@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.email.service;
 
-import inu.codin.codin.common.exception.EmailAuthExistException;
+import inu.codin.codin.common.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,17 +26,29 @@ public class EmailAuthService {
         String email = joinEmailSendRequestDto.getEmail();
         log.info("[sendAuthEmail] email : {}", email);
 
-        if (emailAuthRepository.existsByEmail(email))
-            throw new EmailAuthExistException(email);
+        Optional<EmailAuthEntity> emailAuth = emailAuthRepository.findByEmail(email);
+        EmailAuthEntity emailAuthEntity;
 
-        EmailAuthEntity emailAuthEntity = EmailAuthEntity.builder()
-                .email(email)
-                .authNum(generateAuthNum())
-                .build();
+        // 재인증 로직
+        if (emailAuth.isPresent()) {
+            emailAuthEntity = emailAuth.get();
 
+            if (emailAuthEntity.isVerified()) {
+                throw new EmailAuthFailException("이미 인증된 이메일입니다.", email);
+            }
+
+            emailAuthEntity.changeAuthNum(generateAuthNum());
+        }
+        else {
+            // 인증 생성 로직
+            emailAuthEntity = EmailAuthEntity.builder()
+                    .email(email)
+                    .authNum(generateAuthNum())
+                    .build();
+        }
         emailAuthRepository.save(emailAuthEntity);
 
-        // + 이메일 전송 로직 추가
+        // 이메일 전송 로직
         emailSendService.sendAuthEmail(email, emailAuthEntity.getAuthNum());
     }
 
