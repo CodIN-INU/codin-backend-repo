@@ -22,8 +22,6 @@ public class EmailAuthEntity extends BaseTimeEntity {
 
     private boolean isVerified = false;
 
-    private String userId = null;
-
     @Builder
     public EmailAuthEntity(String email, String authNum, boolean isVerified, String userId) {
         this.email = email;
@@ -32,10 +30,6 @@ public class EmailAuthEntity extends BaseTimeEntity {
 
     public void verifyEmail() {
         this.isVerified = true;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
 }
