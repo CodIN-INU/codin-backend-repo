@@ -17,6 +17,7 @@ import java.util.UUID;
 public class EmailAuthService {
 
     private final EmailAuthRepository emailAuthRepository;
+    private final EmailSendService emailSendService;
 
     // + 비동기 방식 고려
     public void sendAuthEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
@@ -35,6 +36,7 @@ public class EmailAuthService {
         emailAuthRepository.save(emailAuthEntity);
 
         // + 이메일 전송 로직 추가
+        emailSendService.sendAuthEmail(email, emailAuthEntity.getAuthNum());
     }
 
     private String generateAuthNum() {
