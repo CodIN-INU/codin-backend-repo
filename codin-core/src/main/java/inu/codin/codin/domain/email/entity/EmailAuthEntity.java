@@ -23,7 +23,7 @@ public class EmailAuthEntity extends BaseTimeEntity {
     private boolean isVerified = false;
 
     @Builder
-    public EmailAuthEntity(String email, String authNum, boolean isVerified, String userId) {
+    public EmailAuthEntity(String email, String authNum) {
         this.email = email;
         this.authNum = authNum;
     }
