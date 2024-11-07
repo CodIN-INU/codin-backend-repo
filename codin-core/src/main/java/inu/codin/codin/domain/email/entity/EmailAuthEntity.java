@@ -28,6 +28,10 @@ public class EmailAuthEntity extends BaseTimeEntity {
         this.authNum = authNum;
     }
 
+    public void changeAuthNum(String authNum) {
+        this.authNum = authNum;
+    }
+
     public void verifyEmail() {
         this.isVerified = true;
     }
