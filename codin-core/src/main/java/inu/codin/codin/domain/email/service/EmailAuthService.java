@@ -20,7 +20,6 @@ public class EmailAuthService {
     private final EmailAuthRepository emailAuthRepository;
     private final EmailSendService emailSendService;
 
-    // + 비동기 방식 고려
     public void sendAuthEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
 
         String email = joinEmailSendRequestDto.getEmail();
@@ -33,6 +32,7 @@ public class EmailAuthService {
         if (emailAuth.isPresent()) {
             emailAuthEntity = emailAuth.get();
 
+            // 이미 인증된 이메일 체크
             if (emailAuthEntity.isVerified()) {
                 throw new EmailAuthFailException("이미 인증된 이메일입니다.", email);
             }
@@ -48,7 +48,7 @@ public class EmailAuthService {
         }
         emailAuthRepository.save(emailAuthEntity);
 
-        // 이메일 전송 로직
+        // 비동기 이메일 전송 로직
         emailSendService.sendAuthEmail(email, emailAuthEntity.getAuthNum());
     }
 
