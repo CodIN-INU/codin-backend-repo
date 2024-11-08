@@ -65,7 +65,7 @@ public class EmailAuthService {
 
         // 이메일과 인증번호가 일치하는지 확인
         EmailAuthEntity emailAuthEntity = emailAuthRepository.findByEmailAndAuthNum(email, authNum)
-                .orElseThrow(() -> new IllegalArgumentException("인증번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new EmailAuthFailException("인증번호가 일치하지 않습니다.", email));
 
         // 10분 이내에 인증하지 않을 시에 인증번호 만료
         if (emailAuthEntity.isExpired()) {
