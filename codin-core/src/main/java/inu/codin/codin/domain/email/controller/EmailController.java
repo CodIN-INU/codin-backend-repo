@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,19 +24,19 @@ public class EmailController {
     @Operation(summary = "이메일 인증 코드 전송 - 학교인증 X")
     @PostMapping("/auth/send")
     public ResponseEntity<?> sendJoinAuthEmail(
-            @RequestBody @Validated JoinEmailSendRequestDto emailAuthRequestDto
+            @RequestBody @Valid JoinEmailSendRequestDto emailAuthRequestDto
     ) {
         emailAuthService.sendAuthEmail(emailAuthRequestDto);
-        return ResponseEntity.ok("Good : " + emailAuthRequestDto.getEmail());
+        return ResponseEntity.ok("이메일 인증 코드 전송 성공");
     }
 
     @Operation(summary = "이메일 인증 코드 확인 - 학교인증 X")
     @PostMapping("/auth/check")
     public ResponseEntity<?> checkAuthNum(
-            @Valid @RequestBody JoinEmailCheckRequestDto joinEmailCheckRequestDto
+            @RequestBody @Valid JoinEmailCheckRequestDto joinEmailCheckRequestDto
     ) {
         emailAuthService.checkAuthNum(joinEmailCheckRequestDto);
-        return ResponseEntity.ok("Good : " + joinEmailCheckRequestDto.getEmail() + " " + joinEmailCheckRequestDto.getAuthNum());
+        return ResponseEntity.ok("이메일 인증성공 - 회원가입 가능");
     }
 
 }

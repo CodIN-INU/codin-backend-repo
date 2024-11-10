@@ -1,4 +1,4 @@
-package inu.codin.codin.common.exception;
+package inu.codin.codin.domain.email.exception;
 
 import lombok.Getter;
 
