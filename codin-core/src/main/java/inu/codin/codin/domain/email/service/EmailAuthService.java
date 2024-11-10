@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.email.service;
 
-import inu.codin.codin.common.exception.EmailAuthFailException;
+import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
@@ -72,7 +72,8 @@ public class EmailAuthService {
             throw new EmailAuthFailException("인증번호가 만료되었습니다.", email);
         }
 
-        log.info("[checkAuthNum] Email Auth SUCCESS!!, email : {}", email);
         emailAuthEntity.verifyEmail();
+        emailAuthRepository.save(emailAuthEntity);
+        log.info("[checkAuthNum] Email AUTH SUCCESS!!, email : {}", email);
     }
 }
