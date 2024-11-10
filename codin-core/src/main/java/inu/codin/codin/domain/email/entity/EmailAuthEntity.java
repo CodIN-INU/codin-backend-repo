@@ -42,6 +42,6 @@ public class EmailAuthEntity extends BaseTimeEntity {
      * 10분 이상이면 만료됌
      */
     public boolean isExpired() {
-        return getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now());
+        return getUpdatedAt().plusMinutes(10).isBefore(LocalDateTime.now());
     }
 }

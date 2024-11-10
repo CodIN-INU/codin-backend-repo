@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.email.service;
 
-import inu.codin.codin.common.exception.EmailAuthFailException;
+import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
@@ -20,7 +20,6 @@ public class EmailAuthService {
     private final EmailAuthRepository emailAuthRepository;
     private final EmailSendService emailSendService;
 
-    // + 비동기 방식 고려
     public void sendAuthEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
 
         String email = joinEmailSendRequestDto.getEmail();
@@ -33,6 +32,7 @@ public class EmailAuthService {
         if (emailAuth.isPresent()) {
             emailAuthEntity = emailAuth.get();
 
+            // 이미 인증된 이메일 체크
             if (emailAuthEntity.isVerified()) {
                 throw new EmailAuthFailException("이미 인증된 이메일입니다.", email);
             }
@@ -48,7 +48,7 @@ public class EmailAuthService {
         }
         emailAuthRepository.save(emailAuthEntity);
 
-        // 이메일 전송 로직
+        // 비동기 이메일 전송 로직
         emailSendService.sendAuthEmail(email, emailAuthEntity.getAuthNum());
     }
 
@@ -65,14 +65,15 @@ public class EmailAuthService {
 
         // 이메일과 인증번호가 일치하는지 확인
         EmailAuthEntity emailAuthEntity = emailAuthRepository.findByEmailAndAuthNum(email, authNum)
-                .orElseThrow(() -> new IllegalArgumentException("인증번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new EmailAuthFailException("인증번호가 일치하지 않습니다.", email));
 
         // 10분 이내에 인증하지 않을 시에 인증번호 만료
         if (emailAuthEntity.isExpired()) {
             throw new EmailAuthFailException("인증번호가 만료되었습니다.", email);
         }
 
-        log.info("[checkAuthNum] Email Auth SUCCESS!!, email : {}", email);
         emailAuthEntity.verifyEmail();
+        emailAuthRepository.save(emailAuthEntity);
+        log.info("[checkAuthNum] Email AUTH SUCCESS!!, email : {}", email);
     }
 }
