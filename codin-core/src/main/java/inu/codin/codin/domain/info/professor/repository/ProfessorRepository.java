@@ -1,6 +1,7 @@
-package inu.codin.codin.domain.info.professor;
+package inu.codin.codin.domain.info.professor.repository;
 
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.info.professor.domain.Professor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
