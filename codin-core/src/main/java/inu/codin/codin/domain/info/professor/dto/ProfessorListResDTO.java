@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.professor.dto;
 
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.info.professor.Professor;
+import inu.codin.codin.domain.info.professor.domain.Professor;
 import lombok.Builder;
 
 

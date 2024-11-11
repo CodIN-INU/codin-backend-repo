@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.info.professor;
+package inu.codin.codin.domain.info.professor.domain;
 
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.lab.Lab;

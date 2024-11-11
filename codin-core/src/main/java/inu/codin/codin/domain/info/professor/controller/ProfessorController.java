@@ -1,6 +1,7 @@
-package inu.codin.codin.domain.info.professor;
+package inu.codin.codin.domain.info.professor.controller;
 
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.info.professor.service.ProfessorService;
 import inu.codin.codin.domain.info.professor.dto.ProfessorListResDTO;
 import inu.codin.codin.domain.info.professor.dto.ProfessorThumbnailResDTO;
 import io.swagger.v3.oas.annotations.Operation;
