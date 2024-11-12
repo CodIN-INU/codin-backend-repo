@@ -1,7 +1,7 @@
-package inu.codin.codin.domain.info.professor.domain;
+package inu.codin.codin.domain.info.professor.entity;
 
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.info.lab.Lab;
+import inu.codin.codin.domain.info.lab.entity.Lab;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,4 +39,10 @@ public class Professor {
 
     private String subject;
 
+    @DBRef
+    private Lab lab;
+
+    public void updateLab(Lab lab){
+        this.lab = lab;
+    }
 }
