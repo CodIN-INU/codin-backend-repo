@@ -71,6 +71,9 @@ public class CustomUserDetails implements UserDetails {
         return password;
     }
 
+    /**
+     * Spring Security에서 사용하는 유저네임은 email로 사용
+     */
     @Override
     public String getUsername() {
         return email;
