@@ -1,5 +1,7 @@
 package inu.codin.codin.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -14,6 +16,21 @@ public enum PostCategory {
 
     PostCategory(String description) {
         this.description = description;
+    }
+
+    @JsonValue
+    public String getDescription() {
+        return description;
+    }
+
+    @JsonCreator
+    public static PostCategory fromDescription(String description) {
+        for (PostCategory category : PostCategory.values()) {
+            if (category.description.equals(description)) {
+                return category;
+            }
+        }
+        throw new IllegalArgumentException("Unknown description: " + description);
     }
 
 }
