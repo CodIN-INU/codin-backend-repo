@@ -28,7 +28,7 @@ public class PostCreateReqDTO {
     @Schema(description = "게시물 내 이미지 url , blank 가능", example = "example/1231")
     private String postImageUrl;
 
-    @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "0")
+    @Schema(description = "게시물 익명 여부 default = true (익명)", example = "true")
     @NotNull
     private boolean isAnonymous;
 
