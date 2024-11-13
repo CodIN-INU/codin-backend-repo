@@ -13,4 +13,6 @@ public class RedisProperties {
 
     private int port;
 
+    private String password;
+
 }
