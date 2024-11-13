@@ -34,27 +34,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String refreshToken = jwtUtils.getTokenFromCookie(request);
 
         // Access Token이 있는 경우
-        if (accessToken != null) {
-            if (jwtTokenProvider.validateAccessToken(accessToken)) {
-                String username = jwtTokenProvider.getUsername(accessToken);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
-                if (userDetails != null) {
-                    // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
-                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+        if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
+            setAuthentication(accessToken);
         }
         // Refresh Token이 있는 경우 (Access Token 만료) Access Token, Refresh Token 재발급
-        else if (refreshToken != null) {
-            if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
-                jwtService.reissueToken(refreshToken, response);
-            }
-        }
+//        else if (refreshToken != null) {
+//            if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
+//                setAuthentication(refreshToken);
+//                jwtService.reissueToken(refreshToken, response);
+//            }
+//        }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void setAuthentication(String token) {
+        String username = jwtTokenProvider.getUsername(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
+        if (userDetails != null) {
+            // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
+            JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
     }
 
 
