@@ -57,8 +57,8 @@ public class JwtTokenProvider {
 
         // 토큰 만료시간 설정
         Date now = new Date();
-        Date accessTokenExpiration = new Date(now.getTime() + Long.parseLong(this.ACCESS_TOKEN_EXPIRATION));
-        Date refreshTokenExpiration = new Date(now.getTime() + Long.parseLong(this.REFRESH_TOKEN_EXPIRATION));
+        Date accessTokenExpiration = new Date(now.getTime() + Long.parseLong(this.ACCESS_TOKEN_EXPIRATION) * 1000);
+        Date refreshTokenExpiration = new Date(now.getTime() + Long.parseLong(this.REFRESH_TOKEN_EXPIRATION) * 1000);
 
         // 토큰 생성
         String accessToken = Jwts.builder()
@@ -106,6 +106,7 @@ public class JwtTokenProvider {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(SECRET_KEY)
+                    .setAllowedClockSkewSeconds(60)
                     .build()
                     .parseClaimsJws(accessToken);
             return true;
@@ -128,7 +129,7 @@ public class JwtTokenProvider {
             // Redis에 저장된 Refresh Token과 비교
             String storedRefreshToken = redisStorageService.getStoredRefreshToken(getClaims(refreshToken).getSubject());
             if (!refreshToken.equals(storedRefreshToken)) {
-                log.error("[validateRefreshToken] 저장된 Refresh Token과 요청된 Refresh Token이 일치하지 않음");
+                log.warn("[validateRefreshToken] 저장된 Refresh Token과 요청된 Refresh Token이 일치하지 않음");
                 return false;
             }
             return true;
