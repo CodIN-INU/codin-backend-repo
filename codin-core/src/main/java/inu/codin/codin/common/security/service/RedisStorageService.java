@@ -38,7 +38,7 @@ public class RedisStorageService {
     /**
      * RefreshToken 조회
      * @param username
-     * @return refreshToken
+     * @return refreshToken or null
      */
     public String getStoredRefreshToken(String username) {
         return redisTemplate.opsForValue().get("RT:" + username);
