@@ -77,7 +77,7 @@ public class JwtService {
         response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
 
         // 쿠키에 새로운 Refresh Token 추가
-        Cookie refreshTokenCookie = new Cookie("RefreshToken", newToken.getRefreshToken());
+        Cookie refreshTokenCookie = new Cookie("RT", newToken.getRefreshToken());
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);

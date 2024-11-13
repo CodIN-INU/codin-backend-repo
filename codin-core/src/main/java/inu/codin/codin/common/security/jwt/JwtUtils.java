@@ -28,7 +28,7 @@ public class JwtUtils {
     public String getTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("RefreshToken")) {
+                if (cookie.getName().equals("RT")) {
                     return cookie.getValue();
                 }
             }
