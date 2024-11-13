@@ -4,6 +4,7 @@ import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.professor.dto.ProfessorListResDTO;
 import inu.codin.codin.domain.info.professor.dto.ProfessorThumbnailResDTO;
 import inu.codin.codin.domain.info.professor.entity.Professor;
+import inu.codin.codin.domain.info.professor.exception.ProfessorNotFoundException;
 import inu.codin.codin.domain.info.professor.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class ProfessorService {
 
     public ProfessorThumbnailResDTO getProfessorThumbnail(String id) {
         Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found"));
+                .orElseThrow(() -> new ProfessorNotFoundException("교수 정보를 찾을 수 없습니다."));
         return ProfessorThumbnailResDTO.of(professor);
     }
 }
