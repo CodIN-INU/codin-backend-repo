@@ -1,11 +1,18 @@
 package inu.codin.codin.common.security.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RedisStorageService {
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -17,7 +24,15 @@ public class RedisStorageService {
      * @param expiration
      */
     public void saveRefreshToken(String username, String refreshToken, long expiration) {
-        redisTemplate.opsForValue().set("RT:" + username, refreshToken, expiration);
+        log.info("[RedisStorageService] saveRefreshToken : username = {}, refreshToken = {}, expiration = {}", username, refreshToken, expiration);
+
+        // null check validation
+        if (refreshToken != null && refreshToken.contains("\u0000")) {
+            log.warn("[RedisStorageService] refreshToken contains null character!");
+            refreshToken = refreshToken.replace("\u0000", "");
+        }
+
+        redisTemplate.opsForValue().set("RT:" + username, Objects.requireNonNull(refreshToken), expiration, TimeUnit.SECONDS);
     }
 
     /**
