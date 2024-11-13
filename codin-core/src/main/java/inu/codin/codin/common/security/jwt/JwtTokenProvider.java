@@ -128,6 +128,10 @@ public class JwtTokenProvider {
         try {
             // Redis에 저장된 Refresh Token과 비교
             String storedRefreshToken = redisStorageService.getStoredRefreshToken(getClaims(refreshToken).getSubject());
+            if (storedRefreshToken == null) {
+                log.warn("[validateRefreshToken] 저장된 Refresh Token이 없음");
+                return false;
+            }
             if (!refreshToken.equals(storedRefreshToken)) {
                 log.warn("[validateRefreshToken] 저장된 Refresh Token과 요청된 Refresh Token이 일치하지 않음");
                 return false;
