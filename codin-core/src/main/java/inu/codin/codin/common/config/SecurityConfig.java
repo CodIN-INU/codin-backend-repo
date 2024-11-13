@@ -1,12 +1,16 @@
 package inu.codin.codin.common.config;
 
+import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
+import inu.codin.codin.common.security.jwt.JwtUtils;
 import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -26,15 +30,20 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final JwtUtils jwtUtils;
 
     String[] PERMIT_ALL = {
-            "/**",
+            "/api/login",
+            "/api/sign-up",
+            "/api/reissue-token",
+            "/api/logout",
             "/api/members/sign-up",
             "/api/members/sign-in",
             "/api/members/refresh-token",
-            "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/v3/api-docs/**"
+            "/api/swagger-ui/**",
+            "/api/swagger-ui.html",
+            "/api/v3/api-docs/**",
+            "/**"
     };
 
     @Bean
@@ -50,12 +59,22 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers(PERMIT_ALL).permitAll()
                 )
+                // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtService),
+                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtService, jwtUtils),
                         UsernamePasswordAuthenticationFilter.class
-                );
+                )
+                // 예외 처리 필터 추가
+                .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
