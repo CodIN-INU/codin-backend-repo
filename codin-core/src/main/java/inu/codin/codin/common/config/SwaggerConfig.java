@@ -43,7 +43,7 @@ public class SwaggerConfig {
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Server"),
-                        new Server().url("http://www.codin.co.kr").description("Production Server")
+                        new Server().url("https://www.codin.co.kr").description("Production Server")
                 ));
     }
 
