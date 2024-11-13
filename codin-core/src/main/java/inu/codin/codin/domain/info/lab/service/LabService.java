@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.info.lab.service;
 
+import inu.codin.codin.domain.info.lab.dto.LabListResDTO;
 import inu.codin.codin.domain.info.lab.dto.LabThumbnailResDTO;
 import inu.codin.codin.domain.info.lab.entity.Lab;
 import inu.codin.codin.domain.info.lab.repository.LabRepository;
@@ -40,5 +41,10 @@ public class LabService {
             }
         }
         return professors;
+    }
+
+    public List<LabListResDTO> getAllLab() {
+        List<Lab> labs = labRepository.findAll();
+        return labs.stream().map(LabListResDTO::of).toList();
     }
 }
