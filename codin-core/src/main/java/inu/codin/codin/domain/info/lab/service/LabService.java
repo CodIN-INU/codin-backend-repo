@@ -3,6 +3,7 @@ package inu.codin.codin.domain.info.lab.service;
 import inu.codin.codin.domain.info.lab.dto.LabListResDTO;
 import inu.codin.codin.domain.info.lab.dto.LabThumbnailResDTO;
 import inu.codin.codin.domain.info.lab.entity.Lab;
+import inu.codin.codin.domain.info.lab.exception.LabNotFoundException;
 import inu.codin.codin.domain.info.lab.repository.LabRepository;
 import inu.codin.codin.domain.info.professor.entity.Professor;
 import inu.codin.codin.domain.info.professor.repository.ProfessorRepository;
@@ -21,7 +22,7 @@ public class LabService {
 
     public LabThumbnailResDTO getLabThumbnail(String id) {
         Lab lab = labRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found"));
+                .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
         return LabThumbnailResDTO.of(lab);
     }
 
