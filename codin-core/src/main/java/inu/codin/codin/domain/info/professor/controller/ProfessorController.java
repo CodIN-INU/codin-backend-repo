@@ -31,7 +31,7 @@ public class ProfessorController {
     }
 
     @Operation(summary = "id값에 따른 교수 썸네일 반환")
-    @GetMapping("/thumbnail/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<ProfessorThumbnailResDTO> getProfessorThumbnail(@PathVariable("id") String id){
         return ResponseEntity.ok()
                 .body(professorService.getProfessorThumbnail(id));

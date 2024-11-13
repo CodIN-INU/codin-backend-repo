@@ -4,6 +4,7 @@ import inu.codin.codin.domain.info.lab.dto.LabListResDTO;
 import inu.codin.codin.domain.info.lab.service.LabService;
 import inu.codin.codin.domain.info.lab.dto.LabThumbnailResDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/lab")
+@Tag(name = "Lab Info API")
 public class LabController {
 
     private final LabService labService;
