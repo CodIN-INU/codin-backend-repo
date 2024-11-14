@@ -2,6 +2,7 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
+import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
 import jakarta.servlet.http.Cookie;
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +27,7 @@ public class JwtService {
     private final RedisStorageService redisStorageService;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
+    private final UserDetailsService userDetailsService;
 
     /**
      * 최초 로그인 시 Access Token, Refresh Token 발급
@@ -45,6 +49,16 @@ public class JwtService {
         if (refreshToken == null) {
             log.error("[reissueToken] Refresh Token이 없습니다.");
             throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Refresh Token이 없습니다.");
+        }
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
+        if (userDetails != null) {
+            // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
+            JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         reissueToken(refreshToken, response);
