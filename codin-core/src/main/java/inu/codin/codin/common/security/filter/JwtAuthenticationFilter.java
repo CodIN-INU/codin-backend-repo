@@ -38,12 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             setAuthentication(accessToken);
         }
         // Refresh Token이 있는 경우 (Access Token 만료) Access Token, Refresh Token 재발급
-//        else if (refreshToken != null) {
-//            if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
-//                setAuthentication(refreshToken);
+        else if (refreshToken != null) {
+            if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
+                setAuthentication(refreshToken);
 //                jwtService.reissueToken(refreshToken, response);
-//            }
-//        }
+            }
+        }
 
         filterChain.doFilter(request, response);
     }
