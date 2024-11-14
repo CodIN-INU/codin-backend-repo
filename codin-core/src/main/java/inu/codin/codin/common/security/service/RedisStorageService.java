@@ -24,7 +24,7 @@ public class RedisStorageService {
      * @param expiration
      */
     public void saveRefreshToken(String username, String refreshToken, long expiration) {
-        log.info("[RedisStorageService] saveRefreshToken : username = {}, refreshToken = {}, expiration = {}", username, refreshToken, expiration);
+        log.debug("[RedisStorageService] saveRefreshToken : username = {}, refreshToken = {}, expiration = {}", username, refreshToken, expiration);
 
         // null check validation
         if (refreshToken != null && refreshToken.contains("\u0000")) {

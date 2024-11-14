@@ -82,7 +82,7 @@ public class JwtService {
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료 Refresh : {}", newToken.getRefreshToken());
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Refresh : {}",authentication.getName(), newToken.getRefreshToken());
     }
 
     /**
