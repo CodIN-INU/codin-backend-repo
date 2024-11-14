@@ -31,18 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String accessToken = jwtUtils.getTokenFromHeader(request);
-        String refreshToken = jwtUtils.getTokenFromCookie(request);
 
         // Access Token이 있는 경우
         if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
             setAuthentication(accessToken);
-        }
-        // Refresh Token이 있는 경우 (Access Token 만료) Access Token, Refresh Token 재발급
-        else if (refreshToken != null) {
-            if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
-                setAuthentication(refreshToken);
-//                jwtService.reissueToken(refreshToken, response);
-            }
+        } else {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
