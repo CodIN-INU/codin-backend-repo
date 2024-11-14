@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping(value = "/api/users", produces = "plain/text; charset=utf-8")
 @Tag(name = "User API")
 @RequiredArgsConstructor
 public class UserController {
@@ -21,7 +21,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> signUpUser(
             @RequestBody @Valid UserCreateRequestDto userCreateRequestDto) {
-        userService.signUpUser(userCreateRequestDto);
+        userService.createUser(userCreateRequestDto);
         return ResponseEntity.ok("회원가입 성공");
     }
 }
