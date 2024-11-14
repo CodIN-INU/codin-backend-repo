@@ -17,7 +17,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,15 +42,18 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable) // csrf 비활성화
                 .cors(Customizer.withDefaults()) // cors 설정
                 .formLogin(FormLoginConfigurer::disable) // form login 비활성화
-                .httpBasic(HttpBasicConfigurer::disable) // basic auth 비활성화
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지 않음
                 )
+                .httpBasic(Customizer.withDefaults()) // httpBasic 활성화
                 // authorizeHttpRequests 메서드를 통해 요청에 대한 권한 설정
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(PERMIT_ALL).permitAll()
-                                .requestMatchers(SWAGGER_AUTH_PATHS).permitAll() //.hasRole("ADMIN")
+                                .requestMatchers(SWAGGER_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
+                                .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
                                 .anyRequest().hasRole("USER")
                 )
                 // JwtAuthenticationFilter 추가
@@ -61,6 +63,9 @@ public class SecurityConfig {
                 )
                 // 예외 처리 필터 추가
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
+
+        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
+        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
 
         return http.build();
     }
@@ -90,6 +95,7 @@ public class SecurityConfig {
             "/api/users/sign-up",
             "/api/email/auth/check",
             "/api/email/auth/send",
+            "/api/v3/api/test1",
 
             // Local Test Level
             "/auth/login",
@@ -97,7 +103,8 @@ public class SecurityConfig {
             "/auth/logout",
             "/users/sign-up",
             "/email/auth/check",
-            "/email/auth/send"
+            "/email/auth/send",
+            "/v3/api/test1",
     };
 
     private static final String[] SWAGGER_AUTH_PATHS = {
@@ -105,6 +112,26 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/v3/api-docs",
             "/swagger-resources/**",
+    };
+
+    private static final String[] USER_AUTH_PATHS = {
+            "/api/v3/api/test2",
+            "/api/v3/api/test3",
+
+            "/v3/api/test2",
+            "/v3/api/test3",
+    };
+
+    private static final String[] ADMIN_AUTH_PATHS = {
+            "/api/v3/api/test4",
+
+            "/v3/api/test4",
+    };
+
+    private static final String[] MANAGER_AUTH_PATHS = {
+            "/api/v3/api/test5",
+
+            "/v3/api/test5",
     };
 
 }

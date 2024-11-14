@@ -57,5 +57,4 @@ public class UserService {
         if (userRepository.findByStudentId(userCreateRequestDto.getStudentId()).isPresent())
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
     }
-
 }
