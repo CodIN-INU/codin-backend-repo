@@ -22,7 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void signUpUser(UserCreateRequestDto userCreateRequestDto) {
+    public void createUser(UserCreateRequestDto userCreateRequestDto) {
 
         String encodedPassword = passwordEncoder.encode(userCreateRequestDto.getPassword());
 
