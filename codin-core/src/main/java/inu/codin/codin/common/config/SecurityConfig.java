@@ -88,16 +88,6 @@ public class SecurityConfig {
     }
 
     private static final String[] PERMIT_ALL = {
-            // Production Level
-            "/api/auth/login",
-            "/api/auth/reissue",
-            "/api/auth/logout",
-            "/api/users/sign-up",
-            "/api/email/auth/check",
-            "/api/email/auth/send",
-            "/api/v3/api/test1",
-
-            // Local Test Level
             "/auth/login",
             "/auth/reissue",
             "/auth/logout",
@@ -115,22 +105,15 @@ public class SecurityConfig {
     };
 
     private static final String[] USER_AUTH_PATHS = {
-            "/api/v3/api/test2",
-            "/api/v3/api/test3",
-
             "/v3/api/test2",
             "/v3/api/test3",
     };
 
     private static final String[] ADMIN_AUTH_PATHS = {
-            "/api/v3/api/test4",
-
             "/v3/api/test4",
     };
 
     private static final String[] MANAGER_AUTH_PATHS = {
-            "/api/v3/api/test5",
-
             "/v3/api/test5",
     };
 

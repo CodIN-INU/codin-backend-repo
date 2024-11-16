@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/api/email", produces = "plain/text; charset=utf-8")
+@RequestMapping(value = "/email", produces = "plain/text; charset=utf-8")
 @Tag(name = "Email API")
 @RequiredArgsConstructor
 public class EmailController {
