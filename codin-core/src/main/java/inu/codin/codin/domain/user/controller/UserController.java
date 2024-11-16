@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/users", produces = "plain/text; charset=utf-8")
+@RequestMapping(value = "/users", produces = "plain/text; charset=utf-8")
 @Tag(name = "User API")
 @RequiredArgsConstructor
 public class UserController {
