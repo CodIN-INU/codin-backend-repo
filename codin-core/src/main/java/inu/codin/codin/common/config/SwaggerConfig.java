@@ -35,7 +35,7 @@ public class SwaggerConfig {
                 .name("Authorization");
 
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("bearerAuth");
+                .addList("Bearer Auth");
 
         return new OpenAPI()
                 .info(info)
