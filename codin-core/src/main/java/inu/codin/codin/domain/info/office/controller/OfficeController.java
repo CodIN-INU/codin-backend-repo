@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.info.office.controller;
 
+import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.domain.info.office.dto.OfficeListResDTO;
 import inu.codin.codin.domain.info.office.dto.OfficeMemberResDTO;
 import inu.codin.codin.domain.info.office.service.OfficeService;
@@ -26,14 +27,12 @@ public class OfficeController {
     @Operation(summary = "학과별 사무실 직원 정보 반환")
     @GetMapping("/{department}")
     public ResponseEntity<List<OfficeMemberResDTO>> getOfficeByDepartment(@PathVariable("department") Department department){
-        return ResponseEntity.ok()
-                .body(officeService.getOfficeByDepartment(department));
+        return ResponseUtils.success(officeService.getOfficeByDepartment(department));
     }
 
     @Operation(summary = "학과사무실 리스트 반환")
     @GetMapping
     public ResponseEntity<List<OfficeListResDTO>> getAllOffice(){
-        return ResponseEntity.ok()
-                .body(officeService.getAllOffice());
+        return ResponseUtils.success(officeService.getAllOffice());
     }
 }
