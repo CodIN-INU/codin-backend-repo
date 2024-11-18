@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.info.domain.professor.controller;
 
 import inu.codin.codin.common.ResponseUtils;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorListResDTO;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorThumbnailResDTO;
+import inu.codin.codin.domain.info.domain.professor.dto.ProfessorListResponseDto;
+import inu.codin.codin.domain.info.domain.professor.dto.ProfessorThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.professor.service.ProfessorService;
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,13 +26,13 @@ public class ProfessorController {
 
     @Operation(summary = "교수 리스트 반환")
     @GetMapping("/{department}")
-    public ResponseEntity<List<ProfessorListResDTO>> getProfessorList(@PathVariable("department") Department department){
+    public ResponseEntity<List<ProfessorListResponseDto>> getProfessorList(@PathVariable("department") Department department){
         return ResponseUtils.success(professorService.getProfessorByDepartment(department));
     }
 
     @Operation(summary = "id값에 따른 교수 썸네일 반환")
     @GetMapping("/detail/{id}")
-    public ResponseEntity<ProfessorThumbnailResDTO> getProfessorThumbnail(@PathVariable("id") String id){
+    public ResponseEntity<ProfessorThumbnailResponseDto> getProfessorThumbnail(@PathVariable("id") String id){
         return ResponseUtils.success(professorService.getProfessorThumbnail(id));
     }
 }

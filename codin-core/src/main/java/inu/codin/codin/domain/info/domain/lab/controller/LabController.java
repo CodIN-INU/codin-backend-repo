@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.info.domain.lab.controller;
 
 import inu.codin.codin.common.ResponseUtils;
-import inu.codin.codin.domain.info.domain.lab.dto.LabListResDTO;
-import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResDTO;
+import inu.codin.codin.domain.info.domain.lab.dto.LabListResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.service.LabService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,13 +25,13 @@ public class LabController {
 
     @Operation(summary = "연구실 썸네일 반환")
     @GetMapping("/thumbnail/{id}")
-    public ResponseEntity<LabThumbnailResDTO> getLabThumbnail(@PathVariable("id") String id){
+    public ResponseEntity<LabThumbnailResponseDto> getLabThumbnail(@PathVariable("id") String id){
         return ResponseUtils.success(labService.getLabThumbnail(id));
     }
 
     @Operation(summary = "연구실 리스트 반환")
     @GetMapping
-    public ResponseEntity<List<LabListResDTO>> getAllLab(){
+    public ResponseEntity<List<LabListResponseDto>> getAllLab(){
         return ResponseUtils.success(labService.getAllLab());
     }
 

@@ -12,7 +12,7 @@ import lombok.Data;
     해당하는 연구실에 대한 내용들을 모두 반환한다.
  */
 @Data
-public class LabThumbnailResDTO {
+public class LabThumbnailResponseDto {
 
     @NotBlank
     @Schema(description = "학과", example = "CSE")
@@ -45,9 +45,9 @@ public class LabThumbnailResDTO {
     private String site;
 
     @Builder
-    public LabThumbnailResDTO(Department department, String title, String content, String professor,
-                              String professorLoc, String professorNumber, String labLoc,
-                              String labNumber, String site) {
+    public LabThumbnailResponseDto(Department department, String title, String content, String professor,
+                                   String professorLoc, String professorNumber, String labLoc,
+                                   String labNumber, String site) {
         this.department = department;
         this.title = title;
         this.content = content;
@@ -59,8 +59,8 @@ public class LabThumbnailResDTO {
         this.site = site;
     }
 
-    public static LabThumbnailResDTO of(Lab lab) {
-        return LabThumbnailResDTO.builder()
+    public static LabThumbnailResponseDto of(Lab lab) {
+        return LabThumbnailResponseDto.builder()
                 .department(lab.getDepartment())
                 .title(lab.getTitle())
                 .content(lab.getContent())

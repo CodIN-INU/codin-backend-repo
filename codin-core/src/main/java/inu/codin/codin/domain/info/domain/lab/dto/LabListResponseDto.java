@@ -14,7 +14,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LabListResDTO {
+public class LabListResponseDto {
     @Schema(description = "Lab DB의 pk값", example = "b2jfbe432..")
     @NotBlank
     private final String id;
@@ -31,15 +31,15 @@ public class LabListResDTO {
     private final String professor;
 
     @Builder
-    public LabListResDTO(String id, String title, String content, String professor) {
+    public LabListResponseDto(String id, String title, String content, String professor) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.professor = professor;
     }
 
-    public static LabListResDTO of(Lab lab){
-        return LabListResDTO.builder()
+    public static LabListResponseDto of(Lab lab){
+        return LabListResponseDto.builder()
                 .id(lab.getId())
                 .title(lab.getTitle())
                 .content(lab.getContent())

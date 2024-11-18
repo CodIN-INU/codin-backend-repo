@@ -10,7 +10,7 @@ import lombok.Builder;
     교수님 상세 정보 반환 DTO
     해당되는 교수님의 상세 정보들을 반환한다.
  */
-public record ProfessorThumbnailResDTO(
+public record ProfessorThumbnailResponseDto(
         @NotBlank @Schema(description = "학과", example = "CSE")
         Department department,
         @NotBlank @Schema(description = "성함", example = "홍길동")
@@ -31,11 +31,11 @@ public record ProfessorThumbnailResDTO(
         String labId) {
 
     @Builder
-    public ProfessorThumbnailResDTO {
+    public ProfessorThumbnailResponseDto {
     }
 
-    public static ProfessorThumbnailResDTO of(Professor professor) {
-        return ProfessorThumbnailResDTO.builder()
+    public static ProfessorThumbnailResponseDto of(Professor professor) {
+        return ProfessorThumbnailResponseDto.builder()
                 .department(professor.getDepartment())
                 .name(professor.getName())
                 .image(professor.getImage())
