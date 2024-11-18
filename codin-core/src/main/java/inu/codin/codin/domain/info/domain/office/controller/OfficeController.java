@@ -2,8 +2,8 @@ package inu.codin.codin.domain.info.domain.office.controller;
 
 import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.domain.info.domain.office.service.OfficeService;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeListResDTO;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberResDTO;
+import inu.codin.codin.domain.info.domain.office.dto.OfficeListResponseDto;
+import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberResponseDto;
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,13 +26,13 @@ public class OfficeController {
 
     @Operation(summary = "학과별 사무실 직원 정보 반환")
     @GetMapping("/{department}")
-    public ResponseEntity<List<OfficeMemberResDTO>> getOfficeByDepartment(@PathVariable("department") Department department){
+    public ResponseEntity<List<OfficeMemberResponseDto>> getOfficeByDepartment(@PathVariable("department") Department department){
         return ResponseUtils.success(officeService.getOfficeByDepartment(department));
     }
 
     @Operation(summary = "학과사무실 리스트 반환")
     @GetMapping
-    public ResponseEntity<List<OfficeListResDTO>> getAllOffice(){
+    public ResponseEntity<List<OfficeListResponseDto>> getAllOffice(){
         return ResponseUtils.success(officeService.getAllOffice());
     }
 }

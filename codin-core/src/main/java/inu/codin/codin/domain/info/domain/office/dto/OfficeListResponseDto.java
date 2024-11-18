@@ -14,7 +14,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class OfficeListResDTO{
+public class OfficeListResponseDto {
 
     @Schema(description = "학과", example = "IT_COLLEGE")
     @NotBlank
@@ -39,7 +39,7 @@ public class OfficeListResDTO{
     private final String fax;
 
     @Builder
-    public OfficeListResDTO(Department department, String location, String open, String vacation, String office_number, String fax) {
+    public OfficeListResponseDto(Department department, String location, String open, String vacation, String office_number, String fax) {
         this.department = department;
         this.location = location;
         this.open = open;
@@ -48,8 +48,8 @@ public class OfficeListResDTO{
         this.fax = fax;
     }
 
-    public static OfficeListResDTO of(Office office){
-        return OfficeListResDTO.builder()
+    public static OfficeListResponseDto of(Office office){
+        return OfficeListResponseDto.builder()
                 .department(office.getDepartment())
                 .location(office.getLocation())
                 .open(office.getOpen())

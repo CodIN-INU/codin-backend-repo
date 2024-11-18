@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class OfficeMemberResDTO {
+public class OfficeMemberResponseDto {
     @Schema(description = "사무실 평면도", example = "https://")
     private String img;
 
@@ -22,13 +22,13 @@ public class OfficeMemberResDTO {
     private List<OfficeMember> officeMembers;
 
     @Builder
-    public OfficeMemberResDTO(String img, List<OfficeMember> officeMembers) {
+    public OfficeMemberResponseDto(String img, List<OfficeMember> officeMembers) {
         this.img = img;
         this.officeMembers = officeMembers;
     }
 
-    public static OfficeMemberResDTO of(Office office) {
-        return OfficeMemberResDTO.builder()
+    public static OfficeMemberResponseDto of(Office office) {
+        return OfficeMemberResponseDto.builder()
                 .img(office.getImg())
                 .officeMembers(office.getMember())
                 .build();

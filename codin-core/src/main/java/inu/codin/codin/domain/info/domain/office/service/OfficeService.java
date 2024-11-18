@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.domain.office.service;
 
-import inu.codin.codin.domain.info.domain.office.dto.OfficeListResDTO;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberResDTO;
+import inu.codin.codin.domain.info.domain.office.dto.OfficeListResponseDto;
+import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberResponseDto;
 import inu.codin.codin.domain.info.domain.office.entity.Office;
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.repository.InfoRepository;
@@ -15,13 +15,13 @@ import java.util.List;
 public class OfficeService {
 
     private final InfoRepository infoRepository;
-    public List<OfficeListResDTO> getAllOffice() {
+    public List<OfficeListResponseDto> getAllOffice() {
         List<Office> offices = infoRepository.findAllOffices();
-        return offices.stream().map(OfficeListResDTO::of).toList();
+        return offices.stream().map(OfficeListResponseDto::of).toList();
     }
 
-    public List<OfficeMemberResDTO> getOfficeByDepartment(Department department) {
+    public List<OfficeMemberResponseDto> getOfficeByDepartment(Department department) {
         List<Office> offices = infoRepository.findOfficeByDepartment(department);
-        return offices.stream().map(OfficeMemberResDTO::of).toList();
+        return offices.stream().map(OfficeMemberResponseDto::of).toList();
     }
 }

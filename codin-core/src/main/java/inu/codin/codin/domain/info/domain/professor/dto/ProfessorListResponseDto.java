@@ -11,7 +11,7 @@ import lombok.Builder;
     모든 교수님들의 리스트를 반환한다.
  */
 
-public record ProfessorListResDTO(
+public record ProfessorListResponseDto(
         @NotBlank @Schema(description = "교수 _id", example = "67319fe3c4ee25b3adf593a0")
         String id,
 
@@ -21,11 +21,11 @@ public record ProfessorListResDTO(
         @NotBlank @Schema(description = "학과", example = "CSE")
         Department department) {
     @Builder
-    public ProfessorListResDTO {
+    public ProfessorListResponseDto {
     }
 
-    public static ProfessorListResDTO of(Professor professor) {
-        return ProfessorListResDTO.builder()
+    public static ProfessorListResponseDto of(Professor professor) {
+        return ProfessorListResponseDto.builder()
                 .id(professor.getId())
                 .name(professor.getName())
                 .department(professor.getDepartment())
