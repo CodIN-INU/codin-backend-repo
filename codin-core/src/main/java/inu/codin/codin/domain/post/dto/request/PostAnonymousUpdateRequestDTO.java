@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class PostAnonymousUpdateReqDTO {
+public class PostAnonymousUpdateRequestDTO {
     @Schema(description = "익명 여부", example = "true")
     @NotBlank
     private boolean isAnonymous;

@@ -1,10 +1,9 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.util.S3Service;
+import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
-import inu.codin.codin.domain.post.exception.PostCreateFailException;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
