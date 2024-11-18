@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PostDetailResDTO {
 
@@ -29,7 +31,7 @@ public class PostDetailResDTO {
     private String content;
 
     @Schema(description = "게시물 내 이미지 url , blank 가능", example = "example/1231")
-    private String postImageUrl;
+    private List<String> postImageUrl;
 
     @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "0")
     @NotBlank

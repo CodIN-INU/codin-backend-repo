@@ -3,6 +3,9 @@ package inu.codin.codin.domain.post.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 public class PostContentUpdateReqDTO {
@@ -15,6 +18,6 @@ public class PostContentUpdateReqDTO {
     @NotBlank
     private String content;
 
-    @Schema(description = "게시물 내 이미지 url", example = "example/updated_image.jpg")
-    private String postImageUrl;
+    //이미지 별도 Multipart (RequestPart 사용)
+
 }
