@@ -1,4 +1,4 @@
-package inu.codin.codin.common.util;
+package inu.codin.codin.infra.s3;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import org.springframework.beans.factory.annotation.Value;
