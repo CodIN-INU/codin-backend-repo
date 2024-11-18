@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.email.controller;
 
+import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.service.EmailAuthService;
@@ -27,7 +28,7 @@ public class EmailController {
             @RequestBody @Valid JoinEmailSendRequestDto emailAuthRequestDto
     ) {
         emailAuthService.sendAuthEmail(emailAuthRequestDto);
-        return ResponseEntity.ok("이메일 인증 코드 전송 성공");
+        return ResponseUtils.successMsg("이메일 인증 코드 전송 성공");
     }
 
     @Operation(summary = "이메일 인증 코드 확인 - 학교인증 X")
@@ -36,7 +37,7 @@ public class EmailController {
             @RequestBody @Valid JoinEmailCheckRequestDto joinEmailCheckRequestDto
     ) {
         emailAuthService.checkAuthNum(joinEmailCheckRequestDto);
-        return ResponseEntity.ok("이메일 인증성공 - 회원가입 가능");
+        return ResponseUtils.successMsg("이메일 인증 성공 - 회원가입 가능");
     }
 
 }
