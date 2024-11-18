@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.office.entity;
 
-import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.office.dto.OfficeMember;
+import inu.codin.codin.domain.user.entity.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
