@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
+/*
+    학과 사무실 직원 정보
+ */
 @Getter
 public class OfficeMember {
     @NotBlank
