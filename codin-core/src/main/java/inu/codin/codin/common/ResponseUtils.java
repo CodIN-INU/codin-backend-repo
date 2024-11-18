@@ -13,7 +13,7 @@ public class ResponseUtils {
      * @param data class 형태의 데이터 타입 (e.g. DTO)
      * @return ResponseEntity<T>
      */
-    public static ResponseEntity<?> success(Object data) {
+    public static <T> ResponseEntity<T> success(T data) {
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
