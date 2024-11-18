@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PostDetailResDTO {
+public class PostDetailResponseDTO {
 
     @Schema(description = "유저 ID", example = "111111")
     @NotBlank
