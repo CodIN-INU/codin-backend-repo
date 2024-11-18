@@ -3,7 +3,7 @@ package inu.codin.codin.domain.info.office.controller;
 import inu.codin.codin.domain.info.office.dto.OfficeListResDTO;
 import inu.codin.codin.domain.info.office.dto.OfficeMemberResDTO;
 import inu.codin.codin.domain.info.office.service.OfficeService;
-import inu.codin.codin.domain.user.entity.Department;
+import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
