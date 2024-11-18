@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.user.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;

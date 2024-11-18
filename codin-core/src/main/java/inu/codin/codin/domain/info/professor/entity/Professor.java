@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.professor.entity;
 
 import inu.codin.codin.domain.info.lab.entity.Lab;
-import inu.codin.codin.domain.user.entity.Department;
+import inu.codin.codin.common.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;

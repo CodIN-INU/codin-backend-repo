@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.office.repository;
 
 import inu.codin.codin.domain.info.office.entity.Office;
-import inu.codin.codin.domain.user.entity.Department;
+import inu.codin.codin.common.Department;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
