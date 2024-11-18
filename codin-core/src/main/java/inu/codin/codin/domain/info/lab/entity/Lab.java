@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.lab.entity;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.user.entity.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;

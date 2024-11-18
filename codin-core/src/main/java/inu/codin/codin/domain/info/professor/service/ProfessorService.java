@@ -1,11 +1,11 @@
 package inu.codin.codin.domain.info.professor.service;
 
-import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.professor.dto.ProfessorListResDTO;
 import inu.codin.codin.domain.info.professor.dto.ProfessorThumbnailResDTO;
 import inu.codin.codin.domain.info.professor.entity.Professor;
 import inu.codin.codin.domain.info.professor.exception.ProfessorNotFoundException;
 import inu.codin.codin.domain.info.professor.repository.ProfessorRepository;
+import inu.codin.codin.domain.user.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

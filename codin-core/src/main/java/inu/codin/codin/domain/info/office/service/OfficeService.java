@@ -1,10 +1,10 @@
 package inu.codin.codin.domain.info.office.service;
 
-import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.office.dto.OfficeListResDTO;
 import inu.codin.codin.domain.info.office.dto.OfficeMemberResDTO;
 import inu.codin.codin.domain.info.office.entity.Office;
 import inu.codin.codin.domain.info.office.repository.OfficeRepository;
+import inu.codin.codin.domain.user.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

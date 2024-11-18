@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.user.dto;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.user.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
