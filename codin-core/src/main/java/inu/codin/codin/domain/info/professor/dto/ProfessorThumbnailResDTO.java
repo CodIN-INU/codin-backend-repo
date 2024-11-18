@@ -6,6 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
+/*
+    교수님 상세 정보 반환 DTO
+    해당되는 교수님의 상세 정보들을 반환한다.
+ */
 public record ProfessorThumbnailResDTO(
         @NotBlank @Schema(description = "학과", example = "CSE")
         Department department,

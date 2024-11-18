@@ -7,6 +7,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
+/*
+    연구실 상세정보 반환 DTO
+    해당하는 연구실에 대한 내용들을 모두 반환한다.
+ */
 @Data
 public class LabThumbnailResDTO {
 
