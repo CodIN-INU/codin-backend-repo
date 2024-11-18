@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/users", produces = "plain/text; charset=utf-8")
-@Tag(name = "User API")
+@Tag(name = "User Auth API")
 @RequiredArgsConstructor
 public class UserController {
 

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/email", produces = "plain/text; charset=utf-8")
-@Tag(name = "Email API")
+@Tag(name = "User Auth API")
 @RequiredArgsConstructor
 public class EmailController {
 
