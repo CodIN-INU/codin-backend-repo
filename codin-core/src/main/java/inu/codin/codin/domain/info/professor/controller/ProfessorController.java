@@ -23,7 +23,7 @@ public class ProfessorController {
 
     private final ProfessorService professorService;
 
-    @Operation(summary = "교수 목록 반환")
+    @Operation(summary = "교수 리스트 반환")
     @GetMapping("/{department}")
     public ResponseEntity<List<ProfessorListResDTO>> getProfessorList(@PathVariable("department") Department department){
         return ResponseEntity.ok()
