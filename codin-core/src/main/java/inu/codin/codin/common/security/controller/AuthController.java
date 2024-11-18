@@ -1,5 +1,6 @@
 package inu.codin.codin.common.security.controller;
 
+import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.common.security.dto.LoginRequestDto;
 import inu.codin.codin.common.security.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,21 +39,21 @@ public class AuthController {
 
         jwtService.createToken(response);
 
-        return ResponseEntity.ok("로그인 성공 / 토큰 발급 완료");
+        return ResponseUtils.successMsg("로그인 성공 / 토큰 발급 완료");
     }
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         jwtService.deleteToken();
-        return ResponseEntity.ok("로그아웃 성공 / 토큰 삭제 완료");
+        return ResponseUtils.successMsg("로그아웃 성공 / 토큰 삭제 완료");
     }
 
     @Operation(summary = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         jwtService.reissueToken(request, response);
-        return ResponseEntity.ok("토큰 재발급 완료");
+        return ResponseUtils.successMsg("토큰 재발급 완료");
     }
 
 }
