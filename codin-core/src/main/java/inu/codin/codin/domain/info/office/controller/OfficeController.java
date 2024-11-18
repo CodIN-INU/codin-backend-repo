@@ -17,8 +17,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/office")
-@Tag(name = "Department Office Info API")
+@RequestMapping("/info/office")
+@Tag(name = "Info API")
 public class OfficeController {
 
     private final OfficeService officeService;

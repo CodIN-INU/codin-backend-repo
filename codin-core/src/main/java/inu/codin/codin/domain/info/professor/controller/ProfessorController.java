@@ -17,8 +17,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/professor")
-@Tag(name = "Professor Info API")
+@RequestMapping("/info/professor")
+@Tag(name = "Info API")
 public class ProfessorController {
 
     private final ProfessorService professorService;
