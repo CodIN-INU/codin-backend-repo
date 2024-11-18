@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/v3/api", produces = "plain/text; charset=utf-8")
-@Tag(name = "TestController", description = "테스트용 API")
+@Tag(name = "Test API", description = "[관리자] 유저 테스트용 API")
 public class TestController {
 
     @Operation(summary = "1 기본 접근 테스트 - 로그인 없이 접근 가능")
