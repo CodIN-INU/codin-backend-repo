@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class PostContentUpdateReqDTO {
+public class PostContentUpdateRequestDTO {
 
     @Schema(description = "게시물 제목", example = "Updated Title")
     @NotBlank
@@ -15,6 +15,6 @@ public class PostContentUpdateReqDTO {
     @NotBlank
     private String content;
 
-    @Schema(description = "게시물 내 이미지 url", example = "example/updated_image.jpg")
-    private String postImageUrl;
+    //이미지 별도 Multipart (RequestPart 사용)
+
 }
