@@ -1,9 +1,10 @@
 package inu.codin.codin.domain.info.domain.office.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberRequestDto;
+import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberCreateUpdateRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Getter;
 
 /*
@@ -29,11 +30,30 @@ public class OfficeMember extends BaseTimeEntity {
     @Schema(description = "이메일", example = "test@inu.ac.kr")
     private String email;
 
-    public void update(OfficeMemberRequestDto officeMemberRequestDto) {
-        this.name = officeMemberRequestDto.getName();
-        this.position = officeMemberRequestDto.getPosition();
-        this.role = officeMemberRequestDto.getRole();
-        this.number = officeMemberRequestDto.getNumber();
-        this.email = officeMemberRequestDto.getEmail();
+    @Builder
+    public OfficeMember(String name, String position, String role, String number, String email) {
+        this.name = name;
+        this.position = position;
+        this.role = role;
+        this.number = number;
+        this.email = email;
+    }
+
+    public static OfficeMember of(OfficeMemberCreateUpdateRequestDto officeMemberCreateUpdateRequestDto){
+        return OfficeMember.builder()
+                .name(officeMemberCreateUpdateRequestDto.getName())
+                .position(officeMemberCreateUpdateRequestDto.getPosition())
+                .role(officeMemberCreateUpdateRequestDto.getRole())
+                .number(officeMemberCreateUpdateRequestDto.getNumber())
+                .email(officeMemberCreateUpdateRequestDto.getEmail())
+                .build();
+    }
+
+    public void update(OfficeMemberCreateUpdateRequestDto officeMemberCreateUpdateRequestDto) {
+        this.name = officeMemberCreateUpdateRequestDto.getName();
+        this.position = officeMemberCreateUpdateRequestDto.getPosition();
+        this.role = officeMemberCreateUpdateRequestDto.getRole();
+        this.number = officeMemberCreateUpdateRequestDto.getNumber();
+        this.email = officeMemberCreateUpdateRequestDto.getEmail();
     }
 }

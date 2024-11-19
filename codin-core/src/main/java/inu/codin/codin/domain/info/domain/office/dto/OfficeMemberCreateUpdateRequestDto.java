@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OfficeMemberRequestDto {
+public class OfficeMemberCreateUpdateRequestDto {
     @NotBlank
     @Schema(description = "성명", example = "홍길동")
     private String name;
