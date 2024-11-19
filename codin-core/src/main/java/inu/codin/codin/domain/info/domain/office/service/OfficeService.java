@@ -15,10 +15,6 @@ import java.util.List;
 public class OfficeService {
 
     private final InfoRepository infoRepository;
-    public List<OfficeListResponseDto> getAllOffice() {
-        List<Office> offices = infoRepository.findAllOffices();
-        return offices.stream().map(OfficeListResponseDto::of).toList();
-    }
 
     public OfficeDetailsResponseDto getOfficeByDepartment(Department department) {
         Office office = infoRepository.findOfficeByDepartment(department);
