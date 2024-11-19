@@ -15,13 +15,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public abstract class Info {
 
     @Id @NotBlank
-    private String id;
+    protected String id;
 
     @NotBlank
-    private Department department;
+    protected Department department;
 
     @NotBlank
-    private InfoType infoType;
+    protected InfoType infoType;
 
     public Info(String id, Department department, InfoType infoType) {
         this.id = id;

@@ -1,21 +1,23 @@
 package inu.codin.codin.domain.info.domain.lab.dto;
 
-import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /*
     연구실 상세정보 반환 DTO
     해당하는 연구실에 대한 내용들을 모두 반환한다.
  */
-@Data
+@Getter
+@Setter
 public class LabThumbnailResponseDto {
 
     @NotBlank
-    @Schema(description = "학과", example = "CSE")
+    @Schema(description = "학과", example = "EMBEDDED")
     private Department department;
 
     @NotBlank

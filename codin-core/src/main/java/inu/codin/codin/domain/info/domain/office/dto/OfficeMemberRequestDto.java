@@ -3,12 +3,11 @@ package inu.codin.codin.domain.info.domain.office.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.Setter;
 
-/*
-    학과 사무실 직원 정보
- */
 @Getter
-public class OfficeMember {
+@Setter
+public class OfficeMemberRequestDto {
     @NotBlank
     @Schema(description = "성명", example = "홍길동")
     private String name;
