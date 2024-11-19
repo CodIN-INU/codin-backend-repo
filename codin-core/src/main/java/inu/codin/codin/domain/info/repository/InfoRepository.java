@@ -5,6 +5,7 @@ import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.domain.info.domain.office.entity.Office;
 import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.domain.info.entity.Info;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -13,26 +14,26 @@ import java.util.Optional;
 
 public interface InfoRepository extends MongoRepository<Info, String> {
 
-    @Query("{ 'info_type': 'LAB' }")
+    @Query("{ 'infoType': 'LAB' }")
     List<Lab> findAllLabs();
 
-    @Query("{ 'info_type': 'LAB', 'id':  ?0}")
+    @Query("{ 'infoType': 'LAB', '_id':  ?0}")
     Optional<Lab> findLabById(String id);
 
-    @Query("{ 'info_type': 'OFFICE' }")
+    @Query("{ 'infoType': 'OFFICE' }")
     List<Office> findAllOffices();
 
-    @Query("{ 'info_type':  'OFFICE', 'department':  ?0}")
-    List<Office> findOfficeByDepartment(Department department);
+    @Query("{ 'infoType':  'OFFICE', 'department':  ?0}")
+    Office findOfficeByDepartment(Department department);
 
-    @Query("{ 'info_type': 'PROFESSOR' , 'department':  ?0}")
+    @Query("{ 'infoType': 'PROFESSOR' , 'department':  ?0}")
     List<Professor> findAllProfessorsByDepartment(Department department);
 
-    @Query("{ 'info_type': 'PROFESSOR' , 'id':  ?0}")
+    @Query("{ 'infoType': 'PROFESSOR' , '_id':  ?0}")
     Optional<Professor> findProfessorById(String id);
 
-    @Query("{ 'info_type': 'PROFESSOR'}")
-    List<Professor> findAllProfessor();
+    @Query("{ 'infoType': 'PROFESSOR' , 'email': ?0}")
+    Optional<Professor> findProfessorByEmail(String email);
 
 
 }
