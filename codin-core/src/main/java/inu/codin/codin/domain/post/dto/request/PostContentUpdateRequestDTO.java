@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class PostContentUpdateRequestDTO {
 
-    @Schema(description = "게시물 제목", example = "Updated Title")
-    @NotBlank
-    private String title;
+//    @Schema(description = "게시물 제목", example = "Updated Title")
+//    @NotBlank
+//    private String title;
 
     @Schema(description = "게시물 내용", example = "Updated content")
     @NotBlank
