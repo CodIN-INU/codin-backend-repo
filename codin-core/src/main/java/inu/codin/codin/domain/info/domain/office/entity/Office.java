@@ -43,4 +43,8 @@ public class Office extends Info {
         this.office_number = officeUpdateRequestDto.getOffice_number();
         this.fax = officeUpdateRequestDto.getFax();
     }
+
+    public void addOfficeMember(OfficeMember officeMember){
+        this.member.add(officeMember);
+    }
 }

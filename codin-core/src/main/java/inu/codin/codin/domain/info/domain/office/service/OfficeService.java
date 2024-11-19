@@ -21,8 +21,16 @@ public class OfficeService {
     }
 
     public OfficeDetailsResponseDto getOfficeByDepartment(Department department) {
-        Office offices = infoRepository.findOfficeByDepartment(department);
-        return OfficeDetailsResponseDto.of(offices);
+        Office office = infoRepository.findOfficeByDepartment(department);
+        return OfficeDetailsResponseDto.of(office);
+    }
+
+    public void createOfficeMember(Department department, OfficeMemberCreateUpdateRequestDto officeMemberCreateUpdateRequestDto) {
+        Office office = infoRepository.findOfficeByDepartment(department);
+        OfficeMember officeMember = OfficeMember.of(officeMemberCreateUpdateRequestDto);
+        office.addOfficeMember(officeMember);
+        infoRepository.save(office);
+
     }
 
     public void updateOffice(Department department, OfficeUpdateRequestDto officeUpdateRequestDto) {
@@ -31,10 +39,10 @@ public class OfficeService {
         infoRepository.save(office);
     }
 
-    public void updateOfficeMember(Department department, int num, OfficeMemberRequestDto officeMemberRequestDto) {
+    public void updateOfficeMember(Department department, int num, OfficeMemberCreateUpdateRequestDto officeMemberCreateUpdateRequestDto) {
         Office office = infoRepository.findOfficeByDepartment(department);
         OfficeMember officeMember = office.getMember().get(num);
-        officeMember.update(officeMemberRequestDto);
+        officeMember.update(officeMemberCreateUpdateRequestDto);
         infoRepository.save(office);
     }
 
