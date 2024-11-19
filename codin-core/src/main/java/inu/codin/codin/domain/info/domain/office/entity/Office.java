@@ -2,7 +2,6 @@ package inu.codin.codin.domain.info.domain.office.entity;
 
 import inu.codin.codin.domain.info.domain.office.dto.OfficeUpdateRequestDto;
 import inu.codin.codin.domain.info.entity.Info;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -30,7 +29,7 @@ public class Office extends Info {
     private List<OfficeMember> member;
 
     @NotBlank
-    private String office_number;
+    private String officeNumber;
 
     @NotBlank
     private String fax;
@@ -40,7 +39,7 @@ public class Office extends Info {
         this.open=officeUpdateRequestDto.getOpen();
         this.vacation=officeUpdateRequestDto.getVacation();
 //        this.img = officeUpdateRequestDto.get
-        this.office_number = officeUpdateRequestDto.getOffice_number();
+        this.officeNumber = officeUpdateRequestDto.getOfficeNumber();
         this.fax = officeUpdateRequestDto.getFax();
     }
 
