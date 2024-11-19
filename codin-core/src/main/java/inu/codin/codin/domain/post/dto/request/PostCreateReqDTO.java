@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 public class PostCreateReqDTO {
@@ -25,8 +28,7 @@ public class PostCreateReqDTO {
     @NotBlank
     private String content;
 
-    @Schema(description = "게시물 내 이미지 url , blank 가능", example = "example/1231")
-    private String postImageUrl;
+    //이미지 별도 Multipart (RequestPart 사용)
 
     @Schema(description = "게시물 익명 여부 default = true (익명)", example = "true")
     @NotNull
