@@ -43,6 +43,9 @@ public class LabService {
     }
 
     public void deleteLab(String id) {
-        infoRepository.deleteById(id);
+        Lab lab = infoRepository.findLabById(id)
+                .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
+        lab.delete();
+        infoRepository.save(lab);
     }
 }
