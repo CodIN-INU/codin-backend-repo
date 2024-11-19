@@ -70,7 +70,27 @@ public class S3Service {
 
 
     //삭제
+    //삭제 안됐을경우 에러처리 필요
     public void deleteFile(String fileName) {
-        amazonS3Client.deleteObject(bucket, fileName);
+        if (bucket == null || bucket.isEmpty()) {
+            throw new IllegalStateException("S3 버킷 이름이 설정되지 않았습니다.");
+        }
+
+        try {
+            amazonS3Client.deleteObject(bucket, fileName);
+
+            // 삭제가 제대로 되었는지 추가 검증
+            if (amazonS3Client.doesObjectExist(bucket, fileName)) {
+                throw new IllegalStateException("파일 삭제가 실패했습니다. 파일명: " + fileName);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("파일 삭제 중 오류가 발생했습니다. 파일명: " + fileName, e);
+        }
+    }
+
+    public void deleteFiles(List<String> fileUrls) {
+        for (String fileUrl : fileUrls) {
+            deleteFile(fileUrl);
+        }
     }
 }

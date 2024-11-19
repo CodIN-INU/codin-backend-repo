@@ -14,7 +14,6 @@ import java.util.List;
 @Getter
 public class PostEntity extends BaseTimeEntity {
     @Id @NotBlank
-    private String id;
     private String postId;
 
     private String userId; // User 엔티티와의 관계를 유지하기 위한 필드
@@ -42,5 +41,24 @@ public class PostEntity extends BaseTimeEntity {
         this.isAnonymous = isAnonymous;
         this.postImageUrls = postImageUrls;
         this.postStatus = postStatus;
+    }
+
+    public void updatePostContent(String content, List<String> postImageUrls) {
+        this.content = content;
+        this.postImageUrls = postImageUrls;
+    }
+
+    public void updatePostStatus(PostStatus postStatus) {
+        if (this.postStatus == postStatus) {
+            throw new IllegalStateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+        }
+        this.postStatus = postStatus;
+    }
+    public void removePostImage(String imageUrl) {
+        this.postImageUrls.remove(imageUrl);
+    }
+
+    public void removeAllPostImages() {
+        this.postImageUrls.clear();
     }
 }

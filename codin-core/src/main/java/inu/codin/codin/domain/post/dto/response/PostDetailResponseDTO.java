@@ -1,8 +1,10 @@
 package inu.codin.codin.domain.post.dto.response;
 
 import inu.codin.codin.domain.post.entity.PostCategory;
+import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -34,7 +36,16 @@ public class PostDetailResponseDTO {
     private List<String> postImageUrl;
 
     @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "0")
-    @NotBlank
+    @NotNull
     private boolean isAnonymous;
 
+    public PostDetailResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous) {
+        this.userId = userId;
+        this.postId = postId;
+        this.content = content;
+        this.title = title;
+        this.postCategory = postCategory;
+        this.postImageUrl = postImageUrls;
+        this.isAnonymous = isAnonymous;
+    }
 }
