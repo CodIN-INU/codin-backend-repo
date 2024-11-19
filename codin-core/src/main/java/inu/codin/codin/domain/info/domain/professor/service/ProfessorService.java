@@ -48,6 +48,9 @@ public class ProfessorService {
 
 
     public void deleteProfessor(String id) {
-        infoRepository.deleteById(id);
+        Professor professor = infoRepository.findProfessorById(id)
+                .orElseThrow(() -> new ProfessorNotFoundException("교수 정보를 찾을 수 없습니다."));
+        professor.delete();
+        infoRepository.save(professor);
     }
 }

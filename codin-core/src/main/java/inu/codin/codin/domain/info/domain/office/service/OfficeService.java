@@ -40,7 +40,7 @@ public class OfficeService {
 
     public void deleteOfficeMember(Department department, int num) {
         Office office = infoRepository.findOfficeByDepartment(department);
-        office.getMember().remove(num);
+        office.getMember().get(num).delete();
         infoRepository.save(office);
     }
 }

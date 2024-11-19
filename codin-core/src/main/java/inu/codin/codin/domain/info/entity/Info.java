@@ -2,7 +2,6 @@ package inu.codin.codin.domain.info.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
