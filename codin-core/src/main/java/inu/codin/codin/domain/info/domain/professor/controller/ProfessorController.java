@@ -1,16 +1,15 @@
 package inu.codin.codin.domain.info.domain.professor.controller;
 
+import inu.codin.codin.common.Department;
 import inu.codin.codin.common.ResponseUtils;
+import inu.codin.codin.domain.info.domain.professor.dto.ProfessorCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.professor.dto.ProfessorListResponseDto;
 import inu.codin.codin.domain.info.domain.professor.dto.ProfessorThumbnailResponseDto;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.professor.service.ProfessorService;
-import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/info/professor")
-@Tag(name = "Info API")
+@Tag(name = "Info API", description = "연구실, 사무실, 교수 / 정보 API")
 public class ProfessorController {
 
     private final ProfessorService professorService;

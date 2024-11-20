@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/info/lab")
-@Tag(name = "Info API")
+@Tag(name = "Info API", description = "연구실, 사무실, 교수 / 정보 API")
 public class LabController {
 
     private final LabService labService;
