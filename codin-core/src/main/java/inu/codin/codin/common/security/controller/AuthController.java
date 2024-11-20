@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/auth" , produces = "plain/text; charset=utf-8")
-@Tag(name = "User Auth API")
+@Tag(name = "User Auth API", description = "유저 회원가입, 로그인, 로그아웃, 리이슈 API")
 @RequiredArgsConstructor
 public class AuthController {
 
