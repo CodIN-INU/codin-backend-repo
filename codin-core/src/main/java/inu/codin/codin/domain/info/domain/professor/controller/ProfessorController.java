@@ -8,6 +8,7 @@ import inu.codin.codin.domain.info.domain.professor.service.ProfessorService;
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class ProfessorController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(summary = "[ADMIN, MANAGER] 새로운 교수 정보 생성")
     @PostMapping(produces = "plain/text; charset=utf-8")
-    public ResponseEntity<?> createProfessor(@RequestBody ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
+    public ResponseEntity<?> createProfessor(@RequestBody @Valid ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
         professorService.createProfessor(professorCreateUpdateRequestDto);
         return ResponseUtils.successMsg("새로운 교수 정보 생성 완료");
     }
@@ -47,7 +48,7 @@ public class ProfessorController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(summary = "[ADMIN, MANAGER] 교수 정보 수정")
     @PatchMapping(value = "/{id}", produces = "plain/text; charset=utf-8")
-    public ResponseEntity<?> updateProfessor(@PathVariable("id") String id, @RequestBody ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
+    public ResponseEntity<?> updateProfessor(@PathVariable("id") String id, @RequestBody @Valid ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
         professorService.updateProfessor(id, professorCreateUpdateRequestDto);
         return ResponseUtils.successMsg("교수 정보 수정 완료");
     }
