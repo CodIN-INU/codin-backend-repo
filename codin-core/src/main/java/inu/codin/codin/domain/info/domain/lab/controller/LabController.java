@@ -7,7 +7,6 @@ import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.service.LabService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/info/lab")
-@Tag(name = "Info API")
+@Tag(name = "Info API", description = "연구실, 사무실, 교수 / 정보 API")
 public class LabController {
 
     private final LabService labService;
