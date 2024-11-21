@@ -21,19 +21,38 @@ public class S3Service {
     @Value("codin-s3-bucket")
     public String bucket;
 
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final int MAX_FILE_COUNT = 10; // 최대 파일 개수
+
+
     //모든 이미지 업로드
     public List<String> uploadFiles(List<MultipartFile> multipartFiles) {
+        validateFileCount(multipartFiles);
         List<String> uploadUrls = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
+            validateImageFileSize(multipartFile);
+            validateImageFileExtension(multipartFile);
             uploadUrls.add(uploadFile(multipartFile));
         }
         return uploadUrls;
 
     }
 
+    private void validateImageFileSize(MultipartFile multipartFile) {
+        if (multipartFile.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("파일 크기가 5MB를 초과할 수 없습니다.");
+        }
+    }
+
+    private void validateFileCount(List<MultipartFile> multipartFiles) {
+        if (multipartFiles.size() > MAX_FILE_COUNT) {
+            throw new IllegalArgumentException("이미지 파일 개수는 최대 10개까지 업로드 가능합니다.");
+        }
+    }
+
     //각 이미지 S3에 업로드
     public String uploadFile(MultipartFile multipartFile) {
-        validateImageFile(multipartFile);
+        validateImageFileExtension(multipartFile);
 
         String fileName = createFileName(multipartFile.getOriginalFilename());
         try{
@@ -52,7 +71,7 @@ public class S3Service {
     }
 
     //파일 유효성 검사( 이미지 관련 확장자만 업로드 가능 설정)
-    public void validateImageFile(MultipartFile multipartFile) {
+    public void validateImageFileExtension(MultipartFile multipartFile) {
         List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif");
         String extension = getExtension(multipartFile.getOriginalFilename());
         if (extension == null || !validExtensions.contains(extension.toLowerCase())) {
