@@ -8,6 +8,7 @@ import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,14 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
     private final S3Service s3Service;
-
-    public PostService(PostRepository postRepository, S3Service s3Service) {
-        this.postRepository = postRepository;
-        this.s3Service = s3Service;
-    }
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -76,8 +73,24 @@ public class PostService {
         post.updatePostStatus(requestDTO.getPostStatus());
     }
 
-    public List<PostDetailResponseDTO> getAllPosts(String userId) {
-        List<PostEntity> posts = postRepository.findByUserId(userId);
+    public List<PostDetailResponseDTO> getAllPosts() {
+        List<PostEntity> posts = postRepository.findALlNotDeleted();
+        return posts.stream()
+                .map(post -> new PostDetailResponseDTO(
+                        post.getUserId(),
+                        post.getPostId(),
+                        post.getContent(),
+                        post.getTitle(),
+                        post.getPostCategory(),
+                        post.getPostStatus(),
+                        post.getPostImageUrls(),
+                        post.isAnonymous()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<PostDetailResponseDTO> getAllUserPosts(String userId) {
+        List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
         return posts.stream()
                 .map(post -> new PostDetailResponseDTO(
                         post.getUserId(),
@@ -93,8 +106,7 @@ public class PostService {
     }
 
     public PostDetailResponseDTO getPost(String postId) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+        PostEntity post = postRepository.findByPostIdNotDeleted(postId);
 
         return new PostDetailResponseDTO(
                 post.getUserId(),
@@ -109,11 +121,21 @@ public class PostService {
 
     }
 
-    public void deletePost(String postId) {
-        postRepository.deleteById(postId);
+    public void softDeletePost(String postId) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(()-> new IllegalArgumentException("게시물을 찾을 수 없음."));
+
+        if (post.isDeleted()) {
+            throw new IllegalArgumentException("이미 삭제된 게시물");
+        }
+
+        post.softDeletePost();
+        postRepository.save(post);
+
     }
 
     public void deletePostImage(String postId, String imageUrl) {
+
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
@@ -124,9 +146,9 @@ public class PostService {
         try {
             // S3에서 이미지 삭제
             s3Service.deleteFile(imageUrl);
-
             // 게시물의 이미지 리스트에서 제거
             post.removePostImage(imageUrl);
+            postRepository.save(post);
         } catch (Exception e) {
             throw new IllegalStateException("이미지 삭제 중 오류 발생: " + imageUrl, e);
         }

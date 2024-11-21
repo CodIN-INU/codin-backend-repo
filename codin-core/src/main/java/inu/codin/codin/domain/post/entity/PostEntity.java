@@ -28,6 +28,8 @@ public class PostEntity extends BaseTimeEntity {
 
     private boolean isAnonymous;
 
+    private boolean isDeleted = false;
+
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
 
 
@@ -60,5 +62,10 @@ public class PostEntity extends BaseTimeEntity {
 
     public void removeAllPostImages() {
         this.postImageUrls.clear();
+    }
+
+    public void softDeletePost() {
+        this.isDeleted = true;
+        this.delete();
     }
 }
