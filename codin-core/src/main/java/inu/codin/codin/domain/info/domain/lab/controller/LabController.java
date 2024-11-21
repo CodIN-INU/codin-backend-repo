@@ -7,6 +7,7 @@ import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.service.LabService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +38,7 @@ public class LabController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(summary = "[ADMIN, MANAGER] 새로운 연구실 등록")
     @PostMapping(produces = "plain/text; charset=utf-8")
-    public ResponseEntity<?> createLab(@RequestBody LabCreateUpdateRequestDto labCreateUpdateRequestDto){
+    public ResponseEntity<?> createLab(@RequestBody @Valid LabCreateUpdateRequestDto labCreateUpdateRequestDto){
         labService.createLab(labCreateUpdateRequestDto);
         return ResponseUtils.successMsg("새로운 LAB 등록 완료");
     }
@@ -45,7 +46,7 @@ public class LabController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(summary = "[ADMIN, MANAGER] 연구실 정보 수정")
     @PutMapping(value = "/{id}", produces = "plain/text; charset=utf-8")
-    public ResponseEntity<?> updateLab(@RequestBody LabCreateUpdateRequestDto labCreateUpdateRequestDto, @PathVariable("id") String id){
+    public ResponseEntity<?> updateLab(@RequestBody @Valid LabCreateUpdateRequestDto labCreateUpdateRequestDto, @PathVariable("id") String id){
         labService.updateLab(labCreateUpdateRequestDto, id);
         return ResponseUtils.successMsg("LAB 정보 수정 완료");
     }
