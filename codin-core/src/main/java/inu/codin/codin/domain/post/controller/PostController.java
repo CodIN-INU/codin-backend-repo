@@ -4,6 +4,7 @@ import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostWithLikeAndScrapResponseDTO;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -90,6 +91,15 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponseDTO> getPost(@PathVariable String postId) {
         PostDetailResponseDTO post = postService.getPost(postId);
+        return ResponseEntity.status(HttpStatus.OK).body(post);
+    }
+
+    @Operation(
+            summary = "해당 게시물 좋아요,스크랩 포함 조회"
+    )
+    @GetMapping("/{postId}/details")
+    public ResponseEntity<PostWithLikeAndScrapResponseDTO> getPostDetail(@PathVariable String postId) {
+        PostWithLikeAndScrapResponseDTO post = postService.getPostWithLikeAndScrap(postId);
         return ResponseEntity.status(HttpStatus.OK).body(post);
     }
 
