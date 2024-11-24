@@ -23,5 +23,9 @@ public interface PostRepository extends MongoRepository<PostEntity, String> {
     @Query("{'postId': ?0, 'isDeleted': false}")
     PostEntity findByPostIdNotDeleted(String postId);
 
+    @Query("{'_id': ?0, 'comments.isDeleted': false}")
+    Optional<PostEntity> findPostWithActiveComments(String postId);
+
+
 
 }
