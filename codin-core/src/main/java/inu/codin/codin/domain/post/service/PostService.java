@@ -2,7 +2,10 @@ package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
+import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostWithCommentsResponseDTO;
+import inu.codin.codin.domain.post.entity.CommentEntity;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +53,7 @@ public class PostService {
 
                 //Default Status = Active
                 .postStatus(PostStatus.ACTIVE)
-
+                .comments(new ArrayList<>())
                 .build();
         postRepository.save(postEntity);
     }
@@ -154,12 +158,50 @@ public class PostService {
         }
     }
 
+
+
+
     //유효성체크
     private void validateCreatePostRequest(PostCreateReqDTO postCreateReqDTO) {
 //        if (postRepository.findByTitle(postCreateReqDTO.getTitle()).isPresent()) {
 //            throw new PostCreateFailException("이미 존재하는 제목입니다. 다른 제목을 사용해주세요.");
 //        }
 
+    }
+    public List<PostWithCommentsResponseDTO> getAllUserPostsAndComments(String userId) {
+        // 삭제되지 않은 사용자 게시물 조회
+        List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
+
+        // PostEntity를 PostWithCommentsResponseDTO로 변환
+        return posts.stream()
+                .map(post -> new PostWithCommentsResponseDTO(
+                        post.getUserId(),
+                        post.getPostId(),
+                        post.getContent(),
+                        post.getTitle(),
+                        post.getPostCategory(),
+                        post.getPostStatus(),
+                        post.getPostImageUrls(),
+                        post.isAnonymous(),
+                        convertCommentsToDTO(post.getComments()) // 댓글과 대댓글을 DTO로 변환
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private List<CommentsResponseDTO> convertCommentsToDTO(List<CommentEntity> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return List.of(); // 댓글이 없는 경우 빈 리스트 반환
+        }
+
+        return comments.stream()
+                .filter(comment -> !comment.isDeleted()) // 삭제되지 않은 댓글만 포함
+                .map(comment -> new CommentsResponseDTO(
+                        comment.getCommentId(),
+                        comment.getUserId(),
+                        comment.getContent(),
+                        convertCommentsToDTO(comment.getReplies()) // 재귀적으로 대댓글 변환
+                ))
+                .collect(Collectors.toList());
     }
 }
 
