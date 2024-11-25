@@ -1,12 +1,10 @@
 package inu.codin.codin.domain.notification.service;
 
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
+import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.infra.fcm.FcmConfig;
 import inu.codin.codin.infra.fcm.dto.FcmMessageDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
-import inu.codin.codin.infra.redis.RedisStorageService;
-import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
