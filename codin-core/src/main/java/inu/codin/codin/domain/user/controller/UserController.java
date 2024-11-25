@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.user.controller;
 
+import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
 import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/users", produces = "plain/text; charset=utf-8")
-@Tag(name = "User API")
+@Tag(name = "User Auth API", description = "유저 회원가입, 로그인, 로그아웃, 리이슈 API")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -22,6 +23,6 @@ public class UserController {
     public ResponseEntity<?> signUpUser(
             @RequestBody @Valid UserCreateRequestDto userCreateRequestDto) {
         userService.createUser(userCreateRequestDto);
-        return ResponseEntity.ok("회원가입 성공");
+        return ResponseUtils.successMsg("회원가입 성공");
     }
 }
