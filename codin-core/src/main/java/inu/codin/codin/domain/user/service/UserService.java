@@ -71,8 +71,8 @@ public class UserService {
     }
 
     /**
-     * 이메일(username == email)로 유저 조회
-     * @param email
+     * 이메일로 유저 조회
+     * @param email 이메일 == UserDetails.username
      * @return UserEntity
      */
     public UserEntity findUserByEmail(String email) {
