@@ -2,6 +2,7 @@ package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
+import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -56,5 +57,26 @@ public class UserService {
             throw new UserCreateFailException("이미 존재하는 이메일입니다.");
         if (userRepository.findByStudentId(userCreateRequestDto.getStudentId()).isPresent())
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
+    }
+
+    /**
+     * 유저의 알림 설정을 조회
+     * @param userId 유저 id
+     * @return NotificationPreference
+     */
+    public NotificationPreference getUserNotificationPreference(String userId) {
+        UserEntity user = userRepository.findById(userId).
+                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        return user.getNotificationPreference();
+    }
+
+    /**
+     * 이메일(username == email)로 유저 조회
+     * @param email
+     * @return UserEntity
+     */
+    public UserEntity findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
 }
