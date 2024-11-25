@@ -1,9 +1,11 @@
 package inu.codin.codin.domain.notification.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -13,7 +15,8 @@ public class NotificationEntity extends BaseTimeEntity {
     @Id @NotBlank
     private String id;
 
-    private String userId;
+    @DBRef(lazy = true)
+    private UserEntity user;
 
     private String type;
 
@@ -24,8 +27,8 @@ public class NotificationEntity extends BaseTimeEntity {
     private String priority;
 
     @Builder
-    public NotificationEntity(String userId, String type, String message, String priority) {
-        this.userId = userId;
+    public NotificationEntity(UserEntity user, String type, String message, String priority) {
+        this.user = user;
         this.type = type;
         this.message = message;
         this.priority = priority;
