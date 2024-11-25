@@ -1,21 +1,19 @@
 package inu.codin.codin.common.security.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 /**
  * 예외 처리 필터
@@ -38,41 +36,16 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         }
     }
 
-    private void sendErrorResponse(HttpServletResponse response, SecurityErrorCode errorCode) {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
+    private void sendErrorResponse(HttpServletResponse response, SecurityErrorCode code) throws IOException {
+        ResponseEntity<?> responseEntity = ResponseUtils.error("Security Fail", code);
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(errorCode.name())
-                .code(errorCode.getErrorCode())
-                .message(errorCode.getMessage())
-                .build();
+        // Set the HttpServletResponse properties
+        response.setStatus(responseEntity.getStatusCode().value());
+        response.setContentType("application/json");
 
-        try {
-            response.getWriter().write(errorResponse.toString());
-        } catch (IOException e) {
-            log.error("Error writing error response", e);
-        }
-    }
-
-    @Getter
-    public static class ErrorResponse {
-        private int status;
-        private String error;
-        private String code;
-        private String message;
-        private LocalDateTime timestamp;
-
-        @Builder
-        public ErrorResponse(int status, String error, String code, String message) {
-            this.status = status;
-            this.error = error;
-            this.code = code;
-            this.message = message;
-            this.timestamp = LocalDateTime.now();
-        }
+        // Use an ObjectMapper to write the ResponseEntity body as JSON to the response output stream
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getWriter(), responseEntity.getBody());
     }
 
 }
