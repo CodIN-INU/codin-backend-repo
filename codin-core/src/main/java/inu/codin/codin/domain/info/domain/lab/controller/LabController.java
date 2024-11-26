@@ -1,9 +1,9 @@
 package inu.codin.codin.domain.info.domain.lab.controller;
 
 import inu.codin.codin.common.ResponseUtils;
-import inu.codin.codin.domain.info.domain.lab.dto.LabCreateUpdateRequestDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabListResponseDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.request.LabCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabListResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.service.LabService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.info.domain.professor.dto;
+package inu.codin.codin.domain.info.domain.professor.dto.response;
 
 import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.common.Department;

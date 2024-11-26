@@ -1,10 +1,10 @@
 package inu.codin.codin.domain.info.domain.office.controller;
 
 import inu.codin.codin.common.ResponseUtils;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeMemberCreateUpdateRequestDto;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.office.dto.request.OfficeMemberCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.office.dto.request.OfficeUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.office.service.OfficeService;
-import inu.codin.codin.domain.info.domain.office.dto.OfficeDetailsResponseDto;
+import inu.codin.codin.domain.info.domain.office.dto.response.OfficeDetailsResponseDto;
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

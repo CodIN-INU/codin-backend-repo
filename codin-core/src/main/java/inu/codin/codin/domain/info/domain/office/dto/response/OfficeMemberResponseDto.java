@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.info.domain.office.dto;
+package inu.codin.codin.domain.info.domain.office.dto.response;
 
 import inu.codin.codin.domain.info.domain.office.entity.OfficeMember;
 import io.swagger.v3.oas.annotations.media.Schema;
