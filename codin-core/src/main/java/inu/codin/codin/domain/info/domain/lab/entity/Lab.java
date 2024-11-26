@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.domain.lab.entity;
 
-import inu.codin.codin.domain.info.domain.lab.dto.LabCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.lab.dto.request.LabCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.entity.Info;
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.entity.InfoType;
