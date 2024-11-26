@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.domain.professor.dto;
 
-import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

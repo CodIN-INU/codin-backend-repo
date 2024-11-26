@@ -7,7 +7,6 @@ import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.domain.info.domain.lab.exception.LabNotFoundException;
 import inu.codin.codin.domain.info.repository.InfoRepository;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
