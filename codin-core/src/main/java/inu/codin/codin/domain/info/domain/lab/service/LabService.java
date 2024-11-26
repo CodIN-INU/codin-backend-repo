@@ -1,13 +1,12 @@
 package inu.codin.codin.domain.info.domain.lab.service;
 
-import inu.codin.codin.domain.info.domain.lab.dto.LabCreateUpdateRequestDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabListResponseDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.request.LabCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabListResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.domain.info.domain.lab.exception.LabNotFoundException;
 import inu.codin.codin.domain.info.repository.InfoRepository;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

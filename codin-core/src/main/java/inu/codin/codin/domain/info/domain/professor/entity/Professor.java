@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.domain.professor.entity;
 
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.professor.dto.request.ProfessorCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.entity.Info;
 import inu.codin.codin.domain.info.entity.InfoType;
 import jakarta.validation.constraints.NotBlank;
