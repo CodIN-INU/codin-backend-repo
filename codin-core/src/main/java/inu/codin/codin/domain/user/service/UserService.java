@@ -2,7 +2,6 @@ package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
-import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -59,24 +58,31 @@ public class UserService {
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
     }
 
-    /**
-     * 유저의 알림 설정을 조회
-     * @param userId 유저 id
-     * @return NotificationPreference
-     */
-    public NotificationPreference getUserNotificationPreference(String userId) {
-        UserEntity user = userRepository.findById(userId).
-                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        return user.getNotificationPreference();
-    }
-
-    /**
-     * 이메일로 유저 조회
-     * @param email 이메일 == UserDetails.username
-     * @return UserEntity
-     */
-    public UserEntity findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-    }
+    // todo : 중복 코드 제거
+//    /**
+//     * 유저의 알림 설정을 조회
+//     * @param userId 유저 id
+//     * @return NotificationPreference
+//     */
+//    public NotificationPreference getUserNotificationPreference(String userId) {
+//        UserEntity user = userRepository.findById(userId).
+//                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다.")); // Exception 교체 필요
+//
+//        // 알림 설정이 Off 라면 전송하지 않음
+//        if (!user.getNotificationPreference().isAllowPush()) {
+//            log.info("[sendFcmMessage] 알림 설정이 Off User : {}", userId);
+//            return null;
+//        }
+//        return user.getNotificationPreference();
+//    }
+//
+//    /**
+//     * 이메일로 유저 조회
+//     * @param email 이메일 == UserDetails.username
+//     * @return UserEntity
+//     */
+//    public UserEntity findUserByEmail(String email) {
+//        return userRepository.findByEmail(email)
+//                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저입니다."));
+//    }
 }

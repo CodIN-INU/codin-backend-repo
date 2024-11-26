@@ -24,6 +24,7 @@ public class NotificationEntity extends BaseTimeEntity {
 
     private boolean isRead = false;
 
+    // 알림 중요도 - 미사용중
     private String priority;
 
     @Builder
