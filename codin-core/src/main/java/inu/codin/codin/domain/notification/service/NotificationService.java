@@ -37,7 +37,6 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
         }
-
         // 알림 로그 저장
         saveNotificationLog(msgDto);
     }
