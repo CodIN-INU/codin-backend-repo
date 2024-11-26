@@ -75,16 +75,24 @@ public class FcmService {
                         .setNotification(Notification.builder()
                                 .setTitle(msgDto.getTitle())
                                 .setBody(msgDto.getBody())
+                                .setImage(msgDto.getImageUrl())
                                 .build())
                         .setToken(fcmToken)
+                        .putAllData(msgDto.getData())
                         .build();
 
                 String response = FirebaseMessaging.getInstance().send(message);
                 log.info("[sendFcmMessage] 알림 전송 성공 : {}", response);
             } catch (FirebaseMessagingException e) {
                 log.error("[sendFcmMessage] 알림 전송 실패, errorCode : {}, msg : {}", e.getErrorCode(), e.getMessage());
+                // todo : 에러 관리 및 리포팅 기능 추가
                 // todo : 알림 전송 실패 시 로직 추가 FCM 토큰 만료시 삭제 로직 추가
+                // todo : 토큰 만료 관리 추가
             }
         }
     }
+
+    // todo : FCM Bulk 메시지 전송 로직 추가
+    // todo : FCM 토칙 기반 메세지 전송 로직 추가 - 공지사항, 학과별 알림, 게시글 내 모든 댓글 인원에게 알림
+
 }

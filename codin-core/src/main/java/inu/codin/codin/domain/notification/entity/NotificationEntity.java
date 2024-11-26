@@ -18,10 +18,14 @@ public class NotificationEntity extends BaseTimeEntity {
     @DBRef(lazy = true)
     private UserEntity user;
 
-    private String type;
+    private String topic;
 
     private String message;
 
+    // 미사용중
+    private String type;
+
+    // 미사용중
     private boolean isRead = false;
 
     // 알림 중요도 - 미사용중
