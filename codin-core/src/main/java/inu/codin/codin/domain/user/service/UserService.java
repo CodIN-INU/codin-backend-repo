@@ -22,7 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void signUpUser(UserCreateRequestDto userCreateRequestDto) {
+    public void createUser(UserCreateRequestDto userCreateRequestDto) {
 
         String encodedPassword = passwordEncoder.encode(userCreateRequestDto.getPassword());
 
@@ -57,5 +57,4 @@ public class UserService {
         if (userRepository.findByStudentId(userCreateRequestDto.getStudentId()).isPresent())
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
     }
-
 }
