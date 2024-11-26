@@ -4,6 +4,7 @@ import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostWithLikeAndScrapResponseDTO;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -66,13 +67,21 @@ public class PostController {
         postService.updatePostStatus(postId, requestDTO);
         return ResponseEntity.status(HttpStatus.OK).body("게시물 상태 수정 성공");
     }
+    @Operation(
+            summary = "삭제되지 않은 모든 게시물 조회"
+    )
+    @GetMapping("")
+    public ResponseEntity<List<PostDetailResponseDTO>> getAllPosts() {
+        List<PostDetailResponseDTO> posts = postService.getAllPosts();
+        return ResponseEntity.ok(posts);
+    }
 
     @Operation(
             summary = "해당 사용자 게시물 전체 조회"
     )
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PostDetailResponseDTO>> getAllPosts(@PathVariable String userId) {
-        List<PostDetailResponseDTO> posts = postService.getAllPosts(userId);
+        List<PostDetailResponseDTO> posts = postService.getAllUserPosts(userId);
         return ResponseEntity.status(HttpStatus.OK).body(posts);
     }
 
@@ -86,13 +95,14 @@ public class PostController {
     }
 
     @Operation(
-            summary = "해당 게시물 삭제"
+            summary = "해당 게시물 좋아요,스크랩 포함 조회"
     )
-    @DeleteMapping("/postId")
-    public ResponseEntity<String> deletePost(@PathVariable String postId) {
-        postService.deletePost(postId);
-        return ResponseEntity.status(HttpStatus.OK).body("게시물 삭제");
+    @GetMapping("/{postId}/details")
+    public ResponseEntity<PostWithLikeAndScrapResponseDTO> getPostDetail(@PathVariable String postId) {
+        PostWithLikeAndScrapResponseDTO post = postService.getPostWithLikeAndScrap(postId);
+        return ResponseEntity.status(HttpStatus.OK).body(post);
     }
+
 
     @Operation(
             summary = "해당 이미지 삭제"
@@ -103,6 +113,16 @@ public class PostController {
             @RequestParam String imageUrls) {
         postService.deletePostImage(postId, imageUrls);
         return ResponseEntity.status(HttpStatus.OK).body("이미지 삭제");
+    }
+
+
+    @Operation(
+            summary = "해당 게시물 Soft 삭제"
+    )
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<String> softDeletePost(@PathVariable String postId) {
+        postService.softDeletePost(postId);
+        return ResponseEntity.status(HttpStatus.OK).body("게시물 안전삭제");
     }
 
 
