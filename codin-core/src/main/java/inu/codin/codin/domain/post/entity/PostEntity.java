@@ -35,10 +35,12 @@ public class PostEntity extends BaseTimeEntity {
 
     private List<CommentEntity> comments = new ArrayList<>();
 
+    private int likeCount = 0; // 좋아요 카운트
 
+    private int scrapCount = 0; // 스크랩 카운트
 
     @Builder
-    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, boolean isAnonymous, List<String> postImageUrls, PostStatus postStatus, List<CommentEntity> comments) {
+    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, boolean isAnonymous, List<String> postImageUrls, PostStatus postStatus, List<CommentEntity> comments, Integer likeCount, Integer scrapCount) {
         this.postId = postId;
         this.userId = userId;
         this.postCategory = postCategory;
@@ -47,7 +49,9 @@ public class PostEntity extends BaseTimeEntity {
         this.isAnonymous = isAnonymous;
         this.postImageUrls = postImageUrls;
         this.postStatus = postStatus;
-        this.comments = comments;
+        this.comments = comments != null ? comments : new ArrayList<>();
+        this.likeCount = likeCount != null ? likeCount : 0; // 기본값 설정
+        this.scrapCount = scrapCount != null ? scrapCount : 0; // 기본값 설정
     }
 
     public void updatePostContent(String content, List<String> postImageUrls) {
@@ -103,6 +107,15 @@ public class PostEntity extends BaseTimeEntity {
                 .filter(comment -> comment.getCommentId().equals(parentCommentId))
                 .findFirst()
                 .ifPresent(parentComment -> parentComment.addReply(reply));
+    }
+
+    //좋아요 업데이트
+    public void updateLikeCount(int likeCount) {
+        this.likeCount=likeCount;
+    }
+    //스크랩 업데이트
+    public void updateScrapCount(int scrapCount) {
+        this.scrapCount=likeCount;
     }
 
 
