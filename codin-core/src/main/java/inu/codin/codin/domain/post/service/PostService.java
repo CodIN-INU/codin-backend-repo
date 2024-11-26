@@ -5,6 +5,7 @@ import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithCommentsResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostWithLikeAndScrapResponseDTO;
 import inu.codin.codin.domain.post.entity.CommentEntity;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
@@ -12,6 +13,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final S3Service s3Service;
+    private final RedisTemplate<String, String> redisTemplate;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -188,6 +191,49 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public PostWithLikeAndScrapResponseDTO getPostWithLikeAndScrap(String postId) {
+        String likeKey = "post:likes:" + postId;
+        String scrapKey = "post:scraps:" + postId;
+
+        // Redis에서 좋아요 및 스크랩 카운트 조회
+        Long likeCount = redisTemplate.opsForSet().size(likeKey);
+        Long scrapCount = redisTemplate.opsForSet().size(scrapKey);
+
+        // Redis에 데이터가 없을 경우 MongoDB에서 조회 후 Redis 갱신
+        if (likeCount == null || scrapCount == null) {
+            PostEntity post = postRepository.findById(postId)
+                    .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+
+            if (likeCount == null) {
+                likeCount = (long) post.getLikeCount();
+                redisTemplate.opsForSet().add(likeKey, String.valueOf(likeCount));
+            }
+
+            if (scrapCount == null) {
+                scrapCount = (long) post.getScrapCount();
+                redisTemplate.opsForSet().add(scrapKey, String.valueOf(scrapCount));
+            }
+        }
+
+        // MongoDB에서 게시물 조회
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+
+        // PostWithLikeAndScrapResponseDTO 반환
+        return new PostWithLikeAndScrapResponseDTO(
+                post.getUserId(),
+                post.getPostId(),
+                post.getContent(),
+                post.getTitle(),
+                post.getPostCategory(),
+                post.getPostStatus(),
+                post.getPostImageUrls(),
+                post.isAnonymous(),
+                convertCommentsToDTO(post.getComments()), // 댓글 변환 메소드 호출
+                likeCount.intValue(),
+                scrapCount.intValue()
+        );
+    }
     private List<CommentsResponseDTO> convertCommentsToDTO(List<CommentEntity> comments) {
         if (comments == null || comments.isEmpty()) {
             return List.of(); // 댓글이 없는 경우 빈 리스트 반환
