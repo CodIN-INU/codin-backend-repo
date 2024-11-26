@@ -17,9 +17,7 @@ public enum PostCategory {
 
     EXTRACURRICULAR_OUTER("비교과_교외"),
     EXTRACURRICULAR_INNER("비교과_교내"),
-
-    INFO_PROFESSOR("정보대소개_교수_연구실"),
-    INFO_PHONE_NUMBER("정보대소개_정보대전화번호"),
+    EXTRACURRICULAR_STARINU("비교과_STARINU"),
 
     USED_BOOK("중고책");
 
