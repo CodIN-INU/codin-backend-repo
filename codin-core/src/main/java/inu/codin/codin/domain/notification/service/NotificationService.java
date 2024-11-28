@@ -3,7 +3,7 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.infra.fcm.dto.FcmMessageDto;
+import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class NotificationService {
      * @param user 메시지를 받을 사용자
      */
     public void sendFcmMessageToUser(String title, String body, UserEntity user) {
-        FcmMessageDto msgDto = FcmMessageDto.builder()
+        FcmMessageUserDto msgDto = FcmMessageUserDto.builder()
                 .user(user)
                 .title(title)
                 .body(body)
@@ -42,7 +42,7 @@ public class NotificationService {
     }
 
     // 알림 로그를 저장하는 로직
-    private void saveNotificationLog(FcmMessageDto msgDto) {
+    private void saveNotificationLog(FcmMessageUserDto msgDto) {
         NotificationEntity notificationEntity = NotificationEntity.builder()
                 .user(msgDto.getUser())
                 .type("push")

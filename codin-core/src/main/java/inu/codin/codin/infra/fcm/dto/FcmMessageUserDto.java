@@ -13,7 +13,7 @@ import java.util.Map;
  */
 @Getter
 @Data
-public class FcmMessageDto {
+public class FcmMessageUserDto {
 
     private UserEntity user;
     private String title;
@@ -22,7 +22,7 @@ public class FcmMessageDto {
     private Map<String, String> data;
 
     @Builder
-    public FcmMessageDto(UserEntity user, String title, String body, String imageUrl, Map<String, String> data) {
+    public FcmMessageUserDto(UserEntity user, String title, String body, String imageUrl, Map<String, String> data) {
         this.user = user;
         this.title = title;
         this.body = body;
