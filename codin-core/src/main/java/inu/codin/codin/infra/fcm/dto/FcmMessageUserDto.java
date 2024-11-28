@@ -11,7 +11,6 @@ import java.util.Map;
  * Fcm 메시지 DTO
  * 서버 내부 로직에서 사용
  */
-@Getter
 @Data
 public class FcmMessageUserDto {
 
