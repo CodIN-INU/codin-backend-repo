@@ -3,11 +3,14 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -38,17 +41,38 @@ public class NotificationService {
             log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
         }
         // 알림 로그 저장
-        saveNotificationLog(msgDto);
+//        saveNotificationLog(msgDto);
     }
 
-    // 알림 로그를 저장하는 로직
-    private void saveNotificationLog(FcmMessageUserDto msgDto) {
-        NotificationEntity notificationEntity = NotificationEntity.builder()
-                .user(msgDto.getUser())
-                .type("push")
-                .message(msgDto.getBody())
-                .priority("high")
+    public void sendFcmMessageToTopic(String title, String body, Map<String, String> data, String imageUrl, String topic) {
+        FcmMessageTopicDto msgDto = FcmMessageTopicDto.builder()
+                .topic(topic)
+                .title(title)
+                .body(body)
+                .data(data)
+                .imageUrl(imageUrl)
                 .build();
-        notificationRepository.save(notificationEntity);
+
+        // FCM 메시지 전송
+        try {
+            fcmService.sendFcmMessageByTopic(msgDto);
+            log.info("[sendFcmMessage] 알림 전송 성공");
+        } catch (Exception e) {
+            log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
+        }
+        // 알림 로그 저장
+//        saveNotificationLog(msgDto);
     }
+
+    // todo : 알림로그 저장하는 방식에 대한 고찰 필요
+    // 알림 로그를 저장하는 로직
+//    private void saveNotificationLog(FcmMessageUserDto msgDto) {
+//        NotificationEntity notificationEntity = NotificationEntity.builder()
+//                .user(msgDto.getUser())
+//                .type("push")
+//                .message(msgDto.getBody())
+//                .priority("high")
+//                .build();
+//        notificationRepository.save(notificationEntity);
+//    }
 }
