@@ -5,7 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
-import inu.codin.codin.infra.fcm.dto.FcmMessageDto;
+import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
 import inu.codin.codin.infra.fcm.entity.FcmTokenEntity;
 import inu.codin.codin.infra.fcm.exception.FcmTokenNotFoundException;
@@ -55,7 +55,7 @@ public class FcmService {
      * FCM 메시지를 전송하는 로직 - 서버 내부 사용
      * @param msgDto FCM 메시지 DTO
      */
-    public void sendFcmMessage(FcmMessageDto msgDto) {
+    public void sendFcmMessage(FcmMessageUserDto msgDto) {
         // 유저의 알림 설정 조회
         String email = msgDto.getUser().getEmail();
         NotificationPreference userPreference = msgDto.getUser().getNotificationPreference();
@@ -94,5 +94,9 @@ public class FcmService {
 
     // todo : FCM Bulk 메시지 전송 로직 추가
     // todo : FCM 토칙 기반 메세지 전송 로직 추가 - 공지사항, 학과별 알림, 게시글 내 모든 댓글 인원에게 알림
+
+    public void sendFcmMessageByTopic() {
+
+    }
 
 }
