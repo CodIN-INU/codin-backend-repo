@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.Map;
 
 /**
- * Fcm 메시지 DTO
+ * Fcm 메시지 DTO to User
  * 서버 내부 로직에서 사용
  */
 @Data
