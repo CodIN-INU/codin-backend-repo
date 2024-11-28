@@ -5,6 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
 import inu.codin.codin.infra.fcm.entity.FcmTokenEntity;
@@ -53,12 +54,12 @@ public class FcmService {
 
     /**
      * FCM 메시지를 전송하는 로직 - 서버 내부 사용
-     * @param msgDto FCM 메시지 DTO
+     * @param fcmMessageUserDto FCM 메시지 유저 DTO
      */
-    public void sendFcmMessage(FcmMessageUserDto msgDto) {
+    public void sendFcmMessage(FcmMessageUserDto fcmMessageUserDto) {
         // 유저의 알림 설정 조회
-        String email = msgDto.getUser().getEmail();
-        NotificationPreference userPreference = msgDto.getUser().getNotificationPreference();
+        String email = fcmMessageUserDto.getUser().getEmail();
+        NotificationPreference userPreference = fcmMessageUserDto.getUser().getNotificationPreference();
 
         // 유저의 FCM 토큰 조회
         FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByEmail(email).orElseThrow(()
@@ -73,12 +74,12 @@ public class FcmService {
             try {
                 Message message = Message.builder()
                         .setNotification(Notification.builder()
-                                .setTitle(msgDto.getTitle())
-                                .setBody(msgDto.getBody())
-                                .setImage(msgDto.getImageUrl())
+                                .setTitle(fcmMessageUserDto.getTitle())
+                                .setBody(fcmMessageUserDto.getBody())
+                                .setImage(fcmMessageUserDto.getImageUrl())
                                 .build())
                         .setToken(fcmToken)
-                        .putAllData(msgDto.getData())
+                        .putAllData(fcmMessageUserDto.getData())
                         .build();
 
                 String response = FirebaseMessaging.getInstance().send(message);
@@ -95,8 +96,29 @@ public class FcmService {
     // todo : FCM Bulk 메시지 전송 로직 추가
     // todo : FCM 토칙 기반 메세지 전송 로직 추가 - 공지사항, 학과별 알림, 게시글 내 모든 댓글 인원에게 알림
 
-    public void sendFcmMessageByTopic() {
+    /**
+     * FCM 메시지를 특정 토픽으로 전송하는 로직 - 서버 내부 로직
+     * 브로드 캐스팅 알림을 위해 사용
+     * @param fcmMessageTopicDto FCM 메시지 토픽 DTO
+     */
+    public void sendFcmMessageByTopic(FcmMessageTopicDto fcmMessageTopicDto) {
+        //
+        try {
+            Message message = Message.builder()
+                    .setNotification(Notification.builder()
+                            .setTitle(fcmMessageTopicDto.getTitle())
+                            .setBody(fcmMessageTopicDto.getBody())
+                            .setImage(fcmMessageTopicDto.getImageUrl())
+                            .build())
+                    .setTopic(fcmMessageTopicDto.getTopic())
+                    .putAllData(fcmMessageTopicDto.getData())
+                    .build();
 
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("[sendFcmMessageByTopic] 알림 전송 성공 : {}", response);
+        } catch (FirebaseMessagingException e) {
+            log.error("[sendFcmMessageByTopic] 알림 전송 실패, errorCode : {}, msg : {}", e.getErrorCode(), e.getMessage());
+        }
     }
 
 }
