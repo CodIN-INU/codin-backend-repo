@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.info.domain.lab.dto;
+package inu.codin.codin.domain.info.domain.lab.dto.response;
 
 import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import io.swagger.v3.oas.annotations.media.Schema;

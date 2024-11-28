@@ -1,15 +1,16 @@
-package inu.codin.codin.domain.info.domain.lab.dto;
+package inu.codin.codin.domain.info.domain.lab.dto.request;
 
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class LabCreateUpdateRequestDto {
-    @NotBlank
+    @NotNull
     @Schema(description = "학과", example = "EMBEDDED")
     private Department department;
 
