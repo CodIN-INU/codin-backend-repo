@@ -1,6 +1,5 @@
-package inu.codin.codin.domain.info.domain.office.dto;
+package inu.codin.codin.domain.info.domain.office.dto.request;
 
-import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.info.domain.office.entity.Office;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -8,19 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
-/*
-    학과 사무실 정보 반환 DTO
-    학과 사무실 평면도 및 지원 정보들을 모두 반환한다.
- */
 @Getter
 @Setter
-public class OfficeDetailsResponseDto {
-
-    @Schema(description = "학과", example = "IT_COLLEGE")
-    @NotBlank
-    private final Department department;
+public class OfficeUpdateRequestDto {
 
     @Schema(description = "위치", example = "7호관 329호")
     @NotBlank
@@ -40,34 +29,24 @@ public class OfficeDetailsResponseDto {
     @NotBlank
     private final String fax;
 
-    @Schema(description = "사무실 평면도", example = "https://")
-    private String img;
-
-    @Schema(description = "학과사무실 직원")
-    private List<OfficeMemberResponseDto> officeMember;
-
     @Builder
-    public OfficeDetailsResponseDto(Department department, String location, String open, String vacation, String officeNumber, String fax, String img, List<OfficeMemberResponseDto> officeMember) {
-        this.department = department;
+    public OfficeUpdateRequestDto(String location, String open, String vacation, String officeNumber, String fax) {
         this.location = location;
         this.open = open;
         this.vacation = vacation;
         this.officeNumber = officeNumber;
         this.fax = fax;
-        this.img = img;
-        this.officeMember = officeMember;
     }
 
-    public static OfficeDetailsResponseDto of(Office office) {
-        return OfficeDetailsResponseDto.builder()
-                .department(office.getDepartment())
+
+
+    public static OfficeUpdateRequestDto of(Office office){
+        return OfficeUpdateRequestDto.builder()
                 .location(office.getLocation())
                 .open(office.getOpen())
                 .vacation(office.getVacation())
                 .officeNumber(office.getOfficeNumber())
                 .fax(office.getFax())
-                .img(office.getImg())
-                .officeMember(office.getMember().stream().map(OfficeMemberResponseDto::of).toList())
                 .build();
     }
 }
