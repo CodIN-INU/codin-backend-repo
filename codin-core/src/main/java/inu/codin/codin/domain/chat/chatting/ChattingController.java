@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Slf4j
 public class ChattingController {
 
-    @MessageMapping("/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
-    @SendTo("/topic/{chatRoomId}")
+    @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
+    @SendTo("/queue/{chatRoomId}")
     public void chat(@DestinationVariable("chatRoomId") String id, @RequestBody ChattingRequestDto chattingRequestDto){
         log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), chattingRequestDto.getSenderId(), id);
     }
+
+
 }
