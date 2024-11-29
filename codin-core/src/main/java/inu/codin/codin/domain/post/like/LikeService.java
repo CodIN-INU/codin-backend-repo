@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.like;
+package inu.codin.codin.domain.post.like;
 
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;

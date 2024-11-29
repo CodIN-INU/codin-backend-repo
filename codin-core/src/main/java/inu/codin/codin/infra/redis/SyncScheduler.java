@@ -1,13 +1,11 @@
 package inu.codin.codin.infra.redis;
 
-import inu.codin.codin.domain.like.LikeEntity;
-import inu.codin.codin.domain.like.LikeRepository;
-import inu.codin.codin.domain.like.LikeService;
+import inu.codin.codin.domain.post.like.LikeEntity;
+import inu.codin.codin.domain.post.like.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.scrap.ScrapEntity;
-import inu.codin.codin.domain.scrap.ScrapRepository;
+import inu.codin.codin.domain.post.scrap.ScrapEntity;
+import inu.codin.codin.domain.post.scrap.ScrapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.like;
+package inu.codin.codin.domain.post.like;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

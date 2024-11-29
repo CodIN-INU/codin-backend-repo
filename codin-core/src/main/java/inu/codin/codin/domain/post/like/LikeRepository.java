@@ -1,9 +1,9 @@
-package inu.codin.codin.domain.scrap;
+package inu.codin.codin.domain.post.like;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ScrapRepository extends MongoRepository<ScrapEntity, String> {
+public interface LikeRepository extends MongoRepository<LikeEntity, String> {
     boolean findByPostIdAndUserId(String postId, String userId);
 }
