@@ -5,12 +5,14 @@ import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-public class PostWithLikeAndScrapResponseDTO {
+public class PostWithCountsResponseDTO {
     @Schema(description = "유저 ID", example = "111111")
     @NotBlank
     private String userId;
@@ -38,13 +40,16 @@ public class PostWithLikeAndScrapResponseDTO {
     @NotNull
     private boolean isAnonymous;
 
-    @Schema(description = "댓글 및 대댓글", example = "0")
-    private List<CommentsResponseDTO> comments;
+    @Schema(description = "댓글 및 대댓글 count", example = "0")
+    private int commentCount;
 
+    @Schema(description = "좋아요 count", example = "0")
     private int likeCount;
+
+    @Schema(description = "스크랩 count", example = "0")
     private int scrapCount;
 
-    public PostWithLikeAndScrapResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous, List<CommentsResponseDTO> comments, int likeCount, int scrapCount) {
+    public PostWithCountsResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous, int commentCount, int likeCount, int scrapCount) {
         this.userId = userId;
         this.postId = postId;
         this.content = content;
@@ -52,7 +57,7 @@ public class PostWithLikeAndScrapResponseDTO {
         this.postCategory = postCategory;
         this.postImageUrl = postImageUrls;
         this.isAnonymous = isAnonymous;
-        this.comments = comments;
+        this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
     }
