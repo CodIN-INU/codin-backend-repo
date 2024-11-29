@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CommentCreateRequsetDTO {
+public class CommentCreateRequestDTO {
     @Schema(description = "유저 ID", example = "111111")
     @NotBlank
     private String userId;

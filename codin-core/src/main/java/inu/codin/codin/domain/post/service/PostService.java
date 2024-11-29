@@ -1,23 +1,27 @@
 package inu.codin.codin.domain.post.service;
 
+import inu.codin.codin.domain.post.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
+import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithCommentsResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithLikeAndScrapResponseDTO;
-import inu.codin.codin.domain.post.entity.CommentEntity;
+import inu.codin.codin.domain.post.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
+import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
+import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
+
+import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
-import inu.codin.codin.domain.post.dto.request.PostCreateReqDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +29,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
     private final S3Service s3Service;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisService redisService;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -37,26 +43,24 @@ public class PostService {
     }
 
 
-    public void createPost(PostCreateReqDTO postCreateReqDTO, List<MultipartFile> postImages) {
-        validateCreatePostRequest(postCreateReqDTO);
+    public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
+        validateCreatePostRequest(postCreateRequestDTO);
 
         List<String> imageUrls = handleImageUpload(postImages);
 
 
         PostEntity postEntity = PostEntity.builder()
-                .userId(postCreateReqDTO.getUserId())
-                .content(postCreateReqDTO.getContent())
-                .title(postCreateReqDTO.getTitle())
-                .postCategory(postCreateReqDTO.getPostCategory())
+                .userId(postCreateRequestDTO.getUserId())
+                .title(postCreateRequestDTO.getTitle())
+                .content(postCreateRequestDTO.getContent())
 
                 //이미지 Url List 저장
                 .postImageUrls(imageUrls)
 
-                .isAnonymous(postCreateReqDTO.isAnonymous())
-
+                .isAnonymous(postCreateRequestDTO.isAnonymous())
+                .postCategory(postCreateRequestDTO.getPostCategory())
                 //Default Status = Active
                 .postStatus(PostStatus.ACTIVE)
-                .comments(new ArrayList<>())
                 .build();
         postRepository.save(postEntity);
     }
@@ -68,11 +72,15 @@ public class PostService {
 
         List<String> imageUrls = handleImageUpload(postImages);
 
-        //이미지 삭제 로직
-
         post.updatePostContent(requestDTO.getContent(), imageUrls);
+        postRepository.save(post);
     }
 
+    public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
+        post.updatePostAnonymous(requestDTO.isAnonymous());
+    }
 
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findById(postId)
@@ -80,10 +88,13 @@ public class PostService {
         post.updatePostStatus(requestDTO.getPostStatus());
     }
 
-    public List<PostDetailResponseDTO> getAllPosts() {
+
+    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    public List<PostWithCountsResponseDTO> getAllPosts() {
         List<PostEntity> posts = postRepository.findALlNotDeleted();
+
         return posts.stream()
-                .map(post -> new PostDetailResponseDTO(
+                .map(post -> new PostWithCountsResponseDTO(
                         post.getUserId(),
                         post.getPostId(),
                         post.getContent(),
@@ -91,15 +102,21 @@ public class PostService {
                         post.getPostCategory(),
                         post.getPostStatus(),
                         post.getPostImageUrls(),
-                        post.isAnonymous()
+                        post.isAnonymous(),
+                        post.getCommentCount(), // 댓글 수
+                        redisService.getLikeCount("post",post.getPostId()),       // 좋아요 수
+                        redisService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
                 .collect(Collectors.toList());
     }
 
-    public List<PostDetailResponseDTO> getAllUserPosts(String userId) {
+
+    //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    public List<PostWithCountsResponseDTO> getAllUserPosts(String userId) {
         List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
+
         return posts.stream()
-                .map(post -> new PostDetailResponseDTO(
+                .map(post -> new PostWithCountsResponseDTO(
                         post.getUserId(),
                         post.getPostId(),
                         post.getContent(),
@@ -107,15 +124,20 @@ public class PostService {
                         post.getPostCategory(),
                         post.getPostStatus(),
                         post.getPostImageUrls(),
-                        post.isAnonymous()
+                        post.isAnonymous(),
+                        commentRepository.countByPostId(post.getPostId()), // 댓글 수
+                        redisService.getLikeCount("post",post.getPostId()),       // 좋아요 수
+                        redisService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
                 .collect(Collectors.toList());
     }
 
-    public PostDetailResponseDTO getPost(String postId) {
-        PostEntity post = postRepository.findByPostIdNotDeleted(postId);
+    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
+    public PostWithDetailResponseDTO getPostWithDetail(String postId) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
-        return new PostDetailResponseDTO(
+        return new PostWithDetailResponseDTO(
                 post.getUserId(),
                 post.getPostId(),
                 post.getContent(),
@@ -123,10 +145,47 @@ public class PostService {
                 post.getPostCategory(),
                 post.getPostStatus(),
                 post.getPostImageUrls(),
-                post.isAnonymous()
+                post.isAnonymous(),
+                getCommentsByPostId(postId),                   // 댓글 및 대댓글
+                redisService.getLikeCount("post",post.getPostId()),   // 좋아요 수
+                redisService.getScrapCount(post.getPostId())   // 스크랩 수
         );
-
     }
+
+
+    // 댓글 및 대댓글 조회 로직
+    private List<CommentsResponseDTO> getCommentsByPostId(String postId) {
+        List<CommentEntity> comments = commentRepository.findByPostId(postId);
+
+        return comments.stream()
+                .filter(comment -> !comment.isDeleted())
+                .map(comment -> new CommentsResponseDTO(
+                        comment.getCommentId(),
+                        comment.getUserId(),
+                        comment.getContent(),
+                        getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회 및 변환
+                        redisService.getLikeCount("comment",comment.getCommentId()) // 댓글 좋아요 수
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+    // 대댓글 조회 로직
+    private List<CommentsResponseDTO> getRepliesByCommentId(String commentId) {
+        List<ReplyEntity> replies = replyRepository.findByCommentId(commentId);
+
+        return replies.stream()
+                .filter(reply -> !reply.isDeleted())
+                .map(reply -> new CommentsResponseDTO(
+                        reply.getReplyId(),
+                        reply.getUserId(),
+                        reply.getContent(),
+                        List.of(), // 대댓글은 하위 대댓글이 없음
+                        redisService.getLikeCount("reply",reply.getReplyId()) // 대댓글 좋아요 수
+                ))
+                .collect(Collectors.toList());
+    }
+
 
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findById(postId)
@@ -165,89 +224,11 @@ public class PostService {
 
 
     //유효성체크
-    private void validateCreatePostRequest(PostCreateReqDTO postCreateReqDTO) {
+    private void validateCreatePostRequest(PostCreateRequestDTO postCreateReqDTO) {
 //        if (postRepository.findByTitle(postCreateReqDTO.getTitle()).isPresent()) {
 //            throw new PostCreateFailException("이미 존재하는 제목입니다. 다른 제목을 사용해주세요.");
 //        }
-
-    }
-    public List<PostWithCommentsResponseDTO> getAllUserPostsAndComments(String userId) {
-        // 삭제되지 않은 사용자 게시물 조회
-        List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
-
-        // PostEntity를 PostWithCommentsResponseDTO로 변환
-        return posts.stream()
-                .map(post -> new PostWithCommentsResponseDTO(
-                        post.getUserId(),
-                        post.getPostId(),
-                        post.getContent(),
-                        post.getTitle(),
-                        post.getPostCategory(),
-                        post.getPostStatus(),
-                        post.getPostImageUrls(),
-                        post.isAnonymous(),
-                        convertCommentsToDTO(post.getComments()) // 댓글과 대댓글을 DTO로 변환
-                ))
-                .collect(Collectors.toList());
     }
 
-    public PostWithLikeAndScrapResponseDTO getPostWithLikeAndScrap(String postId) {
-        String likeKey = "post:likes:" + postId;
-        String scrapKey = "post:scraps:" + postId;
-
-        // Redis에서 좋아요 및 스크랩 카운트 조회
-        Long likeCount = redisTemplate.opsForSet().size(likeKey);
-        Long scrapCount = redisTemplate.opsForSet().size(scrapKey);
-
-        // Redis에 데이터가 없을 경우 MongoDB에서 조회 후 Redis 갱신
-        if (likeCount == null || scrapCount == null) {
-            PostEntity post = postRepository.findById(postId)
-                    .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
-
-            if (likeCount == null) {
-                likeCount = (long) post.getLikeCount();
-                redisTemplate.opsForSet().add(likeKey, String.valueOf(likeCount));
-            }
-
-            if (scrapCount == null) {
-                scrapCount = (long) post.getScrapCount();
-                redisTemplate.opsForSet().add(scrapKey, String.valueOf(scrapCount));
-            }
-        }
-
-        // MongoDB에서 게시물 조회
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
-
-        // PostWithLikeAndScrapResponseDTO 반환
-        return new PostWithLikeAndScrapResponseDTO(
-                post.getUserId(),
-                post.getPostId(),
-                post.getContent(),
-                post.getTitle(),
-                post.getPostCategory(),
-                post.getPostStatus(),
-                post.getPostImageUrls(),
-                post.isAnonymous(),
-                convertCommentsToDTO(post.getComments()), // 댓글 변환 메소드 호출
-                likeCount.intValue(),
-                scrapCount.intValue()
-        );
-    }
-    private List<CommentsResponseDTO> convertCommentsToDTO(List<CommentEntity> comments) {
-        if (comments == null || comments.isEmpty()) {
-            return List.of(); // 댓글이 없는 경우 빈 리스트 반환
-        }
-
-        return comments.stream()
-                .filter(comment -> !comment.isDeleted()) // 삭제되지 않은 댓글만 포함
-                .map(comment -> new CommentsResponseDTO(
-                        comment.getCommentId(),
-                        comment.getUserId(),
-                        comment.getContent(),
-                        convertCommentsToDTO(comment.getReplies()) // 재귀적으로 대댓글 변환
-                ))
-                .collect(Collectors.toList());
-    }
 }
 
