@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.scrap;
+package inu.codin.codin.domain.post.scrap;
 
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;

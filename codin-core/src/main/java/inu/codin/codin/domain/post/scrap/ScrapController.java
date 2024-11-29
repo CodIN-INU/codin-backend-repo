@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.scrap;
+package inu.codin.codin.domain.post.scrap;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
