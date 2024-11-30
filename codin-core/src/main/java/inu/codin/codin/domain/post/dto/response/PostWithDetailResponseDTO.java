@@ -1,14 +1,13 @@
 package inu.codin.codin.domain.post.dto.response;
 
+import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class PostWithDetailResponseDTO {
     private boolean isAnonymous;
 
     @Schema(description = "댓글 및 대댓글 데이터")
-    private List<CommentsResponseDTO> comments;
+    private List<CommentResponseDTO> comments;
 
     @Schema(description = "좋아요 수", example = "10")
     private int likeCount;
@@ -65,7 +64,7 @@ public class PostWithDetailResponseDTO {
             PostStatus postStatus,
             List<String> postImageUrls,
             boolean isAnonymous,
-            List<CommentsResponseDTO> comments,
+            List<CommentResponseDTO> comments,
             int likeCount,
             int scrapCount
     ) {
