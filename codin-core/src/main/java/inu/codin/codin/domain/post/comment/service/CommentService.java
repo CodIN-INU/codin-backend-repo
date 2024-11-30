@@ -6,6 +6,7 @@ import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
 import inu.codin.codin.domain.post.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
+import inu.codin.codin.domain.post.like.LikeService;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
@@ -26,6 +27,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReplyRepository replyRepository;
     private final RedisService redisService;
+    private final LikeService likeService;
 
     // 댓글 추가
     public void addComment(String postId, CommentCreateRequestDTO requestDTO) {
@@ -138,7 +140,7 @@ public class CommentService {
                         comment.getUserId(),
                         comment.getContent(),
                         getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
-                        redisService.getLikeCount("comment", comment.getCommentId()) // 댓글 좋아요 수
+                        likeService.getLikeCount("comment", comment.getCommentId()) // 댓글 좋아요 수
                 ))
                 .collect(Collectors.toList());
     }
@@ -154,7 +156,7 @@ public class CommentService {
                         reply.getUserId(),
                         reply.getContent(),
                         List.of(), // 대댓글은 하위 대댓글이 없음
-                        redisService.getLikeCount("reply", reply.getReplyId())
+                        likeService.getLikeCount("reply", reply.getReplyId())
                 ))
                 .collect(Collectors.toList());
     }

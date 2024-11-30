@@ -11,7 +11,7 @@ public interface ScrapRepository extends MongoRepository<ScrapEntity, String> {
 
     List<ScrapEntity> findByPostId(String postId);
 
-    Object countByPostId(String postId);
+    long countByPostId(String postId);
 
     void deleteByPostIdAndUserId(String postId, String userId);
 

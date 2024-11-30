@@ -52,7 +52,8 @@ public class ScrapService {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getScrapCount(postId);
         }
-        return (int) scrapRepository.countByPostId(postId);
+        long count = scrapRepository.countByPostId(postId);
+        return (int) Math.max(0, count);
     }
 
     public void recoverRedisFromDB() {

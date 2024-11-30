@@ -53,7 +53,8 @@ public class LikeService {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getLikeCount(entityType, entityId);
         }
-        return (int) likeRepository.countByEntityTypeAndEntityId(entityType, entityId);
+        Long count = likeRepository.countByEntityTypeAndEntityId(entityType, entityId);
+        return (int) Math.max(0, count);
     }
 
     public void recoverRedisFromDB() {
