@@ -32,7 +32,6 @@ public class RedisHealthChecker {
             redisAvailable = status;
         } catch (Exception e) {
             handleRedisFailure(e);
-            throw new RedisUnavailableException("Redis 상태 확인 중 오류 발생: " + e.getMessage());
         }
     }
 

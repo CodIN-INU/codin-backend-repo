@@ -54,11 +54,11 @@ public class RedisRecoverSyncScheduler {
             return;
         }
         try {
-            log.info("[Redis 복구 작업] Redis 복구 작업 시작...");
+            log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 복구 작업 시작...");
             likeService.recoverRedisFromDB();
             scrapService.recoverRedisFromDB();
             lastRecoveryTime = Instant.now();
-            log.info("[Redis 복구 작업] Redis 데이터 복구 완료.");
+            log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 데이터 복구 완료.");
         } catch (Exception e) {
             log.error("[Redis 복구 작업] Redis 복구 작업 실패: {}", e.getMessage(), e);
         }

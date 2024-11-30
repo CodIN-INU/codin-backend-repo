@@ -3,6 +3,7 @@ package inu.codin.codin.infra.redis;
 
 import inu.codin.codin.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RedisService {
     /**
      * Redis 기반 Like/Scrap 관리 Service
@@ -22,10 +24,18 @@ public class RedisService {
 
     //post, comment, reply 구분
     public Set<String> getKeys(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        return keys != null
-                ? keys.stream().filter(key -> key != null && !key.isEmpty()).collect(Collectors.toSet())
-                : Set.of();
+        try {
+            Set<String> keys = redisTemplate.keys(pattern);
+            if (keys == null || keys.isEmpty()) {
+                return Set.of(); // keys가 null이거나 빈 경우 빈 Set 반환
+            }
+            return keys.stream()
+                    .filter(key -> key != null && !key.isEmpty()) // key가 null 또는 빈 문자열이 아닌 경우 필터링
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.warn("Redis 연결 중 오류 발생: {}", e.getMessage());
+            return Set.of(); // Redis 예외 발생 시 빈 Set 반환
+        }
     }
 
     public void addLike(String entityType, String entityId, String userId) {
