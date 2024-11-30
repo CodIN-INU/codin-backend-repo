@@ -1,11 +1,12 @@
 package inu.codin.codin.domain.post.service;
 
+import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
+import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
@@ -52,9 +53,11 @@ public class PostService {
 
         List<String> imageUrls = handleImageUpload(postImages);
 
+        String userId = SecurityUtils.getCurrentUserId();
+
 
         PostEntity postEntity = PostEntity.builder()
-                .userId(postCreateRequestDTO.getUserId())
+                .userId(userId)
                 .title(postCreateRequestDTO.getTitle())
                 .content(postCreateRequestDTO.getContent())
 
@@ -116,7 +119,10 @@ public class PostService {
 
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostWithCountsResponseDTO> getAllUserPosts(String userId) {
+    public List<PostWithCountsResponseDTO> getAllUserPosts() {
+
+        String userId = SecurityUtils.getCurrentUserId();
+
         List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
 
         return posts.stream()
@@ -158,12 +164,12 @@ public class PostService {
 
 
     // 댓글 및 대댓글 조회 로직
-    private List<CommentsResponseDTO> getCommentsByPostId(String postId) {
+    private List<CommentResponseDTO> getCommentsByPostId(String postId) {
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
         return comments.stream()
                 .filter(comment -> !comment.isDeleted())
-                .map(comment -> new CommentsResponseDTO(
+                .map(comment -> new CommentResponseDTO(
                         comment.getCommentId(),
                         comment.getUserId(),
                         comment.getContent(),
@@ -175,12 +181,12 @@ public class PostService {
 
 
     // 대댓글 조회 로직
-    private List<CommentsResponseDTO> getRepliesByCommentId(String commentId) {
+    private List<CommentResponseDTO> getRepliesByCommentId(String commentId) {
         List<ReplyEntity> replies = replyRepository.findByCommentId(commentId);
 
         return replies.stream()
                 .filter(reply -> !reply.isDeleted())
-                .map(reply -> new CommentsResponseDTO(
+                .map(reply -> new CommentResponseDTO(
                         reply.getReplyId(),
                         reply.getUserId(),
                         reply.getContent(),

@@ -12,9 +12,9 @@ import java.util.List;
 @Data
 public class PostCreateRequestDTO {
 
-    @Schema(description = "유저 ID", example = "111111")
-    @NotBlank
-    private String userId;
+//    @Schema(description = "유저 ID", example = "111111")
+//    @NotBlank
+//    private String userId;
 
     @Schema(description = "게시물 제목", example = "Example")
     @NotBlank

@@ -99,9 +99,9 @@ public class PostController {
     @Operation(
             summary = "해당 사용자 게시물 전체 조회"
     )
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<ListResponse<PostWithCountsResponseDTO>> getAllUserPosts(@PathVariable String userId) {
-        List<PostWithCountsResponseDTO> posts = postService.getAllUserPosts(userId);
+    @GetMapping("/user")
+    public ResponseEntity<ListResponse<PostWithCountsResponseDTO>> getAllUserPosts() {
+        List<PostWithCountsResponseDTO> posts = postService.getAllUserPosts();
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "사용자 게시물 조회 성공", posts));
     }

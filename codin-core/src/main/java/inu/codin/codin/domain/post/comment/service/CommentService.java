@@ -1,8 +1,9 @@
 package inu.codin.codin.domain.post.comment.service;
 
-import inu.codin.codin.domain.post.dto.request.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.dto.request.ReplyCreateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
+import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.comment.dto.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.comment.dto.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
@@ -34,9 +35,12 @@ public class CommentService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
+
+        String userId = SecurityUtils.getCurrentUserId();
+
         CommentEntity comment = CommentEntity.builder()
                 .postId(postId)
-                .userId(requestDTO.getUserId())
+                .userId(userId)
                 .content(requestDTO.getContent())
                 .build();
 
@@ -55,9 +59,11 @@ public class CommentService {
         PostEntity post = postRepository.findById(comment.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
+        String userId = SecurityUtils.getCurrentUserId();
+
         ReplyEntity reply = ReplyEntity.builder()
                 .commentId(commentId)
-                .userId(requestDTO.getUserId())
+                .userId(userId)
                 .content(requestDTO.getContent())
                 .build();
 
@@ -130,12 +136,12 @@ public class CommentService {
     }
 
     // 특정 게시물의 댓글 및 대댓글 조회
-    public List<CommentsResponseDTO> getCommentsByPostId(String postId) {
+    public List<CommentResponseDTO> getCommentsByPostId(String postId) {
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
         return comments.stream()
                 .filter(comment -> !comment.isDeleted())
-                .map(comment -> new CommentsResponseDTO(
+                .map(comment -> new CommentResponseDTO(
                         comment.getCommentId(),
                         comment.getUserId(),
                         comment.getContent(),
@@ -146,12 +152,12 @@ public class CommentService {
     }
 
     // 특정 댓글의 대댓글 조회
-    private List<CommentsResponseDTO> getRepliesByCommentId(String commentId) {
+    private List<CommentResponseDTO> getRepliesByCommentId(String commentId) {
         List<ReplyEntity> replies = replyRepository.findByCommentId(commentId);
 
         return replies.stream()
                 .filter(reply -> !reply.isDeleted())
-                .map(reply -> new CommentsResponseDTO(
+                .map(reply -> new CommentResponseDTO(
                         reply.getReplyId(),
                         reply.getUserId(),
                         reply.getContent(),

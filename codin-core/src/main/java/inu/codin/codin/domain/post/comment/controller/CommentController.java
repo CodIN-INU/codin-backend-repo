@@ -2,9 +2,9 @@ package inu.codin.codin.domain.post.comment.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.dto.request.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.dto.request.ReplyCreateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.CommentsResponseDTO;
+import inu.codin.codin.domain.post.comment.dto.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.comment.dto.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -44,8 +44,8 @@ public class CommentController {
 
     @Operation(summary = "해당 게시물의 댓글 및 대댓글 조회")
     @GetMapping("/post/{postId}")
-    public ResponseEntity<ListResponse<CommentsResponseDTO>> getCommentsByPostId(@PathVariable String postId) {
-        List<CommentsResponseDTO> response = commentService.getCommentsByPostId(postId);
+    public ResponseEntity<ListResponse<CommentResponseDTO>> getCommentsByPostId(@PathVariable String postId) {
+        List<CommentResponseDTO> response = commentService.getCommentsByPostId(postId);
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "해당 게시물의 댓글 및 대댓글 조회 성공", response));
 

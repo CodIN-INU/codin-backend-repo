@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.dto.response;
+package inu.codin.codin.domain.post.comment.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class CommentsResponseDTO {
+public class CommentResponseDTO {
     @Schema(description = "댓글 또는 대댓글 ID", example = "111111")
     @NotBlank
     private String commentId;
@@ -21,12 +21,12 @@ public class CommentsResponseDTO {
     private String content;
 
     @Schema(description = "대댓글 리스트", example = "[...]")
-    private List<CommentsResponseDTO> replies;
+    private List<CommentResponseDTO> replies;
 
     @Schema(description = "좋아요 수", example = "5")
     private int likeCount;
 
-    public CommentsResponseDTO(String commentId, String userId, String content, List<CommentsResponseDTO> replies, int likeCount) {
+    public CommentResponseDTO(String commentId, String userId, String content, List<CommentResponseDTO> replies, int likeCount) {
         this.commentId = commentId;
         this.userId = userId;
         this.content = content;

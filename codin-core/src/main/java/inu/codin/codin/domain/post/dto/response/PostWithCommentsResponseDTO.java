@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.dto.response;
 
+import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,9 +38,9 @@ public class PostWithCommentsResponseDTO {
     private boolean isAnonymous;
 
     @Schema(description = "댓글 및 대댓글", example = "0")
-    private List<CommentsResponseDTO> comments;
+    private List<CommentResponseDTO> comments;
 
-    public PostWithCommentsResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous, List<CommentsResponseDTO> comments) {
+    public PostWithCommentsResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous, List<CommentResponseDTO> comments) {
         this.userId = userId;
         this.postId = postId;
         this.content = content;
