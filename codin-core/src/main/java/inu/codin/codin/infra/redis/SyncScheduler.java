@@ -10,6 +10,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.scrap.ScrapEntity;
 import inu.codin.codin.domain.post.scrap.ScrapRepository;
+import inu.codin.codin.domain.post.scrap.ScrapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -31,21 +32,25 @@ public class SyncScheduler {
     private final ReplyRepository replyRepository;
     private final LikeRepository likeRepository;
     private final ScrapRepository scrapRepository;
+    private final RedisHealthChecker redisHealthChecker;
 
     @Scheduled(fixedRate = 10000) // 매 10초마다 실행(테스트목적)
     public void syncLikes() {
-        log.info("좋아요 동기화 작업 시작");
+        if (!redisHealthChecker.isRedisAvailable()) {
+            log.warn("Redis 비활성화 상태, 동기화 작업 중지");
+            return;
+        }
+        log.info(" 동기화 작업 시작");
         syncEntityLikes("post", postRepository);
         syncEntityLikes("comment", commentRepository);
         syncEntityLikes("reply", replyRepository);
         syncPostScraps();
-        log.info("좋아요 동기화 작업 완료");
+        log.info(" 동기화 작업 완료");
     }
 
     private <T> void syncEntityLikes(String entityType, MongoRepository<T, String> repository) {
         Set<String> redisKeys = redisService.getKeys(entityType + ":likes:*");
         if (redisKeys == null || redisKeys.isEmpty()) {
-            log.info("{} 엔티티에 대한 Redis 키가 존재하지 않음", entityType);
             return;
         }
 
@@ -106,7 +111,6 @@ public class SyncScheduler {
 
         Set<String> redisKeys = redisService.getKeys("post:scraps:*");
         if (redisKeys == null || redisKeys.isEmpty()) {
-            log.info("스크랩에 대한 Redis 키가 존재하지 않음");
             return;
         }
 
