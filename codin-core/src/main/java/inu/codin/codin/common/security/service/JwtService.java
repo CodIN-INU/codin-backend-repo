@@ -93,6 +93,8 @@ public class JwtService {
         // 쿠키에 새로운 Refresh Token 추가
         Cookie refreshTokenCookie = new Cookie("RT", newToken.getRefreshToken());
         refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setAttribute("SameSite", "None");  // CORS 설정을 통해 SameSite=None 설정 필요
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
 
