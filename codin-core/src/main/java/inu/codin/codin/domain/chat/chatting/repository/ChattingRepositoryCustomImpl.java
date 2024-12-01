@@ -13,7 +13,7 @@ public class ChattingRepositoryCustomImpl implements CustomChattingRepository{
 
     private final MongoTemplate mongoTemplate;
     @Override
-    public Chatting findRecentMessageByChatroomId(String chatRoomId) {
+    public Chatting findRecentMessageByChatRoomId(String chatRoomId) {
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("chatRoomId").is(chatRoomId)),
                 Aggregation.sort(Sort.by(Sort.Order.desc("createdAt"))),
