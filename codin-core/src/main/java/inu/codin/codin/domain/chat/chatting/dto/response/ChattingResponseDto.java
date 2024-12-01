@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class ChattingResponseDto {
     private final String content;
 
     @NotBlank
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private final LocalDateTime createdAt;
 
     @NotBlank
@@ -34,7 +36,7 @@ public class ChattingResponseDto {
         this.content = content;
         this.createdAt = createdAt;
         this.chatRoomId = chatRoomId;
-    }
+}
 
     public static ChattingResponseDto of(Chatting chatting){
         return ChattingResponseDto.builder()
