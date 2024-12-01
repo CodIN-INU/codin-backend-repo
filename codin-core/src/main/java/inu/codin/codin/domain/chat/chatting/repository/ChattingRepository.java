@@ -12,6 +12,6 @@ public interface ChattingRepository extends ReactiveMongoRepository<Chatting, St
     Mono<Chatting> findById(String id);
 
     @Query("{ 'chatRoomId': ?0 }")
-    Flux<Chatting> findAllByChatroomId(String id);
+    Flux<Chatting> findAllByChatRoomId(String id);
 
 }

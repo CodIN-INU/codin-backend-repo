@@ -35,7 +35,7 @@ public class ChatRoomService {
         List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId);
         return chatRooms.stream()
                 .map(chatRoom -> {
-                    Chatting chatting = chattingRepository.findRecentMessageByChatroomId(chatRoom.getId());
+                    Chatting chatting = chattingRepository.findRecentMessageByChatRoomId(chatRoom.getId());
                     return ChatRoomListResponseDto.of(chatRoom, chatting);
                 })
                 .toList();}
