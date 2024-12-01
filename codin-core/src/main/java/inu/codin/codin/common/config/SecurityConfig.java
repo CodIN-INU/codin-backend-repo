@@ -56,6 +56,7 @@ public class SecurityConfig {
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
+                                .requestMatchers("/ws-stomp/**").permitAll() //잠시 웹소켓 테스트를 위한 open
                                 .anyRequest().hasRole("USER")
                 )
                 // JwtAuthenticationFilter 추가
