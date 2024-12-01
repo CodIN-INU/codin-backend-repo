@@ -3,7 +3,6 @@ package inu.codin.codin.common.security.filter;
 import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,13 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
     private final JwtUtils jwtUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String accessToken = jwtUtils.getTokenFromHeader(request);
+        String accessToken = jwtUtils.getAccessToken(request);
 
         // Access Token이 있는 경우
         if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
