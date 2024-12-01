@@ -1,7 +1,6 @@
 package inu.codin.codin.common.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import jakarta.servlet.FilterChain;

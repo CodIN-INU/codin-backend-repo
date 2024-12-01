@@ -1,6 +1,5 @@
 package inu.codin.codin.common.security.controller;
 
-import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.LoginRequestDto;
 import inu.codin.codin.common.security.service.JwtService;
