@@ -44,8 +44,10 @@ public class ChatRoomService {
         String userId = ((CustomUserDetails) userDetails).getId();
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
-        if (chatRoom.getParticipants().contains(userId)) chatRoom.getParticipants().remove(userId);
-        else throw new ChatRoomNotFoundException("회원이 포함된 채팅방을 찾을 수 없습니다.");
+        boolean isRemoved = chatRoom.getParticipants()
+                .removeIf(participant -> participant.getUserId().equals(userId));
+        if (!isRemoved) throw new ChatRoomNotFoundException("회원이 포함된 채팅방을 찾을 수 없습니다.");
+
         if (chatRoom.getParticipants().isEmpty()) {
             chatRoom.delete();
             log.info("[LeaveChatRoom] 채팅방에 참여자가 없어 채팅방 삭제");
