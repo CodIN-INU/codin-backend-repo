@@ -31,7 +31,7 @@ public class ChattingService {
     }
 
     public Mono<List<ChattingResponseDto>> getAllMessage(String id) {
-        return chattingRepository.findAllByChatroomId(id)
+        return chattingRepository.findAllByChatRoomId(id)
                 .switchIfEmpty(Mono.error(new ChattingNotFoundException("채팅 내역을 찾을 수 없습니다.")))
                 .map(ChattingResponseDto::of)
                 .collectList();
