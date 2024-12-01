@@ -1,12 +1,12 @@
 package inu.codin.codin.domain.chat.chatroom.controller;
 
-import inu.codin.codin.common.ResponseUtils;
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.service.ChatRoomService;
-import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,12 +15,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/chatroom")
+@Tag(name = "ChatRoom API", description = "채팅방 생성, 리스트 반환, 채팅방 나가기, 채팅방 알림 설정")
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
