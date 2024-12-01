@@ -27,6 +27,7 @@ public class SwaggerConfig {
                 .description("CODIN API 명세서")
                 .version("v1.0.0");
 
+        // Bearer Auth 설정
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
@@ -34,6 +35,7 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name("Authorization");
 
+        // Bearer Auth를 사용하는 Security Requirement 설정
         SecurityRequirement securityRequirement = new SecurityRequirement()
                 .addList("Bearer Auth");
 
@@ -42,11 +44,12 @@ public class SwaggerConfig {
                 .security(List.of(securityRequirement))
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local Server"),
-                        new Server().url("https://www.codin.co.kr/api").description("Production Server")
+                        new Server().url("http://localhost:8080").description("Local Server"), // Local Server
+                        new Server().url("https://www.codin.co.kr/api").description("Production Server") // Production Server
                 ));
     }
 
+    // ForwardedHeaderFilter Bean 등록 Nginx 프록시 서버 사용 시 필요
     @Bean
     public ForwardedHeaderFilter forwardedHeaderFilter() {
         return new ForwardedHeaderFilter();

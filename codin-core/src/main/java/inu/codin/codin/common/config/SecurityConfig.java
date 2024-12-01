@@ -90,6 +90,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // 토큰 없이 접근 가능한 URL
     private static final String[] PERMIT_ALL = {
             "/auth/login",
             "/auth/reissue",
@@ -100,6 +101,7 @@ public class SecurityConfig {
             "/v3/api/test1",
     };
 
+    // Swagger 접근 가능한 URL
     private static final String[] SWAGGER_AUTH_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -107,20 +109,26 @@ public class SecurityConfig {
             "/swagger-resources/**",
     };
 
+    // User 권한 URL
     private static final String[] USER_AUTH_PATHS = {
             "/v3/api/test2",
             "/v3/api/test3",
     };
 
+    // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
     };
 
+    // Manager 권한 URL
     private static final String[] MANAGER_AUTH_PATHS = {
             "/v3/api/test5",
     };
 
 
+    /**
+     * CORS 설정
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
