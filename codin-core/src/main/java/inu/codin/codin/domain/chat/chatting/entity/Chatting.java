@@ -3,15 +3,13 @@ package inu.codin.codin.domain.chat.chatting.entity;
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
-@Setter
 @Document(collection = "chatting")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Chatting extends BaseTimeEntity {
 
     @Id @NotBlank

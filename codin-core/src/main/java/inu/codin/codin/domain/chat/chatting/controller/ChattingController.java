@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 public class ChattingController {
 
     private final ChattingService chattingService;
-    private final SimpMessagingTemplate template;
 
     @Operation(
             summary = "채팅 보내기"
