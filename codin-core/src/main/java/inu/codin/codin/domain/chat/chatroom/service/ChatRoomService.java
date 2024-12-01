@@ -6,6 +6,8 @@ import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.Participants;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
+import inu.codin.codin.domain.chat.chatting.entity.Chatting;
+import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChattingRepository chattingRepository;
 
     public void createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
         String senderId = ((CustomUserDetails) userDetails).getId();
@@ -30,14 +33,19 @@ public class ChatRoomService {
     public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
         String userId = ((CustomUserDetails) userDetails).getId();
         List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId);
-        return chatRooms.stream().map(ChatRoomListResponseDto::of).toList();
-    }
+        return chatRooms.stream()
+                .map(chatRoom -> {
+                    Chatting chatting = chattingRepository.findRecentMessageByChatroomId(chatRoom.getId());
+                    return ChatRoomListResponseDto.of(chatRoom, chatting);
+                })
+                .toList();}
 
     public void leaveChatRoom(String chatRoomId, UserDetails userDetails) {
         String userId = ((CustomUserDetails) userDetails).getId();
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
-        chatRoom.getParticipants().remove(userId);
+        if (chatRoom.getParticipants().contains(userId)) chatRoom.getParticipants().remove(userId);
+        else throw new ChatRoomNotFoundException("회원이 포함된 채팅방을 찾을 수 없습니다.");
         if (chatRoom.getParticipants().isEmpty()) {
             chatRoom.delete();
             log.info("[LeaveChatRoom] 채팅방에 참여자가 없어 채팅방 삭제");
