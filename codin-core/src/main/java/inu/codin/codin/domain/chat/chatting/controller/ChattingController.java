@@ -34,7 +34,7 @@ public class ChattingController {
             summary = "채팅 보내기"
     )
     @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
-    @SendTo("/sub/{chatRoomId}")
+    @SendTo("/queue/{chatRoomId}")
     public Mono<ResponseEntity<SingleResponse<Void>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto){
         log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), chattingRequestDto.getSenderId(), id);
         return chattingService.sendMessage(id, chattingRequestDto)
