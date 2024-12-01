@@ -2,6 +2,7 @@ package inu.codin.codin.common.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codin.common.ResponseUtils;
+import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,7 +39,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     }
 
     private void sendErrorResponse(HttpServletResponse response, SecurityErrorCode code) throws IOException {
-        ResponseEntity<?> responseEntity = ResponseUtils.error("Security Fail", code);
+        ResponseEntity<?> responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ExceptionResponse(code.getMessage(), HttpStatus.UNAUTHORIZED.value()));
 
         // Set the HttpServletResponse properties
         response.setStatus(responseEntity.getStatusCode().value());
