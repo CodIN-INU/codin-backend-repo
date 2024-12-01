@@ -3,7 +3,6 @@ package inu.codin.codin.common.security.filter;
 import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
     private final JwtUtils jwtUtils;
 
     @Override
