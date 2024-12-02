@@ -78,13 +78,16 @@ public class ReplyCommentService {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
         return replies.stream()
-                .map(reply -> new CommentResponseDTO(
-                        reply.getReplyId(),
-                        reply.getUserId(),
-                        reply.getContent(),
-                        List.of(), // 대댓글은 하위 대댓글이 없음
-                        likeService.getLikeCount(LikeType.valueOf("reply"), reply.getReplyId())
-                )).toList();
+                .map(reply -> {
+                    boolean isDeleted = reply.getDeletedAt() != null;
+                    return new CommentResponseDTO(
+                            reply.getCommentId(),
+                            reply.getUserId(),
+                            reply.getContent(),
+                            List.of(), //대댓글은 대댓글이 없음
+                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
+                            isDeleted);
+                }).toList();
     }
 
 
