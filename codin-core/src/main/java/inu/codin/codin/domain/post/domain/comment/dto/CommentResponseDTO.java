@@ -26,11 +26,15 @@ public class CommentResponseDTO {
     @Schema(description = "좋아요 수", example = "5")
     private int likeCount;
 
-    public CommentResponseDTO(String commentId, String userId, String content, List<CommentResponseDTO> replies, int likeCount) {
+    @Schema(description = "삭제 여부", example = "false")
+    private boolean isDeleted;
+
+    public CommentResponseDTO(String commentId, String userId, String content, List<CommentResponseDTO> replies, int likeCount, boolean isDeleted) {
         this.commentId = commentId;
         this.userId = userId;
         this.content = content;
         this.replies = replies;
         this.likeCount = likeCount;
+        this.isDeleted = isDeleted;
     }
 }

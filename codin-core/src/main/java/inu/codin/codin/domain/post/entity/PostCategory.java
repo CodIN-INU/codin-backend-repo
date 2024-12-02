@@ -15,13 +15,9 @@ public enum PostCategory {
     COMMUNICATION_JOB("소통해요_취업수기"),
     COMMUNICATION_TIP("소통해요_꿀팁공유"),
 
+    EXTRACURRICULAR_STARINU("비교과_STARINU"),
     EXTRACURRICULAR_OUTER("비교과_교외"),
-    EXTRACURRICULAR_INNER("비교과_교내"),
-
-    INFO_PROFESSOR("정보대소개_교수_연구실"),
-    INFO_PHONE_NUMBER("정보대소개_정보대전화번호"),
-
-    USED_BOOK("중고책");
+    EXTRACURRICULAR_INNER("비교과_교내");
 
     private final String description;
 
@@ -43,5 +39,4 @@ public enum PostCategory {
         }
         throw new IllegalArgumentException("Unknown description: " + description);
     }
-
 }

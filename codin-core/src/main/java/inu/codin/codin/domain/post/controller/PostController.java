@@ -6,8 +6,9 @@ import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDto;
+import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -85,13 +86,13 @@ public class PostController {
 
 
     @Operation(
-            summary = "삭제되지 않은 모든 게시물 조회"
+            summary = "카테고리별 삭제 되지 않은 모든 게시물 조회"
     )
-    @GetMapping("")
-    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPosts() {
-        List<PostListResponseDto> posts = postService.getAllPosts();
+    @GetMapping("/category")
+    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPosts(@RequestParam PostCategory postCategory) {
+        List<PostListResponseDto> posts = postService.getAllPosts(postCategory);
         return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "삭제되지 않은 모든 게시물 조회 성공", posts));
+                .body(new ListResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", posts));
     }
 
     @Operation(
@@ -104,10 +105,10 @@ public class PostController {
                 .body(new ListResponse<>(200, "사용자 게시물 조회 성공", posts));
     }
 
-    @Operation(summary = "해당 게시물 상세 조회")
+    @Operation(summary = "해당 게시물 상세 조회 (댓글 조회는 Comment에서 따로 조회)")
     @GetMapping("/{postId}")
-    public ResponseEntity<SingleResponse<PostDetailResponseDto>> getPostWithDetail(@PathVariable String postId) {
-        PostDetailResponseDto post = postService.getPostWithDetail(postId);
+    public ResponseEntity<SingleResponse<PostDetailResponseDTO>> getPostWithDetail(@PathVariable String postId) {
+        PostDetailResponseDTO post = postService.getPostWithDetail(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }

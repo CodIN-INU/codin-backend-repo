@@ -83,15 +83,21 @@ public class CommentService {
 
     // 특정 게시물의 댓글 및 대댓글 조회
     public List<CommentResponseDTO> getCommentsByPostId(String postId) {
-        List<CommentEntity> comments = commentRepository.findByPostIdAndNotDeleted(postId);
+        postRepository.findByIdAndNotDeleted(postId)
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+        List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
         return comments.stream()
-                .map(comment -> new CommentResponseDTO(
-                        comment.getCommentId(),
-                        comment.getUserId(),
-                        comment.getContent(),
-                        replyCommentService.getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
-                        likeService.getLikeCount(LikeType.valueOf("comment"), comment.getCommentId()) // 댓글 좋아요 수
-                )).toList();
+                .map(comment -> {
+                    boolean isDeleted = comment.getDeletedAt() != null;
+                    return new CommentResponseDTO(
+                            comment.getCommentId(),
+                            comment.getUserId(),
+                            comment.getContent(),
+                            replyCommentService.getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
+                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.getCommentId()), // 댓글 좋아요 수
+                            isDeleted);
+                    })
+                .toList();
     }
 }
