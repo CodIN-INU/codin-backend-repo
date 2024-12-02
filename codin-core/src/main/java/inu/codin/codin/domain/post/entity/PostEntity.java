@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "post")
+@Document(collection = "posts")
 @Getter
 public class PostEntity extends BaseTimeEntity {
     @Id @NotBlank
