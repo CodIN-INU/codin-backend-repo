@@ -1,91 +1,160 @@
 package inu.codin.codin.infra.redis;
 
-import inu.codin.codin.domain.like.LikeEntity;
-import inu.codin.codin.domain.like.LikeRepository;
-import inu.codin.codin.domain.like.LikeService;
+import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.scrap.ScrapEntity;
-import inu.codin.codin.domain.scrap.ScrapRepository;
+import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.post.domain.scrap.repository.ScrapRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SyncScheduler {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisService redisService;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyCommentRepository replyCommentRepository;
     private final LikeRepository likeRepository;
     private final ScrapRepository scrapRepository;
+    private final RedisHealthChecker redisHealthChecker;
 
-    @Scheduled(fixedRate = 60000) // 매 1분마다 실행
-    public void syncLikesAndScraps() {
-        syncLikes();
-        syncScraps();
+    @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
+    public void syncLikes() {
+        if (!redisHealthChecker.isRedisAvailable()) {
+            log.warn("Redis 비활성화 상태, 동기화 작업 중지");
+            return;
+        }
+        log.info(" 동기화 작업 시작");
+        syncEntityLikes("post", postRepository);
+        syncEntityLikes("comment", commentRepository);
+        syncEntityLikes("reply", replyCommentRepository);
+        syncPostScraps();
+        log.info(" 동기화 작업 완료");
     }
 
-    private void syncLikes() {
-        Set<String> keys = redisTemplate.keys("post:likes:*");
-        if (keys == null || keys.isEmpty()) return;
+    private <T> void syncEntityLikes(String entityType, MongoRepository<T, String> repository) {
+        Set<String> redisKeys = redisService.getKeys(entityType+ ":likes:*");
+        if (redisKeys == null || redisKeys.isEmpty()) {
+            return;
+        }
+        LikeType likeType = LikeType.valueOf(entityType);
 
-        for (String key : keys) {
-            String postId = key.replace("post:likes:", "");
-            Set<String> users = redisTemplate.opsForSet().members(key);
+        for (String redisKey : redisKeys) {
+            String likeTypeId = redisKey.replace(entityType + ":likes:", "");
+            Set<String> likedUsers = redisService.getLikedUsers(entityType, likeTypeId);
 
-            if (users != null && !users.isEmpty()) {
-                // LikeEntity 동기화
-                users.forEach(userId -> {
-                    if (!likeRepository.findByPostIdAndUserId(postId, userId)) {
-                        likeRepository.save(new LikeEntity(postId, userId));
-                    }
-                });
+            // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
+            List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeId(likeType, likeTypeId);
+            for (LikeEntity dbLike : dbLikes) {
+                if (!likedUsers.contains(dbLike.getUserId())) {
+                    log.info("MongoDB에서 사용자 삭제: UserID={}, EntityID={}", dbLike.getUserId(), likeTypeId);
+                    likeRepository.delete(dbLike);
+                }
+            }
 
-                // PostEntity의 likeCount 업데이트
-                PostEntity post = postRepository.findById(postId)
-                        .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
-                int newLikeCount = users.size();
-                if (post.getLikeCount() != newLikeCount) { // 기존 카운트와 다를 경우만 업데이트
-                    post.updateLikeCount(newLikeCount);
-                    postRepository.save(post);
+            // (좋아요 추가) Redis에는 있지만 MongoDB에 없는 사용자 추가
+            for (String userId : likedUsers) {
+                if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeType, likeTypeId, userId)) {
+                    log.info("MongoDB에 사용자 추가: UserID={}, EntityID={}", userId, likeTypeId);
+                    LikeEntity dbLike = LikeEntity.builder()
+                            .likeType(likeType)
+                            .likeTypeId(likeTypeId)
+                            .userId(userId)
+                            .build();
+                    likeRepository.save(dbLike);
+                }
+            }
+
+            // (count 업데이트) Redis 사용자 수로 엔티티의 likeCount 업데이트
+            int likeCount = likedUsers.size();
+            if (repository instanceof PostRepository postRepo) {
+                PostEntity post = postRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
+                if (post != null && post.getLikeCount() != likeCount) {
+                    log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    post.updateLikeCount(likeCount);
+                    postRepo.save(post);
+                }
+            } else if (repository instanceof CommentRepository commentRepo) {
+                CommentEntity comment = commentRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
+                if (comment != null && comment.getLikeCount() != likeCount) {
+                    log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    comment.updateLikeCount(likeCount);
+                    commentRepo.save(comment);
+                }
+            } else if (repository instanceof ReplyCommentRepository replyRepo) {
+                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
+                if (reply != null && reply.getLikeCount() != likeCount) {
+                    log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    reply.updateLikeCount(likeCount);
+                    replyRepo.save(reply);
                 }
             }
         }
     }
 
-    private void syncScraps() {
-        Set<String> keys = redisTemplate.keys("user:scraps:*");
-        if (keys == null || keys.isEmpty()) return;
+    public void syncPostScraps() {
 
-        for (String key : keys) {
-            String userId = key.replace("user:scraps:", "");
-            Set<String> posts = redisTemplate.opsForSet().members(key);
+        Set<String> redisKeys = redisService.getKeys("post:scraps:*");
+        if (redisKeys == null || redisKeys.isEmpty()) {
+            return;
+        }
 
-            if (posts != null && !posts.isEmpty()) {
-                // ScrapEntity 동기화
-                posts.forEach(postId -> {
-                    if (!scrapRepository.findByPostIdAndUserId(postId, userId)) {
-                        scrapRepository.save(new ScrapEntity(postId, userId));
-                    }
-                });
+        for (String redisKey : redisKeys) {
+            String postId = redisKey.replace("post:scraps:", "");
+            Set<String> redisScrappedUsers = redisService.getLikedUsers("post", postId);
 
-                // PostEntity의 scrapCount 업데이트
-                posts.forEach(postId -> {
-                    PostEntity post = postRepository.findById(postId)
-                            .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
-                    int newScrapCount = redisTemplate.opsForSet().size("post:scraps:" + postId).intValue();
-                    if (post.getScrapCount() != newScrapCount) { // 기존 카운트와 다를 경우만 업데이트
-                        post.updateScrapCount(newScrapCount);
-                        postRepository.save(post);
-                    }
-                });
+            // MongoDB의 스크랩 데이터 가져오기
+            List<ScrapEntity> dbScraps = scrapRepository.findByPostId(postId);
+            Set<String> dbScrappedUsers = dbScraps.stream()
+                    .map(ScrapEntity::getUserId)
+                    .collect(Collectors.toSet());
+
+            // (스크랩 삭제) MongoDB에 있지만 Redis에 없는 사용자 삭제
+            for (ScrapEntity dbScrap : dbScraps) {
+                if (!redisScrappedUsers.contains(dbScrap.getUserId())) {
+                    log.info("MongoDB에서 사용자 삭제: UserID={}, PostID={}", dbScrap.getUserId(), postId);
+                    scrapRepository.delete(dbScrap);
+                }
+            }
+
+            // (스크랩 추가) Redis에 있지만 MongoDB에 없는 사용자 추가
+            for (String redisUser : redisScrappedUsers) {
+                if (!dbScrappedUsers.contains(redisUser)) {
+                    log.info("MongoDB에 사용자 추가: UserID={}, PostID={}", redisUser, postId);
+                    ScrapEntity dbScrap = ScrapEntity.builder()
+                            .postId(postId)
+                            .userId(redisUser)
+                            .build();
+                    scrapRepository.save(dbScrap);
+                }
+            }
+
+            // Redis 사용자 수로 PostEntity의 scrapCount 업데이트
+            int redisScrapCount = redisScrappedUsers.size();
+            PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+                    .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+            if (post.getScrapCount() != redisScrapCount) {
+                log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, redisScrapCount);
+                post.updateScrapCount(redisScrapCount);
+                postRepository.save(post);
             }
         }
     }
-
 }
