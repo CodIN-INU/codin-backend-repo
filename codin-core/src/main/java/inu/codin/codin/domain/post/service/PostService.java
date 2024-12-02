@@ -96,12 +96,12 @@ public class PostService {
                         post.getContent(),
                         post.getTitle(),
                         post.getPostCategory(),
-                        post.getPostStatus(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(), // 댓글 수
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
-                        scrapService.getScrapCount(post.getPostId())       // 스크랩 수
+                        scrapService.getScrapCount(post.getPostId()),       // 스크랩 수
+                        post.getCreatedAt()
                 )).toList();
     }
 
@@ -120,12 +120,12 @@ public class PostService {
                         post.getContent(),
                         post.getTitle(),
                         post.getPostCategory(),
-                        post.getPostStatus(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
-                        scrapService.getScrapCount(post.getPostId())       // 스크랩 수
+                        scrapService.getScrapCount(post.getPostId()),      // 스크랩 수
+                        post.getCreatedAt()
                 ))
                 .toList();
     }
@@ -144,7 +144,8 @@ public class PostService {
                 post.getPostImageUrls(),
                 post.isAnonymous(),
                 likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),   // 좋아요 수
-                scrapService.getScrapCount(post.getPostId())   // 스크랩 수
+                scrapService.getScrapCount(post.getPostId()),   // 스크랩 수
+                post.getCreatedAt()
         );
     }
 
