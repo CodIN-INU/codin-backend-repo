@@ -4,6 +4,7 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/replies")
+@Tag(name = "ReplyComment API", description = "대댓글 API")
 public class ReplyCommentController {
 
     private final ReplyCommentService replyCommentService;

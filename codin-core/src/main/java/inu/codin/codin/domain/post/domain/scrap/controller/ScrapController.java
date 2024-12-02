@@ -4,14 +4,16 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/scraps")
+@RequestMapping("/scraps")
 @RequiredArgsConstructor
+@Tag(name = "Scrap API", description = "게시물 스크랩 API")
 public class ScrapController {
 
     private final ScrapService scrapService;

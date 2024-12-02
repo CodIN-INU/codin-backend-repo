@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@Tag(name = "POST API", description = "게시글 API")
 public class PostController {
 
     private final PostService postService;
