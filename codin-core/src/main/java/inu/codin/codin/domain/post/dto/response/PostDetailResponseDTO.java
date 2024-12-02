@@ -1,17 +1,19 @@
 package inu.codin.codin.domain.post.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;
-import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class PostDetailResponseDTO {
-
     @Schema(description = "유저 ID", example = "111111")
     @NotBlank
     private String userId;
@@ -39,7 +41,17 @@ public class PostDetailResponseDTO {
     @NotNull
     private boolean isAnonymous;
 
-    public PostDetailResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, PostStatus postStatus, List<String> postImageUrls , boolean isAnonymous) {
+    @Schema(description = "좋아요 count", example = "0")
+    private int likeCount;
+
+    @Schema(description = "스크랩 count", example = "0")
+    private int scrapCount;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
+    private LocalDateTime createdAt;
+
+    public PostDetailResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, LocalDateTime createdAt) {
         this.userId = userId;
         this.postId = postId;
         this.content = content;
@@ -47,5 +59,8 @@ public class PostDetailResponseDTO {
         this.postCategory = postCategory;
         this.postImageUrl = postImageUrls;
         this.isAnonymous = isAnonymous;
+        this.likeCount = likeCount;
+        this.scrapCount = scrapCount;
+        this.createdAt = createdAt;
     }
 }
