@@ -42,8 +42,8 @@ public class CommentController {
 
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<SingleResponse<?>> deleteComment(@PathVariable String commentId) {
-        commentService.deleteComment(commentId);
+    public ResponseEntity<SingleResponse<?>> softDeleteComment(@PathVariable String commentId) {
+        commentService.softDeleteComment(commentId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "댓글이 삭제되었습니다.", null));
     }

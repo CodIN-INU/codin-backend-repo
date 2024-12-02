@@ -4,7 +4,7 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.like.LikeService;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +30,9 @@ public class ReplyCommentService {
 
     // 대댓글 추가
     public void addReply(String commentId, ReplyCreateRequestDTO requestDTO) {
-        CommentEntity comment = commentRepository.findById(commentId)
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
-        PostEntity post = postRepository.findById(comment.getPostId())
+        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
         String userId = SecurityUtils.getCurrentUserId();
@@ -54,23 +53,23 @@ public class ReplyCommentService {
     }
 
     // 대댓글 삭제 (Soft Delete)
-    public void deleteReply(String replyId) {
-        ReplyCommentEntity reply = replyCommentRepository.findById(replyId)
+    public void softDeleteReply(String replyId) {
+        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
                 .orElseThrow(() -> new IllegalArgumentException("대댓글을 찾을 수 없습니다."));
 
-        if (reply.isDeleted()) {
+        if (reply.getDeletedAt()!=null) {
             throw new IllegalArgumentException("이미 삭제된 대댓글입니다.");
         }
 
         // 대댓글 삭제
-        reply.softDelete();
+        reply.delete();
         replyCommentRepository.save(reply);
 
         // 댓글 수 감소 (대댓글도 댓글 수에서 감소)
-        CommentEntity comment = commentRepository.findById(reply.getCommentId())
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(reply.getCommentId())
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        PostEntity post = postRepository.findById(comment.getPostId())
+        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
         post.updateCommentCount(post.getCommentCount() - 1);
         postRepository.save(post);
@@ -80,18 +79,17 @@ public class ReplyCommentService {
 
     // 특정 댓글의 대댓글 조회
     public List<CommentResponseDTO> getRepliesByCommentId(String commentId) {
-        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
+        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
         return replies.stream()
-                .filter(reply -> !reply.isDeleted())
+                .filter(reply -> reply.getDeletedAt()!=null)
                 .map(reply -> new CommentResponseDTO(
                         reply.getReplyId(),
                         reply.getUserId(),
                         reply.getContent(),
                         List.of(), // 대댓글은 하위 대댓글이 없음
                         likeService.getLikeCount(LikeType.valueOf("reply"), reply.getReplyId())
-                ))
-                .collect(Collectors.toList());
+                )).toList();
     }
 
 

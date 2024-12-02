@@ -7,7 +7,7 @@ import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.like.LikeService;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,18 +32,15 @@ public class CommentService {
 
     // 댓글 추가
     public void addComment(String postId, CommentCreateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
-
         String userId = SecurityUtils.getCurrentUserId();
-
         CommentEntity comment = CommentEntity.builder()
                 .postId(postId)
                 .userId(userId)
                 .content(requestDTO.getContent())
                 .build();
-
         commentRepository.save(comment);
 
         // 댓글 수 증가
@@ -54,31 +50,30 @@ public class CommentService {
     }
 
     // 댓글 삭제 (Soft Delete)
-    public void deleteComment(String commentId) {
-        CommentEntity comment = commentRepository.findById(commentId)
+    public void softDeleteComment(String commentId) {
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        if (comment.isDeleted()) {
+        if (comment.getDeletedAt()!=null) {
             throw new IllegalArgumentException("이미 삭제된 댓글입니다.");
         }
 
         // 댓글의 대댓글 조회
-        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
-
+        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
         // 대댓글 Soft Delete 처리
         replies.forEach(reply -> {
-            if (!reply.isDeleted()) {
-                reply.softDelete();
+            if (reply.getDeletedAt()!=null) {
+                reply.delete();
                 replyCommentRepository.save(reply);
             }
         });
 
         // 댓글 Soft Delete 처리
-        comment.softDelete();
+        comment.delete();
         commentRepository.save(comment);
 
         // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
-        PostEntity post = postRepository.findById(comment.getPostId())
+        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
         post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
         postRepository.save(post);
@@ -91,17 +86,16 @@ public class CommentService {
 
     // 특정 게시물의 댓글 및 대댓글 조회
     public List<CommentResponseDTO> getCommentsByPostId(String postId) {
-        List<CommentEntity> comments = commentRepository.findByPostId(postId);
+        List<CommentEntity> comments = commentRepository.findByPostIdAndNotDeleted(postId);
 
         return comments.stream()
-                .filter(comment -> !comment.isDeleted())
+                .filter(comment -> comment.getDeletedAt() != null)
                 .map(comment -> new CommentResponseDTO(
                         comment.getCommentId(),
                         comment.getUserId(),
                         comment.getContent(),
                         replyCommentService.getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
                         likeService.getLikeCount(LikeType.valueOf("comment"), comment.getCommentId()) // 댓글 좋아요 수
-                ))
-                .collect(Collectors.toList());
+                )).toList();
     }
 }
