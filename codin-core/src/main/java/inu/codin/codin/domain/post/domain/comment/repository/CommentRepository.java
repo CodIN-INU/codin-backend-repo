@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.repository;
 
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

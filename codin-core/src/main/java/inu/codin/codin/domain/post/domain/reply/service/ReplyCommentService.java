@@ -4,8 +4,8 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
@@ -56,11 +56,6 @@ public class ReplyCommentService {
     public void softDeleteReply(String replyId) {
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
                 .orElseThrow(() -> new IllegalArgumentException("대댓글을 찾을 수 없습니다."));
-
-        if (reply.getDeletedAt()!=null) {
-            throw new IllegalArgumentException("이미 삭제된 대댓글입니다.");
-        }
-
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
@@ -82,7 +77,6 @@ public class ReplyCommentService {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
         return replies.stream()
-                .filter(reply -> reply.getDeletedAt()!=null)
                 .map(reply -> new CommentResponseDTO(
                         reply.getReplyId(),
                         reply.getUserId(),
