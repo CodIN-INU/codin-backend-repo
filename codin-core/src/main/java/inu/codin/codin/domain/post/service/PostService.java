@@ -1,21 +1,21 @@
 package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
-import inu.codin.codin.domain.post.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
-import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
-import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.ReplyEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.ReplyRepository;
 
-import inu.codin.codin.domain.post.like.LikeService;
-import inu.codin.codin.domain.post.like.entity.LikeType;
-import inu.codin.codin.domain.post.scrap.ScrapService;
+import inu.codin.codin.domain.post.domain.like.LikeService;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.scrap.ScrapService;
 import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -88,12 +88,14 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
         post.updatePostAnonymous(requestDTO.isAnonymous());
+        postRepository.save(post);
     }
 
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
         post.updatePostStatus(requestDTO.getPostStatus());
+        postRepository.save(post);
     }
 
 
