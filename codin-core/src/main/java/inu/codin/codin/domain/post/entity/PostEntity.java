@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,14 +53,14 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostAnonymous(boolean isAnonymous) {
         if (this.isAnonymous == isAnonymous) {
-            throw new IllegalStateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
         }
         this.isAnonymous = isAnonymous;
     }
 
     public void updatePostStatus(PostStatus postStatus) {
         if (this.postStatus == postStatus) {
-            throw new IllegalStateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
         }
         this.postStatus = postStatus;
     }
