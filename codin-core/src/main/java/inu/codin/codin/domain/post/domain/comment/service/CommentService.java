@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.service;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
@@ -33,7 +34,7 @@ public class CommentService {
     // 댓글 추가
     public void addComment(String postId, CommentCreateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         String userId = SecurityUtils.getCurrentUserId();
         CommentEntity comment = CommentEntity.builder()
@@ -52,7 +53,7 @@ public class CommentService {
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String commentId) {
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
 
         // 댓글의 대댓글 조회
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
@@ -70,7 +71,7 @@ public class CommentService {
 
         // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
         postRepository.save(post);
 

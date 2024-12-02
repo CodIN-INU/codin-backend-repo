@@ -1,5 +1,7 @@
 package inu.codin.codin.common.security.util;
 
+import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,11 +20,10 @@ public class SecurityUtils {
     public static String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
-            throw new IllegalStateException("인증 정보가 없습니다.");
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            throw new JwtException(SecurityErrorCode.INVALID_CREDENTIALS);
         }
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         return userDetails.getId();
     }
 

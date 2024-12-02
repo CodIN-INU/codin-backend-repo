@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.service;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
@@ -17,6 +18,7 @@ import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -29,7 +31,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
 
     private final S3Service s3Service;
     private final LikeService likeService;
@@ -68,7 +69,7 @@ public class PostService {
 
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
+                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
 
         List<String> imageUrls = handleImageUpload(postImages);
 
@@ -78,14 +79,14 @@ public class PostService {
 
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
+                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
     }
 
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
+                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
     }
@@ -140,7 +141,7 @@ public class PostService {
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
     public PostWithDetailResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         return new PostWithDetailResponseDTO(
                 post.getUserId(),
@@ -161,7 +162,7 @@ public class PostService {
 
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(()-> new IllegalArgumentException("게시물을 찾을 수 없음."));
+                .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
         post.delete();
         postRepository.save(post);
 
@@ -170,10 +171,10 @@ public class PostService {
     public void deletePostImage(String postId, String imageUrl) {
 
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         if (!post.getPostImageUrls().contains(imageUrl)) {
-            throw new IllegalArgumentException("이미지가 게시물에 존재하지 않습니다.");
+            throw new NotFoundException("이미지가 게시물에 존재하지 않습니다.");
         }
 
         try {
@@ -183,7 +184,7 @@ public class PostService {
             post.removePostImage(imageUrl);
             postRepository.save(post);
         } catch (Exception e) {
-            throw new IllegalStateException("이미지 삭제 중 오류 발생: " + imageUrl, e);
+            throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
         }
     }
 

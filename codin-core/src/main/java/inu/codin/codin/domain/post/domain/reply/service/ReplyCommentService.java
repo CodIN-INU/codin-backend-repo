@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.domain.reply.service;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -31,9 +32,9 @@ public class ReplyCommentService {
     // 대댓글 추가
     public void addReply(String commentId, ReplyCreateRequestDTO requestDTO) {
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         String userId = SecurityUtils.getCurrentUserId();
 
@@ -55,17 +56,17 @@ public class ReplyCommentService {
     // 대댓글 삭제 (Soft Delete)
     public void softDeleteReply(String replyId) {
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
-                .orElseThrow(() -> new IllegalArgumentException("대댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
 
         // 댓글 수 감소 (대댓글도 댓글 수에서 감소)
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(reply.getCommentId())
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
 
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         post.updateCommentCount(post.getCommentCount() - 1);
         postRepository.save(post);
 
