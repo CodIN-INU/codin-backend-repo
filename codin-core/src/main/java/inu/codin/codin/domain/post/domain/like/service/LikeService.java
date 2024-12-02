@@ -1,10 +1,11 @@
-package inu.codin.codin.domain.post.domain.like;
+package inu.codin.codin.domain.post.domain.like.service;
 
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.domain.like.exception.LikeCreateFailException;
 import inu.codin.codin.domain.post.domain.like.exception.LikeRemoveFailException;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.exception.InvalidLikeTypeException;
+import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;
 import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;

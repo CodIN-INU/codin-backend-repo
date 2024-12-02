@@ -1,7 +1,7 @@
 package inu.codin.codin.infra.redis;
 
-import inu.codin.codin.domain.post.domain.like.LikeService;
-import inu.codin.codin.domain.post.domain.scrap.ScrapService;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.infra.redis.exception.RedisUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
