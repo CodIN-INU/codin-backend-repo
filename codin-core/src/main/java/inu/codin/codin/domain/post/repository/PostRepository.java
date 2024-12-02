@@ -18,14 +18,12 @@ public interface PostRepository extends MongoRepository<PostEntity, String> {
     List<PostEntity> findByUserIdNotDeleted(String userId);
 
     @Query("{'isDeleted': false}")
-    List<PostEntity> findALlNotDeleted();
+    List<PostEntity> findAllNotDeleted();
 
     @Query("{'postId': ?0, 'isDeleted': false}")
     PostEntity findByPostIdNotDeleted(String postId);
 
     @Query("{'_id': ?0, 'comments.isDeleted': false}")
     Optional<PostEntity> findPostWithActiveComments(String postId);
-
-
 
 }
