@@ -99,7 +99,7 @@ public class PostService {
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public List<PostWithCountsResponseDTO> getAllPosts() {
-        List<PostEntity> posts = postRepository.findALlNotDeleted();
+        List<PostEntity> posts = postRepository.findAllNotDeleted();
 
         return posts.stream()
                 .map(post -> new PostWithCountsResponseDTO(
