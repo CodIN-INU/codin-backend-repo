@@ -6,8 +6,8 @@ import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDto;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
@@ -39,9 +39,7 @@ public class PostController {
             @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
 
         // postImages가 null이면 빈 리스트로 처리
-        if (postImages == null) {
-            postImages = List.of();
-        }
+        if (postImages == null) postImages = List.of();
 
         postService.createPost(postCreateRequestDTO, postImages);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -49,7 +47,7 @@ public class PostController {
     }
 
     @Operation(
-            summary = "게시물 내용 이미지 수정 추가"
+            summary = "게시물 내용 수정 및 이미지 수정&추가"
     )
     @PatchMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<?>>  updatePostContent(
@@ -90,8 +88,8 @@ public class PostController {
             summary = "삭제되지 않은 모든 게시물 조회"
     )
     @GetMapping("")
-    public ResponseEntity<ListResponse<PostWithCountsResponseDTO>> getAllPosts() {
-        List<PostWithCountsResponseDTO> posts = postService.getAllPosts();
+    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPosts() {
+        List<PostListResponseDto> posts = postService.getAllPosts();
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "삭제되지 않은 모든 게시물 조회 성공", posts));
     }
@@ -100,16 +98,16 @@ public class PostController {
             summary = "해당 사용자 게시물 전체 조회"
     )
     @GetMapping("/user")
-    public ResponseEntity<ListResponse<PostWithCountsResponseDTO>> getAllUserPosts() {
-        List<PostWithCountsResponseDTO> posts = postService.getAllUserPosts();
+    public ResponseEntity<ListResponse<PostListResponseDto>> getAllUserPosts() {
+        List<PostListResponseDto> posts = postService.getAllUserPosts();
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "사용자 게시물 조회 성공", posts));
     }
 
     @Operation(summary = "해당 게시물 상세 조회")
     @GetMapping("/{postId}")
-    public ResponseEntity<SingleResponse<PostWithDetailResponseDTO>> getPostWithDetail(@PathVariable String postId) {
-        PostWithDetailResponseDTO post = postService.getPostWithDetail(postId);
+    public ResponseEntity<SingleResponse<PostDetailResponseDto>> getPostWithDetail(@PathVariable String postId) {
+        PostDetailResponseDto post = postService.getPostWithDetail(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }

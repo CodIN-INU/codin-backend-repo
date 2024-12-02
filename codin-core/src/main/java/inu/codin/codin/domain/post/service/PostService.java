@@ -2,30 +2,26 @@ package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
-
-import inu.codin.codin.domain.post.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
-import inu.codin.codin.infra.s3.S3Service;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,8 +43,6 @@ public class PostService {
 
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
-        validateCreatePostRequest(postCreateRequestDTO);
-
         List<String> imageUrls = handleImageUpload(postImages);
         String userId = SecurityUtils.getCurrentUserId();
 
@@ -93,11 +87,11 @@ public class PostService {
 
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostWithCountsResponseDTO> getAllPosts() {
-        List<PostEntity> posts = postRepository.findAllAndNotDeleted();
+    public List<PostListResponseDto> getAllPosts() {
+        List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive();
 
         return posts.stream()
-                .map(post -> new PostWithCountsResponseDTO(
+                .map(post -> new PostListResponseDto(
                         post.getUserId(),
                         post.getPostId(),
                         post.getContent(),
@@ -109,20 +103,19 @@ public class PostService {
                         post.getCommentCount(), // 댓글 수
                         likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
-                ))
-                .collect(Collectors.toList());
+                )).toList();
     }
 
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostWithCountsResponseDTO> getAllUserPosts() {
+    public List<PostListResponseDto> getAllUserPosts() {
 
         String userId = SecurityUtils.getCurrentUserId();
 
         List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
 
         return posts.stream()
-                .map(post -> new PostWithCountsResponseDTO(
+                .map(post -> new PostListResponseDto(
                         post.getUserId(),
                         post.getPostId(),
                         post.getContent(),
@@ -139,17 +132,16 @@ public class PostService {
     }
 
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
-    public PostWithDetailResponseDTO getPostWithDetail(String postId) {
+    public PostDetailResponseDto getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        return new PostWithDetailResponseDTO(
+        return new PostDetailResponseDto(
                 post.getUserId(),
                 post.getPostId(),
                 post.getContent(),
                 post.getTitle(),
                 post.getPostCategory(),
-                post.getPostStatus(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
                 commentService.getCommentsByPostId(postId),                   // 댓글 및 대댓글
@@ -186,16 +178,6 @@ public class PostService {
         } catch (Exception e) {
             throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
         }
-    }
-
-
-
-
-    //유효성체크
-    private void validateCreatePostRequest(PostCreateRequestDTO postCreateReqDTO) {
-//        if (postRepository.findByTitle(postCreateReqDTO.getTitle()).isPresent()) {
-//            throw new PostCreateFailException("이미 존재하는 제목입니다. 다른 제목을 사용해주세요.");
-//        }
     }
 
 }
