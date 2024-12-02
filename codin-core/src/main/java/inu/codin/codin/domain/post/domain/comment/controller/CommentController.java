@@ -6,6 +6,7 @@ import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/comments")
+@Tag(name = "Comment API", description = "댓글 API")
 public class CommentController {
     private final CommentService commentService;
 
