@@ -2,21 +2,17 @@ package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
-import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
-import inu.codin.codin.domain.post.domain.comment.entity.ReplyEntity;
-import inu.codin.codin.domain.post.domain.comment.repository.ReplyRepository;
 
 import inu.codin.codin.domain.post.domain.like.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.scrap.ScrapService;
-import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -34,11 +30,11 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ReplyRepository replyRepository;
+
     private final S3Service s3Service;
-    private final RedisService redisService;
     private final LikeService likeService;
     private final ScrapService scrapService;
+    private final CommentService commentService;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -53,18 +49,14 @@ public class PostService {
         validateCreatePostRequest(postCreateRequestDTO);
 
         List<String> imageUrls = handleImageUpload(postImages);
-
         String userId = SecurityUtils.getCurrentUserId();
-
 
         PostEntity postEntity = PostEntity.builder()
                 .userId(userId)
                 .title(postCreateRequestDTO.getTitle())
                 .content(postCreateRequestDTO.getContent())
-
                 //이미지 Url List 저장
                 .postImageUrls(imageUrls)
-
                 .isAnonymous(postCreateRequestDTO.isAnonymous())
                 .postCategory(postCreateRequestDTO.getPostCategory())
                 //Default Status = Active
@@ -159,56 +151,23 @@ public class PostService {
                 post.getPostStatus(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
-                getCommentsByPostId(postId),                   // 댓글 및 대댓글
+                commentService.getCommentsByPostId(postId),                   // 댓글 및 대댓글
                 likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),   // 좋아요 수
                 scrapService.getScrapCount(post.getPostId())   // 스크랩 수
         );
     }
 
 
-    // 댓글 및 대댓글 조회 로직
-    private List<CommentResponseDTO> getCommentsByPostId(String postId) {
-        List<CommentEntity> comments = commentRepository.findByPostId(postId);
-
-        return comments.stream()
-                .filter(comment -> !comment.isDeleted())
-                .map(comment -> new CommentResponseDTO(
-                        comment.getCommentId(),
-                        comment.getUserId(),
-                        comment.getContent(),
-                        getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회 및 변환
-                        likeService.getLikeCount(LikeType.valueOf("comment"),comment.getCommentId()) // 댓글 좋아요 수
-                ))
-                .collect(Collectors.toList());
-    }
-
-
-    // 대댓글 조회 로직
-    private List<CommentResponseDTO> getRepliesByCommentId(String commentId) {
-        List<ReplyEntity> replies = replyRepository.findByCommentId(commentId);
-
-        return replies.stream()
-                .filter(reply -> !reply.isDeleted())
-                .map(reply -> new CommentResponseDTO(
-                        reply.getReplyId(),
-                        reply.getUserId(),
-                        reply.getContent(),
-                        List.of(), // 대댓글은 하위 대댓글이 없음
-                        likeService.getLikeCount(LikeType.valueOf("reply"),reply.getReplyId()) // 대댓글 좋아요 수
-                ))
-                .collect(Collectors.toList());
-    }
-
 
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(()-> new IllegalArgumentException("게시물을 찾을 수 없음."));
 
-        if (post.isDeleted()) {
+        if (post.getDeletedAt()!=null) {
             throw new IllegalArgumentException("이미 삭제된 게시물");
         }
 
-        post.softDeletePost();
+        post.delete();
         postRepository.save(post);
 
     }

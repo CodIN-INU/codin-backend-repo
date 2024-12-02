@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.comment.entity;
+package inu.codin.codin.domain.post.domain.reply.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "replies")
 @Getter
-public class ReplyEntity extends BaseTimeEntity {
+public class ReplyCommentEntity extends BaseTimeEntity {
     @Id
     @NotBlank
     private String replyId;
@@ -22,7 +22,7 @@ public class ReplyEntity extends BaseTimeEntity {
     private int likeCount = 0; // 좋아요 카운트
 
     @Builder
-    public ReplyEntity(String replyId, String commentId, String userId, String content, int likeCount) {
+    public ReplyCommentEntity(String replyId, String commentId, String userId, String content, int likeCount) {
         this.replyId = replyId;
         this.commentId = commentId;
         this.userId = userId;

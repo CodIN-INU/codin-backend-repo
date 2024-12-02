@@ -3,7 +3,6 @@ package inu.codin.codin.domain.post.domain.comment.controller;
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 public class CommentController {
     private final CommentService commentService;
 
@@ -30,16 +29,6 @@ public class CommentController {
         commentService.addComment(postId, requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "댓글이 추가되었습니다.", null));
-    }
-
-    @Operation(summary = "대댓글 추가")
-    @PostMapping("/{commentId}/replies")
-    public ResponseEntity<SingleResponse<?>> addReply(@PathVariable String commentId,
-                                           @RequestBody @Valid ReplyCreateRequestDTO requestDTO) {
-        commentService.addReply(commentId, requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "대댓글이 추가되었습니다.", null));
-
     }
 
     @Operation(summary = "해당 게시물의 댓글 및 대댓글 조회")
@@ -57,13 +46,5 @@ public class CommentController {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "댓글이 삭제되었습니다.", null));
-    }
-
-    @Operation(summary = "대댓글 삭제")
-    @DeleteMapping("/replies/{replyId}")
-    public ResponseEntity<SingleResponse<?>> deleteReply(@PathVariable String replyId) {
-        commentService.deleteReply(replyId);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "대댓글이 삭제되었습니다.", null));
     }
 }

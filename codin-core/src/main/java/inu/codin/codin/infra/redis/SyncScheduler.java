@@ -1,9 +1,9 @@
 package inu.codin.codin.infra.redis;
 
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.comment.entity.ReplyEntity;
+import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.comment.repository.ReplyRepository;
+import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.domain.like.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -29,7 +29,7 @@ public class SyncScheduler {
     private final RedisService redisService;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ReplyRepository replyRepository;
+    private final ReplyCommentRepository replyCommentRepository;
     private final LikeRepository likeRepository;
     private final ScrapRepository scrapRepository;
     private final RedisHealthChecker redisHealthChecker;
@@ -43,7 +43,7 @@ public class SyncScheduler {
         log.info(" 동기화 작업 시작");
         syncEntityLikes("post", postRepository);
         syncEntityLikes("comment", commentRepository);
-        syncEntityLikes("reply", replyRepository);
+        syncEntityLikes("reply", replyCommentRepository);
         syncPostScraps();
         log.info(" 동기화 작업 완료");
     }
@@ -97,8 +97,8 @@ public class SyncScheduler {
                     comment.updateLikeCount(likeCount);
                     commentRepo.save(comment);
                 }
-            } else if (repository instanceof ReplyRepository replyRepo) {
-                ReplyEntity reply = replyRepo.findById(entityId).orElse(null);
+            } else if (repository instanceof ReplyCommentRepository replyRepo) {
+                ReplyCommentEntity reply = replyRepo.findById(entityId).orElse(null);
                 if (reply != null && reply.getLikeCount() != likeCount) {
                     log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
                     reply.updateLikeCount(likeCount);
