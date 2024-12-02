@@ -35,7 +35,7 @@ public class SyncScheduler {
     private final ScrapRepository scrapRepository;
     private final RedisHealthChecker redisHealthChecker;
 
-    @Scheduled(fixedRate = 10000) // 매 10초마다 실행(테스트목적)
+    @Scheduled(fixedRate = 43200000) // 매 10초마다 실행(테스트목적)
     public void syncLikes() {
         if (!redisHealthChecker.isRedisAvailable()) {
             log.warn("Redis 비활성화 상태, 동기화 작업 중지");
