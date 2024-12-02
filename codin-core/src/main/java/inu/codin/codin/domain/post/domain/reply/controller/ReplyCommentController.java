@@ -29,8 +29,8 @@ public class ReplyCommentController {
 
     @Operation(summary = "대댓글 삭제")
     @DeleteMapping("/{replyId}")
-    public ResponseEntity<SingleResponse<?>> deleteReply(@PathVariable String replyId) {
-        replyCommentService.deleteReply(replyId);
+    public ResponseEntity<SingleResponse<?>> softDeleteReply(@PathVariable String replyId) {
+        replyCommentService.softDeleteReply(replyId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "대댓글이 삭제되었습니다.", null));
     }

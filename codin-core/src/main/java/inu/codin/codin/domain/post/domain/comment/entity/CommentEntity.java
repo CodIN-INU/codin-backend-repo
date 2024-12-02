@@ -19,7 +19,6 @@ public class CommentEntity extends BaseTimeEntity {
     private String postId;  //게시글 ID 참조
     private String userId;
     private String content;
-    private boolean isDeleted = false; // Soft delete 상태
 
     private int likeCount = 0;  // 좋아요 수 (Redis에서 관리)
 
@@ -29,12 +28,6 @@ public class CommentEntity extends BaseTimeEntity {
         this.postId = postId;
         this.userId = userId;
         this.content = content;
-    }
-
-    // Soft Delete
-    public void softDelete() {
-        this.isDeleted = true;
-        this.delete();
     }
 
 

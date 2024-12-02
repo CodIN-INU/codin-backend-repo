@@ -18,12 +18,10 @@ public class PostEntity extends BaseTimeEntity {
     private String postId;
 
     private String userId; // User 엔티티와의 관계를 유지하기 위한 필드
-
     private String title;
     private String content;
     private List<String> postImageUrls = new ArrayList<>();
     private boolean isAnonymous;
-    private boolean isDeleted = false;
 
     private PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
@@ -33,18 +31,15 @@ public class PostEntity extends BaseTimeEntity {
     private int scrapCount = 0; // 스크랩 카운트 (redis)
 
     @Builder
-    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, boolean isDeleted, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
+    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
         this.postId = postId;
-
         this.userId = userId;
         this.title = title;
         this.content = content;
         this.postImageUrls = postImageUrls;
         this.isAnonymous = isAnonymous;
-        this.isDeleted = isDeleted;
         this.postCategory = postCategory;
         this.postStatus = postStatus;
-
         this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
@@ -71,17 +66,6 @@ public class PostEntity extends BaseTimeEntity {
     public void removePostImage(String imageUrl) {
         this.postImageUrls.remove(imageUrl);
     }
-
-    public void removeAllPostImages() {
-        this.postImageUrls.clear();
-    }
-
-    public void softDeletePost() {
-        this.isDeleted = true;
-        this.delete();
-    }
-
-
 
     //댓글+대댓글 수 업데이트
     public void updateCommentCount(int commentCount) {

@@ -17,7 +17,6 @@ public class ReplyCommentEntity extends BaseTimeEntity {
     private String commentId; // 댓글 ID 참조
     private String userId; // 작성자 ID
     private String content;
-    private boolean isDeleted = false;
 
     private int likeCount = 0; // 좋아요 카운트
 
@@ -28,12 +27,6 @@ public class ReplyCommentEntity extends BaseTimeEntity {
         this.userId = userId;
         this.content = content;
         this.likeCount = likeCount;
-    }
-
-    // Soft Delete
-    public void softDelete() {
-        this.isDeleted = true;
-        this.delete();
     }
 
     //좋아요 수 업데이트

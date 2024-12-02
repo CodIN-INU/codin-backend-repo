@@ -10,9 +10,9 @@ import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithCountsResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostWithDetailResponseDTO;
 
-import inu.codin.codin.domain.post.domain.like.LikeService;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.domain.scrap.ScrapService;
+import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -67,7 +67,7 @@ public class PostService {
 
 
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
 
         List<String> imageUrls = handleImageUpload(postImages);
@@ -77,14 +77,14 @@ public class PostService {
     }
 
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
     }
 
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물 없음"));
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
@@ -93,7 +93,7 @@ public class PostService {
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public List<PostWithCountsResponseDTO> getAllPosts() {
-        List<PostEntity> posts = postRepository.findAllNotDeleted();
+        List<PostEntity> posts = postRepository.findAllAndNotDeleted();
 
         return posts.stream()
                 .map(post -> new PostWithCountsResponseDTO(
@@ -118,7 +118,7 @@ public class PostService {
 
         String userId = SecurityUtils.getCurrentUserId();
 
-        List<PostEntity> posts = postRepository.findByUserIdNotDeleted(userId);
+        List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
 
         return posts.stream()
                 .map(post -> new PostWithCountsResponseDTO(
@@ -130,16 +130,16 @@ public class PostService {
                         post.getPostStatus(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
-                        commentRepository.countByPostId(post.getPostId()), // 댓글 수
+                        post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
     public PostWithDetailResponseDTO getPostWithDetail(String postId) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
         return new PostWithDetailResponseDTO(
@@ -160,7 +160,7 @@ public class PostService {
 
 
     public void softDeletePost(String postId) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()-> new IllegalArgumentException("게시물을 찾을 수 없음."));
 
         if (post.getDeletedAt()!=null) {
@@ -174,7 +174,7 @@ public class PostService {
 
     public void deletePostImage(String postId, String imageUrl) {
 
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
 
         if (!post.getPostImageUrls().contains(imageUrl)) {

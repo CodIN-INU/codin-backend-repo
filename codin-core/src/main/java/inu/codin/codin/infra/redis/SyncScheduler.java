@@ -84,21 +84,21 @@ public class SyncScheduler {
             // (count 업데이트) Redis 사용자 수로 엔티티의 likeCount 업데이트
             int likeCount = likedUsers.size();
             if (repository instanceof PostRepository postRepo) {
-                PostEntity post = postRepo.findByIdNotDeleted(entityId).orElse(null);
+                PostEntity post = postRepo.findByIdAndNotDeleted(entityId).orElse(null);
                 if (post != null && post.getLikeCount() != likeCount) {
                     log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
                     post.updateLikeCount(likeCount);
                     postRepo.save(post);
                 }
             } else if (repository instanceof CommentRepository commentRepo) {
-                CommentEntity comment = commentRepo.findById(entityId).orElse(null);
+                CommentEntity comment = commentRepo.findByIdAndNotDeleted(entityId).orElse(null);
                 if (comment != null && comment.getLikeCount() != likeCount) {
                     log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
                     comment.updateLikeCount(likeCount);
                     commentRepo.save(comment);
                 }
             } else if (repository instanceof ReplyCommentRepository replyRepo) {
-                ReplyCommentEntity reply = replyRepo.findById(entityId).orElse(null);
+                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(entityId).orElse(null);
                 if (reply != null && reply.getLikeCount() != likeCount) {
                     log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
                     reply.updateLikeCount(likeCount);
@@ -147,7 +147,7 @@ public class SyncScheduler {
 
             // Redis 사용자 수로 PostEntity의 scrapCount 업데이트
             int redisScrapCount = redisScrappedUsers.size();
-            PostEntity post = postRepository.findByIdNotDeleted(postId)
+            PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                     .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
             if (post.getScrapCount() != redisScrapCount) {
                 log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, redisScrapCount);
