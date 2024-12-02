@@ -1,5 +1,6 @@
 package inu.codin.codin.infra.redis;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -53,28 +54,28 @@ public class SyncScheduler {
         if (redisKeys == null || redisKeys.isEmpty()) {
             return;
         }
-        LikeType entityTypeEnum = LikeType.valueOf(entityType);
+        LikeType likeType = LikeType.valueOf(entityType);
 
         for (String redisKey : redisKeys) {
-            String entityId = redisKey.replace(entityType + ":likes:", "");
-            Set<String> likedUsers = redisService.getLikedUsers(entityType, entityId);
+            String likeTypeId = redisKey.replace(entityType + ":likes:", "");
+            Set<String> likedUsers = redisService.getLikedUsers(entityType, likeTypeId);
 
             // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
-            List<LikeEntity> dbLikes = likeRepository.findByEntityTypeAndEntityId(entityTypeEnum, entityId);
+            List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeId(likeType, likeTypeId);
             for (LikeEntity dbLike : dbLikes) {
                 if (!likedUsers.contains(dbLike.getUserId())) {
-                    log.info("MongoDB에서 사용자 삭제: UserID={}, EntityID={}", dbLike.getUserId(), entityId);
+                    log.info("MongoDB에서 사용자 삭제: UserID={}, EntityID={}", dbLike.getUserId(), likeTypeId);
                     likeRepository.delete(dbLike);
                 }
             }
 
             // (좋아요 추가) Redis에는 있지만 MongoDB에 없는 사용자 추가
             for (String userId : likedUsers) {
-                if (!likeRepository.existsByEntityTypeAndEntityIdAndUserId(entityTypeEnum, entityId, userId)) {
-                    log.info("MongoDB에 사용자 추가: UserID={}, EntityID={}", userId, entityId);
+                if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeType, likeTypeId, userId)) {
+                    log.info("MongoDB에 사용자 추가: UserID={}, EntityID={}", userId, likeTypeId);
                     LikeEntity dbLike = LikeEntity.builder()
-                            .entityType(entityTypeEnum)
-                            .entityId(entityId)
+                            .likeType(likeType)
+                            .likeTypeId(likeTypeId)
                             .userId(userId)
                             .build();
                     likeRepository.save(dbLike);
@@ -84,23 +85,23 @@ public class SyncScheduler {
             // (count 업데이트) Redis 사용자 수로 엔티티의 likeCount 업데이트
             int likeCount = likedUsers.size();
             if (repository instanceof PostRepository postRepo) {
-                PostEntity post = postRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                PostEntity post = postRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
                 if (post != null && post.getLikeCount() != likeCount) {
-                    log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
+                    log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
                     post.updateLikeCount(likeCount);
                     postRepo.save(post);
                 }
             } else if (repository instanceof CommentRepository commentRepo) {
-                CommentEntity comment = commentRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                CommentEntity comment = commentRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
                 if (comment != null && comment.getLikeCount() != likeCount) {
-                    log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
+                    log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
                     comment.updateLikeCount(likeCount);
                     commentRepo.save(comment);
                 }
             } else if (repository instanceof ReplyCommentRepository replyRepo) {
-                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(likeTypeId).orElse(null);
                 if (reply != null && reply.getLikeCount() != likeCount) {
-                    log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
+                    log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
                     reply.updateLikeCount(likeCount);
                     replyRepo.save(reply);
                 }
@@ -148,7 +149,7 @@ public class SyncScheduler {
             // Redis 사용자 수로 PostEntity의 scrapCount 업데이트
             int redisScrapCount = redisScrappedUsers.size();
             PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                    .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
             if (post.getScrapCount() != redisScrapCount) {
                 log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, redisScrapCount);
                 post.updateScrapCount(redisScrapCount);

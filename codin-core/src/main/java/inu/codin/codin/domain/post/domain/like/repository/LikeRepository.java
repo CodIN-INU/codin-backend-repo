@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface LikeRepository extends MongoRepository<LikeEntity, String> {
     // 특정 엔티티(게시글/댓글/대댓글)의 좋아요 개수 조회
-    long countByEntityTypeAndEntityId(LikeType entityType, String entityId);
+    long countByLikeTypeAndLikeTypeId(LikeType likeType, String id);
 
     // 특정 엔티티의 좋아요 데이터 조회
-    List<LikeEntity> findByEntityTypeAndEntityId(LikeType entityType, String entityId);
+    List<LikeEntity> findByLikeTypeAndLikeTypeId(LikeType likeType, String id);
 
     // 특정 사용자의 좋아요 삭제
-    void deleteByEntityTypeAndEntityIdAndUserId(LikeType entityType, String entityId, String userId);
+    void deleteByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, String id, String userId);
 
-    boolean existsByEntityTypeAndEntityIdAndUserId(LikeType entityType, String entityId, String userId);
+    boolean existsByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, String id, String userId);
 }

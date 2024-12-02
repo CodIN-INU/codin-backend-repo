@@ -33,7 +33,7 @@ public class LikeService {
         String userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); //해당 entity가 삭제되었는지 확인
         // 중복 좋아요 검증
-        if (likeRepository.existsByEntityTypeAndEntityIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId)) {
+        if (likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId)) {
             throw new LikeCreateFailException("이미 좋아요를 누른 상태입니다.");
         }
         if (redisHealthChecker.isRedisAvailable()) {
@@ -51,20 +51,20 @@ public class LikeService {
         String userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto);
         // 없는 좋아요 방지
-        if (!likeRepository.existsByEntityTypeAndEntityIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId)) {
+        if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId)) {
             throw new LikeRemoveFailException(" 좋아요를 누른적이 없습니다.");
         }
         if (redisHealthChecker.isRedisAvailable()) {
             redisService.removeLike(likeRequestDto.getLikeType().name(), likeRequestDto.getId(), userId);
         }
-        likeRepository.deleteByEntityTypeAndEntityIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId);
+        likeRepository.deleteByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeRequestDto.getId(), userId);
     }
 
     public int getLikeCount(LikeType entityType, String entityId) {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getLikeCount(entityType.name(), entityId);
         }
-        long count = likeRepository.countByEntityTypeAndEntityId(entityType, entityId);
+        long count = likeRepository.countByLikeTypeAndLikeTypeId(entityType, entityId);
         return (int) Math.max(0, count);
     }
 
