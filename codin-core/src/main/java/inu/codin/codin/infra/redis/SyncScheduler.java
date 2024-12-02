@@ -1,16 +1,16 @@
 package inu.codin.codin.infra.redis;
 
-import inu.codin.codin.domain.post.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
-import inu.codin.codin.domain.post.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
-import inu.codin.codin.domain.post.like.entity.LikeEntity;
-import inu.codin.codin.domain.post.like.LikeRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.entity.ReplyEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.comment.repository.ReplyRepository;
+import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.post.domain.like.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.post.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.scrap.ScrapEntity;
-import inu.codin.codin.domain.post.scrap.ScrapRepository;
+import inu.codin.codin.domain.post.domain.scrap.ScrapEntity;
+import inu.codin.codin.domain.post.domain.scrap.ScrapRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.repository.MongoRepository;

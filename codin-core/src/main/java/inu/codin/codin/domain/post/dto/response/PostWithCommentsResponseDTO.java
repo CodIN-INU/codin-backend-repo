@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.dto.response;
 
-import inu.codin.codin.domain.post.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
