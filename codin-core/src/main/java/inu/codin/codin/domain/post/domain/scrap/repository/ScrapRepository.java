@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ScrapRepository extends MongoRepository<ScrapEntity, String> {
-    boolean findByPostIdAndUserId(String postId, String userId);
 
     List<ScrapEntity> findByPostId(String postId);
 

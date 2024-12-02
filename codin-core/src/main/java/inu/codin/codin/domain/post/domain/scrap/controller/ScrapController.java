@@ -18,23 +18,16 @@ public class ScrapController {
 
     @Operation(summary = "게시물 스크랩 추가")
     @PostMapping("/{postId}")
-    public ResponseEntity<SingleResponse<?>> addScrap(
-            @PathVariable String postId) {
-        String userId = SecurityUtils.getCurrentUserId();
-
-        scrapService.addScrap(postId, userId);
+    public ResponseEntity<SingleResponse<?>> addScrap(@PathVariable String postId) {
+        scrapService.addScrap(postId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "스크랩 성공.", null));
     }
 
     @Operation(summary = "게시물 스크랩 삭제")
     @DeleteMapping("/{postId}")
-    public ResponseEntity<SingleResponse<?>> removeScrap(
-            @PathVariable String postId) {
-
-        String userId = SecurityUtils.getCurrentUserId();
-
-        scrapService.removeScrap(postId, userId);
+    public ResponseEntity<SingleResponse<?>> removeScrap(@PathVariable String postId) {
+        scrapService.removeScrap(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "스크랩 취소되었습니다.", null));
     }
