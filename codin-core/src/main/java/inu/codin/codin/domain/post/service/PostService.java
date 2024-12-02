@@ -162,11 +162,6 @@ public class PostService {
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()-> new IllegalArgumentException("게시물을 찾을 수 없음."));
-
-        if (post.getDeletedAt()!=null) {
-            throw new IllegalArgumentException("이미 삭제된 게시물");
-        }
-
         post.delete();
         postRepository.save(post);
 

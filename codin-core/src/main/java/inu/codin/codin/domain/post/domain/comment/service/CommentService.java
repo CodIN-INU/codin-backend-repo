@@ -54,10 +54,6 @@ public class CommentService {
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
-        if (comment.getDeletedAt()!=null) {
-            throw new IllegalArgumentException("이미 삭제된 댓글입니다.");
-        }
-
         // 댓글의 대댓글 조회
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
         // 대댓글 Soft Delete 처리
@@ -89,7 +85,6 @@ public class CommentService {
         List<CommentEntity> comments = commentRepository.findByPostIdAndNotDeleted(postId);
 
         return comments.stream()
-                .filter(comment -> comment.getDeletedAt() != null)
                 .map(comment -> new CommentResponseDTO(
                         comment.getCommentId(),
                         comment.getUserId(),
