@@ -24,7 +24,7 @@ public class RedisRecoverSyncScheduler {
     /**
      * Redis 상태를 주기적으로 확인하고, 필요한 경우 복구 작업을 수행합니다.
      */
-    @Scheduled(fixedRate = 21600000) // 10초마다 실행 (테스트용)
+    @Scheduled(fixedRate = 21600000) // 6시간마다 실행
     public void monitorRedisAndRecover() {
         try {
             redisHealthChecker.checkRedisStatus(); // Redis 상태 확인
