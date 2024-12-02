@@ -93,7 +93,7 @@ public class PostEntity extends BaseTimeEntity {
     }
     //스크랩 수 업데이트
     public void updateScrapCount(int scrapCount) {
-        this.scrapCount=likeCount;
+        this.scrapCount=scrapCount;
     }
 
 
