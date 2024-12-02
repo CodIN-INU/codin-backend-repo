@@ -31,7 +31,7 @@ public class CommentController {
                 .body(new SingleResponse<>(201, "댓글이 추가되었습니다.", null));
     }
 
-    @Operation(summary = "해당 게시물의 댓글 및 대댓글 조회")
+    @Operation(summary = "해당 게시물의 댓글 및 대댓글 조회 (삭제된 내역도 모두 반환)")
     @GetMapping("/post/{postId}")
     public ResponseEntity<ListResponse<CommentResponseDTO>> getCommentsByPostId(@PathVariable String postId) {
         List<CommentResponseDTO> response = commentService.getCommentsByPostId(postId);

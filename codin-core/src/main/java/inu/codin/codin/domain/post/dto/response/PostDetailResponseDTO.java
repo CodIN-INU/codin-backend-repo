@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PostCommonResponseDto {
+public class PostDetailResponseDTO {
     @Schema(description = "유저 ID", example = "111111")
     @NotBlank
     private String userId;
@@ -45,7 +45,7 @@ public class PostCommonResponseDto {
     @Schema(description = "스크랩 count", example = "0")
     private int scrapCount;
 
-    public PostCommonResponseDto(String userId, String postId, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount) {
+    public PostDetailResponseDTO(String userId, String postId, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount) {
         this.userId = userId;
         this.postId = postId;
         this.content = content;

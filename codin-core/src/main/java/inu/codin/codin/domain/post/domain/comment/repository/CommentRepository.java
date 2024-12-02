@@ -13,6 +13,6 @@ public interface CommentRepository extends MongoRepository<CommentEntity, String
     @Query("{ '_id': ?0, 'deletedAt': null }")
     Optional<CommentEntity> findByIdAndNotDeleted(String Id);
 
-    @Query("{ 'postId': ?0, 'deletedAt':  null }")
-    List<CommentEntity> findByPostIdAndNotDeleted(String postId);
+    @Query("{ 'postId': ?0 }")
+    List<CommentEntity> findByPostId(String postId);
 }

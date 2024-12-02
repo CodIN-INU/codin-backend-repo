@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class PostListResponseDto extends PostCommonResponseDto{
+public class PostListResponseDto extends PostDetailResponseDTO{
 
     @Schema(description = "댓글 및 대댓글 count", example = "0")
     private int commentCount;
