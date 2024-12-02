@@ -1,15 +1,18 @@
 package inu.codin.codin.domain.post.like;
 
-import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.like.entity.LikeEntity;
+import inu.codin.codin.domain.post.like.entity.LikeType;
+import inu.codin.codin.domain.post.like.exception.InvalidLikeTypeException;
 import inu.codin.codin.domain.post.like.exception.LikeCreateFailException;
 import inu.codin.codin.domain.post.like.exception.LikeRemoveFailException;
-import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;
 import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.EnumSet;
 
 @Service
 @RequiredArgsConstructor
@@ -20,15 +23,16 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final RedisHealthChecker redisHealthChecker;
 
-    public void addLike(String entityType, String entityId, String userId) {
-
+    public void addLike(LikeType entityType, String entityId, String userId) {
+        //유효한 entityType 검증
+        validateLikeType(entityType);
         // 중복 좋아요 검증
         if (likeRepository.existsByEntityTypeAndEntityIdAndUserId(entityType, entityId, userId)) {
             throw new LikeCreateFailException("이미 좋아요를 누른 상태입니다.");
         }
 
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.addLike(entityType, entityId, userId);
+            redisService.addLike(entityType.name(), entityId, userId);
         }
         LikeEntity like = LikeEntity.builder()
                 .entityType(entityType)
@@ -38,20 +42,26 @@ public class LikeService {
         likeRepository.save(like);
         }
 
-    public void removeLike(String entityType, String entityId, String userId) {
+    public void removeLike(LikeType entityType, String entityId, String userId) {
+        //유효한 entityType 검증
+        validateLikeType(entityType);
+
         // 없는 좋아요 방지
         if (!likeRepository.existsByEntityTypeAndEntityIdAndUserId(entityType, entityId, userId)) {
             throw new LikeRemoveFailException(" 좋아요를 누른적이 없습니다.");
         }
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.removeLike(entityType, entityId, userId);
+            redisService.removeLike(entityType.name(), entityId, userId);
         }
         likeRepository.deleteByEntityTypeAndEntityIdAndUserId(entityType, entityId, userId);
     }
 
-    public int getLikeCount(String entityType, String entityId) {
+    public int getLikeCount(LikeType entityType, String entityId) {
+        //유효한 entityType 검증
+        validateLikeType(entityType);
+
         if (redisHealthChecker.isRedisAvailable()) {
-            return redisService.getLikeCount(entityType, entityId);
+            return redisService.getLikeCount(entityType.name(), entityId);
         }
         Long count = likeRepository.countByEntityTypeAndEntityId(entityType, entityId);
         return (int) Math.max(0, count);
@@ -59,7 +69,15 @@ public class LikeService {
 
     public void recoverRedisFromDB() {
         likeRepository.findAll().forEach(like -> {
-            redisService.addLike(like.getEntityType(), like.getEntityId(), like.getUserId());
+            redisService.addLike(like.getEntityType().name(), like.getEntityId(), like.getUserId());
         });
     }
+
+    //EnumSet.allOf 를 사용해 Enum 값 집합 처리
+    private void validateLikeType(LikeType entityType) {
+        if (entityType == null || !EnumSet.allOf(LikeType.class).contains(entityType)) {
+            throw new InvalidLikeTypeException("유효하지 않은 LikeType입니다: " + entityType);
+        }
+    }
+
 }

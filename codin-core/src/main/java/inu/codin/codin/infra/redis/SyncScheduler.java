@@ -4,13 +4,13 @@ import inu.codin.codin.domain.post.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
 import inu.codin.codin.domain.post.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
-import inu.codin.codin.domain.post.like.LikeEntity;
+import inu.codin.codin.domain.post.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.like.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.scrap.ScrapEntity;
 import inu.codin.codin.domain.post.scrap.ScrapRepository;
-import inu.codin.codin.domain.post.scrap.ScrapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -49,17 +49,18 @@ public class SyncScheduler {
     }
 
     private <T> void syncEntityLikes(String entityType, MongoRepository<T, String> repository) {
-        Set<String> redisKeys = redisService.getKeys(entityType + ":likes:*");
+        Set<String> redisKeys = redisService.getKeys(entityType+ ":likes:*");
         if (redisKeys == null || redisKeys.isEmpty()) {
             return;
         }
+        LikeType entityTypeEnum = LikeType.valueOf(entityType);
 
         for (String redisKey : redisKeys) {
             String entityId = redisKey.replace(entityType + ":likes:", "");
             Set<String> likedUsers = redisService.getLikedUsers(entityType, entityId);
 
             // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
-            List<LikeEntity> dbLikes = likeRepository.findByEntityTypeAndEntityId(entityType, entityId);
+            List<LikeEntity> dbLikes = likeRepository.findByEntityTypeAndEntityId(entityTypeEnum, entityId);
             for (LikeEntity dbLike : dbLikes) {
                 if (!likedUsers.contains(dbLike.getUserId())) {
                     log.info("MongoDB에서 사용자 삭제: UserID={}, EntityID={}", dbLike.getUserId(), entityId);
@@ -69,10 +70,10 @@ public class SyncScheduler {
 
             // (좋아요 추가) Redis에는 있지만 MongoDB에 없는 사용자 추가
             for (String userId : likedUsers) {
-                if (!likeRepository.existsByEntityTypeAndEntityIdAndUserId(entityType, entityId, userId)) {
+                if (!likeRepository.existsByEntityTypeAndEntityIdAndUserId(entityTypeEnum, entityId, userId)) {
                     log.info("MongoDB에 사용자 추가: UserID={}, EntityID={}", userId, entityId);
                     LikeEntity dbLike = LikeEntity.builder()
-                            .entityType(entityType)
+                            .entityType(entityTypeEnum)
                             .entityId(entityId)
                             .userId(userId)
                             .build();

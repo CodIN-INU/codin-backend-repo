@@ -14,6 +14,7 @@ import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
 import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
 
 import inu.codin.codin.domain.post.like.LikeService;
+import inu.codin.codin.domain.post.like.entity.LikeType;
 import inu.codin.codin.domain.post.scrap.ScrapService;
 import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
@@ -111,7 +112,7 @@ public class PostService {
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(), // 댓글 수
-                        likeService.getLikeCount("post",post.getPostId()),       // 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
                 .collect(Collectors.toList());
@@ -136,7 +137,7 @@ public class PostService {
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         commentRepository.countByPostId(post.getPostId()), // 댓글 수
-                        likeService.getLikeCount("post",post.getPostId()),       // 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
                 .collect(Collectors.toList());
@@ -157,7 +158,7 @@ public class PostService {
                 post.getPostImageUrls(),
                 post.isAnonymous(),
                 getCommentsByPostId(postId),                   // 댓글 및 대댓글
-                likeService.getLikeCount("post",post.getPostId()),   // 좋아요 수
+                likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),   // 좋아요 수
                 scrapService.getScrapCount(post.getPostId())   // 스크랩 수
         );
     }
@@ -174,7 +175,7 @@ public class PostService {
                         comment.getUserId(),
                         comment.getContent(),
                         getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회 및 변환
-                        likeService.getLikeCount("comment",comment.getCommentId()) // 댓글 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("comment"),comment.getCommentId()) // 댓글 좋아요 수
                 ))
                 .collect(Collectors.toList());
     }
@@ -191,7 +192,7 @@ public class PostService {
                         reply.getUserId(),
                         reply.getContent(),
                         List.of(), // 대댓글은 하위 대댓글이 없음
-                        likeService.getLikeCount("reply",reply.getReplyId()) // 대댓글 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("reply"),reply.getReplyId()) // 대댓글 좋아요 수
                 ))
                 .collect(Collectors.toList());
     }

@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.like;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.like.entity.LikeType;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,11 +17,12 @@ public class LikeController {
     private final LikeService likeService;
 
     @Operation(summary = "게시물, 댓글, 대댓글 좋아요 추가"+
-            "entityType = post,comment,reply"
-            +"entityId = postId, commentId, replyId")
+            "entityType = post, comment, reply"
+            +"entityId = postId, commentId, replyId"
+            +"예시 :: post/123")
     @PostMapping("/{entityType}/{entityId}")
     public ResponseEntity<SingleResponse<?>> likeEntity(
-            @PathVariable String entityType,
+            @PathVariable LikeType entityType,
             @PathVariable String entityId) {
 
         String userId = SecurityUtils.getCurrentUserId();
@@ -31,11 +33,12 @@ public class LikeController {
     }
 
     @Operation(summary = "게시물, 댓글, 대댓글 좋아요 삭제 " +
-            "entityType = post,comment,reply"
-    +"entityId = postId, commentId, replyId")
+            "entityType = post, comment, reply"
+            +"entityId = postId, commentId, replyId"
+            +"예시 :: post/123")
     @DeleteMapping("/{entityType}/{entityId}")
     public ResponseEntity<SingleResponse<?>> unlikeEntity(
-            @PathVariable String entityType,
+            @PathVariable LikeType entityType,
             @PathVariable String entityId) {
 
         String userId = SecurityUtils.getCurrentUserId();

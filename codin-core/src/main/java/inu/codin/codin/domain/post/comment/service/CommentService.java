@@ -8,6 +8,7 @@ import inu.codin.codin.domain.post.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.comment.entity.ReplyEntity;
 import inu.codin.codin.domain.post.like.LikeService;
+import inu.codin.codin.domain.post.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.comment.repository.ReplyRepository;
@@ -146,7 +147,7 @@ public class CommentService {
                         comment.getUserId(),
                         comment.getContent(),
                         getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
-                        likeService.getLikeCount("comment", comment.getCommentId()) // 댓글 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("comment"), comment.getCommentId()) // 댓글 좋아요 수
                 ))
                 .collect(Collectors.toList());
     }
@@ -162,7 +163,7 @@ public class CommentService {
                         reply.getUserId(),
                         reply.getContent(),
                         List.of(), // 대댓글은 하위 대댓글이 없음
-                        likeService.getLikeCount("reply", reply.getReplyId())
+                        likeService.getLikeCount(LikeType.valueOf("reply"), reply.getReplyId())
                 ))
                 .collect(Collectors.toList());
     }
