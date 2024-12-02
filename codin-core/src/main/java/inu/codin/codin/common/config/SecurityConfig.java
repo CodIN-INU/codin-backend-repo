@@ -36,7 +36,6 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
     private final JwtUtils jwtUtils;
 
     @Bean
@@ -61,7 +60,7 @@ public class SecurityConfig {
                 )
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtService, jwtUtils),
+                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
