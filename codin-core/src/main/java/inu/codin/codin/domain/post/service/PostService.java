@@ -2,7 +2,6 @@ package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
@@ -10,8 +9,9 @@ import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -31,7 +31,6 @@ public class PostService {
     private final S3Service s3Service;
     private final LikeService likeService;
     private final ScrapService scrapService;
-    private final CommentService commentService;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -87,8 +86,8 @@ public class PostService {
 
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostListResponseDto> getAllPosts() {
-        List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive();
+    public List<PostListResponseDto> getAllPosts(PostCategory postCategory) {
+        List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
 
         return posts.stream()
                 .map(post -> new PostListResponseDto(
@@ -101,7 +100,7 @@ public class PostService {
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(), // 댓글 수
-                        likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
                 )).toList();
     }
@@ -125,18 +124,18 @@ public class PostService {
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(),
-                        likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),       // 좋아요 수
+                        likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
                         scrapService.getScrapCount(post.getPostId())       // 스크랩 수
                 ))
                 .toList();
     }
 
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
-    public PostDetailResponseDto getPostWithDetail(String postId) {
+    public PostDetailResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        return new PostDetailResponseDto(
+        return new PostDetailResponseDTO(
                 post.getUserId(),
                 post.getPostId(),
                 post.getContent(),
@@ -144,8 +143,7 @@ public class PostService {
                 post.getPostCategory(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
-                commentService.getCommentsByPostId(postId),                   // 댓글 및 대댓글
-                likeService.getLikeCount(LikeType.valueOf("post"),post.getPostId()),   // 좋아요 수
+                likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),   // 좋아요 수
                 scrapService.getScrapCount(post.getPostId())   // 스크랩 수
         );
     }
