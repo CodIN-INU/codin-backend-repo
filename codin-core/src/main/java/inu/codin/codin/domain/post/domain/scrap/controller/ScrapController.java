@@ -1,7 +1,8 @@
-package inu.codin.codin.domain.post.domain.scrap;
+package inu.codin.codin.domain.post.domain.scrap.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

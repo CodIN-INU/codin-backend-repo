@@ -1,7 +1,8 @@
-package inu.codin.codin.domain.post.domain.like;
+package inu.codin.codin.domain.post.domain.like.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

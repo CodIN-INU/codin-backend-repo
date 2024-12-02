@@ -1,7 +1,9 @@
-package inu.codin.codin.domain.post.domain.scrap;
+package inu.codin.codin.domain.post.domain.scrap.service;
 
 import inu.codin.codin.domain.post.domain.like.exception.LikeRemoveFailException;
+import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.post.domain.scrap.exception.ScrapCreateFailException;
+import inu.codin.codin.domain.post.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;
 import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;

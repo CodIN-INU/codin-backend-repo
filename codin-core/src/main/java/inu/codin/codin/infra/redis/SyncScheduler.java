@@ -5,12 +5,12 @@ import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
-import inu.codin.codin.domain.post.domain.like.LikeRepository;
+import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.domain.scrap.ScrapEntity;
-import inu.codin.codin.domain.post.domain.scrap.ScrapRepository;
+import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.post.domain.scrap.repository.ScrapRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -84,7 +84,7 @@ public class SyncScheduler {
             // (count 업데이트) Redis 사용자 수로 엔티티의 likeCount 업데이트
             int likeCount = likedUsers.size();
             if (repository instanceof PostRepository postRepo) {
-                PostEntity post = postRepo.findById(entityId).orElse(null);
+                PostEntity post = postRepo.findByIdNotDeleted(entityId).orElse(null);
                 if (post != null && post.getLikeCount() != likeCount) {
                     log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityId, likeCount);
                     post.updateLikeCount(likeCount);
@@ -147,7 +147,7 @@ public class SyncScheduler {
 
             // Redis 사용자 수로 PostEntity의 scrapCount 업데이트
             int redisScrapCount = redisScrappedUsers.size();
-            PostEntity post = postRepository.findById(postId)
+            PostEntity post = postRepository.findByIdNotDeleted(postId)
                     .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
             if (post.getScrapCount() != redisScrapCount) {
                 log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, redisScrapCount);

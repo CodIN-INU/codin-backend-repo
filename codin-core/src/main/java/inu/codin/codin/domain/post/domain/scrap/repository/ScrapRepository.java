@@ -1,5 +1,6 @@
-package inu.codin.codin.domain.post.domain.scrap;
+package inu.codin.codin.domain.post.domain.scrap.repository;
 
+import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
