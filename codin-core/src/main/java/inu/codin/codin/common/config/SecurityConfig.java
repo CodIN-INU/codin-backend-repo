@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,7 +37,6 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
     private final JwtUtils jwtUtils;
 
     @Bean
@@ -59,9 +59,12 @@ public class SecurityConfig {
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
                                 .anyRequest().hasRole("USER")
                 )
+                // Swagger 접근 시 httpBasic 인증 사용
+//                .securityMatcher(SWAGGER_AUTH_PATHS)
+                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtService, jwtUtils),
+                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
@@ -90,6 +93,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // 토큰 없이 접근 가능한 URL
     private static final String[] PERMIT_ALL = {
             "/auth/login",
             "/auth/reissue",
@@ -100,6 +104,7 @@ public class SecurityConfig {
             "/v3/api/test1",
     };
 
+    // Swagger 접근 가능한 URL
     private static final String[] SWAGGER_AUTH_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -107,20 +112,26 @@ public class SecurityConfig {
             "/swagger-resources/**",
     };
 
+    // User 권한 URL
     private static final String[] USER_AUTH_PATHS = {
             "/v3/api/test2",
             "/v3/api/test3",
     };
 
+    // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
     };
 
+    // Manager 권한 URL
     private static final String[] MANAGER_AUTH_PATHS = {
             "/v3/api/test5",
     };
 
 
+    /**
+     * CORS 설정
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

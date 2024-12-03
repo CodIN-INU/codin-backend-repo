@@ -1,9 +1,9 @@
 package inu.codin.codin.domain.info.domain.professor.service;
 
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorCreateUpdateRequestDto;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorListResponseDto;
-import inu.codin.codin.domain.info.domain.professor.dto.ProfessorThumbnailResponseDto;
+import inu.codin.codin.domain.info.domain.professor.dto.response.ProfessorListResponseDto;
+import inu.codin.codin.domain.info.domain.professor.dto.response.ProfessorThumbnailResponseDto;
+import inu.codin.codin.domain.info.domain.professor.dto.request.ProfessorCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.domain.info.domain.professor.exception.ProfessorDuplicatedException;
 import inu.codin.codin.domain.info.domain.professor.exception.ProfessorNotFoundException;
