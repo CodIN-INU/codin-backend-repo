@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,19 +12,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "post")
+@Document(collection = "posts")
 @Getter
 public class PostEntity extends BaseTimeEntity {
     @Id @NotBlank
     private String postId;
 
     private String userId; // User 엔티티와의 관계를 유지하기 위한 필드
-
     private String title;
     private String content;
     private List<String> postImageUrls = new ArrayList<>();
     private boolean isAnonymous;
-    private boolean isDeleted = false;
 
     private PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
@@ -33,18 +32,15 @@ public class PostEntity extends BaseTimeEntity {
     private int scrapCount = 0; // 스크랩 카운트 (redis)
 
     @Builder
-    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, boolean isDeleted, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
+    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
         this.postId = postId;
-
         this.userId = userId;
         this.title = title;
         this.content = content;
         this.postImageUrls = postImageUrls;
         this.isAnonymous = isAnonymous;
-        this.isDeleted = isDeleted;
         this.postCategory = postCategory;
         this.postStatus = postStatus;
-
         this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
@@ -57,31 +53,20 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostAnonymous(boolean isAnonymous) {
         if (this.isAnonymous == isAnonymous) {
-            throw new IllegalStateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
         }
         this.isAnonymous = isAnonymous;
     }
 
     public void updatePostStatus(PostStatus postStatus) {
         if (this.postStatus == postStatus) {
-            throw new IllegalStateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
         }
         this.postStatus = postStatus;
     }
     public void removePostImage(String imageUrl) {
         this.postImageUrls.remove(imageUrl);
     }
-
-    public void removeAllPostImages() {
-        this.postImageUrls.clear();
-    }
-
-    public void softDeletePost() {
-        this.isDeleted = true;
-        this.delete();
-    }
-
-
 
     //댓글+대댓글 수 업데이트
     public void updateCommentCount(int commentCount) {

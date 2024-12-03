@@ -1,10 +1,12 @@
 package inu.codin.codin.infra.s3;
 
 import com.amazonaws.services.s3.AmazonS3Client;
+import inu.codin.codin.infra.s3.exception.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +42,13 @@ public class S3Service {
 
     private void validateImageFileSize(MultipartFile multipartFile) {
         if (multipartFile.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("파일 크기가 5MB를 초과할 수 없습니다.");
+            throw new ImageFileSizeException("파일 크기가 5MB를 초과할 수 없습니다.");
         }
     }
 
     private void validateFileCount(List<MultipartFile> multipartFiles) {
         if (multipartFiles.size() > MAX_FILE_COUNT) {
-            throw new IllegalArgumentException("이미지 파일 개수는 최대 10개까지 업로드 가능합니다.");
+            throw new ImageCountException("이미지 파일 개수는 최대 10개까지 업로드 가능합니다.");
         }
     }
 
@@ -75,7 +77,7 @@ public class S3Service {
         List<String> validExtensions = List.of("jpg", "jpeg", "png", "gif");
         String extension = getExtension(multipartFile.getOriginalFilename());
         if (extension == null || !validExtensions.contains(extension.toLowerCase())) {
-            throw new IllegalArgumentException("유효한 이미지 파일(jpg, jpeg, png, gif)만 업로드 가능합니다.");
+            throw new ImageTypeException("유효한 이미지 파일(jpg, jpeg, png, gif)만 업로드 가능합니다.");
         }
     }
 
@@ -92,7 +94,7 @@ public class S3Service {
     //삭제 안됐을경우 에러처리 필요
     public void deleteFile(String fileName) {
         if (bucket == null || bucket.isEmpty()) {
-            throw new IllegalStateException("S3 버킷 이름이 설정되지 않았습니다.");
+            throw new S3BucketNameException("S3 버킷 이름이 설정되지 않았습니다.");
         }
 
         try {
@@ -100,10 +102,10 @@ public class S3Service {
 
             // 삭제가 제대로 되었는지 추가 검증
             if (amazonS3Client.doesObjectExist(bucket, fileName)) {
-                throw new IllegalStateException("파일 삭제가 실패했습니다. 파일명: " + fileName);
+                throw new ImageRemoveException("파일 삭제가 실패했습니다. 파일명: " + fileName);
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("파일 삭제 중 오류가 발생했습니다. 파일명: " + fileName, e);
+            throw new ImageRemoveException("파일 삭제 중 오류가 발생했습니다. 파일명: " + fileName);
         }
     }
 

@@ -1,7 +1,7 @@
 package inu.codin.codin.infra.redis;
 
-import inu.codin.codin.domain.post.like.LikeService;
-import inu.codin.codin.domain.post.scrap.ScrapService;
+import inu.codin.codin.domain.post.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.infra.redis.exception.RedisUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class RedisRecoverSyncScheduler {
     /**
      * Redis 상태를 주기적으로 확인하고, 필요한 경우 복구 작업을 수행합니다.
      */
-    @Scheduled(fixedRate = 10000) // 10초마다 실행 (테스트용)
+    @Scheduled(fixedRate = 21600000) // 6시간마다 실행
     public void monitorRedisAndRecover() {
         try {
             redisHealthChecker.checkRedisStatus(); // Redis 상태 확인
