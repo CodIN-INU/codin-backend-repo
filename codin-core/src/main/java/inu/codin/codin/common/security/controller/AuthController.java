@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/auth" , produces = "plain/text; charset=utf-8")
+@RequestMapping(value = "/auth")
 @Tag(name = "User Auth API", description = "유저 회원가입, 로그인, 로그아웃, 리이슈 API")
 @RequiredArgsConstructor
 public class AuthController {
@@ -55,5 +55,4 @@ public class AuthController {
         jwtService.reissueToken(request, response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "토큰 재발급 성공", null));
     }
-
 }
