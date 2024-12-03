@@ -6,10 +6,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
 
 // Redis configuration
 @Configuration
@@ -30,7 +33,12 @@ public class RedisConfig {
 
         // Lettuce는 비동기 방식을 지원하는 Redis 클라이언트
         // 성능상 이점이 있어 기본적으로 사용
-        return new LettuceConnectionFactory(redisStandAloneConfiguration);
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .commandTimeout(Duration.ofMillis(500)) // 명령 타임아웃
+                .shutdownTimeout(Duration.ofMillis(100)) // 셧다운 타임아웃
+                .build();
+
+        return new LettuceConnectionFactory(redisStandAloneConfiguration, clientConfig);
     }
 
     @Bean
