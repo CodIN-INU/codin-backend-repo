@@ -5,9 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Data
 public class PostCreateRequestDTO {
@@ -30,7 +27,7 @@ public class PostCreateRequestDTO {
     @NotNull
     private boolean isAnonymous;
 
-    @Schema(description = "게시물 종류", example = "구해요_스터디")
+    @Schema(description = "게시물 종류", example = "REQUEST_STUDY")
     @NotNull
     private PostCategory postCategory;
     //STATUS 필드 - DEFAULT :: ACTIVE
