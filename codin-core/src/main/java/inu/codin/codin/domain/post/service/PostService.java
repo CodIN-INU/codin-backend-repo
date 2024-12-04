@@ -1,6 +1,8 @@
 package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
@@ -15,6 +17,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +48,11 @@ public class PostService {
         List<String> imageUrls = handleImageUpload(postImages);
         String userId = SecurityUtils.getCurrentUserId();
 
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                postCreateRequestDTO.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+        }
+
         PostEntity postEntity = PostEntity.builder()
                 .userId(userId)
                 .title(postCreateRequestDTO.getTitle())
@@ -61,8 +69,14 @@ public class PostService {
 
 
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
+
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+        }
 
         List<String> imageUrls = handleImageUpload(postImages);
 
@@ -73,6 +87,12 @@ public class PostService {
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+        }
+
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
     }
@@ -80,6 +100,12 @@ public class PostService {
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+        }
+
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
     }
@@ -154,6 +180,12 @@ public class PostService {
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
+
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+        }
+
         post.delete();
         postRepository.save(post);
 
@@ -164,9 +196,14 @@ public class PostService {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        if (!post.getPostImageUrls().contains(imageUrl)) {
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR"))
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+
+
+        if (!post.getPostImageUrls().contains(imageUrl))
             throw new NotFoundException("이미지가 게시물에 존재하지 않습니다.");
-        }
+
 
         try {
             // S3에서 이미지 삭제
