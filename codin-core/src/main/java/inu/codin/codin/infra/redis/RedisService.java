@@ -4,6 +4,7 @@ package inu.codin.codin.infra.redis;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -38,17 +39,17 @@ public class RedisService {
         }
     }
 
-    public void addLike(String entityType, String entityId, String userId) {
+    public void addLike(String entityType, ObjectId entityId, ObjectId userId) {
         String redisKey = entityType + ":likes:" + entityId;
-        redisTemplate.opsForSet().add(redisKey, userId);
+        redisTemplate.opsForSet().add(redisKey, String.valueOf(userId));
     }
 
-    public void removeLike(String entityType, String entityId, String userId) {
+    public void removeLike(String entityType, ObjectId entityId, ObjectId userId) {
         String redisKey = entityType + ":likes:" + entityId;
-        redisTemplate.opsForSet().remove(redisKey, userId);
+        redisTemplate.opsForSet().remove(redisKey, String.valueOf(userId));
     }
 
-    public int getLikeCount(String entityType, String entityId) {
+    public int getLikeCount(String entityType, ObjectId entityId) {
         String redisKey = entityType + ":likes:" + entityId;
         Long count = redisTemplate.opsForSet().size(redisKey);
         return count != null ? count.intValue() : 0;
@@ -59,18 +60,18 @@ public class RedisService {
         return redisTemplate.opsForSet().members(redisKey);
     }
 
-    public void addScrap(String postId, String userId) {
-        String redisKey = "post:scraps:" + postId;
-        redisTemplate.opsForSet().add(redisKey, userId);
+    public void addScrap(ObjectId postId, ObjectId userId) {
+        String redisKey = "post:scraps:" + postId.toString();
+        redisTemplate.opsForSet().add(redisKey, userId.toString());
     }
 
-    public void removeScrap(String postId, String userId) {
-        String redisKey = "post:scraps:" + postId;
-        redisTemplate.opsForSet().remove(redisKey, userId);
+    public void removeScrap(ObjectId postId, ObjectId userId) {
+        String redisKey = "post:scraps:" + postId.toString();
+        redisTemplate.opsForSet().remove(redisKey, userId.toString());
     }
 
-    public int getScrapCount(String postId) {
-        String redisKey = "post:scraps:" + postId;
+    public int getScrapCount(ObjectId postId) {
+        String redisKey = "post:scraps:" + postId.toString();
         Long scrapCount = redisTemplate.opsForSet().size(redisKey);
         return scrapCount != null ? scrapCount.intValue() : 0;
     }
