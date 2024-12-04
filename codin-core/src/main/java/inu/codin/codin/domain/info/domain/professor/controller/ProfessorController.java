@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/info/professor")
-@Tag(name = "Info API", description = "연구실, 사무실, 교수 / 정보 API")
+@Tag(name = "Professor API", description = "교수 정보 API")
 public class ProfessorController {
 
     private final ProfessorService professorService;
