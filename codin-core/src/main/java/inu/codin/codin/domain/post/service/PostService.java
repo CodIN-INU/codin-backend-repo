@@ -50,7 +50,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 postCreateRequestDTO.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
         PostEntity postEntity = PostEntity.builder()
@@ -75,7 +75,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
         List<String> imageUrls = handleImageUpload(postImages);
@@ -90,7 +90,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
         post.updatePostAnonymous(requestDTO.isAnonymous());
@@ -103,7 +103,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
         post.updatePostStatus(requestDTO.getPostStatus());
@@ -183,7 +183,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
         post.delete();
@@ -198,7 +198,7 @@ public class PostService {
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR"))
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "게시물을 업로드 할 권한이 없습니다.");
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
 
 
         if (!post.getPostImageUrls().contains(imageUrl))
