@@ -17,7 +17,7 @@ public class SecurityUtils {
      * 현재 인증된 사용자의 ID를 반환.
      *
      * @return 인증된 사용자의 ID
-     * @throws IllegalStateException 인증 정보가 없는 경우 예외 발생
+     * @throws JwtException 인증 정보가 없는 경우 예외 발생
      */
     public static ObjectId getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -37,6 +37,13 @@ public class SecurityUtils {
         }
 
         return userDetails.getRole();
+    }
+
+    public void validateUser(ObjectId id){
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        if (!id.equals(userId)) {
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "현재 유저에게 권한이 없습니다.");
+        }
     }
 
 }
