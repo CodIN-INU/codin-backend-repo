@@ -60,7 +60,6 @@ public class SecurityConfig {
                                 .anyRequest().hasRole("USER")
                 )
                 // Swagger 접근 시 httpBasic 인증 사용
-//                .securityMatcher(SWAGGER_AUTH_PATHS)
                 .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
