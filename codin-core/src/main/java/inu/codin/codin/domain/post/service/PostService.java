@@ -21,6 +21,7 @@ import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,7 +48,7 @@ public class PostService {
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         List<String> imageUrls = handleImageUpload(postImages);
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 postCreateRequestDTO.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
@@ -71,7 +72,7 @@ public class PostService {
 
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
 
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -86,7 +87,7 @@ public class PostService {
     }
 
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -99,7 +100,7 @@ public class PostService {
     }
 
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -121,7 +122,7 @@ public class PostService {
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public List<PostListResponseDto> getAllUserPosts() {
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
         List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
         return getPostListResponseDtos(posts);
     }
@@ -130,16 +131,16 @@ public class PostService {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
                 .map(post -> new PostListResponseDto(
-                        post.getUserId(),
-                        post.getPostId(),
+                        post.getUserId().toString(),
+                        post.get_id().toString(),
                         post.getContent(),
                         post.getTitle(),
                         post.getPostCategory(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
                         post.getCommentCount(),
-                        likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
-                        scrapService.getScrapCount(post.getPostId()),      // 스크랩 수
+                        likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
+                        scrapService.getScrapCount(post.get_id()),      // 스크랩 수
                         post.getCreatedAt()
                 ))
                 .toList();
@@ -147,19 +148,19 @@ public class PostService {
 
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
     public PostDetailResponseDTO getPostWithDetail(String postId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         return new PostDetailResponseDTO(
-                post.getUserId(),
-                post.getPostId(),
+                post.getUserId().toString(),
+                post.get_id().toString(),
                 post.getContent(),
                 post.getTitle(),
                 post.getPostCategory(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
-                likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),   // 좋아요 수
-                scrapService.getScrapCount(post.getPostId()),   // 스크랩 수
+                likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
+                scrapService.getScrapCount(post.get_id()),   // 스크랩 수
                 post.getCreatedAt()
         );
     }
@@ -167,7 +168,7 @@ public class PostService {
 
 
     public void softDeletePost(String postId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -182,7 +183,7 @@ public class PostService {
 
     public void deletePostImage(String postId, String imageUrl) {
 
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&

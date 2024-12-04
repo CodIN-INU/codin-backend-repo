@@ -4,6 +4,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 import java.util.List;

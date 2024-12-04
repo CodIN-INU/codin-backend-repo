@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.bson.types.ObjectId;
 
 /*
     교수님 리스트 반환 DTO
@@ -34,7 +35,7 @@ public class ProfessorListResponseDto{
 
     public static ProfessorListResponseDto of(Professor professor) {
         return ProfessorListResponseDto.builder()
-                .id(professor.getId())
+                .id(professor.get_id().toString())
                 .name(professor.getName())
                 .department(professor.getDepartment())
                 .build();
