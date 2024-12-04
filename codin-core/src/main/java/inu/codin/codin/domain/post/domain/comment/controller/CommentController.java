@@ -2,8 +2,8 @@ package inu.codin.codin.domain.post.domain.comment.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

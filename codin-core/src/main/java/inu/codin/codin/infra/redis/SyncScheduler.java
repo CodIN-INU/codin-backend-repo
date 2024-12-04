@@ -66,7 +66,7 @@ public class SyncScheduler {
             List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeId(likeType, likeId);
             for (LikeEntity dbLike : dbLikes) {
                 if (!likedUsers.contains(dbLike.getUserId().toString())) {
-                    log.info("MongoDB에서 사용자 삭제: UserID={}, EntityID={}", dbLike.getUserId(), likeId);
+                    log.info("[MongoDB] 좋아요 삭제: UserID={}, EntityID={}", dbLike.getUserId(), likeId);
                     likeRepository.delete(dbLike);
                 }
             }
@@ -75,7 +75,7 @@ public class SyncScheduler {
             for (String id : likedUsers) {
                 ObjectId userId = new ObjectId(id);
                 if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeType, likeId, userId)) {
-                    log.info("MongoDB에 사용자 추가: UserID={}, EntityID={}", userId, likeId);
+                    log.info("[MongoDB] 좋아요 추가: UserID={}, EntityID={}", userId, likeId);
                     LikeEntity dbLike = LikeEntity.builder()
                             .likeType(likeType)
                             .likeTypeId(likeId)
@@ -134,7 +134,7 @@ public class SyncScheduler {
             // (스크랩 삭제) MongoDB에 있지만 Redis에 없는 사용자 삭제
             for (ScrapEntity dbScrap : dbScraps) {
                 if (!redisScrappedUsers.contains(dbScrap.getUserId().toString())) {
-                    log.info("MongoDB에서 사용자 삭제: UserID={}, PostID={}", dbScrap.getUserId(), id);
+                    log.info("[MongoDB] 스크랩 삭제: UserID={}, PostID={}", dbScrap.getUserId(), id);
                     scrapRepository.delete(dbScrap);
                 }
             }
@@ -142,7 +142,7 @@ public class SyncScheduler {
             // (스크랩 추가) Redis에 있지만 MongoDB에 없는 사용자 추가
             for (String redisUser : redisScrappedUsers) {
                 if (!dbScrappedUsers.contains(redisUser)) {
-                    log.info("MongoDB에 사용자 추가: UserID={}, PostID={}", redisUser, id);
+                    log.info("[MongoDB] 스크랩 추가: UserID={}, PostID={}", redisUser, id);
                     ScrapEntity dbScrap = ScrapEntity.builder()
                             .postId(id)
                             .userId(new ObjectId(redisUser))
