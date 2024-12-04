@@ -53,6 +53,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	//web socket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// bucket4j
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.5.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
