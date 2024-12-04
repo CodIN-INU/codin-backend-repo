@@ -14,7 +14,6 @@ public class ReplyCommentEntity extends BaseTimeEntity {
     @Id
     @NotBlank
     private ObjectId _id;
-
     private ObjectId commentId; // 댓글 ID 참조
     private ObjectId userId; // 작성자 ID
     private String content;

@@ -2,7 +2,7 @@ package inu.codin.codin.domain.post.domain.reply.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
@@ -83,7 +83,7 @@ public class ReplyCommentService {
                 .map(reply -> {
                     boolean isDeleted = reply.getDeletedAt() != null;
                     return new CommentResponseDTO(
-                            reply.getCommentId().toString(),
+                            reply.get_id().toString(),
                             reply.getUserId().toString(),
                             reply.getContent(),
                             List.of(), //대댓글은 대댓글이 없음
