@@ -23,7 +23,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(JwtException.class)
-    protected ResponseEntity<ExceptionResponse> handleJwtException(NotFoundException e) {
+    protected ResponseEntity<ExceptionResponse> handleJwtException(JwtException e) {
+        if (e.getErrorCode().getErrorCode().equals("SEC_005")){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));
+        }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
     }

@@ -23,7 +23,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
-            throw new JwtException(SecurityErrorCode.INVALID_CREDENTIALS);
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED);
         }
 
         return userDetails.getId();
@@ -33,7 +33,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
-            throw new JwtException(SecurityErrorCode.INVALID_CREDENTIALS);
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED);
         }
 
         return userDetails.getRole();
