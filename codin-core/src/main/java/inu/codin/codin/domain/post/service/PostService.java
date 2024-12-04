@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -114,32 +115,20 @@ public class PostService {
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public List<PostListResponseDto> getAllPosts(PostCategory postCategory) {
         List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
-
-        return posts.stream()
-                .map(post -> new PostListResponseDto(
-                        post.getUserId(),
-                        post.getPostId(),
-                        post.getContent(),
-                        post.getTitle(),
-                        post.getPostCategory(),
-                        post.getPostImageUrls(),
-                        post.isAnonymous(),
-                        post.getCommentCount(), // 댓글 수
-                        likeService.getLikeCount(LikeType.valueOf("POST"),post.getPostId()),       // 좋아요 수
-                        scrapService.getScrapCount(post.getPostId()),       // 스크랩 수
-                        post.getCreatedAt()
-                )).toList();
+        return getPostListResponseDtos(posts);
     }
 
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public List<PostListResponseDto> getAllUserPosts() {
-
         String userId = SecurityUtils.getCurrentUserId();
-
         List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
+        return getPostListResponseDtos(posts);
+    }
 
+    private List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
+                .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
                 .map(post -> new PostListResponseDto(
                         post.getUserId(),
                         post.getPostId(),
