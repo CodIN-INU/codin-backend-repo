@@ -59,6 +59,7 @@ public class ReplyCommentService {
     public void softDeleteReply(String replyId) {
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(new ObjectId(replyId))
                 .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+        SecurityUtils.validateUser(reply.getUserId());
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
