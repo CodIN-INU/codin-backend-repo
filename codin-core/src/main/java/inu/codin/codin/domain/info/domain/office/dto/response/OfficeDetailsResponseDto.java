@@ -15,7 +15,6 @@ import java.util.List;
     학과 사무실 평면도 및 지원 정보들을 모두 반환한다.
  */
 @Getter
-@Setter
 public class OfficeDetailsResponseDto {
 
     @Schema(description = "학과", example = "IT_COLLEGE")
@@ -41,10 +40,10 @@ public class OfficeDetailsResponseDto {
     private final String fax;
 
     @Schema(description = "사무실 평면도", example = "https://")
-    private String img;
+    private final String img;
 
     @Schema(description = "학과사무실 직원")
-    private List<OfficeMemberResponseDto> officeMember;
+    private final List<OfficeMemberResponseDto> officeMember;
 
     @Builder
     public OfficeDetailsResponseDto(Department department, String location, String open, String vacation, String officeNumber, String fax, String img, List<OfficeMemberResponseDto> officeMember) {

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public abstract class Info extends BaseTimeEntity {
 
     @Id @NotBlank
-    protected String id;
+    protected ObjectId _id;
 
     @NotBlank
     protected Department department;
@@ -23,8 +24,8 @@ public abstract class Info extends BaseTimeEntity {
     @NotBlank
     protected InfoType infoType;
 
-    public Info(String id, Department department, InfoType infoType) {
-        this.id = id;
+    public Info(ObjectId id, Department department, InfoType infoType) {
+        this._id = id;
         this.department = department;
         this.infoType = infoType;
     }

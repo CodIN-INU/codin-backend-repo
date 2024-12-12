@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "info")
@@ -38,7 +39,7 @@ public class Professor extends Info {
     private String labId;
 
     @Builder
-    public Professor(String id, Department department, InfoType infoType, String name, String image, String number, String email, String site, String field, String subject, String labId) {
+    public Professor(ObjectId id, Department department, InfoType infoType, String name, String image, String number, String email, String site, String field, String subject, String labId) {
         super(id, department, infoType);
         this.name = name;
         this.image = image;
