@@ -4,6 +4,7 @@ import inu.codin.codin.common.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,17 +12,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 public class CommentEntity extends BaseTimeEntity {
     @Id @NotBlank
-    private String commentId;
+    private ObjectId _id;
 
-    private String postId;  //게시글 ID 참조
-    private String userId;
+    private ObjectId postId;  //게시글 ID 참조
+    private ObjectId userId;
     private String content;
 
     private int likeCount = 0;  // 좋아요 수 (Redis에서 관리)
 
     @Builder
-    public CommentEntity(String commentId, String postId, String userId, String content) {
-        this.commentId = commentId;
+    public CommentEntity(ObjectId _id, ObjectId postId, ObjectId userId, String content) {
+        this._id = _id;
         this.postId = postId;
         this.userId = userId;
         this.content = content;
