@@ -18,6 +18,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class PostService {
     private final S3Service s3Service;
     private final LikeService likeService;
     private final ScrapService scrapService;
+    private final RedisService redisService;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -113,14 +115,14 @@ public class PostService {
     }
 
 
-    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 + 조회수 반환
     public List<PostListResponseDto> getAllPosts(PostCategory postCategory) {
         List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
         return getPostListResponseDtos(posts);
     }
 
 
-    //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 + 조회수 반환
     public List<PostListResponseDto> getAllUserPosts() {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
@@ -141,15 +143,20 @@ public class PostService {
                         post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
                         scrapService.getScrapCount(post.get_id()),      // 스크랩 수
+                        redisService.getHitsCount(post.get_id()),
                         post.getCreatedAt()
                 ))
                 .toList();
     }
 
-    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
+    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수) + 조회수 반환
     public PostDetailResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        if (redisService.validateHits(post.get_id(), userId))
+            redisService.addHits(post.get_id(), userId);
 
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
@@ -161,6 +168,7 @@ public class PostService {
                 post.isAnonymous(),
                 likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
                 scrapService.getScrapCount(post.get_id()),   // 스크랩 수
+                redisService.getHitsCount(post.get_id()),
                 post.getCreatedAt()
         );
     }

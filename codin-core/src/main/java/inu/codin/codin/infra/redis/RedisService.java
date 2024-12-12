@@ -21,7 +21,6 @@ public class RedisService {
      * 장애 복구를 대비한 보완 로직 추가
      */
     private final RedisTemplate<String, String> redisTemplate;
-    private final PostRepository postRepository;
 
     //post, comment, reply 구분
     public Set<String> getKeys(String pattern) {
@@ -74,5 +73,26 @@ public class RedisService {
         String redisKey = "post:scraps:" + postId.toString();
         Long scrapCount = redisTemplate.opsForSet().size(redisKey);
         return scrapCount != null ? scrapCount.intValue() : 0;
+    }
+
+    public void addHits(ObjectId postId, ObjectId userId){
+        String redisKey = "post:hits:" + postId.toString();
+        redisTemplate.opsForSet().add(redisKey, userId.toString());
+    }
+
+    public boolean validateHits(ObjectId postId, ObjectId userId){
+        String redisKey = "post:hits:" + postId.toString();
+        return Boolean.FALSE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString())); //없어야 유효성 검증 통과
+    }
+
+    public int getHitsCount(ObjectId postId){
+        String redisKey = "post:hits:" + postId.toString();
+        Long hitsCount = redisTemplate.opsForSet().size(redisKey);
+        return hitsCount != null ? hitsCount.intValue() : 0;
+    }
+
+    public Set<String> getHitsUser(ObjectId postId) {
+        String redisKey = "post:hits:" + postId.toString();
+        return redisTemplate.opsForSet().members(redisKey);
     }
 }
