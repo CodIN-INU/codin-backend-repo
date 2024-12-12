@@ -21,4 +21,6 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
 
     @Query("{'deletedAt': null, 'postStatus':  { $in:  ['ACTIVE'] }, 'postCategory': ?0 }")
     List<PostEntity> findAllAndNotDeletedAndActive(PostCategory postCategory);
+
+    List<PostEntity> findByPostCategoryStartingWith(String prefix);
 }

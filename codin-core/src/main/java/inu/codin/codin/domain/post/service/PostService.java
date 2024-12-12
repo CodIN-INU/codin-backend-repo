@@ -12,6 +12,7 @@ import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -116,8 +117,13 @@ public class PostService {
 
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 + 조회수 반환
-    public List<PostListResponseDto> getAllPosts(PostCategory postCategory) {
-        List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
+    public List<PostListResponseDto> getAllPostsByCategory(PostCategory postCategory) {
+        List<PostEntity> posts;
+        if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR)){
+            posts = postRepository.findByPostCategoryStartingWith(postCategory.toString());
+        } else {
+            posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
+        }
         return getPostListResponseDtos(posts);
     }
 
@@ -144,7 +150,8 @@ public class PostService {
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
                         scrapService.getScrapCount(post.get_id()),      // 스크랩 수
                         redisService.getHitsCount(post.get_id()),
-                        post.getCreatedAt()
+                        post.getCreatedAt(),
+                        getUserInfoAboutPost(post.get_id())
                 ))
                 .toList();
     }
@@ -169,8 +176,8 @@ public class PostService {
                 likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
                 scrapService.getScrapCount(post.get_id()),   // 스크랩 수
                 redisService.getHitsCount(post.get_id()),
-                post.getCreatedAt()
-        );
+                post.getCreatedAt(),
+                getUserInfoAboutPost(post.get_id()));
     }
 
 
@@ -212,6 +219,14 @@ public class PostService {
         } catch (Exception e) {
             throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
         }
+    }
+
+    public UserInfo getUserInfoAboutPost(ObjectId postId){
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return UserInfo.builder()
+                .isLike(redisService.isPostLiked(postId, userId))
+                .isScrap(redisService.isPostScraped(postId, userId))
+                .build();
     }
 
 }

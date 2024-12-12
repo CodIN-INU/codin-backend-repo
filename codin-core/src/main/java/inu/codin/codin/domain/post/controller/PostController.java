@@ -91,8 +91,8 @@ public class PostController {
             summary = "카테고리별 삭제 되지 않은 모든 게시물 조회"
     )
     @GetMapping("/category")
-    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPosts(@RequestParam PostCategory postCategory) {
-        List<PostListResponseDto> posts = postService.getAllPosts(postCategory);
+    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPostsByCategory(@RequestParam PostCategory postCategory) {
+        List<PostListResponseDto> posts = postService.getAllPostsByCategory(postCategory);
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", posts));
     }
