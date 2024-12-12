@@ -45,11 +45,14 @@ public class PostDetailResponseDTO {
     @Schema(description = "스크랩 count", example = "0")
     private final int scrapCount;
 
+    @Schema(description = "조회수", example = "0")
+    private final int hits;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
     private final LocalDateTime createdAt;
 
-    public PostDetailResponseDTO(String userId, String _id, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, LocalDateTime createdAt) {
+    public PostDetailResponseDTO(String userId, String _id, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt) {
         this.userId = userId;
         this._id = _id;
         this.content = content;
@@ -59,6 +62,7 @@ public class PostDetailResponseDTO {
         this.isAnonymous = isAnonymous;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
+        this.hits = hits;
         this.createdAt = createdAt;
     }
 }
