@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Chatting API", description = "채팅 보내기, 채팅 내역 반환")
 public class ChattingController {
 
@@ -34,10 +33,10 @@ public class ChattingController {
     )
     @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
     @SendTo("/queue/{chatRoomId}")
-    public Mono<ResponseEntity<SingleResponse<Void>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto){
-        log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), chattingRequestDto.getSenderId(), id);
-        return chattingService.sendMessage(id, chattingRequestDto)
-                .thenReturn(ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", null)));
+    public Mono<ResponseEntity<SingleResponse<?>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto,
+                                                               Authentication authentication){
+        return chattingService.sendMessage(id, chattingRequestDto, authentication)
+                .map( chattingResponseDto -> ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", chattingResponseDto)));
     }
 
 

@@ -4,6 +4,7 @@ import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,26 +14,26 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Chatting extends BaseTimeEntity {
 
     @Id @NotBlank
-    private String id;
+    private ObjectId _id;
 
     @NotBlank
-    private String senderId;
+    private ObjectId senderId;
 
     @NotBlank
     private String content;
 
-    private String chatRoomId;
+    private ObjectId chatRoomId;
 
     @Builder
-    public Chatting(String senderId, String content, String chatRoomId) {
+    public Chatting(ObjectId senderId, String content, ObjectId chatRoomId) {
         this.senderId = senderId;
         this.content = content;
         this.chatRoomId = chatRoomId;
     }
 
-    public static Chatting of(String chatRoomId, ChattingRequestDto chattingRequestDto) {
+    public static Chatting of(ObjectId chatRoomId, ChattingRequestDto chattingRequestDto, ObjectId senderId) {
         return Chatting.builder()
-                .senderId(chattingRequestDto.getSenderId())
+                .senderId(senderId)
                 .content(chattingRequestDto.getContent())
                 .chatRoomId(chatRoomId)
                 .build();

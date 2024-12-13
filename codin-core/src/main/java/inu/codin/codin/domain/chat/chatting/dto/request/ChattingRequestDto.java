@@ -16,10 +16,6 @@ public class ChattingRequestDto {
     private MessageType type;
 
     @NotBlank
-    @Schema(description = "수신자 Id", example = "111111")
-    private String senderId;
-
-    @NotBlank
     @Schema(description = "채팅 내용", example = "안녕하세요")
     private String content;
 }

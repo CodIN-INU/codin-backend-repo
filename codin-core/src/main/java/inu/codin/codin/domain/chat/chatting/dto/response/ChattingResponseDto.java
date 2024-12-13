@@ -40,11 +40,11 @@ public class ChattingResponseDto {
 
     public static ChattingResponseDto of(Chatting chatting){
         return ChattingResponseDto.builder()
-                .id(chatting.getId())
-                .senderId(chatting.getSenderId())
+                .id(chatting.get_id().toString())
+                .senderId(chatting.getSenderId().toString())
                 .content(chatting.getContent())
                 .createdAt(chatting.getCreatedAt())
-                .chatRoomId(chatting.getChatRoomId())
+                .chatRoomId(chatting.getChatRoomId().toString())
                 .build();
     }
 }
