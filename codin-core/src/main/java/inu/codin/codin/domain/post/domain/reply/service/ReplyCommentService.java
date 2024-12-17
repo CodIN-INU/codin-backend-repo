@@ -8,10 +8,12 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -93,4 +95,13 @@ public class ReplyCommentService {
     }
 
 
+    public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
+
+        ObjectId replyId = new ObjectId(id);
+        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
+                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+
+        reply.updateReply(requestDTO.getContent());
+        replyCommentRepository.save(reply);
+    }
 }
