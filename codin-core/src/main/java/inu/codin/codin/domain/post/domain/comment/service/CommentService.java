@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.domain.comment.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
@@ -103,5 +104,15 @@ public class CommentService {
                             isDeleted);
                     })
                 .toList();
+    }
+
+    public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
+
+        ObjectId commentId = new ObjectId(id);
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+
+        comment.updateComment(requestDTO.getContent());
+        commentRepository.save(comment);
     }
 }
