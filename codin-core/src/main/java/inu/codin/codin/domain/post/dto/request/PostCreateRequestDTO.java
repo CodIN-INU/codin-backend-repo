@@ -21,7 +21,7 @@ public class PostCreateRequestDTO {
 
     @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "true")
     @NotNull
-    private boolean isAnonymous;
+    private boolean anonymous;
 
     @Schema(description = "게시물 종류", example = "REQUEST_STUDY")
     @NotNull

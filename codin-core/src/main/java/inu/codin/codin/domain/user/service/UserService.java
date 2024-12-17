@@ -10,6 +10,7 @@ import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,5 +57,13 @@ public class UserService {
             throw new UserCreateFailException("이미 존재하는 이메일입니다.");
         if (userRepository.findByStudentId(userCreateRequestDto.getStudentId()).isPresent())
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
+    }
+
+
+    //user id 기반 nickname 반환
+    public String getNicknameByUserId(ObjectId userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return user.getNickname();
     }
 }

@@ -8,5 +8,5 @@ import lombok.Getter;
 public class PostAnonymousUpdateRequestDTO {
     @Schema(description = "익명 여부", example = "true")
     @NotNull
-    private boolean isAnonymous;
+    private boolean anonymous;
 }
