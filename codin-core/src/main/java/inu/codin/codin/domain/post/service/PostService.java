@@ -18,6 +18,8 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,8 @@ public class PostService {
     private final S3Service s3Service;
     private final LikeService likeService;
     private final ScrapService scrapService;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
     //이미지 업로드 메소드
     private List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -128,21 +132,28 @@ public class PostService {
     }
 
     private List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> new PostListResponseDto(
-                        post.getUserId().toString(),
-                        post.get_id().toString(),
-                        post.getContent(),
-                        post.getTitle(),
-                        post.getPostCategory(),
-                        post.getPostImageUrls(),
-                        post.isAnonymous(),
-                        post.getCommentCount(),
-                        likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
-                        scrapService.getScrapCount(post.get_id()),      // 스크랩 수
-                        post.getCreatedAt()
-                ))
+                .map(post ->
+                {
+                    String nickname = userService.getNicknameByUserId(post.getUserId()); // 닉네임 조회
+                    return new PostListResponseDto(
+                            post.getUserId().toString(),
+                            post.get_id().toString(),
+                            post.getTitle(),
+                            post.getContent(),
+                            post.isAnonymous() ? "익명" : nickname,
+                            post.getPostCategory(),
+                            post.getPostImageUrls(),
+                            post.isAnonymous(),
+                            post.getCommentCount(),
+                            likeService.getLikeCount(LikeType.valueOf("POST"), post.get_id()),       // 좋아요 수
+                            scrapService.getScrapCount(post.get_id()),      // 스크랩 수
+                            post.getCreatedAt()
+                    );
+
+                })
                 .toList();
     }
 
@@ -151,11 +162,13 @@ public class PostService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
+        String nickname = post.isAnonymous() ? "익명" : userService.getNicknameByUserId(post.getUserId());
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
                 post.get_id().toString(),
-                post.getContent(),
                 post.getTitle(),
+                post.getContent(),
+                nickname,
                 post.getPostCategory(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
