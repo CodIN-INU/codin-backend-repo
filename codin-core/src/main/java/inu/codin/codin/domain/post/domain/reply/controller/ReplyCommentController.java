@@ -44,7 +44,7 @@ public class ReplyCommentController {
     public ResponseEntity<SingleResponse<?>> updateReply(@PathVariable String replyId, @RequestBody @Valid ReplyUpdateRequestDTO requestDTO){
         replyCommentService.updateReply(replyId, requestDTO);
         return ResponseEntity.status(HttpStatus.OK).
-                body(new SingleResponse<>(200, "댓글 수정되었습니다.", null));
+                body(new SingleResponse<>(200, "대댓글이 수정되었습니다.", null));
 
     }
 }
