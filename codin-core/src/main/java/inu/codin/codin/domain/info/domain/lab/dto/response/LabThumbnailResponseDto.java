@@ -18,33 +18,33 @@ public class LabThumbnailResponseDto {
 
     @NotBlank
     @Schema(description = "학과", example = "EMBEDDED")
-    private Department department;
+    private final Department department;
 
     @NotBlank
     @Schema(description = "연구실 이름", example = "땡땡연구실")
-    private String title;
+    private final String title;
 
     @Schema(description = "연구 내용", example = "이것저것 연구합니다.")
-    private String content;
+    private final String content;
 
     @NotBlank
     @Schema(description = "담당 교수", example = "홍길동")
-    private String professor;
+    private final String professor;
 
     @Schema(description = "교수실 위치", example = "7호관 423호")
-    private String professorLoc;
+    private final String professorLoc;
 
     @Schema(description = "교수실 전화번호", example = "032-123-4567")
-    private String professorNumber;
+    private final String professorNumber;
 
     @Schema(description = "연구실 위치", example = "7호관 409호")
-    private String labLoc;
+    private final String labLoc;
 
     @Schema(description = "연구실 전화번호", example = "032-987-0653")
-    private String labNumber;
+    private final String labNumber;
 
     @Schema(description = "연구실 홈페이지", example = "http://~")
-    private String site;
+    private final String site;
 
     @Builder
     public LabThumbnailResponseDto(Department department, String title, String content, String professor,

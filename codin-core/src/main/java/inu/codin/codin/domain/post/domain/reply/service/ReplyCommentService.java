@@ -2,18 +2,21 @@ package inu.codin.codin.domain.post.domain.reply.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,13 +33,14 @@ public class ReplyCommentService {
     private final LikeService likeService;
 
     // 대댓글 추가
-    public void addReply(String commentId, ReplyCreateRequestDTO requestDTO) {
+    public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
+        ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
 
         ReplyCommentEntity reply = ReplyCommentEntity.builder()
                 .commentId(commentId)
@@ -55,7 +59,7 @@ public class ReplyCommentService {
 
     // 대댓글 삭제 (Soft Delete)
     public void softDeleteReply(String replyId) {
-        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
+        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(new ObjectId(replyId))
                 .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
         // 대댓글 삭제
         reply.delete();
@@ -70,19 +74,19 @@ public class ReplyCommentService {
         post.updateCommentCount(post.getCommentCount() - 1);
         postRepository.save(post);
 
-        log.info("대댓글 성공적 삭제  replyId: {} , postId: {}.", replyId, post.getPostId());
+        log.info("대댓글 성공적 삭제  replyId: {} , postId: {}.", replyId, post.get_id());
     }
 
     // 특정 댓글의 대댓글 조회
-    public List<CommentResponseDTO> getRepliesByCommentId(String commentId) {
+    public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
         return replies.stream()
                 .map(reply -> {
                     boolean isDeleted = reply.getDeletedAt() != null;
                     return new CommentResponseDTO(
-                            reply.getCommentId(),
-                            reply.getUserId(),
+                            reply.get_id().toString(),
+                            reply.getUserId().toString(),
                             reply.getContent(),
                             List.of(), //대댓글은 대댓글이 없음
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
@@ -91,4 +95,13 @@ public class ReplyCommentService {
     }
 
 
+    public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
+
+        ObjectId replyId = new ObjectId(id);
+        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
+                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+
+        reply.updateReply(requestDTO.getContent());
+        replyCommentRepository.save(reply);
+    }
 }
