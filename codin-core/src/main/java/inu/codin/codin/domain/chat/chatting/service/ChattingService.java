@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 @Service
@@ -29,18 +30,18 @@ public class ChattingService {
     //todo 이미지 채팅에 따른 S3 처리
 
     public Mono<ChattingResponseDto> sendMessage(String id, ChattingRequestDto chattingRequestDto, Authentication authentication) {
-        ChatRoom chatRoom = chatRoomRepository.findById(id)
+        ChatRoom chatRoom = chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
-        String userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
-        Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto, new ObjectId(userId));
+        ObjectId userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto, userId);
         log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), userId, id);
         return chattingRepository.save(chatting).map(ChattingResponseDto::of);
     }
 
-    public Mono<List<ChattingResponseDto>> getAllMessage(String id) {
-        chatRoomRepository.findById(id)
+    public Mono<List<ChattingResponseDto>> getAllMessage(String id, Pageable pageable) {
+        chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
-        return chattingRepository.findAllByChatRoomId(id)
+        return chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)
                 .switchIfEmpty(Mono.error(new ChattingNotFoundException("채팅 내역을 찾을 수 없습니다.")))
                 .map(ChattingResponseDto::of)
                 .collectList();

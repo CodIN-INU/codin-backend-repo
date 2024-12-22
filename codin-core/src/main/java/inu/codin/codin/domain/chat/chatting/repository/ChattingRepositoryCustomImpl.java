@@ -8,13 +8,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class ChattingRepositoryCustomImpl implements CustomChattingRepository{
 
     private final MongoTemplate mongoTemplate;
     @Override
-    public Chatting findRecentMessageByChatRoomId(ObjectId chatRoomId) {
+    public Mono<Chatting> findRecentMessageByChatRoomId(ObjectId chatRoomId) {
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("chatRoomId").is(chatRoomId)),
                 Aggregation.sort(Sort.by(Sort.Order.desc("createdAt"))),
@@ -23,6 +24,8 @@ public class ChattingRepositoryCustomImpl implements CustomChattingRepository{
 
         AggregationResults<Chatting> result = mongoTemplate.aggregate(aggregation, "chatting", Chatting.class);
 
-        return result.getUniqueMappedResult();
+        // Use Mono.justOrEmpty to ensure it returns Mono.empty() when there is no result
+        return Mono.justOrEmpty(result.getUniqueMappedResult());
     }
+
 }
