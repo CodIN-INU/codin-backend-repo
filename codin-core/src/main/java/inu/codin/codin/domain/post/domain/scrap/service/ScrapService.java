@@ -12,6 +12,7 @@ import inu.codin.codin.infra.redis.RedisHealthChecker;
 import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,11 +25,12 @@ public class ScrapService {
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
-    public void addScrap(String postId) {
+    public void addScrap(String id) {
+        ObjectId postId = new ObjectId(id);
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
 
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (scrapRepository.existsByPostIdAndUserId(postId, userId)) {
             throw new ScrapCreateFailException("이미 스크랩 한 상태 입니다.");
@@ -44,11 +46,12 @@ public class ScrapService {
         scrapRepository.save(scrap);
     }
 
-    public void removeScrap(String postId) {
+    public void removeScrap(String id) {
+        ObjectId postId = new ObjectId(id);
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
 
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
         if (!scrapRepository.existsByPostIdAndUserId(postId, userId)) {
             throw new ScrapRemoveFailException("스크랩한 적이 없는 게시물입니다.");
         }
@@ -59,7 +62,7 @@ public class ScrapService {
         scrapRepository.deleteByPostIdAndUserId(postId, userId);
     }
 
-    public int getScrapCount(String postId) {
+    public int getScrapCount(ObjectId postId) {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getScrapCount(postId);
         }

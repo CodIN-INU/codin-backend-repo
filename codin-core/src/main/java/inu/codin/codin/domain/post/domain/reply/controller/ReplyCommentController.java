@@ -1,6 +1,8 @@
 package inu.codin.codin.domain.post.domain.reply.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,5 +37,14 @@ public class ReplyCommentController {
         replyCommentService.softDeleteReply(replyId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "대댓글이 삭제되었습니다.", null));
+    }
+
+    @Operation(summary = "대댓글 수정")
+    @PatchMapping("/{replyId}")
+    public ResponseEntity<SingleResponse<?>> updateReply(@PathVariable String replyId, @RequestBody @Valid ReplyUpdateRequestDTO requestDTO){
+        replyCommentService.updateReply(replyId, requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SingleResponse<>(200, "대댓글이 수정되었습니다.", null));
+
     }
 }
