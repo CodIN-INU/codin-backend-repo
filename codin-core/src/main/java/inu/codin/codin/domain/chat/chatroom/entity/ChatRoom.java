@@ -35,9 +35,9 @@ public class ChatRoom extends BaseTimeEntity {
         this.participants = participants;
     }
 
-    public static ChatRoom of(ChatRoomCreateRequestDto chatRoomCreateRequestDto, String senderId){
+    public static ChatRoom of(ChatRoomCreateRequestDto chatRoomCreateRequestDto, ObjectId senderId){
         ArrayList<Participants> participants = new ArrayList<>(2);
-        participants.add(new Participants(chatRoomCreateRequestDto.getReceiverId(), true));
+        participants.add(new Participants(new ObjectId(chatRoomCreateRequestDto.getReceiverId()), true));
         participants.add(new Participants(senderId, true));
         return ChatRoom.builder()
                 .roomName(chatRoomCreateRequestDto.getRoomName())
