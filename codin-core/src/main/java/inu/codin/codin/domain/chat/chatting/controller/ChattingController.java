@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -44,8 +45,9 @@ public class ChattingController {
             description = "Pageable에 해당하는 page, size, sort 내역에 맞게 반환"
     )
     @GetMapping("/chats/list/{chatRoomId}")
-    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id){
-        return chattingService.getAllMessage(id)
+    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id,
+                                                                                        @RequestParam("page") int page){
+        return chattingService.getAllMessage(id, page)
                 .map(chattingList -> ResponseEntity.ok().body(new ListResponse<>(200, "채팅 내용 리스트 반환 완료", chattingList)));
     }
 
