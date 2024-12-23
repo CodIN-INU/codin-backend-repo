@@ -40,8 +40,8 @@ public class ChattingService {
         return chattingRepository.save(chatting).map(ChattingResponseDto::of);
     }
 
-    public Mono<List<ChattingResponseDto>> getAllMessage(String id) {
-        Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
+    public Mono<List<ChattingResponseDto>> getAllMessage(String id, int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
         chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
         return chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)
