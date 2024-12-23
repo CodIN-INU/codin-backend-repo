@@ -12,11 +12,13 @@ import inu.codin.codin.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 @Service
@@ -38,7 +40,8 @@ public class ChattingService {
         return chattingRepository.save(chatting).map(ChattingResponseDto::of);
     }
 
-    public Mono<List<ChattingResponseDto>> getAllMessage(String id, Pageable pageable) {
+    public Mono<List<ChattingResponseDto>> getAllMessage(String id) {
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
         chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
         return chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)

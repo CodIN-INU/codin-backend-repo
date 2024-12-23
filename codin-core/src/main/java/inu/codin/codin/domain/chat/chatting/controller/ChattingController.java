@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
-
 @Controller
 @RequiredArgsConstructor
 @Tag(name = "Chatting API", description = "채팅 보내기, 채팅 내역 반환")
@@ -42,11 +40,12 @@ public class ChattingController {
 
 
     @Operation(
-            summary = "채팅 내용 리스트 가져오기"
+            summary = "채팅 내용 리스트 가져오기",
+            description = "Pageable에 해당하는 page, size, sort 내역에 맞게 반환"
     )
     @GetMapping("/chats/list/{chatRoomId}")
-    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id, Pageable pageable){
-        return chattingService.getAllMessage(id, pageable)
+    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id){
+        return chattingService.getAllMessage(id)
                 .map(chattingList -> ResponseEntity.ok().body(new ListResponse<>(200, "채팅 내용 리스트 반환 완료", chattingList)));
     }
 
