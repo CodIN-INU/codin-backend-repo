@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,9 +17,9 @@ import java.util.List;
 @Getter
 public class PostEntity extends BaseTimeEntity {
     @Id @NotBlank
-    private String postId;
+    private ObjectId _id;
 
-    private String userId; // User 엔티티와의 관계를 유지하기 위한 필드
+    private ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
     private String title;
     private String content;
     private List<String> postImageUrls = new ArrayList<>();
@@ -32,8 +33,8 @@ public class PostEntity extends BaseTimeEntity {
     private int scrapCount = 0; // 스크랩 카운트 (redis)
 
     @Builder
-    public PostEntity(String postId, String userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
-        this.postId = postId;
+    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
+        this._id = _id;
         this.userId = userId;
         this.title = title;
         this.content = content;

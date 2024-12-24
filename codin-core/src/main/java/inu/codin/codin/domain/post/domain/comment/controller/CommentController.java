@@ -2,8 +2,9 @@ package inu.codin.codin.domain.post.domain.comment.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,5 +49,14 @@ public class CommentController {
         commentService.softDeleteComment(commentId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "댓글이 삭제되었습니다.", null));
+    }
+
+    @Operation(summary = "댓글 수정")
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<SingleResponse<?>> updateComment(@PathVariable String commentId, @RequestBody @Valid CommentUpdateRequestDTO requestDTO){
+        commentService.updateComment(commentId, requestDTO);
+        return ResponseEntity.status(HttpStatus.OK).
+                body(new SingleResponse<>(200, "댓글 수정되었습니다.", null));
+
     }
 }
