@@ -5,6 +5,7 @@ import inu.codin.codin.common.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserEntity extends BaseTimeEntity {
 
     @Id @NotBlank
-    private String id;
+    private ObjectId _id;
 
     private String email;
 

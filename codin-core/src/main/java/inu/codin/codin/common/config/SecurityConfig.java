@@ -4,7 +4,6 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +56,6 @@ public class SecurityConfig {
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
-                                .requestMatchers("/ws-stomp/**").permitAll() //잠시 웹소켓 테스트를 위한 open
                                 .anyRequest().hasRole("USER")
                 )
                 // Swagger 접근 시 httpBasic 인증 사용
@@ -103,6 +101,9 @@ public class SecurityConfig {
             "/email/auth/check",
             "/email/auth/send",
             "/v3/api/test1",
+            "/ws-stomp/**",
+            "/chat",
+            "/chat/image",
     };
 
     // Swagger 접근 가능한 URL

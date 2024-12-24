@@ -2,8 +2,9 @@ package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -15,6 +16,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,11 +34,12 @@ public class CommentService {
     private final ReplyCommentService replyCommentService;
 
     // 댓글 추가
-    public void addComment(String postId, CommentCreateRequestDTO requestDTO) {
+    public void addComment(String id, CommentCreateRequestDTO requestDTO) {
+        ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        String userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
         CommentEntity comment = CommentEntity.builder()
                 .postId(postId)
                 .userId(userId)
@@ -51,7 +54,8 @@ public class CommentService {
     }
 
     // 댓글 삭제 (Soft Delete)
-    public void softDeleteComment(String commentId) {
+    public void softDeleteComment(String id) {
+        ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
 
@@ -76,13 +80,14 @@ public class CommentService {
         postRepository.save(post);
 
         log.info("삭제된 commentId: {} , 대댓글 {} . 총 삭제 수: {} postId: {}",
-                commentId, replies.size(), (1 + replies.size()), post.getPostId());
+                commentId, replies.size(), (1 + replies.size()), post.get_id());
     }
 
 
 
     // 특정 게시물의 댓글 및 대댓글 조회
-    public List<CommentResponseDTO> getCommentsByPostId(String postId) {
+    public List<CommentResponseDTO> getCommentsByPostId(String id) {
+        ObjectId postId = new ObjectId(id);
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
@@ -91,13 +96,23 @@ public class CommentService {
                 .map(comment -> {
                     boolean isDeleted = comment.getDeletedAt() != null;
                     return new CommentResponseDTO(
-                            comment.getCommentId(),
-                            comment.getUserId(),
+                            comment.get_id().toString(),
+                            comment.getUserId().toString(),
                             comment.getContent(),
-                            replyCommentService.getRepliesByCommentId(comment.getCommentId()), // 대댓글 조회
-                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.getCommentId()), // 댓글 좋아요 수
+                            replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
+                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
                             isDeleted);
                     })
                 .toList();
+    }
+
+    public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
+
+        ObjectId commentId = new ObjectId(id);
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+
+        comment.updateComment(requestDTO.getContent());
+        commentRepository.save(comment);
     }
 }

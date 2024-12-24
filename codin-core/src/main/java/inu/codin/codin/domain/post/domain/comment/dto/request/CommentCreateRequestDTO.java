@@ -1,11 +1,11 @@
-package inu.codin.codin.domain.post.domain.reply.dto.request;
+package inu.codin.codin.domain.post.domain.comment.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class ReplyCreateRequestDTO {
+public class CommentCreateRequestDTO {
 
     @Schema(description = "댓글 내용", example = "content")
     @NotBlank
