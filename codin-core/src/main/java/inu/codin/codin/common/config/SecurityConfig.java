@@ -4,7 +4,6 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -102,6 +101,9 @@ public class SecurityConfig {
             "/email/auth/check",
             "/email/auth/send",
             "/v3/api/test1",
+            "/ws-stomp/**",
+            "/chat",
+            "/chat/image",
     };
 
     // Swagger 접근 가능한 URL
