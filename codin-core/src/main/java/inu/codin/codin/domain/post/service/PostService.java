@@ -37,17 +37,8 @@ public class PostService {
     private final LikeService likeService;
     private final ScrapService scrapService;
 
-    //이미지 업로드 메소드
-    private List<String> handleImageUpload(List<MultipartFile> postImages) {
-        if (postImages != null && !postImages.isEmpty()) {
-            return s3Service.uploadFiles(postImages); // 실제 업로드 처리
-        }
-        return List.of(); // 이미지가 없을 경우 빈 리스트 반환
-    }
-
-
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = s3Service.handleImageUpload(postImages);
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -80,7 +71,7 @@ public class PostService {
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
 
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = s3Service.handleImageUpload(postImages);
 
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
