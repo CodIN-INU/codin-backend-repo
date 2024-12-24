@@ -13,6 +13,7 @@ import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -22,6 +23,9 @@ import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,17 +118,20 @@ public class PostService {
 
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostListResponseDto> getAllPosts(PostCategory postCategory) {
-        List<PostEntity> posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
-        return getPostListResponseDtos(posts);
+    public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
+
     }
 
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public List<PostListResponseDto> getAllUserPosts() {
+    public PostPageResponse getAllUserPosts(int pageNumber) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
-        return getPostListResponseDtos(posts);
+        PageRequest pageRequest = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
     }
 
     private List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
