@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +25,16 @@ public class S3Service {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final int MAX_FILE_COUNT = 10; // 최대 파일 개수
 
+    //이미지 업로드 메소드
+    public List<String> handleImageUpload(List<MultipartFile> postImages) {
+        if (postImages != null && !postImages.isEmpty()) {
+            return uploadFiles(postImages); // 실제 업로드 처리
+        }
+        return List.of(); // 이미지가 없을 경우 빈 리스트 반환
+    }
 
     //모든 이미지 업로드
-    public List<String> uploadFiles(List<MultipartFile> multipartFiles) {
+    private List<String> uploadFiles(List<MultipartFile> multipartFiles) {
         validateFileCount(multipartFiles);
         List<String> uploadUrls = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
