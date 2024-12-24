@@ -2,9 +2,9 @@ package inu.codin.codin.domain.post.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class PostContentUpdateRequestDTO {
     @Schema(description = "게시물 내용", example = "Updated content")
     @NotBlank

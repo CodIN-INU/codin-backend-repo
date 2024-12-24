@@ -9,21 +9,22 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Chatting API", description = "채팅 보내기, 채팅 내역 반환")
 public class ChattingController {
 
@@ -34,19 +35,29 @@ public class ChattingController {
     )
     @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
     @SendTo("/queue/{chatRoomId}")
-    public Mono<ResponseEntity<SingleResponse<Void>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto){
-        log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), chattingRequestDto.getSenderId(), id);
-        return chattingService.sendMessage(id, chattingRequestDto)
-                .thenReturn(ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", null)));
+    public Mono<ResponseEntity<SingleResponse<?>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto,
+                                                               @AuthenticationPrincipal Authentication authentication){
+        return chattingService.sendMessage(id, chattingRequestDto, authentication)
+                .map( chattingResponseDto -> ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", chattingResponseDto)));
     }
 
+    @Operation(
+            summary = "채팅으로 사진 보내기"
+    )
+    @PostMapping(value = "/chats/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> sendImageMessage(List<MultipartFile> chatImages){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "채팅 사진 업로드 완료", chattingService.sendImageMessage(chatImages)));
+    }
 
     @Operation(
-            summary = "채팅 내용 리스트 가져오기"
+            summary = "채팅 내용 리스트 가져오기",
+            description = "Pageable에 해당하는 page, size, sort 내역에 맞게 반환"
     )
     @GetMapping("/chats/list/{chatRoomId}")
-    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id){
-        return chattingService.getAllMessage(id)
+    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id,
+                                                                                        @RequestParam("page") int page){
+        return chattingService.getAllMessage(id, page)
                 .map(chattingList -> ResponseEntity.ok().body(new ListResponse<>(200, "채팅 내용 리스트 반환 완료", chattingList)));
     }
 
@@ -54,6 +65,11 @@ public class ChattingController {
     @GetMapping("/chat")
     public String chatHtml(){
         return "chat";
+    }
+
+    @GetMapping("/chat/image")
+    public String chatImageHtml(){
+        return "chatImage";
     }
 
 }
