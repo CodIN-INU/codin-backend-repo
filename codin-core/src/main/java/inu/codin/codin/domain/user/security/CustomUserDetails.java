@@ -6,6 +6,7 @@ import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +17,7 @@ import java.util.Collections;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final String id;
+    private final ObjectId id;
     private final String email;
     private final String password;
     private final String studentId;
@@ -30,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Builder
-    public CustomUserDetails(String id, String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(ObjectId id, String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -46,7 +47,7 @@ public class CustomUserDetails implements UserDetails {
 
     public static CustomUserDetails from(UserEntity userEntity) {
         return CustomUserDetails.builder()
-                .id(userEntity.getId())
+                .id(userEntity.get_id())
                 .email(userEntity.getEmail())
                 .password(userEntity.getPassword())
                 .studentId(userEntity.getStudentId())
