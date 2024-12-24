@@ -119,7 +119,7 @@ public class PostService {
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
-        PageRequest pageRequest = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
 
@@ -129,7 +129,7 @@ public class PostService {
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllUserPosts(int pageNumber) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        PageRequest pageRequest = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page = postRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
     }
