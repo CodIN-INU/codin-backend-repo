@@ -9,17 +9,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -34,11 +36,19 @@ public class ChattingController {
     @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
     @SendTo("/queue/{chatRoomId}")
     public Mono<ResponseEntity<SingleResponse<?>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto,
-                                                               Authentication authentication){
+                                                               @AuthenticationPrincipal Authentication authentication){
         return chattingService.sendMessage(id, chattingRequestDto, authentication)
                 .map( chattingResponseDto -> ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", chattingResponseDto)));
     }
 
+    @Operation(
+            summary = "채팅으로 사진 보내기"
+    )
+    @PostMapping(value = "/chats/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> sendImageMessage(List<MultipartFile> chatImages){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "채팅 사진 업로드 완료", chattingService.sendImageMessage(chatImages)));
+    }
 
     @Operation(
             summary = "채팅 내용 리스트 가져오기",
@@ -55,6 +65,11 @@ public class ChattingController {
     @GetMapping("/chat")
     public String chatHtml(){
         return "chat";
+    }
+
+    @GetMapping("/chat/image")
+    public String chatImageHtml(){
+        return "chatImage";
     }
 
 }

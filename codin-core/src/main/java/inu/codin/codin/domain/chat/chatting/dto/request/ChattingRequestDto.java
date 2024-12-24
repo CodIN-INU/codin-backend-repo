@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.dto.request;
 
+import inu.codin.codin.domain.chat.chatting.dto.ContentType;
 import inu.codin.codin.domain.chat.chatting.entity.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -18,4 +19,8 @@ public class ChattingRequestDto {
     @NotBlank
     @Schema(description = "채팅 내용", example = "안녕하세요")
     private String content;
+
+    @NotNull
+    @Schema(description = "채팅 타입", example = "TEXT")
+    private ContentType contentType;
 }
