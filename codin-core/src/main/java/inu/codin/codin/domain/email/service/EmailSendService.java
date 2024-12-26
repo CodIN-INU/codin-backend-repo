@@ -46,4 +46,27 @@ public class EmailSendService {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendPasswordEmail(String email, String authNum) {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("authNum", authNum);
+
+            // 템플릿 엔진을 사용하여 HTML 내용을 생성
+            String htmlContent = templateEngine.process("password-email", context);
+
+            helper.setTo(email);
+            helper.setSubject("[CODIN] 비밀번호 찾기 인증번호입니다.");
+            helper.setText(htmlContent, true);
+
+            javaMailSender.send(message);
+            log.info("[sendAuthEmail] 인증 이메일 전송 성공, email : {}", email);
+        } catch (MessagingException e) {
+            log.error("[sendAuthEmail] 인증 이메일 전송 실패, email : {}", email);
+            throw new RuntimeException(e);
+        }
+    }
 }
