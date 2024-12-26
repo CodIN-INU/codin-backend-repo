@@ -55,7 +55,7 @@ public class UserController {
     public ResponseEntity<SingleResponse<PostPageResponse>> getUserScrap(@RequestParam("page") int pageNumber){
         PostPageResponse posts = userService.getPostUserInteraction(pageNumber, UserService.InteractionType.SCRAP);
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "사용자가 좋아요 누른 게시물 조회 성공", posts));
+                .body(new SingleResponse<>(200, "사용자가 스크랩한 게시물 조회 성공", posts));
     }
 
     @Operation(
