@@ -2,6 +2,8 @@ package inu.codin.codin.domain.post.domain.comment.repository;
 
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -16,4 +18,6 @@ public interface CommentRepository extends MongoRepository<CommentEntity, Object
 
     @Query("{ 'postId': ?0 }")
     List<CommentEntity> findByPostId(ObjectId postId);
+
+    Page<CommentEntity> findAllByUserIdOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
 }
