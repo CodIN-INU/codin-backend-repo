@@ -16,21 +16,28 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
+import inu.codin.codin.domain.user.dto.UserDeleteRequestDto;
+import inu.codin.codin.domain.user.dto.UserPasswordRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
+import inu.codin.codin.domain.user.exception.UserDisabledException;
+import inu.codin.codin.domain.user.exception.UserPasswordChangeFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.domain.user.security.CustomUserDetails;
+import io.jsonwebtoken.Jwt;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.xml.stream.events.Comment;
 import java.util.List;
 
 @Slf4j
@@ -122,6 +129,27 @@ public class UserService {
                 default:
                 throw new IllegalArgumentException("지원하지 않는 타입입니다.");
         }
+    }
+
+    public void setUserPassword(@Valid UserPasswordRequestDto userPasswordRequestDto) {
+        UserEntity user = userRepository.findByEmail(userPasswordRequestDto.getEmail())
+                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
+        if (user.isChangePassword()){
+            String encodedPassword = passwordEncoder.encode(userPasswordRequestDto.getPassword());
+            user.updatePassword(encodedPassword);
+            user.changePassword();
+            userRepository.save(user);
+        } else {
+            throw new UserPasswordChangeFailException("유저의 비밀번호를 변경할 수 없습니다. 이메일 인증을 먼저 진행해주세요.");
+        }
+    }
+
+    public void deleteUser(UserDeleteRequestDto userDeleteRequestDto) {
+        UserEntity user = userRepository.findByEmail(userDeleteRequestDto.getEmail())
+                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
+        SecurityUtils.validateUser(user.get_id());
+        user.delete();
+        userRepository.save(user);
     }
 
     public enum InteractionType {
