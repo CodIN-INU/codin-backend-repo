@@ -15,26 +15,24 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
-import inu.codin.codin.domain.user.dto.UserDeleteRequestDto;
-import inu.codin.codin.domain.user.dto.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
-import inu.codin.codin.domain.user.exception.UserDisabledException;
 import inu.codin.codin.domain.user.exception.UserPasswordChangeFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.security.CustomUserDetails;
-import io.jsonwebtoken.Jwt;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -150,6 +148,13 @@ public class UserService {
         SecurityUtils.validateUser(user.get_id());
         user.delete();
         userRepository.save(user);
+    }
+
+    public UserInfoResponseDto getUserInfo() {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        return UserInfoResponseDto.of(user);
     }
 
     public enum InteractionType {
