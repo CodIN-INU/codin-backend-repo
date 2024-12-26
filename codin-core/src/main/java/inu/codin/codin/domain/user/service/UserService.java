@@ -79,6 +79,14 @@ public class UserService {
             throw new UserCreateFailException("이미 존재하는 학번입니다.");
     }
 
+    //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    public PostPageResponse getAllUserPosts(int pageNumber) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+        return PostPageResponse.of(postService.getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
+    }
+
     public PostPageResponse getPostUserLike(int pageNumber) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
@@ -100,4 +108,6 @@ public class UserService {
                 .toList();
         return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
     }
+
+
 }
