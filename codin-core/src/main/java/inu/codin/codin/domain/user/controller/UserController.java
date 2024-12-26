@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.user.controller;
 
-import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
@@ -8,7 +7,6 @@ import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +26,16 @@ public class UserController {
         userService.createUser(userCreateRequestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원가입 성공", null));
+    }
+
+    @Operation(
+            summary = "해당 사용자 게시물 전체 조회"
+    )
+    @GetMapping("/post")
+    public ResponseEntity<SingleResponse<PostPageResponse>> getAllUserPosts(@RequestParam("page") int pageNumber) {
+        PostPageResponse posts = userService.getAllUserPosts(pageNumber);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "사용자 게시물 조회 성공", posts));
     }
 
     @Operation(
