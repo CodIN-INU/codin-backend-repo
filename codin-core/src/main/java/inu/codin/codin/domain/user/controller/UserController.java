@@ -2,9 +2,10 @@ package inu.codin.codin.domain.user.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.user.dto.UserCreateRequestDto;
-import inu.codin.codin.domain.user.dto.UserDeleteRequestDto;
-import inu.codin.codin.domain.user.dto.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,8 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -91,5 +90,14 @@ public class UserController {
         userService.deleteUser(userDeleteRequestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 탈퇴 완료", null));
+    }
+
+    @Operation(
+            summary = "유저 정보 반환"
+    )
+    @GetMapping
+    public ResponseEntity<SingleResponse<UserInfoResponseDto>> getUserInfo(){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 정보 반환 완료", userService.getUserInfo()));
     }
 }
