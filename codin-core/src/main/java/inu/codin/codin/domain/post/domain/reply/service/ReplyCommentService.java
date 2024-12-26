@@ -90,7 +90,8 @@ public class ReplyCommentService {
                             reply.getContent(),
                             List.of(), //대댓글은 대댓글이 없음
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
-                            isDeleted);
+                            isDeleted,
+                            reply.getCreatedAt());
                 }).toList();
     }
 
