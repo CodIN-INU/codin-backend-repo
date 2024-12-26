@@ -4,6 +4,8 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.xml.stream.events.Comment;
 import java.util.List;
 
 @Slf4j
@@ -40,6 +43,7 @@ public class UserService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
+    private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
     private final PostService postService;
 
@@ -87,27 +91,43 @@ public class UserService {
         return PostPageResponse.of(postService.getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public PostPageResponse getPostUserLike(int pageNumber) {
+    public PostPageResponse getPostUserInteraction(int pageNumber, InteractionType interactionType) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<LikeEntity> page = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
-        List<PostEntity> postUserLike = page.getContent().stream()
-                .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
-                        .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
-                .toList();
-        return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
+        switch (interactionType) {
+            case LIKE:
+                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
+                List<PostEntity> postUserLike = likePage.getContent().stream()
+                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
+                                .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
+                        .toList();
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
+
+            case SCRAP:
+                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                List<PostEntity> postUserScrap = scrapPage.getContent().stream()
+                        .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
+                                .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
+                        .toList();
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), scrapPage.getTotalPages()-1, scrapPage.hasNext()? scrapPage.getPageable().getPageNumber() + 1 : -1);
+
+            case COMMENT:
+                Page<CommentEntity> commentPage = commentRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                List<PostEntity> postUserComment = commentPage.getContent().stream()
+                        .map(commentEntity -> postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
+                                .orElseThrow(() -> new NotFoundException("유저가 작성한 댓글의 게시글을 찾을 수 없습니다.")))
+                        .toList();
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages()-1, commentPage.hasNext()? commentPage.getPageable().getPageNumber() + 1 : -1);
+
+                default:
+                throw new IllegalArgumentException("지원하지 않는 타입입니다.");
+        }
     }
 
-    public PostPageResponse getPostUserScrap(int pageNumber) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<ScrapEntity> page = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
-        List<PostEntity> postUserScrap = page.getContent().stream()
-                .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
-                        .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
-                .toList();
-        return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
+    public enum InteractionType {
+        LIKE, SCRAP, COMMENT
     }
+
 
 
 }
