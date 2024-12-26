@@ -43,7 +43,7 @@ public class UserController {
     )
     @GetMapping("/like")
     public ResponseEntity<SingleResponse<PostPageResponse>> getUserLike(@RequestParam("page") int pageNumber){
-        PostPageResponse posts = userService.getPostUserLike(pageNumber);
+        PostPageResponse posts = userService.getPostUserInteraction(pageNumber, UserService.InteractionType.LIKE);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "사용자가 좋아요 누른 게시물 조회 성공", posts));
     }
@@ -53,8 +53,18 @@ public class UserController {
     )
     @GetMapping("/scrap")
     public ResponseEntity<SingleResponse<PostPageResponse>> getUserScrap(@RequestParam("page") int pageNumber){
-        PostPageResponse posts = userService.getPostUserScrap(pageNumber);
+        PostPageResponse posts = userService.getPostUserInteraction(pageNumber, UserService.InteractionType.SCRAP);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "사용자가 좋아요 누른 게시물 조회 성공", posts));
+    }
+
+    @Operation(
+            summary = "유저가 작성한 댓글의 게시글 반환"
+    )
+    @GetMapping("/comment")
+    public ResponseEntity<SingleResponse<PostPageResponse>> getUserComment(@RequestParam("page") int pageNumber){
+        PostPageResponse posts = userService.getPostUserInteraction(pageNumber, UserService.InteractionType.COMMENT);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "사용자가 작성한 댓글의 게시물 조회 성공", posts));
     }
 }
