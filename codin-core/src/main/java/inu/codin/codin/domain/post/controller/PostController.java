@@ -97,16 +97,6 @@ public class PostController {
                 .body(new SingleResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
     }
 
-    @Operation(
-            summary = "해당 사용자 게시물 전체 조회"
-    )
-    @GetMapping("/user")
-    public ResponseEntity<SingleResponse<PostPageResponse>> getAllUserPosts(@RequestParam("page") int pageNumber) {
-        PostPageResponse posts = postService.getAllUserPosts(pageNumber);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "사용자 게시물 조회 성공", posts));
-    }
-
     @Operation(summary = "해당 게시물 상세 조회 (댓글 조회는 Comment에서 따로 조회)")
     @GetMapping("/{postId}")
     public ResponseEntity<SingleResponse<PostDetailResponseDTO>> getPostWithDetail(@PathVariable String postId) {
