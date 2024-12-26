@@ -125,7 +125,7 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    private List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
                 .map(post -> new PostListResponseDto(
