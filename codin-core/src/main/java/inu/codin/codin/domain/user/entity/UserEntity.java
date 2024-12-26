@@ -34,6 +34,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private UserStatus status;
 
+    private boolean changePassword = false;
+
     @Builder
     public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status) {
         this.email = email;
@@ -45,5 +47,13 @@ public class UserEntity extends BaseTimeEntity {
         this.department = department;
         this.role = role;
         this.status = status;
+    }
+
+    public void updatePassword(String password){
+        this.password = password;
+    }
+
+    public void changePassword(){
+        this.changePassword = !this.changePassword;
     }
 }
