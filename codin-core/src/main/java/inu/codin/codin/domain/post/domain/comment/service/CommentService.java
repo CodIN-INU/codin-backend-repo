@@ -101,7 +101,8 @@ public class CommentService {
                             comment.getContent(),
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
-                            isDeleted);
+                            isDeleted,
+                            comment.getCreatedAt());
                     })
                 .toList();
     }
