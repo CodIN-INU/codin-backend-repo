@@ -12,7 +12,6 @@ import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -116,10 +115,10 @@ public class PostService {
 
     }
 
-    public List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> new PostListResponseDto(
+                .map(post -> new PostDetailResponseDTO(
                         post.getUserId().toString(),
                         post.get_id().toString(),
                         post.getContent(),
@@ -127,12 +126,11 @@ public class PostService {
                         post.getPostCategory(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
-                        post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
                         scrapService.getScrapCount(post.get_id()),      // 스크랩 수
-                        post.getCreatedAt()
-                ))
-                .toList();
+                        post.getCreatedAt(),
+                        post.getCommentCount()
+                )).toList();
     }
 
     //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
@@ -150,8 +148,8 @@ public class PostService {
                 post.isAnonymous(),
                 likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
                 scrapService.getScrapCount(post.get_id()),   // 스크랩 수
-                post.getCreatedAt()
-        );
+                post.getCreatedAt(),
+                post.getCommentCount());
     }
 
 

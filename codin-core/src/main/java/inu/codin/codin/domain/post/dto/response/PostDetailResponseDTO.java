@@ -49,7 +49,10 @@ public class PostDetailResponseDTO {
     @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
     private final LocalDateTime createdAt;
 
-    public PostDetailResponseDTO(String userId, String _id, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, LocalDateTime createdAt) {
+    @Schema(description = "댓글 및 대댓글 count", example = "0")
+    private final int commentCount;
+
+    public PostDetailResponseDTO(String userId, String _id, String content, String title, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, LocalDateTime createdAt, int commentCount) {
         this.userId = userId;
         this._id = _id;
         this.content = content;
@@ -60,5 +63,6 @@ public class PostDetailResponseDTO {
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
         this.createdAt = createdAt;
+        this.commentCount = commentCount;
     }
 }
