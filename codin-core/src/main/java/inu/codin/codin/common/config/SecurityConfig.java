@@ -96,7 +96,7 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/reissue",
             "/auth/logout",
-            "/users/sign-up",
+            "/users/signup",
             "/email/auth/check",
             "/email/auth/send",
             "/email/auth/password",
