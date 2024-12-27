@@ -14,6 +14,7 @@ import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -24,6 +25,9 @@ import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,17 +44,8 @@ public class PostService {
     private final ScrapService scrapService;
     private final RedisService redisService;
 
-    //이미지 업로드 메소드
-    private List<String> handleImageUpload(List<MultipartFile> postImages) {
-        if (postImages != null && !postImages.isEmpty()) {
-            return s3Service.uploadFiles(postImages); // 실제 업로드 처리
-        }
-        return List.of(); // 이미지가 없을 경우 빈 리스트 반환
-    }
-
-
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = s3Service.handleImageUpload(postImages);
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -78,7 +73,8 @@ public class PostService {
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
         validateUserAndPost(post);
 
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = s3Service.handleImageUpload(postImages);
+
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
     }
@@ -119,16 +115,14 @@ public class PostService {
         }
         return getPostListResponseDtos(posts);
     }
-
-
-    //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 + 조회수 반환
-    public List<PostListResponseDto> getAllUserPosts() {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        List<PostEntity> posts = postRepository.findByUserIdAndNotDeleted(userId);
-        return getPostListResponseDtos(posts);
+    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    private List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
                 .map(post -> new PostListResponseDto(

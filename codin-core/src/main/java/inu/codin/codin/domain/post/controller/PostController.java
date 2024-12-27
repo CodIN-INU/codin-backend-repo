@@ -1,13 +1,12 @@
 package inu.codin.codin.domain.post.controller;
 
-import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,20 +90,11 @@ public class PostController {
             summary = "카테고리별 삭제 되지 않은 모든 게시물 조회"
     )
     @GetMapping("/category")
-    public ResponseEntity<ListResponse<PostListResponseDto>> getAllPostsByCategory(@RequestParam PostCategory postCategory) {
-        List<PostListResponseDto> posts = postService.getAllPostsByCategory(postCategory);
+    public ResponseEntity<SingleResponse<PostPageResponse>> getAllPosts(@RequestParam PostCategory postCategory,
+                                                                        @RequestParam("page") int pageNumber) {
+        PostPageResponse postpages= postService.getAllPosts(postCategory, pageNumber);
         return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", posts));
-    }
-
-    @Operation(
-            summary = "해당 사용자 게시물 전체 조회"
-    )
-    @GetMapping("/user")
-    public ResponseEntity<ListResponse<PostListResponseDto>> getAllUserPosts() {
-        List<PostListResponseDto> posts = postService.getAllUserPosts();
-        return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "사용자 게시물 조회 성공", posts));
+                .body(new SingleResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
     }
 
     @Operation(summary = "해당 게시물 상세 조회 (댓글 조회는 Comment에서 따로 조회)")
