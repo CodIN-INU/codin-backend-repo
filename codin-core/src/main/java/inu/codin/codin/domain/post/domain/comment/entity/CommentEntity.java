@@ -28,6 +28,9 @@ public class CommentEntity extends BaseTimeEntity {
         this.content = content;
     }
 
+    public void updateComment(String content) {
+        this.content = content;
+    }
 
     //좋아요 수 업데이트
     public void updateLikeCount(int likeCount) {

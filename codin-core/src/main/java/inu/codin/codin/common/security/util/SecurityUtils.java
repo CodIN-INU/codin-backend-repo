@@ -39,7 +39,7 @@ public class SecurityUtils {
         return userDetails.getRole();
     }
 
-    public void validateUser(ObjectId id){
+    public static void validateUser(ObjectId id){
         ObjectId userId = SecurityUtils.getCurrentUserId();
         if (!id.equals(userId)) {
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "현재 유저에게 권한이 없습니다.");

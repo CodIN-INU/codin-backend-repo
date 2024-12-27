@@ -29,6 +29,9 @@ public class ReplyCommentEntity extends BaseTimeEntity {
         this.likeCount = likeCount;
     }
 
+    public void updateReply(String content) {
+        this.content = content;
+    }
     //좋아요 수 업데이트
     public void updateLikeCount(int likeCount) {
         this.likeCount=likeCount;

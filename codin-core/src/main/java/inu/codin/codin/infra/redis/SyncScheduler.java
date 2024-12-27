@@ -2,6 +2,8 @@ package inu.codin.codin.infra.redis;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.hits.HitsEntity;
+import inu.codin.codin.domain.post.domain.hits.HitsRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
@@ -20,6 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,12 +31,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SyncScheduler {
 
-    private final RedisService redisService;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final LikeRepository likeRepository;
     private final ScrapRepository scrapRepository;
+    private final HitsRepository hitsRepository;
+
+    private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
     @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
@@ -47,6 +52,7 @@ public class SyncScheduler {
         syncEntityLikes("comment", commentRepository);
         syncEntityLikes("reply", replyCommentRepository);
         syncPostScraps();
+        synPostHits();
         log.info(" 동기화 작업 완료");
     }
 
@@ -162,4 +168,49 @@ public class SyncScheduler {
             }
         }
     }
+
+    public void synPostHits(){
+        Map<ObjectId, Set<String>> postHits = fetchAllPostHits(); //하나의 게시글에 조회한 user들
+
+        //Redis 데이터로 DB 저장
+        postHits.forEach((postId, userIds) -> {
+            userIds.forEach(userId -> {
+                hitsRepository.findByPostIdAndUserId(postId, new ObjectId(userId))
+                        .orElseGet(() -> hitsRepository.save(
+                                HitsEntity.builder()
+                                        .postId(postId)
+                                        .userId(new ObjectId(userId))
+                                        .build()
+                        ));
+            });
+        });
+
+        //DB 데이터로 Redis 저장
+        postHits.keySet().forEach(postId -> {
+            List<HitsEntity> dbHits = hitsRepository.findAllByPostId(postId);
+
+            dbHits.forEach(hitsEntity -> {
+                if (redisService.validateHits(postId, hitsEntity.getUserId())) {
+                    redisService.addHits(postId, hitsEntity.getUserId());
+                }
+            });
+        });
+    }
+
+    public Map<ObjectId, Set<String>> fetchAllPostHits(){
+        Set<String> keys = redisService.getKeys("post:hits:*");
+        return keys.stream()
+                .collect(Collectors.toMap(
+                        key -> {
+                            String postId = key.replace("post:hits:", "");
+                            return new ObjectId(postId);
+                        },
+                        key -> {
+                            String postId = key.replace("post:hits:", "");
+                            return redisService.getHitsUser(new ObjectId(postId));
+                        }
+                        )
+                );
+    }
+
 }
