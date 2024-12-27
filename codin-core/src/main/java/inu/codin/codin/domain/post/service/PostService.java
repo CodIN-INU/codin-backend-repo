@@ -13,7 +13,6 @@ import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
-import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -69,6 +68,7 @@ public class PostService {
 
 
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
+
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
         validateUserAndPost(post);
@@ -113,10 +113,10 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> new PostListResponseDto(
+                .map(post -> new PostDetailResponseDTO(
                         post.getUserId().toString(),
                         post.get_id().toString(),
                         post.getContent(),
@@ -124,17 +124,17 @@ public class PostService {
                         post.getPostCategory(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
-                        post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
                         scrapService.getScrapCount(post.get_id()),      // 스크랩 수
                         redisService.getHitsCount(post.get_id()),
                         post.getCreatedAt(),
+                        post.getCommentCount(),
                         getUserInfoAboutPost(post.get_id())
                 ))
                 .toList();
     }
 
-    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수) + 조회수 반환
+    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
     public PostDetailResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
@@ -155,10 +155,10 @@ public class PostService {
                 scrapService.getScrapCount(post.get_id()),   // 스크랩 수
                 redisService.getHitsCount(post.get_id()),
                 post.getCreatedAt(),
-                getUserInfoAboutPost(post.get_id()));
+                post.getCommentCount(),
+                getUserInfoAboutPost(post.get_id())
+        );
     }
-
-
 
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))

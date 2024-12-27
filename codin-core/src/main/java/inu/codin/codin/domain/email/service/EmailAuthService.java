@@ -36,10 +36,10 @@ public class EmailAuthService {
         if (emailAuth.isPresent()) {
             emailAuthEntity = emailAuth.get();
 
-            // 이미 인증된 이메일 체크
-            if (emailAuthEntity.isVerified()) {
-                throw new EmailAuthFailException("이미 인증된 이메일입니다.", email);
-            }
+//            // 이미 인증된 이메일 체크
+//            if (emailAuthEntity.isVerified()) {
+//                throw new EmailAuthFailException("이미 인증된 이메일입니다.", email);
+//            }
 
             emailAuthEntity.changeAuthNum(generateAuthNum());
         }
