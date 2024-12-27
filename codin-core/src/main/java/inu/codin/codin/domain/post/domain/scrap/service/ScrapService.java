@@ -25,20 +25,33 @@ public class ScrapService {
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
-    public void addScrap(String id) {
+    public void toggleScrap(String id) {
         ObjectId postId = new ObjectId(id);
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
+        // 이미 스크랩한 게시물인지 확인
+        boolean alreadyScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
+
+        if (alreadyScrapped) {
+            removeScrap(postId, userId);
+        } else {
+            addScrap(postId, userId);
+        }
+    }
+
+    private void addScrap(ObjectId postId, ObjectId userId) {
+        // 중복 스크랩 방지
         if (scrapRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw new ScrapCreateFailException("이미 스크랩 한 상태 입니다.");
+            throw new ScrapCreateFailException("이미 스크랩한 게시물입니다.");
         }
 
         if (redisHealthChecker.isRedisAvailable()) {
             redisService.addScrap(postId, userId);
         }
+
         ScrapEntity scrap = ScrapEntity.builder()
                 .postId(postId)
                 .userId(userId)
@@ -46,12 +59,8 @@ public class ScrapService {
         scrapRepository.save(scrap);
     }
 
-    public void removeScrap(String id) {
-        ObjectId postId = new ObjectId(id);
-        postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
-
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+    private void removeScrap(ObjectId postId, ObjectId userId) {
+        // 스크랩하지 않은 게시물이라면 오류 처리
         if (!scrapRepository.existsByPostIdAndUserId(postId, userId)) {
             throw new ScrapRemoveFailException("스크랩한 적이 없는 게시물입니다.");
         }
@@ -59,6 +68,7 @@ public class ScrapService {
         if (redisHealthChecker.isRedisAvailable()) {
             redisService.removeScrap(postId, userId);
         }
+
         scrapRepository.deleteByPostIdAndUserId(postId, userId);
     }
 
