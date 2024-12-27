@@ -58,6 +58,7 @@ public class CommentService {
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+        SecurityUtils.validateUser(comment.getUserId());
 
         // 댓글의 대댓글 조회
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
@@ -82,7 +83,6 @@ public class CommentService {
         log.info("삭제된 commentId: {} , 대댓글 {} . 총 삭제 수: {} postId: {}",
                 commentId, replies.size(), (1 + replies.size()), post.get_id());
     }
-
 
 
     // 특정 게시물의 댓글 및 대댓글 조회
