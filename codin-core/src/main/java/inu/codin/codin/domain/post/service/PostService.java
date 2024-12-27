@@ -103,22 +103,13 @@ public class PostService {
         SecurityUtils.validateUser(post.getUserId());
     }
 
-
-
-    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 + 조회수 반환
-    public List<PostListResponseDto> getAllPostsByCategory(PostCategory postCategory) {
-        List<PostEntity> posts;
-        if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR)){
-            posts = postRepository.findByPostCategoryStartingWith(postCategory.toString());
-        } else {
-            posts = postRepository.findAllAndNotDeletedAndActive(postCategory);
-        }
-        return getPostListResponseDtos(posts);
-    }
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
+        Page<PostEntity> page;
+        if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR))
+            page = postRepository.findByPostCategoryStartingWithOrderByCreatedAt(postCategory.toString(), pageRequest);
+        else page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
