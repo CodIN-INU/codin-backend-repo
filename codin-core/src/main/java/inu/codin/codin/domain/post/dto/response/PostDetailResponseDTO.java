@@ -5,6 +5,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -48,11 +49,21 @@ public class PostDetailResponseDTO {
     @Schema(description = "스크랩 count", example = "0")
     private final int scrapCount;
 
+    @Schema(description = "댓글 및 대댓글 count", example = "0")
+    private final int commentCount;
+
+    @Schema(description = "조회수", example = "0")
+    private final int hits;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
     private final LocalDateTime createdAt;
 
-    public PostDetailResponseDTO(String userId, String _id, String title ,String content, String nickname, PostCategory postCategory, List<String> postImageUrls , boolean isAnonymous, int likeCount, int scrapCount, LocalDateTime createdAt) {
+    @Schema(description = "해당 게시글에 대한 유저 반응 여부")
+    private final UserInfo userInfo;
+
+    public PostDetailResponseDTO(String userId, String _id, String title, String content,String nickname ,PostCategory postCategory, List < String > postImageUrls,
+                            boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfo userInfo){
         this.userId = userId;
         this._id = _id;
         this.title = title;
@@ -63,6 +74,22 @@ public class PostDetailResponseDTO {
         this.isAnonymous = isAnonymous;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
+        this.commentCount = commentCount;
+        this.hits = hits;
         this.createdAt = createdAt;
+        this.userInfo = userInfo;
+    }
+
+    @Getter
+    public static class UserInfo {
+        private final boolean isLike;
+        private final boolean isScrap;
+
+        @Builder
+        public UserInfo(boolean isLike, boolean isScrap) {
+            this.isLike = isLike;
+            this.isScrap = isScrap;
+        }
     }
 }
+

@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.dto;
+package inu.codin.codin.domain.user.dto.request;
 
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.media.Schema;

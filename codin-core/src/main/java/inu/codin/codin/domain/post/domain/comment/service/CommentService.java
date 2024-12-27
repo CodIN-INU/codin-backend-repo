@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.domain.comment.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
@@ -57,6 +58,7 @@ public class CommentService {
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+        SecurityUtils.validateUser(comment.getUserId());
 
         // 댓글의 대댓글 조회
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
@@ -83,7 +85,6 @@ public class CommentService {
     }
 
 
-
     // 특정 게시물의 댓글 및 대댓글 조회
     public List<CommentResponseDTO> getCommentsByPostId(String id) {
         ObjectId postId = new ObjectId(id);
@@ -100,8 +101,19 @@ public class CommentService {
                             comment.getContent(),
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
-                            isDeleted);
+                            isDeleted,
+                            comment.getCreatedAt());
                     })
                 .toList();
+    }
+
+    public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
+
+        ObjectId commentId = new ObjectId(id);
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+
+        comment.updateComment(requestDTO.getContent());
+        commentRepository.save(comment);
     }
 }
