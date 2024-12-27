@@ -12,13 +12,14 @@ import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostListResponseDto;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class PostService {
     private final S3Service s3Service;
     private final LikeService likeService;
     private final ScrapService scrapService;
+    private final RedisService redisService;
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
@@ -69,11 +71,7 @@ public class PostService {
 
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
-
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-        }
+        validateUserAndPost(post);
 
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
 
@@ -84,42 +82,41 @@ public class PostService {
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
-
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-        }
+        validateUserAndPost(post);
 
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
     }
-
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
-
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-        }
+        validateUserAndPost(post);
 
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
     }
-
+    private void validateUserAndPost(PostEntity post) {
+        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
+        }
+        SecurityUtils.validateUser(post.getUserId());
+    }
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
-        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages()-1, page.hasNext()? page.getPageable().getPageNumber() + 1 : -1);
-
+        Page<PostEntity> page;
+        if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR))
+            page = postRepository.findByPostCategoryStartingWithOrderByCreatedAt(postCategory.toString(), pageRequest);
+        else page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public List<PostListResponseDto> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> new PostListResponseDto(
+                .map(post -> new PostDetailResponseDTO(
                         post.getUserId().toString(),
                         post.get_id().toString(),
                         post.getContent(),
@@ -127,10 +124,12 @@ public class PostService {
                         post.getPostCategory(),
                         post.getPostImageUrls(),
                         post.isAnonymous(),
-                        post.getCommentCount(),
                         likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
                         scrapService.getScrapCount(post.get_id()),      // 스크랩 수
-                        post.getCreatedAt()
+                        redisService.getHitsCount(post.get_id()),
+                        post.getCreatedAt(),
+                        post.getCommentCount(),
+                        getUserInfoAboutPost(post.get_id())
                 ))
                 .toList();
     }
@@ -139,6 +138,10 @@ public class PostService {
     public PostDetailResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        if (redisService.validateHits(post.get_id(), userId))
+            redisService.addHits(post.get_id(), userId);
 
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
@@ -150,20 +153,17 @@ public class PostService {
                 post.isAnonymous(),
                 likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
                 scrapService.getScrapCount(post.get_id()),   // 스크랩 수
-                post.getCreatedAt()
+                redisService.getHitsCount(post.get_id()),
+                post.getCreatedAt(),
+                post.getCommentCount(),
+                getUserInfoAboutPost(post.get_id())
         );
     }
-
-
 
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
-
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-        }
+        validateUserAndPost(post);
 
         post.delete();
         postRepository.save(post);
@@ -171,18 +171,12 @@ public class PostService {
     }
 
     public void deletePostImage(String postId, String imageUrl) {
-
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR"))
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-
+        validateUserAndPost(post);
 
         if (!post.getPostImageUrls().contains(imageUrl))
             throw new NotFoundException("이미지가 게시물에 존재하지 않습니다.");
-
 
         try {
             // S3에서 이미지 삭제
@@ -193,6 +187,14 @@ public class PostService {
         } catch (Exception e) {
             throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
         }
+    }
+
+    public UserInfo getUserInfoAboutPost(ObjectId postId){
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return UserInfo.builder()
+                .isLike(redisService.isPostLiked(postId, userId))
+                .isScrap(redisService.isPostScraped(postId, userId))
+                .build();
     }
 
 }
