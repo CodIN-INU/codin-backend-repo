@@ -37,12 +37,12 @@ public class SwaggerConfig {
 
         // Bearer Auth를 사용하는 Security Requirement 설정
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("Bearer Auth");
+                .addList("JWT");
 
         return new OpenAPI()
                 .info(info)
                 .security(List.of(securityRequirement))
-                .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
+                .components(new Components().addSecuritySchemes("JWT", securityScheme))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Server"), // Local Server
                         new Server().url("https://www.codin.co.kr/api").description("Production Server") // Production Server

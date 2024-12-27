@@ -59,7 +59,6 @@ public class SecurityConfig {
                                 .anyRequest().hasRole("USER")
                 )
                 // Swagger 접근 시 httpBasic 인증 사용
-//                .securityMatcher(SWAGGER_AUTH_PATHS)
                 .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
@@ -100,7 +99,13 @@ public class SecurityConfig {
             "/users/sign-up",
             "/email/auth/check",
             "/email/auth/send",
+            "/email/auth/password",
+            "/email/auth/password/check",
+            "/users/password",
             "/v3/api/test1",
+            "/ws-stomp/**",
+            "/chat",
+            "/chat/image",
     };
 
     // Swagger 접근 가능한 URL

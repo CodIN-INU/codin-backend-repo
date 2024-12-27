@@ -45,6 +45,8 @@ public class TestController {
     }
 
     private static String getUserData() {
+        // todo : HttpBasic을 통한 인증 X
+        // 로그인 정보 인식 추가 필요
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             log.info("[TEST] 로그인 정보 없음");
             return "로그인 정보 없음";
