@@ -23,7 +23,5 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
     @Query("{'deletedAt': null, 'postStatus':  { $in:  ['ACTIVE'] }, 'userId': ?0 }")
     Page<PostEntity> findAllByUserIdOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
 
-    List<PostEntity> findAllAndNotDeletedAndActive(PostCategory postCategory);
-
-    List<PostEntity> findByPostCategoryStartingWith(String prefix);
+    Page<PostEntity> findByPostCategoryStartingWithOrderByCreatedAt(String prefix, PageRequest pageRequest);
 }
