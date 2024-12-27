@@ -14,12 +14,16 @@ import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
 
+    private final UserRepository userRepository;
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
 
@@ -43,6 +48,7 @@ public class CommentService {
         CommentEntity comment = CommentEntity.builder()
                 .postId(postId)
                 .userId(userId)
+                .anonymous(requestDTO.isAnonymous())
                 .content(requestDTO.getContent())
                 .build();
         commentRepository.save(comment);
@@ -92,13 +98,20 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
+        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
+                comments.stream().map(CommentEntity::getUserId).distinct().toList()
+        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+
         return comments.stream()
                 .map(comment -> {
+                    String nickname = comment.isAnonymous() ? "익명" : userNicknameMap.get(comment.getUserId());
                     boolean isDeleted = comment.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             comment.get_id().toString(),
                             comment.getUserId().toString(),
                             comment.getContent(),
+                            nickname,
+                            comment.isAnonymous(),
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
                             isDeleted,
@@ -115,5 +128,12 @@ public class CommentService {
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
+    }
+
+    //user id 기반 nickname 반환
+    public String getNicknameByUserId(ObjectId userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return user.getNickname();
     }
 }

@@ -19,7 +19,7 @@ public class PostCreateRequestDTO {
 
     //이미지 별도 Multipart (RequestPart 사용)
 
-    @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "true")
+    @Schema(description = "게시물 익명 여부 default = true (익명)", example = "true")
     @NotNull
     private boolean anonymous;
 
