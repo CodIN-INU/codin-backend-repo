@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.domain.comment.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,14 +19,17 @@ public class CommentEntity extends BaseTimeEntity {
     private ObjectId userId;
     private String content;
 
+    private boolean anonymous;
+
     private int likeCount = 0;  // 좋아요 수 (Redis에서 관리)
 
     @Builder
-    public CommentEntity(ObjectId _id, ObjectId postId, ObjectId userId, String content) {
+    public CommentEntity(ObjectId _id, ObjectId postId, ObjectId userId, String content, Boolean anonymous) {
         this._id = _id;
         this.postId = postId;
         this.userId = userId;
         this.content = content;
+        this.anonymous = anonymous;
     }
 
     public void updateComment(String content) {
