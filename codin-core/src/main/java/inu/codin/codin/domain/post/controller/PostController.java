@@ -13,9 +13,12 @@ import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@Validated
 @Tag(name = "POST API", description = "게시글 API")
 public class PostController {
 
@@ -92,7 +96,7 @@ public class PostController {
     )
     @GetMapping("/category")
     public ResponseEntity<SingleResponse<PostPageResponse>> getAllPosts(@RequestParam PostCategory postCategory,
-                                                                        @RequestParam("page") int pageNumber) {
+                                                                        @RequestParam("page") @NotNull int pageNumber) {
         PostPageResponse postpages= postService.getAllPosts(postCategory, pageNumber);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
@@ -123,6 +127,16 @@ public class PostController {
         postService.softDeletePost(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물이 삭제되었습니다.", null));
+    }
+
+    @Operation(
+            summary = "검색 엔진"
+    )
+    @GetMapping("/search")
+    public ResponseEntity<SingleResponse<?>> searchPosts(@RequestParam("keyword") @Size(min = 2) String keyword,
+                                                         @RequestParam("pageNumber") @NotNull int pageNumber){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "'"+keyword+"'"+"으로 검색된 게시글 반환 완료", postService.searchPosts(keyword, pageNumber)));
     }
 
     @Operation(summary = "Top 3 베스트 게시글 가져오기")
