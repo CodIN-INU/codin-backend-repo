@@ -12,7 +12,6 @@ import java.util.TimeZone;
 @SpringBootApplication
 @EnableMongoAuditing
 @EnableMethodSecurity
-@EnableReactiveMongoAuditing
 @EnableScheduling
 public class CodinApplication {
 	public static void main(String[] args) {
