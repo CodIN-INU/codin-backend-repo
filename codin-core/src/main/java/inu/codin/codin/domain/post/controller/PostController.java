@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.controller;
 
+import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
@@ -12,6 +13,7 @@ import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -122,5 +124,12 @@ public class PostController {
         postService.softDeletePost(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물이 삭제되었습니다.", null));
+    }
+
+    @Operation(summary = "Top 3 베스트 게시글 가져오기")
+    @GetMapping("/top3")
+    public ResponseEntity<ListResponse<?>> getTop3BestPosts(){
+        return ResponseEntity.ok()
+                .body(new ListResponse<>(200, "Top3 베스트 게시글 반환 완료", postService.getTop3BestPosts()));
     }
 }
