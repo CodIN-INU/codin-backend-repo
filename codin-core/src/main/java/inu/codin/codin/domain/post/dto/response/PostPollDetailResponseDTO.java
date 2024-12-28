@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.post.dto.response;
 
 import inu.codin.codin.domain.post.entity.PostCategory;
+import inu.codin.codin.domain.post.entity.PostEntity;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -12,12 +12,7 @@ import java.util.List;
 @Setter
 public class PostPollDetailResponseDTO extends PostDetailResponseDTO {
 
-    // Poll 관련 필드
-    private List<String> pollOptions;
-    private LocalDateTime pollEndTime;
-    private boolean multipleChoice;
-    private List<Integer> pollVotes; // 선택지별 투표 수
-    private boolean isPollFinished;
+    private PollInfo poll;
 
     public PostPollDetailResponseDTO(
             String userId,
@@ -32,19 +27,61 @@ public class PostPollDetailResponseDTO extends PostDetailResponseDTO {
             LocalDateTime createdAt,
             int commentCount,
             UserInfo userInfo,
-            List<String> pollOptions,
-            LocalDateTime pollEndTime,
-            boolean multipleChoice,
-            List<Integer> pollVotes,
-            boolean isPollFinished
+            PollInfo poll
     ) {
-        // 상위 클래스(PostDetailResponseDTO)의 생성자 호출
-        super(userId, postId, title, content, nickname, PostCategory.POLL, null, isAnonymous, likeCount, scrapCount, hitsCount, createdAt, commentCount, userInfo);
+        super(userId, postId, title, content, nickname,
+                PostCategory.POLL, null, isAnonymous,
+                likeCount, scrapCount, hitsCount, createdAt, commentCount,
+                userInfo);
 
-        this.pollOptions = pollOptions;
-        this.pollEndTime = pollEndTime;
-        this.multipleChoice = multipleChoice;
-        this.pollVotes = pollVotes;
-        this.isPollFinished = isPollFinished;
+        this.poll = poll;
+    }
+
+    public static PostPollDetailResponseDTO of(PostEntity post, String nickname,
+                                               int likeCount, int scrapCount, int hitsCount,
+                                               int commentCount, UserInfo userInfo,
+                                               List<String> pollOptions, LocalDateTime pollEndTime,
+                                               boolean multipleChoice, List<Integer> pollVotesCounts,
+                                               boolean isPollFinished, List<Integer> userVotes,
+                                               Long totalVotes) {
+
+        PollInfo pollInfo = new PollInfo(pollOptions, pollEndTime, multipleChoice, pollVotesCounts, userVotes, totalVotes, isPollFinished);
+        return new PostPollDetailResponseDTO(
+                post.getUserId().toString(),
+                post.get_id().toString(),
+                post.getTitle(),
+                post.getContent(),
+                nickname,
+                post.isAnonymous(),
+                likeCount,
+                scrapCount,
+                hitsCount,
+                post.getCreatedAt(),
+                commentCount,
+                userInfo,
+                pollInfo
+        );
+    }
+
+    @Getter
+    public static class PollInfo {
+        private List<String> pollOptions;
+        private LocalDateTime pollEndTime;
+        private boolean multipleChoice;
+        private List<Integer> pollVotesCounts;
+        private List<Integer> userVotesOptions;
+        private Long totalVotes;
+        private boolean isPollFinished;
+
+        public PollInfo(List<String> pollOptions, LocalDateTime pollEndTime, boolean multipleChoice,
+                        List<Integer> pollVotesCounts, List<Integer> userVotesOptions, Long totalVotes, boolean isPollFinished) {
+            this.pollOptions = pollOptions;
+            this.pollEndTime = pollEndTime;
+            this.multipleChoice = multipleChoice;
+            this.pollVotesCounts = pollVotesCounts;
+            this.userVotesOptions = userVotesOptions;
+            this.totalVotes = totalVotes;
+            this.isPollFinished = isPollFinished;
+        }
     }
 }

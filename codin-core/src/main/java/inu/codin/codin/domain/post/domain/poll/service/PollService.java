@@ -8,8 +8,11 @@ import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 
+import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
+import inu.codin.codin.domain.post.domain.poll.exception.PollDuplicateVoteException;
 import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
 import inu.codin.codin.domain.post.domain.poll.exception.PollTimeFailException;
+import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -30,18 +33,19 @@ public class PollService {
 
     private final PostRepository postRepository;
     private final PollRepository pollRepository;
+    private final PollVoteRepository pollVoteRepository;
 
     @Transactional
     public void createPoll(PollCreateRequestDTO pollRequestDTO) {
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        //권한 확인 처리 로직 추가
+        // 권한 확인 처리 로직 추가
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
                 pollRequestDTO.getPostCategory().toString().split("_")[0].equals("POLL")){
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "투표에 대한 권한이 없습니다.");
         }
 
-        // 1. PostEntity 생성 및 저장
+        // PostEntity 생성 및 저장
         PostEntity postEntity = PostEntity.builder()
                 .title(pollRequestDTO.getTitle())
                 .content(pollRequestDTO.getContent())
@@ -52,7 +56,7 @@ public class PollService {
                 .build();
         postEntity = postRepository.save(postEntity);
 
-        // 2. PollEntity 생성 및 저장
+        // PollEntity 생성 및 저장
         PollEntity pollEntity = PollEntity.builder()
                 .postId(postEntity.get_id())
                 .pollOptions(pollRequestDTO.getPollOptions())
@@ -63,21 +67,29 @@ public class PollService {
     }
 
     public void votingPoll(String postId, PollVotingRequestDTO pollRequestDTO) {
-        // 1. 게시글 조회 및 검증
+
+        // 게시글 조회 및 검증
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
         validateUserAndPost(post);
 
-        // 2. 투표 데이터(PollEntity) 조회
+        // 투표 데이터(PollEntity) 조회
         PollEntity poll = pollRepository.findByPostId(post.get_id())
                 .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
 
-        // 3. 투표 종료 여부 확인
+        // 투표 종료 여부 확인
         if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
             throw new PollTimeFailException("이미 종료된 투표입니다.");
         }
 
-        // 4. 사용자의 선택 항목 검증
+        // 사용자 투표 여부 검증
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        boolean hasAlreadyVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
+        if (hasAlreadyVoted) {
+            throw new PollDuplicateVoteException("이미 투표하셨습니다.");
+        }
+
+        //투표 항목 검증
         List<Integer> selectedOptions = pollRequestDTO.getSelectedOptions();
         if (!poll.isMultipleChoice() && selectedOptions.size() > 1) {
             throw new PollOptionChoiceException("복수 선택이 허용되지 않은 투표입니다.");
@@ -88,7 +100,16 @@ public class PollService {
             }
         }
 
-        // 5. 투표 항목 DB 반영
+        //투표 기록
+        PollVoteEntity vote = PollVoteEntity.builder()
+                .pollId(poll.get_id())
+                .userId(userId)
+                .selectedOptions(selectedOptions) // 다중 선택 지원
+                .build();
+        pollVoteRepository.save(vote);
+
+
+        // 투표 항목 DB 반영
         for (Integer index : selectedOptions) {
             poll.vote(index);
         }

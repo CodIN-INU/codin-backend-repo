@@ -8,6 +8,7 @@ import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
+import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
@@ -24,7 +25,6 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
@@ -36,11 +36,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +51,7 @@ public class PostService {
     private final RedisService redisService;
     private final UserRepository userRepository;
     private final PollRepository pollRepository;
+    private final PollVoteRepository pollVoteRepository;
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
@@ -124,120 +123,55 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
-        // 1. 사용자 ID와 닉네임을 한 번에 조회하여 Map으로 변환
-        // 닉네임 조회를 스트림 내부에서 진행하지 않고 매핑을 통해 한번에 처리 (중복 호출 최소화)
-        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
-                posts.stream().map(PostEntity::getUserId).distinct().toList()
-        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
-
-        // 2. 게시글 처리
-        return posts.stream()
-                .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> {
-                    String nickname = post.isAnonymous() ? "익명" : userNicknameMap.get(post.getUserId());
-                    return new PostDetailResponseDTO(
-                            post.getUserId().toString(),
-                            post.get_id().toString(),
-                            post.getTitle(),
-                            post.getContent(),
-                            nickname,
-                            post.getPostCategory(),
-                            post.getPostImageUrls(),
-                            post.isAnonymous(),
-                            likeService.getLikeCount(LikeType.valueOf("POST"), post.get_id()), // 좋아요 수
-                            scrapService.getScrapCount(post.get_id()), // 스크랩 수
-                            redisService.getHitsCount(post.get_id()),
-                            post.getCreatedAt(),
-                            post.getCommentCount(),
-                            getUserInfoAboutPost(post.get_id())
-                    );
-                })
-                .toList();
-    }
-
-    //게시물 상세 조회 :: 게시글 (내용 + 좋아요,스크랩 count 수)  + 댓글 +대댓글 (내용 +좋아요,스크랩 count 수 ) 반환
-    public PostDetailResponseDTO getPostWithDetail(String postId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-
-        if (redisService.validateHits(post.get_id(), userId))
-            redisService.addHits(post.get_id(), userId);
+    // Post 정보를 처리하여 DTO를 생성하는 공통 메소드
+    private PostDetailResponseDTO createPostDetailResponse(PostEntity post) {
 
         String nickname = post.isAnonymous() ? "익명" : getNicknameByUserId(post.getUserId());
+        UserInfo userInfo = getUserInfoAboutPost(post.get_id());
+        int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id());
+        int scrapCount = scrapService.getScrapCount(post.get_id());
+        int hitsCount = redisService.getHitsCount(post.get_id());
+        int commentCount = post.getCommentCount();
 
         // POLL 게시물 처리
         if (post.getPostCategory().equals(PostCategory.POLL)) {
             PollEntity poll = pollRepository.findByPostId(post.get_id())
                     .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
+            long totalVotes = pollVoteRepository.countByPollId(poll.get_id());
+            List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), post.getUserId())
+                    .stream().flatMap(vote -> vote.getSelectedOptions().stream()).toList();
+            boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), post.getUserId());
 
-            // 투표 종료 여부 판단
-            boolean hasPollFinished = LocalDateTime.now().isAfter(poll.getPollEndTime());
-
-            if (!hasPollFinished) {
-                // 투표 진행 중
-                return new PostPollDetailResponseDTO(
-                        post.getUserId().toString(),
-                        post.get_id().toString(),
-                        post.getTitle(),
-                        post.getContent(),
-                        nickname,
-                        post.isAnonymous(),
-                        likeService.getLikeCount(LikeType.POST, post.get_id()),
-                        scrapService.getScrapCount(post.get_id()),
-                        redisService.getHitsCount(post.get_id()),
-                        post.getCreatedAt(),
-                        post.getCommentCount(),
-                        getUserInfoAboutPost(post.get_id()),
-                        poll.getPollOptions(),
-                        poll.getPollEndTime(),
-                        poll.isMultipleChoice(),
-                        null, // 진행 중이므로 투표 수는 반환하지 않음
-                        false // 투표 종료 여부
-                );
-            } else {
-                // 투표 종료
-                return new PostPollDetailResponseDTO(
-                        post.getUserId().toString(),
-                        post.get_id().toString(),
-                        post.getTitle(),
-                        post.getContent(),
-                        nickname,
-                        post.isAnonymous(),
-                        likeService.getLikeCount(LikeType.POST, post.get_id()),
-                        scrapService.getScrapCount(post.get_id()),
-                        redisService.getHitsCount(post.get_id()),
-                        post.getCreatedAt(),
-                        post.getCommentCount(),
-                        getUserInfoAboutPost(post.get_id()),
-                        poll.getPollOptions(),
-                        poll.getPollEndTime(),
-                        poll.isMultipleChoice(),
-                        poll.getPollVotes(), // 투표 종료 시 투표 수 반환
-                        true // 투표 종료 여부
-                );
-            }
+            return PostPollDetailResponseDTO.of(
+                    post, nickname, likeCount, scrapCount, hitsCount, commentCount, userInfo,
+                    poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
+                    poll.getPollVotesCounts(), hasUserVoted, userVotes, totalVotes
+            );
         }
-
-        // 5. 일반 게시물 처리
-        return new PostDetailResponseDTO(
-                post.getUserId().toString(),
-                post.get_id().toString(),
-                post.getTitle(),
-                post.getContent(),
-                nickname,
-                post.getPostCategory(),
-                post.getPostImageUrls(),
-                post.isAnonymous(),
-                likeService.getLikeCount(LikeType.POST, post.get_id()),
-                scrapService.getScrapCount(post.get_id()),
-                redisService.getHitsCount(post.get_id()),
-                post.getCreatedAt(),
-                post.getCommentCount(),
-                getUserInfoAboutPost(post.get_id())
+        // 일반 게시물 처리
+        return PostDetailResponseDTO.of(
+                post, nickname, likeCount, scrapCount, hitsCount, commentCount, userInfo
         );
+    }
+
+    // 게시물 리스트 가져오기
+    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
+        return posts.stream()
+                .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
+                .map(this::createPostDetailResponse)
+                .toList();
+    }
+
+    // 게시물 상세 조회
+    public PostDetailResponseDTO getPostWithDetail(String postId) {
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        if (redisService.validateHits(post.get_id(), userId))
+            redisService.addHits(post.get_id(), userId);
+
+        return createPostDetailResponse(post);
     }
 
     public void softDeletePost(String postId) {
