@@ -52,9 +52,9 @@ public class ChattingController {
             description = "Pageable에 해당하는 page, size, sort 내역에 맞게 반환"
     )
     @GetMapping("/chats/list/{chatRoomId}")
-    public ResponseEntity<ListResponse<?>> getAllMessage(@PathVariable("chatRoomId") String id,
+    public ResponseEntity<SingleResponse<?>> getAllMessage(@PathVariable("chatRoomId") String id,
                                                                                         @RequestParam("page") int page){
-        return ResponseEntity.ok().body(new ListResponse<>(200, "채팅 내용 리스트 반환 완료", chattingService.getAllMessage(id, page)));
+        return ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 내용 리스트 반환 완료", chattingService.getAllMessage(id, page)));
     }
 
     //채팅 테스트를 위한 MVC

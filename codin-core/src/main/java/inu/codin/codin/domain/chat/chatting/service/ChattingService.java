@@ -1,9 +1,11 @@
 package inu.codin.codin.domain.chat.chatting.service;
 
+import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
+import inu.codin.codin.domain.chat.chatting.dto.response.ChattingAndUserIdResponseDto;
 import inu.codin.codin.domain.chat.chatting.dto.response.ChattingResponseDto;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,13 +45,13 @@ public class ChattingService {
         return ChattingResponseDto.of(chatting);
     }
 
-    public List<ChattingResponseDto> getAllMessage(String id, int page) {
+    public ChattingAndUserIdResponseDto getAllMessage(String id, int page) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
         chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
-        return chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)
-                .stream().map(ChattingResponseDto::of)
-                .toList();
+        List<ChattingResponseDto> chattingResponseDto = chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)
+                .stream().map(ChattingResponseDto::of).toList();
+        return new ChattingAndUserIdResponseDto(chattingResponseDto, SecurityUtils.getCurrentUserId().toString());
     }
 
     public List<String> sendImageMessage(List<MultipartFile> chatImages) {

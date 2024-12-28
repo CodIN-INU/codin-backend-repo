@@ -7,6 +7,7 @@ import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.Participants;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
+import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.CustomChattingRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -45,12 +46,11 @@ public class ChatRoomService {
     public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
         ObjectId userId = ((CustomUserDetails) userDetails).getId();
         List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId);
-        return Flux.fromIterable(chatRooms)
-                .flatMap(chatRoom ->
-                        customChattingRepository.findMostRecentByChatRoomId(chatRoom.get_id())  // Retrieve the most recent message
-                                .map(chatting -> ChatRoomListResponseDto.of(chatRoom, chatting))   // Map to response DTO
-                                .defaultIfEmpty(ChatRoomListResponseDto.of(chatRoom, null))        // Default to null if no message found
-                ).collectList().block();
+        return chatRooms.stream()
+                .map(chatRoom -> {
+                    Chatting chat = customChattingRepository.findMostRecentByChatRoomId(chatRoom.get_id());
+                    return ChatRoomListResponseDto.of(chatRoom, chat);
+                }).toList();
     }
 
     public void leaveChatRoom(String chatRoomId, UserDetails userDetails) {
