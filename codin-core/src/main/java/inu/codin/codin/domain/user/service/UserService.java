@@ -18,6 +18,7 @@ import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -156,11 +157,11 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
-    public void updateUserInfo(@Valid UserCreateRequestDto userCreateRequestDto) {
+    public void updateUserInfo(@Valid UserUpdateRequestDto userUpdateRequestDto) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
-        user.updateUserInfo(userCreateRequestDto);
+        user.updateUserInfo(userUpdateRequestDto);
         userRepository.save(user);
     }
 

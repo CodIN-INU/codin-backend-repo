@@ -5,6 +5,7 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -105,8 +106,8 @@ public class UserController {
             summary = "유저 정보 수정"
     )
     @PutMapping
-    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UserCreateRequestDto userCreateRequestDto){
-        userService.updateUserInfo(userCreateRequestDto);
+    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto){
+        userService.updateUserInfo(userUpdateRequestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 수정 완료", null));
     }
