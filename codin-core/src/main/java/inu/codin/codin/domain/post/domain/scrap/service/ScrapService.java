@@ -75,7 +75,7 @@ public class ScrapService {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getScrapCount(postId);
         }
-        long count = scrapRepository.countByPostId(postId);
+        long count = scrapRepository.countByPostIdAndDeletedAtIsNull(postId);
         return (int) Math.max(0, count);
     }
 

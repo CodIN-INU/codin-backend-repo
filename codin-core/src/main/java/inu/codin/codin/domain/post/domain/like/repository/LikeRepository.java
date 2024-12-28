@@ -14,14 +14,14 @@ import java.util.List;
 
 public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
     // 특정 엔티티(게시글/댓글/대댓글)의 좋아요 개수 조회
-    long countByLikeTypeAndLikeTypeId(LikeType likeType, ObjectId id);
+    long countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(LikeType likeType, ObjectId id);
 
     // 특정 엔티티의 좋아요 데이터 조회
-    List<LikeEntity> findByLikeTypeAndLikeTypeId(LikeType likeType, ObjectId id);
+    List<LikeEntity> findByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(LikeType likeType, ObjectId id);
 
-    boolean existsByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
+    boolean existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(LikeType likeType, ObjectId id, ObjectId userId);
 
     LikeEntity findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
 
-    Page<LikeEntity> findAllByUserIdAndLikeTypeOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
+    Page<LikeEntity> findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
 }

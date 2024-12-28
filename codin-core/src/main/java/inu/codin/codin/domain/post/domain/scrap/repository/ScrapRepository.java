@@ -12,11 +12,11 @@ import java.util.List;
 @Repository
 public interface ScrapRepository extends MongoRepository<ScrapEntity, ObjectId> {
 
-    List<ScrapEntity> findByPostId(ObjectId postId);
+    List<ScrapEntity> findByPostIdAndDeletedAtIsNull(ObjectId postId);
 
-    long countByPostId(ObjectId postId);
+    long countByPostIdAndDeletedAtIsNull(ObjectId postId);
 
     ScrapEntity findByPostIdAndUserId(ObjectId postId, ObjectId userId);
 
-    Page<ScrapEntity> findAllByUserIdOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
+    Page<ScrapEntity> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
 }
