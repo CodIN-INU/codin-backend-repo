@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.controller;
 
+import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
@@ -136,5 +137,12 @@ public class PostController {
                                                          @RequestParam("pageNumber") @NotNull int pageNumber){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "'"+keyword+"'"+"으로 검색된 게시글 반환 완료", postService.searchPosts(keyword, pageNumber)));
+    }
+
+    @Operation(summary = "Top 3 베스트 게시글 가져오기")
+    @GetMapping("/top3")
+    public ResponseEntity<ListResponse<?>> getTop3BestPosts(){
+        return ResponseEntity.ok()
+                .body(new ListResponse<>(200, "Top3 베스트 게시글 반환 완료", postService.getTop3BestPosts()));
     }
 }
