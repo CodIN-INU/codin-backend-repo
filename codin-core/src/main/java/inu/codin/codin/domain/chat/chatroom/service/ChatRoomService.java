@@ -24,10 +24,11 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChattingRepository chattingRepository;
 
-    public void createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
+    public String createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
         String senderId = ((CustomUserDetails) userDetails).getId();
         ChatRoom chatRoom = ChatRoom.of(chatRoomCreateRequestDto, senderId);
         chatRoomRepository.save(chatRoom);
+        return chatRoom.getId().toString();
     }
 
     public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
