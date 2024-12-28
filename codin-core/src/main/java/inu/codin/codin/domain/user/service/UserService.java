@@ -18,6 +18,7 @@ import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -33,7 +34,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,13 +164,26 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
+    public void updateUserInfo(@Valid UserUpdateRequestDto userUpdateRequestDto) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        user.updateUserInfo(userUpdateRequestDto);
+        userRepository.save(user);
+    }
+
+    public void updateUserProfile(MultipartFile profileImage) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        String profileImageUrl = s3Service.handleImageUpload(List.of(profileImage)).get(0);
+        user.updateProfileImageUrl(profileImageUrl);
+        userRepository.save(user);
+    }
+
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }
-
-
-
-
 
     //user id 기반 nickname 반환
     public String getNicknameByUserId(ObjectId userId) {
