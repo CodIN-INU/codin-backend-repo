@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -34,15 +35,18 @@ public class ChattingResponseDto {
     @NotBlank
     private final String chatRoomId;
 
+    private final String currentUserId;
+
     @Builder
-    public ChattingResponseDto(String id, String senderId, String content, ContentType contentType, LocalDateTime createdAt, String chatRoomId) {
+    public ChattingResponseDto(String id, String senderId, String content, ContentType contentType, LocalDateTime createdAt, String chatRoomId, String currentUserId) {
         this.id = id;
         this.senderId = senderId;
         this.content = content;
         this.contentType = contentType;
         this.createdAt = createdAt;
         this.chatRoomId = chatRoomId;
-}
+        this.currentUserId = currentUserId;
+    }
 
     public static ChattingResponseDto of(Chatting chatting){
         return ChattingResponseDto.builder()
@@ -52,6 +56,18 @@ public class ChattingResponseDto {
                 .createdAt(chatting.getCreatedAt())
                 .contentType(chatting.getType())
                 .chatRoomId(chatting.getChatRoomId().toString())
+                .build();
+    }
+
+    public static ChattingResponseDto of(Chatting chatting, ObjectId currentUserId){
+        return ChattingResponseDto.builder()
+                .id(chatting.get_id().toString())
+                .senderId(chatting.getSenderId().toString())
+                .content(chatting.getContent())
+                .createdAt(chatting.getCreatedAt())
+                .contentType(chatting.getType())
+                .chatRoomId(chatting.getChatRoomId().toString())
+                .currentUserId(currentUserId.toString())
                 .build();
     }
 }
