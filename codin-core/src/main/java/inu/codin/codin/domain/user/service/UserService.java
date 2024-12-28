@@ -18,6 +18,7 @@ import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -25,16 +26,17 @@ import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserPasswordChangeFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,10 +51,15 @@ public class UserService {
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final PostService postService;
+    private final S3Service s3Service;
 
-    public void createUser(UserCreateRequestDto userCreateRequestDto) {
+    public void createUser(UserCreateRequestDto userCreateRequestDto, MultipartFile userImage) {
+
+        String imageUrl = null;
+        if (userImage != null) imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
 
         String encodedPassword = passwordEncoder.encode(userCreateRequestDto.getPassword());
 
@@ -66,7 +73,7 @@ public class UserService {
                 .studentId(userCreateRequestDto.getStudentId())
                 .name(userCreateRequestDto.getName())
                 .nickname(userCreateRequestDto.getNickname())
-                .profileImageUrl(userCreateRequestDto.getProfileImageUrl())
+                .profileImageUrl(imageUrl)
                 .department(userCreateRequestDto.getDepartment())
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.USER)
@@ -101,7 +108,7 @@ public class UserService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         switch (interactionType) {
             case LIKE:
-                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
+                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
                         .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
@@ -109,7 +116,7 @@ public class UserService {
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
 
             case SCRAP:
-                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserScrap = scrapPage.getContent().stream()
                         .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
@@ -157,10 +164,31 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
+    public void updateUserInfo(@Valid UserUpdateRequestDto userUpdateRequestDto) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        user.updateUserInfo(userUpdateRequestDto);
+        userRepository.save(user);
+    }
+
+    public void updateUserProfile(MultipartFile profileImage) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        String profileImageUrl = s3Service.handleImageUpload(List.of(profileImage)).get(0);
+        user.updateProfileImageUrl(profileImageUrl);
+        userRepository.save(user);
+    }
+
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }
 
-
-
+    //user id 기반 nickname 반환
+    public String getNicknameByUserId(ObjectId userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return user.getNickname();
+    }
 }

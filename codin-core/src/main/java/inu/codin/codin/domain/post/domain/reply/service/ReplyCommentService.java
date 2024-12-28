@@ -13,6 +13,9 @@ import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.RedisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,8 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +34,10 @@ public class ReplyCommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
+    private final UserRepository userRepository;
 
     private final LikeService likeService;
+    private final RedisService redisService;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -46,6 +53,7 @@ public class ReplyCommentService {
                 .commentId(commentId)
                 .userId(userId)
                 .content(requestDTO.getContent())
+                .anonymous(requestDTO.isAnonymous())
                 .build();
 
         replyCommentRepository.save(reply);
@@ -53,6 +61,7 @@ public class ReplyCommentService {
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
         log.info("대댓글 추가전, commentCount: {}", post.getCommentCount());
         post.updateCommentCount(post.getCommentCount() + 1);
+        redisService.applyBestScore(1, post.get_id());
         postRepository.save(post);
         log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
     }
@@ -82,13 +91,22 @@ public class ReplyCommentService {
     public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
+        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
+                replies.stream().map(ReplyCommentEntity::getUserId).distinct().toList()
+        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+
+
         return replies.stream()
                 .map(reply -> {
+                    String nickname = reply.isAnonymous() ? "익명" : userNicknameMap.get(reply.getUserId());
+
                     boolean isDeleted = reply.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             reply.get_id().toString(),
                             reply.getUserId().toString(),
                             reply.getContent(),
+                            nickname,
+                            reply.isAnonymous(),
                             List.of(), //대댓글은 대댓글이 없음
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
                             isDeleted,
