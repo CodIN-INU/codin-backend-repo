@@ -7,9 +7,6 @@ import lombok.Getter;
 
 @Getter
 public class UserUpdateRequestDto {
-    @Schema(description = "학번", example = "20210000")
-    @NotBlank
-    private String studentId;
 
     @Schema(description = "이름", example = "홍길동")
     @NotBlank
