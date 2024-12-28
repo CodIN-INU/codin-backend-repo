@@ -15,7 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +27,13 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final CustomChattingRepository customChattingRepository;
 
-    public void createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
+    public Map<String, String> createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
         ObjectId senderId = ((CustomUserDetails) userDetails).getId();
         ChatRoom chatRoom = ChatRoom.of(chatRoomCreateRequestDto, senderId);
         chatRoomRepository.save(chatRoom);
+        Map<String, String> response = new HashMap<>();
+        response.put("chatRoomId", chatRoom.get_id().toString());
+        return response;
     }
 
     public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
