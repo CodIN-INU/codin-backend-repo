@@ -2,11 +2,13 @@ package inu.codin.codin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/v3/api", produces = "plain/text; charset=utf-8")
 @Tag(name = "Test API", description = "[관리자] 유저 테스트용 API")
@@ -43,6 +45,12 @@ public class TestController {
     }
 
     private static String getUserData() {
+        // todo : HttpBasic을 통한 인증 X
+        // 로그인 정보 인식 추가 필요
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.info("[TEST] 로그인 정보 없음");
+            return "로그인 정보 없음";
+        }
         // SecurityContextHolder를 이용하여 현재 사용자의 정보를 가져올 수 있습니다.
         String username = SecurityContextHolder // SecurityContextHolder를 이용하여 현재 사용자의 정보를 가져올 수 있습니다.
                 .getContext()
@@ -53,6 +61,7 @@ public class TestController {
                 .getAuthentication()
                 .getAuthorities()
                 .toString();
+        log.info("[TEST] 유저 이름 : {}, Role : {}", username, userRole);
         return "유저 이름 : " + username + ", Role : " + userRole;
     }
 }

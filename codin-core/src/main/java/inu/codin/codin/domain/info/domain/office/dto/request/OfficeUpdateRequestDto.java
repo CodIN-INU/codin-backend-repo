@@ -5,10 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class OfficeUpdateRequestDto {
 
     @Schema(description = "위치", example = "7호관 329호")

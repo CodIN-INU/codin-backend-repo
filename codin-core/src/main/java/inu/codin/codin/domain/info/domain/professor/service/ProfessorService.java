@@ -9,6 +9,7 @@ import inu.codin.codin.domain.info.domain.professor.exception.ProfessorDuplicate
 import inu.codin.codin.domain.info.domain.professor.exception.ProfessorNotFoundException;
 import inu.codin.codin.domain.info.repository.InfoRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class ProfessorService {
     }
 
     public ProfessorThumbnailResponseDto getProfessorThumbnail(String id) {
-        Professor professor = infoRepository.findProfessorById(id)
+        Professor professor = infoRepository.findProfessorById(new ObjectId(id))
                 .orElseThrow(() -> new ProfessorNotFoundException("교수 정보를 찾을 수 없습니다."));
         return ProfessorThumbnailResponseDto.of(professor);
     }
@@ -39,7 +40,7 @@ public class ProfessorService {
     }
 
     public void updateProfessor(String id, ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto) {
-        Professor professor = infoRepository.findProfessorById(id)
+        Professor professor = infoRepository.findProfessorById(new ObjectId(id))
                 .orElseThrow(() -> new ProfessorNotFoundException("교수 정보를 찾을 수 없습니다."));
         professor.update(professorCreateUpdateRequestDto);
         infoRepository.save(professor);
@@ -48,7 +49,7 @@ public class ProfessorService {
 
 
     public void deleteProfessor(String id) {
-        Professor professor = infoRepository.findProfessorById(id)
+        Professor professor = infoRepository.findProfessorById(new ObjectId(id))
                 .orElseThrow(() -> new ProfessorNotFoundException("교수 정보를 찾을 수 없습니다."));
         professor.delete();
         infoRepository.save(professor);

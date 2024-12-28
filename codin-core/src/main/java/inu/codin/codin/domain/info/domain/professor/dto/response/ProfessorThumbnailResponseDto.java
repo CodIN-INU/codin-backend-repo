@@ -1,12 +1,11 @@
 package inu.codin.codin.domain.info.domain.professor.dto.response;
 
-import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 /*
     교수님 상세 정보 반환 DTO
@@ -14,27 +13,26 @@ import lombok.Setter;
  */
 
 @Getter
-@Setter
 public class ProfessorThumbnailResponseDto{
 
     @NotBlank @Schema(description = "학과", example = "CSE")
-    Department department;
+    private final Department department;
     @NotBlank @Schema(description = "성함", example = "홍길동")
-    String name;
+    private final String name;
     @NotBlank @Schema(description = "프로필 사진", example = "https://~")
-    String image;
+    private final String image;
     @NotBlank @Schema(description = "전화번호", example = "032-123-4567")
-    String number;
+    private final String number;
     @NotBlank @Schema(description = "이메일", example = "test@inu.ac.kr")
-    String email;
+    private final String email;
     @Schema(description = "연구실 홈페이지", example = "https://~")
-    String site;
+    private final String site;
     @Schema(description = "연구 분야", example = "무선 통신 및 머신런닝")
-    String field;
+    private final String field;
     @Schema(description = "담당 과목", example = "대학수학, 이동통신, ..")
-    String subject;
+    private final String subject;
     @Schema(description = "연구실 _id", example = "6731a506c4ee25b3adf593ca")
-    String labId;
+    private final String labId;
 
     @Builder
     public ProfessorThumbnailResponseDto(Department department, String name, String image, String number, String email, String site, String field, String subject, String labId) {

@@ -4,7 +4,6 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,21 +36,18 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
     private final JwtUtils jwtUtils;
-    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // cors 설정
                 .csrf(CsrfConfigurer::disable) // csrf 비활성화
-                .cors(security -> security.configurationSource(corsConfigurationSource)) // cors 비활성화
                 .formLogin(FormLoginConfigurer::disable) // form login 비활성화
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지 않음
                 )
-                .httpBasic(Customizer.withDefaults()) // httpBasic 활성화
                 // authorizeHttpRequests 메서드를 통해 요청에 대한 권한 설정
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
@@ -56,12 +56,13 @@ public class SecurityConfig {
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
-                                .requestMatchers("/ws-stomp/**").permitAll() //잠시 웹소켓 테스트를 위한 open
                                 .anyRequest().hasRole("USER")
                 )
+                // Swagger 접근 시 httpBasic 인증 사용
+                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtService, jwtUtils),
+                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
@@ -82,7 +83,7 @@ public class SecurityConfig {
 
     @Bean
     public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_MANGER > ROLE_USER");
+        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_MANAGER > ROLE_USER");
     }
 
     @Bean
@@ -90,6 +91,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // 토큰 없이 접근 가능한 URL
     private static final String[] PERMIT_ALL = {
             "/auth/login",
             "/auth/reissue",
@@ -97,9 +99,16 @@ public class SecurityConfig {
             "/users/sign-up",
             "/email/auth/check",
             "/email/auth/send",
+            "/email/auth/password",
+            "/email/auth/password/check",
+            "/users/password",
             "/v3/api/test1",
+            "/ws-stomp/**",
+            "/chat",
+            "/chat/image",
     };
 
+    // Swagger 접근 가능한 URL
     private static final String[] SWAGGER_AUTH_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -107,17 +116,37 @@ public class SecurityConfig {
             "/swagger-resources/**",
     };
 
+    // User 권한 URL
     private static final String[] USER_AUTH_PATHS = {
             "/v3/api/test2",
             "/v3/api/test3",
     };
 
+    // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
     };
 
+    // Manager 권한 URL
     private static final String[] MANAGER_AUTH_PATHS = {
             "/v3/api/test5",
     };
+
+
+    /**
+     * CORS 설정
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.codin.co.kr"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        config.addExposedHeader("Authorization");
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
 }
