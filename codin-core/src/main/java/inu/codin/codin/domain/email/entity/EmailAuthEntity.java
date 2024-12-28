@@ -4,6 +4,7 @@ import inu.codin.codin.common.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class EmailAuthEntity extends BaseTimeEntity {
 
     @Id @NotBlank
-    private String id;
+    private ObjectId _id;
 
     @NotBlank
     private String email;

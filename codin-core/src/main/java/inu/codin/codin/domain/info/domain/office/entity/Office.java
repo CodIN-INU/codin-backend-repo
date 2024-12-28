@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.domain.office.entity;
 
-import inu.codin.codin.domain.info.domain.office.dto.OfficeUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.office.dto.request.OfficeUpdateRequestDto;
 import inu.codin.codin.domain.info.entity.Info;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
