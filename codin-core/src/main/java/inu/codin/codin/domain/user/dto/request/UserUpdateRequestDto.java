@@ -19,10 +19,6 @@ public class UserUpdateRequestDto {
     @NotBlank
     private String nickname;
 
-    @Schema(description = "프로필 이미지 URL", example = "https://avatars.githubusercontent.com/u/77490521?v=4")
-    @NotBlank
-    private String profileImageUrl;
-
     @Schema(description = "소속", example = "IT_COLLEGE")
     private Department department;
 }

@@ -26,6 +26,7 @@ import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserPasswordChangeFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -51,6 +53,7 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
     private final PostService postService;
+    private final S3Service s3Service;
 
     public void createUser(UserCreateRequestDto userCreateRequestDto) {
 
@@ -162,6 +165,15 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
         user.updateUserInfo(userUpdateRequestDto);
+        userRepository.save(user);
+    }
+
+    public void updateUserProfile(MultipartFile postImage) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        String profileImageUrl = s3Service.handleImageUpload(List.of(postImage)).get(0);
+        user.updateProfileImageUrl(profileImageUrl);
         userRepository.save(user);
     }
 
