@@ -2,7 +2,6 @@ package inu.codin.codin.infra.redis;
 
 
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.entity.PostEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -117,32 +117,37 @@ public class RedisService {
         return redisTemplate.opsForSet().members(redisKey);
     }
 
-
-    // 점수 업데이트 Sorted Set 사용
-    public void updateScore(String postId, double score) {
-        redisTemplate.opsForZSet().add("post:ranking", postId, score);
-    }
-
     // Top N 게시물 조회
     public Set<String> getTopNPosts(int N) {
-        return redisTemplate.opsForZSet().reverseRange("post:ranking", 0, N - 1);
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
+
+        Set<String> result = new HashSet<>();
+        for (int i = 0; i < 24; i++) {
+            String redisKey = now.minusHours(i).format(formatter);
+            Set<String> members = redisTemplate.opsForZSet().reverseRange(redisKey, 0, N - 1);
+            if (members != null) {
+                result.addAll(members);
+            }
+        }
+
+        return result.stream().limit(N).collect(Collectors.toSet());
     }
 
     public void applyBestScore(int score, ObjectId id){
         LocalDateTime now = LocalDateTime.now();
-        int hour = now.toLocalTime().getHour();
-        int day = now.toLocalDate().getDayOfMonth();
-        String rediskey;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
+
+        String redisKey;
         for (int i=0; i<24; i++){
-            if ((hour-i) < 0){ hour = hour+24; day= day-1; }
-            rediskey = now.format(DateTimeFormatter.ofPattern("yyyyMM")) + day + "/" + (hour-i);
-            Double scoreOfBest = redisTemplate.opsForZSet().score(rediskey, id.toString());
+            redisKey = now.minusHours(i).format(formatter);
+            Double scoreOfBest = redisTemplate.opsForZSet().score(redisKey, id.toString());
             if (scoreOfBest != null){
-                redisTemplate.opsForZSet().incrementScore(rediskey, id.toString(), score);
-                break;
+                redisTemplate.opsForZSet().incrementScore(redisKey, id.toString(), score);
+                return;
             }
         }
-        rediskey = now.format(DateTimeFormatter.ofPattern("yyyyMMdd/HH"));
-        redisTemplate.opsForZSet().add(rediskey, id.toString(), score);
+        redisKey = now.format(DateTimeFormatter.ofPattern("yyyyMMdd/HH"));
+        redisTemplate.opsForZSet().add(redisKey, id.toString(), score);
     }
 }

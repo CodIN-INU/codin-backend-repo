@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -224,8 +225,13 @@ public class PostService {
     }
 
     public List<PostDetailResponseDTO> getTop3BestPosts() {
-        redisService.getTopNPosts(3);
-        return null;
+        Set<String> postIds = redisService.getTopNPosts(3);
+        List<PostEntity> bestPosts = postIds.stream()
+                .map(postId ->
+                    postRepository.findById(new ObjectId(postId))
+                            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."))
+                ).toList();
+        return getPostListResponseDtos(bestPosts);
     }
 }
 
