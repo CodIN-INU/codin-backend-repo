@@ -33,7 +33,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,13 +163,14 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
+    public UserEntity getUserEntityFromUserId(ObjectId userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
+    }
+
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }
-
-
-
-
 
     //user id 기반 nickname 반환
     public String getNicknameByUserId(ObjectId userId) {

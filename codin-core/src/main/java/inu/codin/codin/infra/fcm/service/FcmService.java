@@ -1,10 +1,10 @@
 package inu.codin.codin.infra.fcm.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
+import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
@@ -14,7 +14,7 @@ import inu.codin.codin.infra.fcm.repository.FcmTokenRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +26,17 @@ import java.util.Optional;
 public class FcmService {
 
     private final FcmTokenRepository fcmTokenRepository;
+    private final UserService userService;
 
     /**
      * 클라이언트로부터 받은 FCM 토큰을 저장하는 로직
      * @param fcmTokenRequest FCM 토큰 요청 DTO
-     * @param userDetails 로그인한 유저 정보
      */
-    public void saveFcmToken(@Valid FcmTokenRequest fcmTokenRequest, UserDetails userDetails) {
+    public void saveFcmToken(@Valid FcmTokenRequest fcmTokenRequest) {
         // 유저의 FCM 토큰이 존재하는지 확인
-        String email = userDetails.getUsername();
-        Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByEmail(email);
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userService.getUserEntityFromUserId(userId);
+        Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByUser(user);
 
         if (fcmToken.isPresent()) { // 이미 존재하는 유저라면 토큰 추가
             FcmTokenEntity fcmTokenEntity = fcmToken.get();
@@ -44,7 +45,7 @@ public class FcmService {
         }
         else { // 존재하지 않는 FCM 토큰이라면 저장
             FcmTokenEntity newFcmTokenEntity = FcmTokenEntity.builder()
-                    .email(email)
+                    .user(user)
                     .fcmTokenList(List.of(fcmTokenRequest.getFcmToken()))
                     .deviceType(fcmTokenRequest.getDeviceType())
                     .build();
@@ -58,16 +59,16 @@ public class FcmService {
      */
     public void sendFcmMessage(FcmMessageUserDto fcmMessageUserDto) {
         // 유저의 알림 설정 조회
-        String email = fcmMessageUserDto.getUser().getEmail();
+        UserEntity user = fcmMessageUserDto.getUser();
         NotificationPreference userPreference = fcmMessageUserDto.getUser().getNotificationPreference();
 
         // 유저의 FCM 토큰 조회
-        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByEmail(email).orElseThrow(()
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user).orElseThrow(()
                 -> new FcmTokenNotFoundException("유저에게 FCM 토큰이 존재하지 않습니다."));
 
         // 알림 설정에 따라 알림 전송
         if (!userPreference.isAllowPush()) {
-            log.info("[sendFcmMessage] 알림 설정에서 푸시 알림을 허용하지 않았습니다. : {}", email);
+            log.info("[sendFcmMessage] 알림 설정에서 푸시 알림을 허용하지 않았습니다. : {}", user.getEmail());
             return;
         }
         for (String fcmToken : fcmTokenEntity.getFcmTokenList()) {
@@ -86,9 +87,7 @@ public class FcmService {
                 log.info("[sendFcmMessage] 알림 전송 성공 : {}", response);
             } catch (FirebaseMessagingException e) {
                 log.error("[sendFcmMessage] 알림 전송 실패, errorCode : {}, msg : {}", e.getErrorCode(), e.getMessage());
-                // todo : 에러 관리 및 리포팅 기능 추가
-                // todo : 알림 전송 실패 시 로직 추가 FCM 토큰 만료시 삭제 로직 추가
-                // todo : 토큰 만료 관리 추가
+                handleFirebaseMessagingException(e, fcmTokenEntity, fcmToken);
             }
         }
     }
@@ -119,6 +118,50 @@ public class FcmService {
         } catch (FirebaseMessagingException e) {
             log.error("[sendFcmMessageByTopic] 알림 전송 실패, errorCode : {}, msg : {}", e.getErrorCode(), e.getMessage());
         }
+    }
+
+    /**
+     * FCM 메시지 전송 중 발생한 예외를 처리하는 로직
+     * @param e FirebaseMessagingException
+     * @param fcmTokenEntity FcmTokenEntity
+     * @param fcmToken FCM 토큰
+     */
+    private void handleFirebaseMessagingException(FirebaseMessagingException e, FcmTokenEntity fcmTokenEntity, String fcmToken) {
+        MessagingErrorCode errorCode = e.getMessagingErrorCode();
+        switch (errorCode) {
+            case INVALID_ARGUMENT: // FCM 토큰이 유효하지 않을 때
+                log.error("Invalid argument error for token: {}", fcmToken);
+                break;
+            case UNREGISTERED: // FCM 토큰이 등록되지 않았을 때
+                log.warn("Unregistered token: {}. Removing from database.", fcmToken);
+                removeFcmToken(fcmTokenEntity, fcmToken);
+                break;
+            case QUOTA_EXCEEDED: // FCM 토큰의 전송량이 초과되었을 때
+                log.error("Quota exceeded for token: {}", fcmToken);
+                // 에러관리 및 리포팅 기능 추가
+                break;
+            case SENDER_ID_MISMATCH: // FCM 토큰의 발신자 ID가 일치하지 않을 때
+                log.error("Sender ID mismatch for token: {}", fcmToken);
+                break;
+            case THIRD_PARTY_AUTH_ERROR: // FCM 토큰의 인증이 실패했을 때
+                log.error("Third-party authentication error for token: {}", fcmToken);
+                break;
+            default: // 그 외의 에러
+                log.error("Unknown error for token: {}", fcmToken);
+                break;
+        }
+    }
+
+    // todo : FCM 토큰 만료시 삭제 로직 추가
+    private void removeFcmToken(FcmTokenEntity fcmTokenEntity, String fcmToken) {
+        fcmTokenEntity.deleteFcmToken(fcmToken);
+        fcmTokenRepository.save(fcmTokenEntity);
+    }
+
+    // todo : FCM 토픽 구독 및 구독 해제 로직 추가
+    public void unsubscribeTopic(String topic) {
+    }
+    public void subscribeTopic(String topic) {
     }
 
 }
