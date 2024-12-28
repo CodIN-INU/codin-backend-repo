@@ -2,10 +2,10 @@ package inu.codin.codin.domain.user.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserEntity extends BaseTimeEntity {
 
     @Id @NotBlank
-    private String id;
+    private ObjectId _id;
 
     private String email;
 
@@ -34,8 +34,7 @@ public class UserEntity extends BaseTimeEntity {
 
     private UserStatus status;
 
-    // 알림 설정
-    private NotificationPreference notificationPreference = new NotificationPreference();
+    private boolean changePassword = false;
 
     @Builder
     public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status) {
@@ -48,5 +47,13 @@ public class UserEntity extends BaseTimeEntity {
         this.department = department;
         this.role = role;
         this.status = status;
+    }
+
+    public void updatePassword(String password){
+        this.password = password;
+    }
+
+    public void changePassword(){
+        this.changePassword = !this.changePassword;
     }
 }

@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.info.domain.lab.service;
 
-import inu.codin.codin.domain.info.domain.lab.dto.LabCreateUpdateRequestDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabListResponseDto;
-import inu.codin.codin.domain.info.domain.lab.dto.LabThumbnailResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.request.LabCreateUpdateRequestDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabListResponseDto;
+import inu.codin.codin.domain.info.domain.lab.dto.response.LabThumbnailResponseDto;
 import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.domain.info.domain.lab.exception.LabNotFoundException;
 import inu.codin.codin.domain.info.repository.InfoRepository;
@@ -19,7 +19,7 @@ public class LabService {
     private final InfoRepository infoRepository;
 
     public LabThumbnailResponseDto getLabThumbnail(String id) {
-        Lab lab = infoRepository.findLabById(id)
+        Lab lab = infoRepository.findLabById(new ObjectId(id))
                 .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
         return LabThumbnailResponseDto.of(lab);
     }
@@ -36,14 +36,14 @@ public class LabService {
     }
 
     public void updateLab(LabCreateUpdateRequestDto labCreateUpdateRequestDto, String id) {
-        Lab lab = infoRepository.findLabById(id)
+        Lab lab = infoRepository.findLabById(new ObjectId(id))
                 .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
         lab.update(labCreateUpdateRequestDto);
         infoRepository.save(lab);
     }
 
     public void deleteLab(String id) {
-        Lab lab = infoRepository.findLabById(id)
+        Lab lab = infoRepository.findLabById(new ObjectId(id))
                 .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
         lab.delete();
         infoRepository.save(lab);

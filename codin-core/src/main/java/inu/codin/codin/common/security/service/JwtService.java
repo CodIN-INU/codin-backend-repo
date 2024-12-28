@@ -5,8 +5,6 @@ import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.infra.redis.RedisStorageService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +43,7 @@ public class JwtService {
      * @param response
      */
     public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = jwtUtils.getTokenFromCookie(request);
+        String refreshToken = jwtUtils.getRefreshToken(request);
 
         if (refreshToken == null) {
             log.error("[reissueToken] Refresh Token이 없습니다.");
@@ -91,11 +89,8 @@ public class JwtService {
         // 응답 헤더에 Access Token 추가
         response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
 
-        // 쿠키에 새로운 Refresh Token 추가
-        Cookie refreshTokenCookie = new Cookie("RT", newToken.getRefreshToken());
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
+        // 헤더에 Access Token 추가
+        response.addHeader("X-Refresh-Token", newToken.getRefreshToken());
 
         log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Refresh : {}",authentication.getName(), newToken.getRefreshToken());
     }
