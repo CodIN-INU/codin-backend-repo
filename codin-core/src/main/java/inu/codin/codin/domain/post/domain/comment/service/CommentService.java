@@ -130,10 +130,4 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    //user id 기반 nickname 반환
-    public String getNicknameByUserId(ObjectId userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        return user.getNickname();
-    }
 }
