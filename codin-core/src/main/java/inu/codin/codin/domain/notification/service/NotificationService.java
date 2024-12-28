@@ -17,8 +17,17 @@ import java.util.Map;
 @Slf4j
 public class NotificationService {
 
-    private NotificationRepository notificationRepository;
-    private FcmService fcmService;
+    private final NotificationRepository notificationRepository;
+    private final FcmService fcmService;
+
+    /**
+     * 특정 유저의 읽지 않은 알림 개수를 반환
+     * @param user 알림 수신자
+     * @return 읽지 않은 알림 개수
+     */
+    public long getUnreadNotificationCount(UserEntity user) {
+        return notificationRepository.countUnreadNotificationsByUser(user);
+    }
 
     /**
      * FCM 메시지를 특정 사용자에게 전송하는 로직
@@ -33,17 +42,23 @@ public class NotificationService {
                 .body(body)
                 .build();
 
-        // FCM 메시지 전송
         try {
             fcmService.sendFcmMessage(msgDto);
             log.info("[sendFcmMessage] 알림 전송 성공");
+            saveNotificationLog(msgDto);
         } catch (Exception e) {
             log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
         }
-        // 알림 로그 저장
-//        saveNotificationLog(msgDto);
     }
 
+    /**
+     * FCM 메시지를 Topic을 구독한 사람들에게 전송하는 로직
+     * @param title
+     * @param body
+     * @param data
+     * @param imageUrl
+     * @param topic
+     */
     public void sendFcmMessageToTopic(String title, String body, Map<String, String> data, String imageUrl, String topic) {
         FcmMessageTopicDto msgDto = FcmMessageTopicDto.builder()
                 .topic(topic)
@@ -53,26 +68,36 @@ public class NotificationService {
                 .imageUrl(imageUrl)
                 .build();
 
-        // FCM 메시지 전송
         try {
             fcmService.sendFcmMessageByTopic(msgDto);
             log.info("[sendFcmMessage] 알림 전송 성공");
+            saveNotificationLog(msgDto);
         } catch (Exception e) {
             log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
         }
-        // 알림 로그 저장
-//        saveNotificationLog(msgDto);
     }
 
-    // todo : 알림로그 저장하는 방식에 대한 고찰 필요
-    // 알림 로그를 저장하는 로직
-//    private void saveNotificationLog(FcmMessageUserDto msgDto) {
-//        NotificationEntity notificationEntity = NotificationEntity.builder()
-//                .user(msgDto.getUser())
-//                .type("push")
-//                .message(msgDto.getBody())
-//                .priority("high")
-//                .build();
-//        notificationRepository.save(notificationEntity);
-//    }
+    // 알림 로그를 저장하는 로직 (특정 사용자 대상)
+    private void saveNotificationLog(FcmMessageUserDto msgDto) {
+        NotificationEntity notificationEntity = NotificationEntity.builder()
+                .user(msgDto.getUser())
+                .title(msgDto.getTitle())
+                .message(msgDto.getBody())
+                .type("push")
+                .priority("high")
+                .build();
+        notificationRepository.save(notificationEntity);
+    }
+
+    // 알림 로그를 저장하는 로직 (토픽 대상)
+    private void saveNotificationLog(FcmMessageTopicDto msgDto) {
+        NotificationEntity notificationEntity = NotificationEntity.builder()
+                .title(msgDto.getTitle())
+                .message(msgDto.getBody())
+                .type("topic")
+                .priority("high")
+                .build();
+        notificationRepository.save(notificationEntity);
+    }
+
 }
