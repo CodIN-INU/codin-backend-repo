@@ -62,7 +62,10 @@ public class UserEntity extends BaseTimeEntity {
         this.studentId = userUpdateRequestDto.getStudentId();
         this.name = userUpdateRequestDto.getName();
         this.nickname = userUpdateRequestDto.getNickname();
-        this.profileImageUrl = userUpdateRequestDto.getProfileImageUrl();
         this.department = userUpdateRequestDto.getDepartment();
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

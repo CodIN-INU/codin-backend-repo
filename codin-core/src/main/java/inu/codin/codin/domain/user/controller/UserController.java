@@ -13,8 +13,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -110,5 +114,15 @@ public class UserController {
         userService.updateUserInfo(userUpdateRequestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 수정 완료", null));
+    }
+
+    @Operation(
+            summary = "유저 사진 수정"
+    )
+    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> updateUserProfile(@RequestPart(value = "postImages", required = false) MultipartFile postImage){
+        userService.updateUserProfile(postImage);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 사진 수정 완료", null));
     }
 }
