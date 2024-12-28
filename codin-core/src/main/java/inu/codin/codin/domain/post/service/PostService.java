@@ -37,7 +37,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,7 +116,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page;
         if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR))
-            page = postRepository.findByPostCategoryStartingWithAndDeletedAtIsNullOrderByCreatedAt(postCategory.toString(), pageRequest);
+            page = postRepository.findByPostCategoryStartingWithAndDeletedAtIsNullAndPostStatusInOrderByCreatedAt(postCategory.toString(), PostStatus.ACTIVE, pageRequest);
         else page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
