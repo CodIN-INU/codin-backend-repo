@@ -4,7 +4,6 @@ import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -24,6 +23,8 @@ public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
     void deleteByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
 
     boolean existsByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
+
+    LikeEntity findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
 
     Page<LikeEntity> findAllByUserIdAndLikeTypeOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
 }
