@@ -4,42 +4,48 @@ import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
 
 
 @Document(collection = "notification")
 public class NotificationEntity extends BaseTimeEntity {
 
     @Id @NotBlank
-    private String id;
+    private ObjectId id;
 
     @DBRef(lazy = true)
     private UserEntity user;
 
-    private String topic;
+    private String title;
 
     private String message;
 
-    // 미사용중
-    private String type;
-
-    // 미사용중
     private boolean isRead = false;
+
+    private LocalDateTime readAt;
+
+    // push, email ...
+    private String type;
 
     // 알림 중요도 - 미사용중
     private String priority;
 
     @Builder
-    public NotificationEntity(UserEntity user, String type, String message, String priority) {
+    public NotificationEntity(UserEntity user, String title, String message, String type, String priority) {
         this.user = user;
-        this.type = type;
+        this.title = title;
         this.message = message;
+        this.type = type;
         this.priority = priority;
     }
 
-    public void read() {
+    public void markAsRead() {
         this.isRead = true;
+        this.readAt = LocalDateTime.now();
     }
 }

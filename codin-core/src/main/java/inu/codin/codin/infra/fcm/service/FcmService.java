@@ -158,10 +158,44 @@ public class FcmService {
         fcmTokenRepository.save(fcmTokenEntity);
     }
 
-    // todo : FCM 토픽 구독 및 구독 해제 로직 추가
-    public void unsubscribeTopic(String topic) {
-    }
+    /**
+     * FCM 토픽 구독 로직
+     * @param topic 구독할 토픽 이름
+     */
     public void subscribeTopic(String topic) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userService.getUserEntityFromUserId(userId);
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
+                .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
+
+        for (String token : fcmTokenEntity.getFcmTokenList()) {
+            try {
+                FirebaseMessaging.getInstance().subscribeToTopic(List.of(token), topic);
+                log.info("FCM 토픽 구독 성공: 토픽={}, 토큰={}", topic, token);
+            } catch (FirebaseMessagingException e) {
+                log.error("FCM 토픽 구독 실패: 토픽={}, 토큰={}, 에러={}", topic, token, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * FCM 토픽 구독 해제 로직
+     * @param topic 구독 해제할 토픽 이름
+     */
+    public void unsubscribeTopic(String topic) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userService.getUserEntityFromUserId(userId);
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
+                .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
+
+        for (String token : fcmTokenEntity.getFcmTokenList()) {
+            try {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(List.of(token), topic);
+                log.info("FCM 토픽 구독 해제 성공: 토픽={}, 토큰={}", topic, token);
+            } catch (FirebaseMessagingException e) {
+                log.error("FCM 토픽 구독 해제 실패: 토픽={}, 토큰={}, 에러={}", topic, token, e.getMessage());
+            }
+        }
     }
 
 }
