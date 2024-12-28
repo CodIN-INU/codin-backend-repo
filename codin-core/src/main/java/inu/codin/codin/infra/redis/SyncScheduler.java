@@ -69,7 +69,7 @@ public class SyncScheduler {
             ObjectId likeId = new ObjectId(likeTypeId);
 
             // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
-            List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(likeType, likeId);
+            List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeId(likeType, likeId);
             for (LikeEntity dbLike : dbLikes) {
                 if (!likedUsers.contains(dbLike.getUserId().toString())) {
                     log.info("[MongoDB] 좋아요 삭제: UserID={}, EntityID={}", dbLike.getUserId(), likeId);
@@ -80,7 +80,7 @@ public class SyncScheduler {
             // (좋아요 추가) Redis에는 있지만 MongoDB에 없는 사용자 추가
             for (String id : likedUsers) {
                 ObjectId userId = new ObjectId(id);
-                if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(likeType, likeId, userId)) {
+                if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserId(likeType, likeId, userId)) {
                     log.info("[MongoDB] 좋아요 추가: UserID={}, EntityID={}", userId, likeId);
                     LikeEntity dbLike = LikeEntity.builder()
                             .likeType(likeType)
@@ -131,7 +131,7 @@ public class SyncScheduler {
             ObjectId id = new ObjectId(postId);
 
             // MongoDB의 스크랩 데이터 가져오기
-            List<ScrapEntity> dbScraps = scrapRepository.findByPostIdAndDeletedAtIsNull(id);
+            List<ScrapEntity> dbScraps = scrapRepository.findByPostId(id);
             Set<String> dbScrappedUsers = dbScraps.stream()
                     .map(ScrapEntity::getUserId)
                     .map(ObjectId::toString)
