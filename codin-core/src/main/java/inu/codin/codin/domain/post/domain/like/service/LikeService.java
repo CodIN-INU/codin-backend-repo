@@ -5,9 +5,8 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
-import inu.codin.codin.domain.post.domain.like.exception.LikeCreateFailException;
-import inu.codin.codin.domain.post.domain.like.exception.LikeRemoveFailException;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.like.exception.LikeCreateFailException;
 import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.ObjectError;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +63,8 @@ public class LikeService {
                     .likeTypeId(likeId)
                     .userId(userId)
                     .build());
-            redisService.applyBestScore(1, likeId);
+            if (likeType == LikeType.POST)
+                redisService.applyBestScore(1, likeId);
         }
     }
 

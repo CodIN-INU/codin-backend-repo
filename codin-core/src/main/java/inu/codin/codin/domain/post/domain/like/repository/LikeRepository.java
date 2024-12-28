@@ -19,9 +19,6 @@ public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
     // 특정 엔티티의 좋아요 데이터 조회
     List<LikeEntity> findByLikeTypeAndLikeTypeId(LikeType likeType, ObjectId id);
 
-    // 특정 사용자의 좋아요 삭제
-    void deleteByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
-
     boolean existsByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
 
     LikeEntity findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
