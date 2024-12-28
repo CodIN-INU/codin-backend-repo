@@ -2,6 +2,7 @@ package inu.codin.codin.domain.user.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
+import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,8 @@ public class UserEntity extends BaseTimeEntity {
     private UserStatus status;
 
     private boolean changePassword = false;
+
+    private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
     public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status) {
