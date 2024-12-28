@@ -223,5 +223,10 @@ public class PostService {
         return user.getNickname();
     }
 
+    public PostPageResponse searchPosts(String keyword, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByKeyword(keyword, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
 }
 
