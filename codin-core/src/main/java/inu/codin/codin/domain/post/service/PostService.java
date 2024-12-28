@@ -18,7 +18,10 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
@@ -32,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,7 @@ public class PostService {
     private final LikeService likeService;
     private final ScrapService scrapService;
     private final RedisService redisService;
+    private final UserRepository userRepository;
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
@@ -114,23 +120,34 @@ public class PostService {
     }
 
     public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
+        // 1. 사용자 ID와 닉네임을 한 번에 조회하여 Map으로 변환
+        // 닉네임 조회를 스트림 내부에서 진행하지 않고 매핑을 통해 한번에 처리 (중복 호출 최소화)
+        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
+                posts.stream().map(PostEntity::getUserId).distinct().toList()
+        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+
+        // 2. 게시글 처리
         return posts.stream()
                 .sorted(Comparator.comparing(PostEntity::getCreatedAt).reversed())
-                .map(post -> new PostDetailResponseDTO(
-                        post.getUserId().toString(),
-                        post.get_id().toString(),
-                        post.getContent(),
-                        post.getTitle(),
-                        post.getPostCategory(),
-                        post.getPostImageUrls(),
-                        post.isAnonymous(),
-                        likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),       // 좋아요 수
-                        scrapService.getScrapCount(post.get_id()),      // 스크랩 수
-                        redisService.getHitsCount(post.get_id()),
-                        post.getCreatedAt(),
-                        post.getCommentCount(),
-                        getUserInfoAboutPost(post.get_id())
-                ))
+                .map(post -> {
+                    String nickname = post.isAnonymous() ? "익명" : userNicknameMap.get(post.getUserId());
+                    return new PostDetailResponseDTO(
+                            post.getUserId().toString(),
+                            post.get_id().toString(),
+                            post.getTitle(),
+                            post.getContent(),
+                            nickname,
+                            post.getPostCategory(),
+                            post.getPostImageUrls(),
+                            post.isAnonymous(),
+                            likeService.getLikeCount(LikeType.valueOf("POST"), post.get_id()), // 좋아요 수
+                            scrapService.getScrapCount(post.get_id()), // 스크랩 수
+                            redisService.getHitsCount(post.get_id()),
+                            post.getCreatedAt(),
+                            post.getCommentCount(),
+                            getUserInfoAboutPost(post.get_id())
+                    );
+                })
                 .toList();
     }
 
@@ -143,11 +160,13 @@ public class PostService {
         if (redisService.validateHits(post.get_id(), userId))
             redisService.addHits(post.get_id(), userId);
 
+        String nickname = post.isAnonymous() ? "익명" : getNicknameByUserId(post.getUserId());
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
                 post.get_id().toString(),
-                post.getContent(),
                 post.getTitle(),
+                post.getContent(),
+                nickname,
                 post.getPostCategory(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
@@ -195,6 +214,13 @@ public class PostService {
                 .isLike(redisService.isPostLiked(postId, userId))
                 .isScrap(redisService.isPostScraped(postId, userId))
                 .build();
+    }
+
+    //user id 기반 nickname 반환
+    public String getNicknameByUserId(ObjectId userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return user.getNickname();
     }
 
     public List<PostDetailResponseDTO> getTop3BestPosts() {

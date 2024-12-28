@@ -33,6 +33,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -163,4 +164,12 @@ public class UserService {
 
 
 
+
+
+    //user id 기반 nickname 반환
+    public String getNicknameByUserId(ObjectId userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return user.getNickname();
+    }
 }
