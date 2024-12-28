@@ -2,10 +2,8 @@ package inu.codin.codin.domain.post.domain.scrap.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.like.exception.LikeRemoveFailException;
 import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.post.domain.scrap.exception.ScrapCreateFailException;
-import inu.codin.codin.domain.post.domain.scrap.exception.ScrapRemoveFailException;
 import inu.codin.codin.domain.post.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;
@@ -33,52 +31,51 @@ public class ScrapService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         // 이미 스크랩한 게시물인지 확인
-        boolean alreadyScrapped = scrapRepository.existsByPostIdAndUserId(postId, userId);
+        ScrapEntity scrap =  scrapRepository.findByPostIdAndUserId(postId, userId);
 
-        if (alreadyScrapped) {
-            removeScrap(postId, userId);
+        if (scrap != null && scrap.getDeletedAt() == null) {
+            removeScrap(scrap);
             return "스크랩이 취소되었습니다. ";
-        } else {
-            addScrap(postId, userId);
-            return "스크랩이 추가되었습니다. ";
         }
+        addScrap(postId, userId);
+        return "스크랩이 추가되었습니다. ";
+
     }
 
     private void addScrap(ObjectId postId, ObjectId userId) {
-        // 중복 스크랩 방지
-        if (scrapRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw new ScrapCreateFailException("이미 스크랩한 게시물입니다.");
-        }
+        ScrapEntity scrap =  scrapRepository.findByPostIdAndUserId(postId, userId);
 
-        if (redisHealthChecker.isRedisAvailable()) {
-            redisService.addScrap(postId, userId);
+        if (scrap != null){
+            if (scrap.getDeletedAt() != null){
+                scrap.recreatedAt();
+                scrap.restore();
+                scrapRepository.save(scrap);
+            } else throw new ScrapCreateFailException("이미 스크랩이 된 상태입니다.");
+        } else {
+            if (redisHealthChecker.isRedisAvailable()) {
+                redisService.addScrap(postId, userId);
+            }
+            scrapRepository.save(ScrapEntity.builder()
+                    .postId(postId)
+                    .userId(userId)
+                    .build());
+            redisService.applyBestScore(2, postId);
         }
-
-        ScrapEntity scrap = ScrapEntity.builder()
-                .postId(postId)
-                .userId(userId)
-                .build();
-        scrapRepository.save(scrap);
     }
 
-    private void removeScrap(ObjectId postId, ObjectId userId) {
-        // 스크랩하지 않은 게시물이라면 오류 처리
-        if (!scrapRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw new ScrapRemoveFailException("스크랩한 적이 없는 게시물입니다.");
-        }
-
+    private void removeScrap(ScrapEntity scrap) {
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.removeScrap(postId, userId);
+            redisService.removeScrap(scrap.getPostId(), scrap.getUserId());
         }
-
-        scrapRepository.deleteByPostIdAndUserId(postId, userId);
+        scrap.delete();
+        scrapRepository.save(scrap);
     }
 
     public int getScrapCount(ObjectId postId) {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getScrapCount(postId);
         }
-        long count = scrapRepository.countByPostId(postId);
+        long count = scrapRepository.countByPostIdAndDeletedAtIsNull(postId);
         return (int) Math.max(0, count);
     }
 
