@@ -1,12 +1,10 @@
-package inu.codin.codin.domain.user.dto;
+package inu.codin.codin.domain.user.dto.request;
 
 import inu.codin.codin.common.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 import lombok.Getter;
 
-@Data
 @Getter
 public class UserCreateRequestDto {
 
@@ -31,11 +29,6 @@ public class UserCreateRequestDto {
     @Schema(description = "닉네임", example = "코딩")
     @NotBlank
     private String nickname;
-
-    //todo 프로필 이미지 업로드 처리 ex) 이미지 크기 제한..
-    @Schema(description = "프로필 이미지 URL", example = "https://avatars.githubusercontent.com/u/77490521?v=4")
-    @NotBlank
-    private String profileImageUrl;
 
     @Schema(description = "소속", example = "IT_COLLEGE")
     private Department department;

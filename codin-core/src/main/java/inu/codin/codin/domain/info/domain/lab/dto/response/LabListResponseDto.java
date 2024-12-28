@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.bson.types.ObjectId;
 
 /*
     연구실 리스트 반환 DTO
@@ -40,7 +41,7 @@ public class LabListResponseDto {
 
     public static LabListResponseDto of(Lab lab){
         return LabListResponseDto.builder()
-                .id(lab.getId())
+                .id(lab.get_id().toString())
                 .title(lab.getTitle())
                 .content(lab.getContent())
                 .professor(lab.getProfessor())
