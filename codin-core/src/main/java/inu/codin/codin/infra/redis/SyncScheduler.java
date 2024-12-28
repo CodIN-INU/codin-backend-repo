@@ -1,6 +1,8 @@
 package inu.codin.codin.infra.redis;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.domain.post.domain.best.BestEntity;
+import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.hits.HitsEntity;
 import inu.codin.codin.domain.post.domain.hits.HitsRepository;
@@ -9,6 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -18,9 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +44,7 @@ public class SyncScheduler {
     private final LikeRepository likeRepository;
     private final ScrapRepository scrapRepository;
     private final HitsRepository hitsRepository;
+    private final BestRepository bestRepository;
 
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
@@ -211,6 +219,21 @@ public class SyncScheduler {
                         }
                         )
                 );
+    }
+    @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
+    public void getTop3BestPosts() {
+        Map<String, Double> posts = redisService.getTopNPosts(3);
+        posts.entrySet().stream()
+                .peek(post -> {
+                    BestEntity bestPost = bestRepository.findByPostId(new ObjectId(post.getKey()));
+                    if (bestPost == null) {
+                        bestRepository.save(BestEntity.builder()
+                                .postId(new ObjectId(post.getKey()))
+                                .score(post.getValue().intValue())
+                                .build());
+                    }
+                }
+        );
     }
 
 }
