@@ -3,7 +3,6 @@ package inu.codin.codin.domain.chat.chatting.controller;
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
-import inu.codin.codin.domain.chat.chatting.dto.response.ChattingResponseDto;
 import inu.codin.codin.domain.chat.chatting.service.ChattingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -35,10 +33,9 @@ public class ChattingController {
     )
     @MessageMapping("/chats/{chatRoomId}") //앞에 '/pub' 를 붙여서 요청
     @SendTo("/queue/{chatRoomId}")
-    public Mono<ResponseEntity<SingleResponse<?>>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto,
+    public ResponseEntity<SingleResponse<?>> sendMessage(@DestinationVariable("chatRoomId") String id, @RequestBody @Valid ChattingRequestDto chattingRequestDto,
                                                                @AuthenticationPrincipal Authentication authentication){
-        return chattingService.sendMessage(id, chattingRequestDto, authentication)
-                .map( chattingResponseDto -> ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", chattingResponseDto)));
+        return ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 송신 완료", chattingService.sendMessage(id, chattingRequestDto, authentication)));
     }
 
     @Operation(
@@ -55,10 +52,9 @@ public class ChattingController {
             description = "Pageable에 해당하는 page, size, sort 내역에 맞게 반환"
     )
     @GetMapping("/chats/list/{chatRoomId}")
-    public Mono<ResponseEntity<ListResponse<@Valid ChattingResponseDto>>> getAllMessage(@PathVariable("chatRoomId") String id,
+    public ResponseEntity<SingleResponse<?>> getAllMessage(@PathVariable("chatRoomId") String id,
                                                                                         @RequestParam("page") int page){
-        return chattingService.getAllMessage(id, page)
-                .map(chattingList -> ResponseEntity.ok().body(new ListResponse<>(200, "채팅 내용 리스트 반환 완료", chattingList)));
+        return ResponseEntity.ok().body(new SingleResponse<>(200, "채팅 내용 리스트 반환 완료", chattingService.getAllMessage(id, page)));
     }
 
     //채팅 테스트를 위한 MVC
