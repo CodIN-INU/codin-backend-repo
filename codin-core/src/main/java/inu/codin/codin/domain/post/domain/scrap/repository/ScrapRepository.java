@@ -1,5 +1,7 @@
 package inu.codin.codin.domain.post.domain.scrap.repository;
 
+import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -12,11 +14,13 @@ import java.util.List;
 @Repository
 public interface ScrapRepository extends MongoRepository<ScrapEntity, ObjectId> {
 
-    List<ScrapEntity> findByPostIdAndDeletedAtIsNull(ObjectId postId);
+    List<ScrapEntity> findByPostId(ObjectId postId);
 
-    long countByPostIdAndDeletedAtIsNull(ObjectId postId);
+    long countByPostId(ObjectId postId);
 
-    ScrapEntity findByPostIdAndUserId(ObjectId postId, ObjectId userId);
+    void deleteByPostIdAndUserId(ObjectId postId, ObjectId userId);
 
-    Page<ScrapEntity> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
+    boolean existsByPostIdAndUserId(ObjectId postId, ObjectId userId);
+
+    Page<ScrapEntity> findAllByUserIdOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
 }
