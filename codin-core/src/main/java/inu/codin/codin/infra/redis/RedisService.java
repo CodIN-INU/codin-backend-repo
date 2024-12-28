@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -122,16 +125,30 @@ public class RedisService {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
 
-        Set<String> result = new HashSet<>();
+        Map<String, Double> result = new HashMap<>();
         for (int i = 0; i < 24; i++) {
             String redisKey = now.minusHours(i).format(formatter);
-            Set<String> members = redisTemplate.opsForZSet().reverseRange(redisKey, 0, N - 1);
+            Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().reverseRangeWithScores(redisKey, 0, - 1);
             if (members != null) {
-                result.addAll(members);
+                for (ZSetOperations.TypedTuple<String> member :members){
+                    String postId = member.getValue();
+                    Double score = member.getScore();
+                    result.put(postId, score);
+                }
             }
         }
 
-        return result.stream().limit(N).collect(Collectors.toSet());
+        return result.entrySet().stream()
+                .sorted((e1, e2) -> {
+                    int scoreComparison = Double.compare(e2.getValue(), e1.getValue());
+                    if (scoreComparison != 0) {
+                        return scoreComparison;
+                    }
+                    return Integer.compare(getHitsCount(new ObjectId(e2.getKey())), getHitsCount(new ObjectId(e1.getKey())));
+                })
+                .limit(N)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     public void applyBestScore(int score, ObjectId id){
