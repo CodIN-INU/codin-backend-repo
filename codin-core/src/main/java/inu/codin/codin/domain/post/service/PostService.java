@@ -6,6 +6,8 @@ import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
+import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
@@ -14,6 +16,7 @@ import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.PostPollDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -33,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +52,7 @@ public class PostService {
     private final ScrapService scrapService;
     private final RedisService redisService;
     private final UserRepository userRepository;
+    private final PollRepository pollRepository;
 
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
@@ -157,10 +162,66 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
+
         if (redisService.validateHits(post.get_id(), userId))
             redisService.addHits(post.get_id(), userId);
 
         String nickname = post.isAnonymous() ? "익명" : getNicknameByUserId(post.getUserId());
+
+        // POLL 게시물 처리
+        if (post.getPostCategory().equals(PostCategory.POLL)) {
+            PollEntity poll = pollRepository.findByPostId(post.get_id())
+                    .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
+
+            // 투표 종료 여부 판단
+            boolean hasPollFinished = LocalDateTime.now().isAfter(poll.getPollEndTime());
+
+            if (!hasPollFinished) {
+                // 투표 진행 중
+                return new PostPollDetailResponseDTO(
+                        post.getUserId().toString(),
+                        post.get_id().toString(),
+                        post.getTitle(),
+                        post.getContent(),
+                        nickname,
+                        post.isAnonymous(),
+                        likeService.getLikeCount(LikeType.POST, post.get_id()),
+                        scrapService.getScrapCount(post.get_id()),
+                        redisService.getHitsCount(post.get_id()),
+                        post.getCreatedAt(),
+                        post.getCommentCount(),
+                        getUserInfoAboutPost(post.get_id()),
+                        poll.getPollOptions(),
+                        poll.getPollEndTime(),
+                        poll.isMultipleChoice(),
+                        null, // 진행 중이므로 투표 수는 반환하지 않음
+                        false // 투표 종료 여부
+                );
+            } else {
+                // 투표 종료
+                return new PostPollDetailResponseDTO(
+                        post.getUserId().toString(),
+                        post.get_id().toString(),
+                        post.getTitle(),
+                        post.getContent(),
+                        nickname,
+                        post.isAnonymous(),
+                        likeService.getLikeCount(LikeType.POST, post.get_id()),
+                        scrapService.getScrapCount(post.get_id()),
+                        redisService.getHitsCount(post.get_id()),
+                        post.getCreatedAt(),
+                        post.getCommentCount(),
+                        getUserInfoAboutPost(post.get_id()),
+                        poll.getPollOptions(),
+                        poll.getPollEndTime(),
+                        poll.isMultipleChoice(),
+                        poll.getPollVotes(), // 투표 종료 시 투표 수 반환
+                        true // 투표 종료 여부
+                );
+            }
+        }
+
+        // 5. 일반 게시물 처리
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
                 post.get_id().toString(),
@@ -170,8 +231,8 @@ public class PostService {
                 post.getPostCategory(),
                 post.getPostImageUrls(),
                 post.isAnonymous(),
-                likeService.getLikeCount(LikeType.valueOf("POST"),post.get_id()),   // 좋아요 수
-                scrapService.getScrapCount(post.get_id()),   // 스크랩 수
+                likeService.getLikeCount(LikeType.POST, post.get_id()),
+                scrapService.getScrapCount(post.get_id()),
                 redisService.getHitsCount(post.get_id()),
                 post.getCreatedAt(),
                 post.getCommentCount(),
