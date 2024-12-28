@@ -1,16 +1,16 @@
 package inu.codin.codin.domain.post.domain.scrap.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/scraps")
