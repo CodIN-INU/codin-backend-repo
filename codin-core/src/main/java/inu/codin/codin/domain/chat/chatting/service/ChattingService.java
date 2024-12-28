@@ -6,7 +6,6 @@ import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.chat.chatting.dto.response.ChattingResponseDto;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
-import inu.codin.codin.domain.chat.chatting.exception.ChattingNotFoundException;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import inu.codin.codin.infra.s3.S3Service;
@@ -19,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
