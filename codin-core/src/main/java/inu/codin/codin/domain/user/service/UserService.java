@@ -108,7 +108,7 @@ public class UserService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         switch (interactionType) {
             case LIKE:
-                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
+                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
                         .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
@@ -116,7 +116,7 @@ public class UserService {
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
 
             case SCRAP:
-                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserScrap = scrapPage.getContent().stream()
                         .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
