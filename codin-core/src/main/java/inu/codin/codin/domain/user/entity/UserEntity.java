@@ -59,7 +59,6 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public void updateUserInfo(UserUpdateRequestDto userUpdateRequestDto) {
-        this.studentId = userUpdateRequestDto.getStudentId();
         this.name = userUpdateRequestDto.getName();
         this.nickname = userUpdateRequestDto.getNickname();
         this.department = userUpdateRequestDto.getDepartment();
