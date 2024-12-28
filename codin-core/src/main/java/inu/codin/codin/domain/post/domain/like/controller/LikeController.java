@@ -22,9 +22,9 @@ public class LikeController {
     @Operation(summary = "게시물, 댓글, 대댓글 좋아요 토글")
     @PostMapping
     public ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody @Valid LikeRequestDto likeRequestDto) {
-        likeService.toggleLike(likeRequestDto);
+        String message = likeService.toggleLike(likeRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "좋아요 상태가 변경되었습니다.", null));
+                .body(new SingleResponse<>(201, message, null));
     }
 
 }

@@ -31,7 +31,7 @@ public class LikeService {
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
-    public void toggleLike(LikeRequestDto likeRequestDto) {
+    public String toggleLike(LikeRequestDto likeRequestDto) {
         ObjectId likeId = new ObjectId(likeRequestDto.getId());
         ObjectId userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
@@ -41,8 +41,10 @@ public class LikeService {
 
         if (alreadyLiked) {
             removeLike(likeRequestDto.getLikeType(), likeId, userId);
+            return "좋아요가 삭제되었습니다";
         } else {
             addLike(likeRequestDto.getLikeType(), likeId, userId);
+            return "좋아요가 추가되었습니다.";
         }
     }
 
