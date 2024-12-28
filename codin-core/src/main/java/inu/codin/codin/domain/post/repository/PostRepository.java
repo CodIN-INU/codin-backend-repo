@@ -26,6 +26,4 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
 
     @Query("{ '$or': [ { 'content': { $regex: ?0, $options: 'i' } }, { 'title': { $regex: ?0, $options: 'i' } } ] }")
     Page<PostEntity> findAllByKeywordAndDeletedAtIsNull(String keyword, PageRequest pageRequest);
-
-    Page<PostEntity> findAllByBestIsTrueAndDeletedAtIsNull(PageRequest pageRequest);
 }
