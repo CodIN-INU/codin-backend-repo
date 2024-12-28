@@ -25,10 +25,10 @@ import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserPasswordChangeFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -50,10 +51,15 @@ public class UserService {
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final PostService postService;
+    private final S3Service s3Service;
 
-    public void createUser(UserCreateRequestDto userCreateRequestDto) {
+    public void createUser(UserCreateRequestDto userCreateRequestDto, MultipartFile userImage) {
+
+        String imageUrl = null;
+        if (userImage != null) imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
 
         String encodedPassword = passwordEncoder.encode(userCreateRequestDto.getPassword());
 
@@ -67,7 +73,7 @@ public class UserService {
                 .studentId(userCreateRequestDto.getStudentId())
                 .name(userCreateRequestDto.getName())
                 .nickname(userCreateRequestDto.getNickname())
-                .profileImageUrl(userCreateRequestDto.getProfileImageUrl())
+                .profileImageUrl(imageUrl)
                 .department(userCreateRequestDto.getDepartment())
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.USER)
