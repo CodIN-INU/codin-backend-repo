@@ -158,13 +158,17 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
+    public void updateUserInfo(@Valid UserCreateRequestDto userCreateRequestDto) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        user.updateUserInfo(userCreateRequestDto);
+        userRepository.save(user);
+    }
+
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }
-
-
-
-
 
     //user id 기반 nickname 반환
     public String getNicknameByUserId(ObjectId userId) {
