@@ -30,11 +30,6 @@ public class UserCreateRequestDto {
     @NotBlank
     private String nickname;
 
-    //todo 프로필 이미지 업로드 처리 ex) 이미지 크기 제한..
-    @Schema(description = "프로필 이미지 URL", example = "https://avatars.githubusercontent.com/u/77490521?v=4")
-    @NotBlank
-    private String profileImageUrl;
-
     @Schema(description = "소속", example = "IT_COLLEGE")
     private Department department;
 
