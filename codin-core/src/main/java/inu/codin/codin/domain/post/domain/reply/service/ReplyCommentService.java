@@ -13,6 +13,8 @@ import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,8 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +33,7 @@ public class ReplyCommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
-
+    private final UserRepository userRepository;
     private final LikeService likeService;
 
     // 대댓글 추가
@@ -46,6 +50,7 @@ public class ReplyCommentService {
                 .commentId(commentId)
                 .userId(userId)
                 .content(requestDTO.getContent())
+                .anonymous(requestDTO.isAnonymous())
                 .build();
 
         replyCommentRepository.save(reply);
@@ -82,13 +87,22 @@ public class ReplyCommentService {
     public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
+        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
+                replies.stream().map(ReplyCommentEntity::getUserId).distinct().toList()
+        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+
+
         return replies.stream()
                 .map(reply -> {
+                    String nickname = reply.isAnonymous() ? "익명" : userNicknameMap.get(reply.getUserId());
+
                     boolean isDeleted = reply.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             reply.get_id().toString(),
                             reply.getUserId().toString(),
                             reply.getContent(),
+                            nickname,
+                            reply.isAnonymous(),
                             List.of(), //대댓글은 대댓글이 없음
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
                             isDeleted,
