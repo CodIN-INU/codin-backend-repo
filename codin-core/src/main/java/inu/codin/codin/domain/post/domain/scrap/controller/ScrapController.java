@@ -23,9 +23,9 @@ public class ScrapController {
     @Operation(summary = "게시물 스크랩 토글")
     @PostMapping("/{postId}")
     public ResponseEntity<SingleResponse<?>> toggleLike(@PathVariable String postId) {
-        scrapService.toggleScrap(postId);
+        String message = scrapService.toggleScrap(postId);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "스크랩 상태가 변경되었습니다.", null));
+                .body(new SingleResponse<>(201, message, null));
     }
 
 }

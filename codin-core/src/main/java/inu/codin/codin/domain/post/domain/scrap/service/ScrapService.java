@@ -25,7 +25,7 @@ public class ScrapService {
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
-    public void toggleScrap(String id) {
+    public String toggleScrap(String id) {
         ObjectId postId = new ObjectId(id);
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
@@ -37,8 +37,10 @@ public class ScrapService {
 
         if (alreadyScrapped) {
             removeScrap(postId, userId);
+            return "스크랩이 취소되었습니다. ";
         } else {
             addScrap(postId, userId);
+            return "스크랩이 추가되었습니다. ";
         }
     }
 
