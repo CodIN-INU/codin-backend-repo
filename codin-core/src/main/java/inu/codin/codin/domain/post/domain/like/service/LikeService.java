@@ -45,7 +45,7 @@ public class LikeService {
         return "좋아요가 추가되었습니다.";
     }
 
-    public void addLike(LikeType likeType,ObjectId likeId, ObjectId userId) {
+    public void addLike(LikeType likeType, ObjectId likeId, ObjectId userId) {
         LikeEntity like = likeRepository.findByLikeTypeAndLikeTypeIdAndUserId(likeType, likeId, userId);
 
         if (like != null){
@@ -70,7 +70,7 @@ public class LikeService {
 
     public void removeLike(LikeEntity like) {
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.removeLike(like.getLikeType().name(), like.get_id(), like.getUserId());
+            redisService.removeLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
         }
         like.delete();
         likeRepository.save(like);
@@ -80,7 +80,7 @@ public class LikeService {
         if (redisHealthChecker.isRedisAvailable()) {
             return redisService.getLikeCount(entityType.name(), entityId);
         }
-        long count = likeRepository.countByLikeTypeAndLikeTypeId(entityType, entityId);
+        long count = likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
         return (int) Math.max(0, count);
     }
 

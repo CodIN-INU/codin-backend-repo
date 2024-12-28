@@ -28,12 +28,10 @@ import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -102,7 +100,7 @@ public class UserService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         switch (interactionType) {
             case LIKE:
-                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
+                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
                         .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
@@ -110,7 +108,7 @@ public class UserService {
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
 
             case SCRAP:
-                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserScrap = scrapPage.getContent().stream()
                         .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
