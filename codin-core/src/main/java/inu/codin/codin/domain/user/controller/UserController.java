@@ -117,9 +117,9 @@ public class UserController {
     @Operation(
             summary = "유저 사진 수정"
     )
-    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>> updateUserProfile(@RequestPart(value = "postImages", required = false) MultipartFile postImage){
-        userService.updateUserProfile(postImage);
+    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> updateUserProfile(@RequestPart(value = "postImages", required = true) MultipartFile profileImage){
+        userService.updateUserProfile(profileImage);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 사진 수정 완료", null));
     }

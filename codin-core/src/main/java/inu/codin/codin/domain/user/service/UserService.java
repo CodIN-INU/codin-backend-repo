@@ -168,11 +168,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void updateUserProfile(MultipartFile postImage) {
+    public void updateUserProfile(MultipartFile profileImage) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
-        String profileImageUrl = s3Service.handleImageUpload(List.of(postImage)).get(0);
+        String profileImageUrl = s3Service.handleImageUpload(List.of(profileImage)).get(0);
         user.updateProfileImageUrl(profileImageUrl);
         userRepository.save(user);
     }
