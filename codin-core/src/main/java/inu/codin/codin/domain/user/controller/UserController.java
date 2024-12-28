@@ -100,4 +100,14 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 반환 완료", userService.getUserInfo()));
     }
+
+    @Operation(
+            summary = "유저 정보 수정"
+    )
+    @PutMapping
+    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UserCreateRequestDto userCreateRequestDto){
+        userService.updateUserInfo(userCreateRequestDto);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 정보 수정 완료", null));
+    }
 }
