@@ -16,6 +16,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -37,6 +38,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
+    private final RedisService redisService;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -55,6 +57,7 @@ public class CommentService {
 
         // 댓글 수 증가
         post.updateCommentCount(post.getCommentCount() + 1);
+        redisService.applyBestScore(1, postId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
     }
