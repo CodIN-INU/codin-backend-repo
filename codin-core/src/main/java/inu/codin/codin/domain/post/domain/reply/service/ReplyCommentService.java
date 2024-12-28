@@ -15,6 +15,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.RedisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,9 @@ public class ReplyCommentService {
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final UserRepository userRepository;
+
     private final LikeService likeService;
+    private final RedisService redisService;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -58,6 +61,7 @@ public class ReplyCommentService {
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
         log.info("대댓글 추가전, commentCount: {}", post.getCommentCount());
         post.updateCommentCount(post.getCommentCount() + 1);
+        redisService.applyBestScore(1, post.get_id());
         postRepository.save(post);
         log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
     }
