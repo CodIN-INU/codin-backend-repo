@@ -33,10 +33,13 @@ public class PostDetailResponseDTO {
     @NotBlank
     private final String content;
 
+    @Schema(description = "유저 nickname 익명시 익명으로 표시됨")
+    private final String nickname;
+
     @Schema(description = "게시물 내 이미지 url , blank 가능", example = "example/1231")
     private final List<String> postImageUrl;
 
-    @Schema(description = "게시물 익명 여부 default = 0 (익명)", example = "0")
+    @Schema(description = "게시물 익명 여부 default = true (익명)", example = "true")
     @NotNull
     private final boolean isAnonymous;
 
@@ -59,12 +62,13 @@ public class PostDetailResponseDTO {
     @Schema(description = "해당 게시글에 대한 유저 반응 여부")
     private final UserInfo userInfo;
 
-    public PostDetailResponseDTO(String userId, String _id, String content, String title, PostCategory postCategory, List < String > postImageUrls,
+    public PostDetailResponseDTO(String userId, String _id, String title, String content,String nickname ,PostCategory postCategory, List < String > postImageUrls,
                             boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfo userInfo){
         this.userId = userId;
         this._id = _id;
-        this.content = content;
         this.title = title;
+        this.content = content;
+        this.nickname = nickname;
         this.postCategory = postCategory;
         this.postImageUrl = postImageUrls;
         this.isAnonymous = isAnonymous;
