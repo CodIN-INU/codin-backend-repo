@@ -197,5 +197,9 @@ public class PostService {
                 .build();
     }
 
+    public List<PostDetailResponseDTO> getTop3BestPosts() {
+        redisService.getTopNPosts(3);
+        return null;
+    }
 }
 
