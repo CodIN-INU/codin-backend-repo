@@ -128,7 +128,7 @@ public class RedisService {
         return redisTemplate.opsForZSet().reverseRange("post:ranking", 0, N - 1);
     }
 
-    public void applyBestScore(int score, PostEntity post){
+    public void applyBestScore(int score, ObjectId id){
         LocalDateTime now = LocalDateTime.now();
         int hour = now.toLocalTime().getHour();
         int day = now.toLocalDate().getDayOfMonth();
@@ -136,13 +136,13 @@ public class RedisService {
         for (int i=0; i<24; i++){
             if ((hour-i) < 0){ hour = hour+24; day= day-1; }
             rediskey = now.format(DateTimeFormatter.ofPattern("yyyyMM")) + day + "/" + (hour-i);
-            Double scoreOfBest = redisTemplate.opsForZSet().score(rediskey, post.get_id().toString());
+            Double scoreOfBest = redisTemplate.opsForZSet().score(rediskey, id.toString());
             if (scoreOfBest != null){
-                redisTemplate.opsForZSet().incrementScore(rediskey, post.get_id().toString(), score);
+                redisTemplate.opsForZSet().incrementScore(rediskey, id.toString(), score);
                 break;
             }
         }
         rediskey = now.format(DateTimeFormatter.ofPattern("yyyyMMdd/HH"));
-        redisTemplate.opsForZSet().add(rediskey, post.get_id().toString(), score);
+        redisTemplate.opsForZSet().add(rediskey, id.toString(), score);
     }
 }
