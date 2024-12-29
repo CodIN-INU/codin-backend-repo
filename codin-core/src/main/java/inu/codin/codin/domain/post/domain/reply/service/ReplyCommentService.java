@@ -116,9 +116,9 @@ public class ReplyCommentService {
                     );
                 }).toList();
     }
-    public CommentResponseDTO.CommnetUserInfo getUserInfoAboutPost(ObjectId replyId) {
+    public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        return CommentResponseDTO.CommnetUserInfo.builder()
+        return CommentResponseDTO.UserInfo.builder()
                 .isLike(redisService.isReplyLiked(replyId, userId))
                 .build();
     }

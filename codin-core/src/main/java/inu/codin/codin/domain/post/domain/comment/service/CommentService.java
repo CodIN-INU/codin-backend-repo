@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.CommnetUserInfo;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -137,9 +137,9 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public CommnetUserInfo getUserInfoAboutPost(ObjectId commentId) {
+    public UserInfo getUserInfoAboutPost(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        return CommnetUserInfo.builder()
+        return UserInfo.builder()
                 .isLike(redisService.isCommentLiked(commentId, userId))
                 .build();
     }

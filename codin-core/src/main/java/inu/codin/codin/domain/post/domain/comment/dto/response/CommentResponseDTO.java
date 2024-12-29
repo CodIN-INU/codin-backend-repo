@@ -45,12 +45,12 @@ public class CommentResponseDTO {
     private final LocalDateTime createdAt;
 
     @Schema(description = "해당 댓글 대한 유저 반응 여부")
-    private final CommnetUserInfo CommnetUserInfo;
+    private final UserInfo userInfo;
 
     public CommentResponseDTO(String _id, String userId, String content,
                               String nickname, Boolean anonymous ,
                               List<CommentResponseDTO> replies, int likeCount,
-                              boolean isDeleted, LocalDateTime createdAt, CommnetUserInfo CommnetUserInfo) {
+                              boolean isDeleted, LocalDateTime createdAt, UserInfo userInfo) {
         this._id = _id;
         this.userId = userId;
         this.content = content;
@@ -60,15 +60,15 @@ public class CommentResponseDTO {
         this.likeCount = likeCount;
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
-        this.CommnetUserInfo = CommnetUserInfo;
+        this.userInfo = userInfo;
     }
 
     @Getter
-    public static class CommnetUserInfo {
+    public static class UserInfo {
         private final boolean isLike;
 
         @Builder
-        public CommnetUserInfo(boolean isLike) {
+        public UserInfo(boolean isLike) {
             this.isLike = isLike;
         }
     }
