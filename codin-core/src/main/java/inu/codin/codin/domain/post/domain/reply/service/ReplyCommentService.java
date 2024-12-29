@@ -108,10 +108,19 @@ public class ReplyCommentService {
                             nickname,
                             reply.isAnonymous(),
                             List.of(), //대댓글은 대댓글이 없음
-                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
+                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
                             isDeleted,
-                            reply.getCreatedAt());
+                            reply.getCreatedAt(),
+                            getUserInfoAboutPost(reply.get_id())
+
+                    );
                 }).toList();
+    }
+    public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return CommentResponseDTO.UserInfo.builder()
+                .isLike(redisService.isReplyLiked(replyId, userId))
+                .build();
     }
 
 
