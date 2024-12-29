@@ -74,6 +74,14 @@ public class RedisService {
         String redisKey = LikeType.POST + LIKE_KEY + postId.toString();
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
     }
+    public boolean isCommentLiked(ObjectId commentId, ObjectId userId){
+        String redisKey = LikeType.COMMENT + LIKE_KEY + commentId.toString();
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
+    }
+    public boolean isReplyLiked(ObjectId replyId, ObjectId userId){
+        String redisKey = LikeType.REPLY + LIKE_KEY + replyId.toString();
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
+    }
 
     //Scrap
     public void addScrap(ObjectId postId, ObjectId userId) {

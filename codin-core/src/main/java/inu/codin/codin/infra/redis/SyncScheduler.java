@@ -48,9 +48,9 @@ public class SyncScheduler {
             return;
         }
         log.info(" 동기화 작업 시작");
-        syncEntityLikes("post", postRepository);
-        syncEntityLikes("comment", commentRepository);
-        syncEntityLikes("reply", replyCommentRepository);
+        syncEntityLikes("POST", postRepository);
+        syncEntityLikes("COMMENT", commentRepository);
+        syncEntityLikes("REPLY", replyCommentRepository);
         syncPostScraps();
         synPostHits();
         log.info(" 동기화 작업 완료");
