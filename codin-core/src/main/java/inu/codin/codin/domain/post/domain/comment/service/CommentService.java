@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -118,7 +118,11 @@ public class CommentService {
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
                             isDeleted,
-                            comment.getCreatedAt());
+                            comment.getCreatedAt(),
+                            getUserInfoAboutPost(comment.get_id())
+                    );
+
+
                     })
                 .toList();
     }
@@ -131,6 +135,13 @@ public class CommentService {
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
+    }
+
+    public UserInfo getUserInfoAboutPost(ObjectId commentId) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return UserInfo.builder()
+                .isLike(redisService.isCommentLiked(commentId, userId))
+                .build();
     }
 
 }
