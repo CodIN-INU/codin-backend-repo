@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -128,6 +130,16 @@ public class UserService {
                 List<PostEntity> postUserComment = commentPage.getContent().stream()
                         .map(commentEntity -> postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 작성한 댓글의 게시글을 찾을 수 없습니다.")))
+                        //중복 필터링 로직
+                        //Map(ObjectId, PostEntity) 로 변환
+                        .collect(Collectors.toMap(
+                                PostEntity::get_id, // Key: postId
+                                postEntity -> postEntity, // Value: PostEntity
+                                (existing, replacement) -> existing // 중복 발생 시 기존 값 유지 - 같은 키 존재 발생시 기존 값 유지
+                        ))
+                        // 중복 제거된 후 Map 에서 PostEntity 추출
+                        .values()
+                        .stream()
                         .toList();
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages()-1, commentPage.hasNext()? commentPage.getPageable().getPageNumber() + 1 : -1);
 
