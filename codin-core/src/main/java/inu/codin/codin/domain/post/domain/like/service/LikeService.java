@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
@@ -28,6 +29,7 @@ public class LikeService {
 
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
+    private final NotificationService notificationService;
 
     public String toggleLike(LikeRequestDto likeRequestDto) {
         ObjectId likeId = new ObjectId(likeRequestDto.getId());
@@ -65,6 +67,9 @@ public class LikeService {
                     .build());
             if (likeType == LikeType.POST)
                 redisService.applyBestScore(1, likeId);
+            if (redisService.getLikeCount(likeType.toString(), likeId) == 1){
+                notificationService.sendNotificationMessageByLike(likeType, likeId);
+            }
         }
     }
 

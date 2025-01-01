@@ -3,16 +3,26 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -22,10 +32,14 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyCommentRepository replyCommentRepository;
 
     private final FcmService fcmService;
     private final String NOTI_COMMENT_TITLE = "누군가가 내 게시글에 댓글을 달았어요!";
     private final String NOTI_REPLY_TITLE = "누군가가 내 댓글에 답글을 달았어요!";
+    private final String NOTI_LIKE_TITLE = "나에게 첫 좋아요가 달렸어요!";
 
 
     /**
@@ -41,13 +55,15 @@ public class NotificationService {
      * FCM 메시지를 특정 사용자에게 전송하는 로직
      * @param title 메시지 제목
      * @param body 메시지 내용
+     * @param data 알림 대상의 _id
      * @param user 메시지를 받을 사용자
      */
-    public void sendFcmMessageToUser(String title, String body, UserEntity user) {
+    public void sendFcmMessageToUser(String title, String body, Map<String, String> data, UserEntity user) {
         FcmMessageUserDto msgDto = FcmMessageUserDto.builder()
                 .user(user)
                 .title(title)
                 .body(body)
+                .data(data)
 //                .imageUrl() //codin 로고 url
                 .build();
 
@@ -109,15 +125,57 @@ public class NotificationService {
         notificationRepository.save(notificationEntity);
     }
 
-    public void sendNotificationMessageByComment(ObjectId userId, String content) {
+    public void sendNotificationMessageByComment(ObjectId userId, String postId, String content) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
-        sendFcmMessageToUser(NOTI_COMMENT_TITLE, content, user);
+        Map<String, String> post = new HashMap<>();
+        post.put("postId", postId);
+        sendFcmMessageToUser(NOTI_COMMENT_TITLE, content, post, user);
     }
 
-    public void sendNotificationMessageByReply(ObjectId userId, String content) {
+    public void sendNotificationMessageByReply(ObjectId userId, String postId, String content) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
-        sendFcmMessageToUser(NOTI_REPLY_TITLE, content, user);
+        Map<String, String> post = new HashMap<>();
+        post.put("postId", postId);
+        sendFcmMessageToUser(NOTI_REPLY_TITLE, content, post, user);
+    }
+
+    public void sendNotificationMessageByLike(LikeType likeType, ObjectId id) {
+        switch(likeType){
+            case POST -> {
+                PostEntity postEntity = postRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                UserEntity user = userRepository.findById(postEntity.getUserId())
+                        .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+                Map<String, String> post = new HashMap<>();
+                post.put("postId", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 게시글 보러 가기", post, user);
+            }
+            case REPLY -> {
+                ReplyCommentEntity replyCommentEntity = replyCommentRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+                CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(replyCommentEntity.getCommentId())
+                        .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                PostEntity postEntity = postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
+                        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                UserEntity user = userRepository.findById(replyCommentEntity.getUserId())
+                        .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+                Map<String, String> post = new HashMap<>();
+                post.put("postId", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 답글 보러 가기", post, user);
+            }
+            case COMMENT -> {
+                CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                PostEntity postEntity = postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
+                        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                UserEntity user = userRepository.findById(commentEntity.getUserId())
+                        .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+                Map<String, String> post = new HashMap<>();
+                post.put("postId", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 댓글 보러 가기", post, user);
+            }
+        }
     }
 }
