@@ -1,9 +1,11 @@
 package inu.codin.codin.infra.fcm.service;
 
 import com.google.firebase.messaging.*;
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
@@ -26,7 +28,7 @@ import java.util.Optional;
 public class FcmService {
 
     private final FcmTokenRepository fcmTokenRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     /**
      * 클라이언트로부터 받은 FCM 토큰을 저장하는 로직
@@ -35,7 +37,7 @@ public class FcmService {
     public void saveFcmToken(@Valid FcmTokenRequest fcmTokenRequest) {
         // 유저의 FCM 토큰이 존재하는지 확인
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = userService.getUserEntityFromUserId(userId);
+        UserEntity user = getUserEntityFromUserId(userId);
         Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByUser(user);
 
         if (fcmToken.isPresent()) { // 이미 존재하는 유저라면 토큰 추가
@@ -164,7 +166,7 @@ public class FcmService {
      */
     public void subscribeTopic(String topic) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = userService.getUserEntityFromUserId(userId);
+        UserEntity user = getUserEntityFromUserId(userId);
         FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 
@@ -184,7 +186,7 @@ public class FcmService {
      */
     public void unsubscribeTopic(String topic) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = userService.getUserEntityFromUserId(userId);
+        UserEntity user = getUserEntityFromUserId(userId);
         FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 
@@ -196,6 +198,11 @@ public class FcmService {
                 log.error("FCM 토픽 구독 해제 실패: 토픽={}, 토큰={}, 에러={}", topic, token, e.getMessage());
             }
         }
+    }
+
+    public UserEntity getUserEntityFromUserId(ObjectId userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
     }
 
 }

@@ -66,7 +66,7 @@ public class ReplyCommentService {
         redisService.applyBestScore(1, post.get_id());
         postRepository.save(post);
         log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
-        notificationService.sendNotificationMessageByReply(comment.getUserId(), reply.getContent());
+        notificationService.sendNotificationMessageByReply(comment.getUserId(), post.get_id().toString(), reply.getContent());
     }
 
     // 대댓글 삭제 (Soft Delete)

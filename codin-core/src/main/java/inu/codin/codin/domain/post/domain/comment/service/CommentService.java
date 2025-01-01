@@ -62,7 +62,7 @@ public class CommentService {
         redisService.applyBestScore(1, postId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
-        notificationService.sendNotificationMessageByComment(post.getUserId(), comment.getContent());
+        notificationService.sendNotificationMessageByComment(post.getUserId(), post.get_id().toString(), comment.getContent());
     }
 
     // 댓글 삭제 (Soft Delete)
