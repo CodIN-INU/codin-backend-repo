@@ -1,13 +1,16 @@
 package inu.codin.codin.domain.notification.service;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,7 +21,12 @@ import java.util.Map;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+
     private final FcmService fcmService;
+    private final String NOTI_COMMENT_TITLE = "누군가가 내 게시글에 댓글을 달았어요!";
+    private final String NOTI_REPLY_TITLE = "누군가가 내 댓글에 답글을 달았어요!";
+
 
     /**
      * 특정 유저의 읽지 않은 알림 개수를 반환
@@ -40,6 +48,7 @@ public class NotificationService {
                 .user(user)
                 .title(title)
                 .body(body)
+//                .imageUrl() //codin 로고 url
                 .build();
 
         try {
@@ -100,4 +109,15 @@ public class NotificationService {
         notificationRepository.save(notificationEntity);
     }
 
+    public void sendNotificationMessageByComment(ObjectId userId, String content) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+        sendFcmMessageToUser(NOTI_COMMENT_TITLE, content, user);
+    }
+
+    public void sendNotificationMessageByReply(ObjectId userId, String content) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+        sendFcmMessageToUser(NOTI_REPLY_TITLE, content, user);
+    }
 }
