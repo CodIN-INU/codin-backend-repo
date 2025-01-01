@@ -17,6 +17,4 @@ public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
     @Query("{'studentId':  ?0, 'deletedAt': null, 'status':  { $in:  ['ACTIVE'] }}")
     Optional<UserEntity> findByStudentId(String studentId);
 
-    Optional<UserEntity> findById(String id);
-
 }
