@@ -3,6 +3,7 @@ package inu.codin.codin.domain.user.entity;
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,5 +59,15 @@ public class UserEntity extends BaseTimeEntity {
 
     public void changePassword(){
         this.changePassword = !this.changePassword;
+    }
+
+    public void updateUserInfo(UserUpdateRequestDto userUpdateRequestDto) {
+        this.name = userUpdateRequestDto.getName();
+        this.nickname = userUpdateRequestDto.getNickname();
+        this.department = userUpdateRequestDto.getDepartment();
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

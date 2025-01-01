@@ -6,8 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,6 +74,14 @@ public class RedisService {
         String redisKey = LikeType.POST + LIKE_KEY + postId.toString();
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
     }
+    public boolean isCommentLiked(ObjectId commentId, ObjectId userId){
+        String redisKey = LikeType.COMMENT + LIKE_KEY + commentId.toString();
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
+    }
+    public boolean isReplyLiked(ObjectId replyId, ObjectId userId){
+        String redisKey = LikeType.REPLY + LIKE_KEY + replyId.toString();
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString()));
+    }
 
     //Scrap
     public void addScrap(ObjectId postId, ObjectId userId) {
@@ -112,5 +125,53 @@ public class RedisService {
     public Set<String> getHitsUser(ObjectId postId) {
         String redisKey = HITS_KEY + postId.toString();
         return redisTemplate.opsForSet().members(redisKey);
+    }
+
+    // Top N 게시물 조회
+    public Set<String> getTopNPosts(int N) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
+
+        Map<String, Double> result = new HashMap<>();
+        for (int i = 0; i < 24; i++) {
+            String redisKey = now.minusHours(i).format(formatter);
+            Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().reverseRangeWithScores(redisKey, 0, - 1);
+            if (members != null) {
+                for (ZSetOperations.TypedTuple<String> member :members){
+                    String postId = member.getValue();
+                    Double score = member.getScore();
+                    result.put(postId, score);
+                }
+            }
+        }
+
+        return result.entrySet().stream()
+                .sorted((e1, e2) -> {
+                    int scoreComparison = Double.compare(e2.getValue(), e1.getValue());
+                    if (scoreComparison != 0) {
+                        return scoreComparison;
+                    }
+                    return Integer.compare(getHitsCount(new ObjectId(e2.getKey())), getHitsCount(new ObjectId(e1.getKey())));
+                })
+                .limit(N)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    public void applyBestScore(int score, ObjectId id){
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
+
+        String redisKey;
+        for (int i=0; i<24; i++){
+            redisKey = now.minusHours(i).format(formatter);
+            Double scoreOfBest = redisTemplate.opsForZSet().score(redisKey, id.toString());
+            if (scoreOfBest != null){
+                redisTemplate.opsForZSet().incrementScore(redisKey, id.toString(), score);
+                return;
+            }
+        }
+        redisKey = now.format(DateTimeFormatter.ofPattern("yyyyMMdd/HH"));
+        redisTemplate.opsForZSet().add(redisKey, id.toString(), score);
     }
 }

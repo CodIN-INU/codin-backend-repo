@@ -21,7 +21,6 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.redis.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
@@ -36,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -223,5 +223,19 @@ public class PostService {
         return user.getNickname();
     }
 
+    public PostPageResponse searchPosts(String keyword, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByKeyword(keyword, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
+    public List<PostDetailResponseDTO> getTop3BestPosts() {
+        Set<String> postIds = redisService.getTopNPosts(3);
+        List<PostEntity> bestPosts = postIds.stream()
+                .map(postId ->
+                    postRepository.findById(new ObjectId(postId))
+                            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."))
+                ).toList();
+        return getPostListResponseDtos(bestPosts);
+    }
 }
 
