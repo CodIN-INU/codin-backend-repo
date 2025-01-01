@@ -35,4 +35,8 @@ public abstract class BaseTimeEntity {
         this.deletedAt = null;
     }
 
+    public void recreatedAt(){
+        this.createdAt = LocalDateTime.now();
+    }
+
 }

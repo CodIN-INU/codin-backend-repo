@@ -17,11 +17,12 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public class CommentService {
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
     private final NotificationService notificationService;
+    private final RedisService redisService;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -57,6 +59,7 @@ public class CommentService {
 
         // 댓글 수 증가
         post.updateCommentCount(post.getCommentCount() + 1);
+        redisService.applyBestScore(1, postId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
         notificationService.sendNotificationMessageByComment(post.getUserId(), comment.getContent());
@@ -118,7 +121,11 @@ public class CommentService {
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
                             isDeleted,
-                            comment.getCreatedAt());
+                            comment.getCreatedAt(),
+                            getUserInfoAboutPost(comment.get_id())
+                    );
+
+
                     })
                 .toList();
     }
@@ -131,6 +138,13 @@ public class CommentService {
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
+    }
+
+    public UserInfo getUserInfoAboutPost(ObjectId commentId) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return UserInfo.builder()
+                .isLike(redisService.isCommentLiked(commentId, userId))
+                .build();
     }
 
 }

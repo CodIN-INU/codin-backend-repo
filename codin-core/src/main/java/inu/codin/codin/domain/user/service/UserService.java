@@ -18,6 +18,7 @@ import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -38,6 +39,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -107,7 +110,7 @@ public class UserService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         switch (interactionType) {
             case LIKE:
-                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
+                Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
                         .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
@@ -115,7 +118,7 @@ public class UserService {
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
 
             case SCRAP:
-                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
+                Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserScrap = scrapPage.getContent().stream()
                         .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
@@ -127,6 +130,16 @@ public class UserService {
                 List<PostEntity> postUserComment = commentPage.getContent().stream()
                         .map(commentEntity -> postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
                                 .orElseThrow(() -> new NotFoundException("유저가 작성한 댓글의 게시글을 찾을 수 없습니다.")))
+                        //중복 필터링 로직
+                        //Map(ObjectId, PostEntity) 로 변환
+                        .collect(Collectors.toMap(
+                                PostEntity::get_id, // Key: postId
+                                postEntity -> postEntity, // Value: PostEntity
+                                (existing, replacement) -> existing // 중복 발생 시 기존 값 유지 - 같은 키 존재 발생시 기존 값 유지
+                        ))
+                        // 중복 제거된 후 Map 에서 PostEntity 추출
+                        .values()
+                        .stream()
                         .toList();
                 return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages()-1, commentPage.hasNext()? commentPage.getPageable().getPageNumber() + 1 : -1);
 
@@ -166,6 +179,23 @@ public class UserService {
     public UserEntity getUserEntityFromUserId(ObjectId userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
+    }
+
+    public void updateUserInfo(@Valid UserUpdateRequestDto userUpdateRequestDto) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        user.updateUserInfo(userUpdateRequestDto);
+        userRepository.save(user);
+    }
+
+    public void updateUserProfile(MultipartFile profileImage) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        String profileImageUrl = s3Service.handleImageUpload(List.of(profileImage)).get(0);
+        user.updateProfileImageUrl(profileImageUrl);
+        userRepository.save(user);
     }
 
     public enum InteractionType {

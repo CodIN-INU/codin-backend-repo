@@ -5,6 +5,7 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.user.dto.request.UserCreateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserPasswordRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -102,5 +103,25 @@ public class UserController {
     public ResponseEntity<SingleResponse<UserInfoResponseDto>> getUserInfo(){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 반환 완료", userService.getUserInfo()));
+    }
+
+    @Operation(
+            summary = "유저 정보 수정"
+    )
+    @PutMapping
+    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto){
+        userService.updateUserInfo(userUpdateRequestDto);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 정보 수정 완료", null));
+    }
+
+    @Operation(
+            summary = "유저 사진 수정"
+    )
+    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> updateUserProfile(@RequestPart(value = "postImages", required = true) MultipartFile profileImage){
+        userService.updateUserProfile(profileImage);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 사진 수정 완료", null));
     }
 }

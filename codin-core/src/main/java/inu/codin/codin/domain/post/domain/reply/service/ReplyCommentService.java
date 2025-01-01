@@ -16,6 +16,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.RedisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final NotificationService notificationService;
-
+    private final RedisService redisService;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -62,6 +63,7 @@ public class ReplyCommentService {
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
         log.info("대댓글 추가전, commentCount: {}", post.getCommentCount());
         post.updateCommentCount(post.getCommentCount() + 1);
+        redisService.applyBestScore(1, post.get_id());
         postRepository.save(post);
         log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
         notificationService.sendNotificationMessageByReply(comment.getUserId(), reply.getContent());
@@ -109,10 +111,19 @@ public class ReplyCommentService {
                             nickname,
                             reply.isAnonymous(),
                             List.of(), //대댓글은 대댓글이 없음
-                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.getCommentId()), // 대댓글 좋아요 수
+                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
                             isDeleted,
-                            reply.getCreatedAt());
+                            reply.getCreatedAt(),
+                            getUserInfoAboutPost(reply.get_id())
+
+                    );
                 }).toList();
+    }
+    public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return CommentResponseDTO.UserInfo.builder()
+                .isLike(redisService.isReplyLiked(replyId, userId))
+                .build();
     }
 
 
