@@ -176,11 +176,6 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
 
-    public UserEntity getUserEntityFromUserId(ObjectId userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
-    }
-
     public void updateUserInfo(@Valid UserUpdateRequestDto userUpdateRequestDto) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         UserEntity user = userRepository.findById(userId)
