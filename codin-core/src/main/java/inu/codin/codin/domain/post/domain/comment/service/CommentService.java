@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
@@ -37,6 +38,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
+    private final NotificationService notificationService;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -57,6 +59,7 @@ public class CommentService {
         post.updateCommentCount(post.getCommentCount() + 1);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
+        notificationService.sendNotificationMessageByComment(post.getUserId(), comment.getContent());
     }
 
     // 댓글 삭제 (Soft Delete)
