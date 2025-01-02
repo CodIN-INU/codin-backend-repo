@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -7,13 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Getter
-@NoArgsConstructor
 public class PollCreateRequestDTO {
 
     @Schema(description = "투표 제목", example = "투표 제목")
@@ -30,11 +31,12 @@ public class PollCreateRequestDTO {
     @NotNull
     private List<@NotBlank String> pollOptions;
 
-    @Schema(description = "복수 선택 가능 여부", example = "false")
+    @Schema(description = "복수 선택 가능 여부", example = "true")
     private boolean multipleChoice;
 
-    @Schema(description = "설문조사 종료 시간 (ISO8601 format)", example = "2024-01-21T23:59:59")
+    @Schema(description = "설문조사 종료 시간 (yyyy/MM/dd HH:mm format)", example = "2024/01/21 23:59")
     @NotNull
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm", timezone = "Asia/Seoul")  // Jackson에서 LocalDateTime 변환을 위한 어노테이션
     private LocalDateTime pollEndTime;
 
     @Schema(description = "게시물 익명 여부 default = true (익명)", example = "true")

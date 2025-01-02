@@ -41,7 +41,7 @@ public class PollService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         // 권한 확인 처리 로직 추가
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                pollRequestDTO.getPostCategory().toString().split("_")[0].equals("POLL")){
+                pollRequestDTO.getPostCategory().toString().equals("POLL")){
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "투표에 대한 권한이 없습니다.");
         }
 
@@ -118,7 +118,7 @@ public class PollService {
 
     private void validateUserAndPost(PostEntity post) {
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("POLL")){
+                post.getPostCategory().toString().equals("POLL")){
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "투표 게시글에 대한 권한이 없습니다.");
         }
         SecurityUtils.validateUser(post.getUserId());
