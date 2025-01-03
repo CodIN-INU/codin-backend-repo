@@ -29,9 +29,8 @@ public class ChatRoomController {
     )
     @PostMapping
     public ResponseEntity<SingleResponse<?>> createChatRoom(@RequestBody ChatRoomCreateRequestDto chatRoomCreateRequestDto, @AuthenticationPrincipal UserDetails userDetails){
-        chatRoomService.createChatRoom(chatRoomCreateRequestDto, userDetails);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "채팅방 생성 완료", null));
+                .body(new SingleResponse<>(201, "채팅방 생성 완료", chatRoomService.createChatRoom(chatRoomCreateRequestDto, userDetails)));
     }
 
     @Operation(

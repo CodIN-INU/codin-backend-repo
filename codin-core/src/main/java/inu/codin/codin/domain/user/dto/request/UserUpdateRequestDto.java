@@ -6,21 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class UserCreateRequestDto {
-
-    // todo : 길이 관련 validation 추가
-
-    @Schema(description = "이메일 주소", example = "codin@inu.ac.kr")
-    @NotBlank
-    private String email;
-
-    @Schema(description = "비밀번호", example = "password")
-    @NotBlank
-    private String password;
-
-    @Schema(description = "학번", example = "20210000")
-    @NotBlank
-    private String studentId;
+public class UserUpdateRequestDto {
 
     @Schema(description = "이름", example = "홍길동")
     @NotBlank
@@ -32,5 +18,4 @@ public class UserCreateRequestDto {
 
     @Schema(description = "소속", example = "IT_COLLEGE")
     private Department department;
-
 }

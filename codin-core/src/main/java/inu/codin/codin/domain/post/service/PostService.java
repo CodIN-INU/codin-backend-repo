@@ -41,6 +41,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -231,5 +234,19 @@ public class PostService {
         return user.getNickname();
     }
 
+    public PostPageResponse searchPosts(String keyword, int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page = postRepository.findAllByKeyword(keyword, pageRequest);
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
+    public List<PostDetailResponseDTO> getTop3BestPosts() {
+        Set<String> postIds = redisService.getTopNPosts(3);
+        List<PostEntity> bestPosts = postIds.stream()
+                .map(postId ->
+                    postRepository.findById(new ObjectId(postId))
+                            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."))
+                ).toList();
+        return getPostListResponseDtos(bestPosts);
+    }
 }
 
