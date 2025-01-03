@@ -7,22 +7,20 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
-
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.exception.PollDuplicateVoteException;
 import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
 import inu.codin.codin.domain.post.domain.poll.exception.PollTimeFailException;
+import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
+import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,11 +37,6 @@ public class PollService {
     public void createPoll(PollCreateRequestDTO pollRequestDTO) {
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        // 권한 확인 처리 로직 추가
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                pollRequestDTO.getPostCategory().toString().equals("POLL")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "투표에 대한 권한이 없습니다.");
-        }
 
         // PostEntity 생성 및 저장
         PostEntity postEntity = PostEntity.builder()
