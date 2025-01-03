@@ -1,7 +1,10 @@
 package inu.codin.codin.infra.redis;
 
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.entity.PostEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -11,9 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -128,7 +129,7 @@ public class RedisService {
     }
 
     // Top N 게시물 조회
-    public Set<String> getTopNPosts(int N) {
+    public Map<String, Double> getTopNPosts(int N) {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd/HH");
 
@@ -153,9 +154,12 @@ public class RedisService {
                     }
                     return Integer.compare(getHitsCount(new ObjectId(e2.getKey())), getHitsCount(new ObjectId(e1.getKey())));
                 })
-                .limit(N)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+                .limit(N).collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (existing, replacement) -> existing, // Merge function (not needed here)
+                        LinkedHashMap::new // Use LinkedHashMap to preserve the order
+                ));
     }
 
     public void applyBestScore(int score, ObjectId id){
