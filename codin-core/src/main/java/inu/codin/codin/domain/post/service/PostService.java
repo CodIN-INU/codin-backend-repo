@@ -4,6 +4,8 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.domain.best.BestEntity;
+import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
@@ -42,13 +44,13 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+    private final BestRepository bestRepository;
 
     private final S3Service s3Service;
     private final LikeService likeService;
@@ -164,7 +166,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page;
         if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR))
-            page = postRepository.findByPostCategoryStartingWithOrderByCreatedAt(postCategory.toString(), pageRequest);
+            page = postRepository.findByPostCategoryStartingWithAndDeletedAtIsNullAndPostStatusInOrderByCreatedAt(postCategory.toString(), PostStatus.ACTIVE, pageRequest);
         else page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
@@ -236,17 +238,35 @@ public class PostService {
 
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByKeyword(keyword, pageRequest);
+        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, pageRequest);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
     public List<PostDetailResponseDTO> getTop3BestPosts() {
-        Set<String> postIds = redisService.getTopNPosts(3);
-        List<PostEntity> bestPosts = postIds.stream()
-                .map(postId ->
-                    postRepository.findById(new ObjectId(postId))
-                            .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."))
+        Map<String, Double> posts = redisService.getTopNPosts(3);
+        List<PostEntity> bestPosts = posts.entrySet().stream()
+                .map(post -> {
+                    BestEntity bestPost = bestRepository.findByPostId(new ObjectId(post.getKey()));
+                    PostEntity postEntity = postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
+                            .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."));
+                    if (bestPost == null) {
+                        bestRepository.save(BestEntity.builder()
+                                .postId(new ObjectId(post.getKey()))
+                                .createdAt(postEntity.getCreatedAt())
+                                .score(post.getValue().intValue())
+                                .build());
+                    }
+                    return postEntity;
+                }
                 ).toList();
         return getPostListResponseDtos(bestPosts);
+    }
+
+    public PostPageResponse getBestPosts(int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<BestEntity> bests = bestRepository.findAll(pageRequest);
+        Page<PostEntity> page = bests.map(bestEntity -> postRepository.findByIdAndNotDeleted(bestEntity.getPostId())
+                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.")));
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 }
 

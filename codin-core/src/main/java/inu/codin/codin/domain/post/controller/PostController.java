@@ -145,4 +145,11 @@ public class PostController {
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "Top3 베스트 게시글 반환 완료", postService.getTop3BestPosts()));
     }
+
+    @Operation(summary = "Top3로 선정된 게시글들 모두 가져오기")
+    @GetMapping("/best")
+    public ResponseEntity<SingleResponse<?>> getBestPosts(@RequestParam("pageNumber") int pageNumber){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "Top3로 선정된 게시글들 모두 반환 완료", postService.getBestPosts(pageNumber)));
+    }
 }
