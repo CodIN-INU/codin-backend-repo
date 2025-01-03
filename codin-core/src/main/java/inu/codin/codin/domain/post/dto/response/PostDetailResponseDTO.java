@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;
+import inu.codin.codin.domain.post.entity.PostEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -90,6 +91,25 @@ public class PostDetailResponseDTO {
             this.isLike = isLike;
             this.isScrap = isScrap;
         }
+    }
+
+    public static PostDetailResponseDTO of(PostEntity post, String nickname, int likeCount, int scrapCount, int hitsCount, int commentCount, UserInfo userInfo) {
+        return new PostDetailResponseDTO(
+                post.getUserId().toString(),
+                post.get_id().toString(),
+                post.getTitle(),
+                post.getContent(),
+                nickname,
+                post.getPostCategory(),
+                post.getPostImageUrls(),
+                post.isAnonymous(),
+                likeCount,
+                scrapCount,
+                hitsCount,
+                post.getCreatedAt(),
+                commentCount,
+                userInfo
+        );
     }
 }
 
