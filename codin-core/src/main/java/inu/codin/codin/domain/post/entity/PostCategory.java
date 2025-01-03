@@ -19,7 +19,9 @@ public enum PostCategory {
     EXTRACURRICULAR("비교과"),
     EXTRACURRICULAR_STARINU("비교과_STARINU"),
     EXTRACURRICULAR_OUTER("비교과_교외"),
-    EXTRACURRICULAR_INNER("비교과_교내");
+    EXTRACURRICULAR_INNER("비교과_교내"),
+
+    POLL("설문조사");
 
     private final String description;
 
