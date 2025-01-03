@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -66,7 +67,16 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
-                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
+                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
+                // Content-Security-Policy 및 Frame-Options 설정
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("frame-ancestors 'self' http://localhost:8080 http://www.codin.co.kr https://www.codin.co.kr;") // 특정 도메인만 허용
+                        )
+                        .frameOptions(frame -> frame.disable()) // X-Frame-Options 비활성화
+                );
+
+
 
         http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
         http.setSharedObject(RoleHierarchy.class, roleHierarchy());
