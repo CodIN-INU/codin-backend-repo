@@ -1,0 +1,132 @@
+package inu.codin.codin.domain.post.domain.poll.service;
+
+import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.common.security.exception.SecurityErrorCode;
+import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
+import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
+import inu.codin.codin.domain.post.domain.poll.exception.PollDuplicateVoteException;
+import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
+import inu.codin.codin.domain.post.domain.poll.exception.PollTimeFailException;
+import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
+import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
+import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.entity.PostStatus;
+import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserRole;
+import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class PollService {
+
+    private final PostRepository postRepository;
+    private final PollRepository pollRepository;
+    private final PollVoteRepository pollVoteRepository;
+
+    @Transactional
+    public void createPoll(PollCreateRequestDTO pollRequestDTO) {
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+
+        // PostEntity 생성 및 저장
+        PostEntity postEntity = PostEntity.builder()
+                .title(pollRequestDTO.getTitle())
+                .content(pollRequestDTO.getContent())
+                .userId(userId)
+                .postCategory(pollRequestDTO.getPostCategory())
+                .isAnonymous(pollRequestDTO.isAnonymous())
+                .postStatus(PostStatus.ACTIVE)
+                .build();
+        postEntity = postRepository.save(postEntity);
+
+        // PollEntity 생성 및 저장
+        PollEntity pollEntity = PollEntity.builder()
+                .postId(postEntity.get_id())
+                .pollOptions(pollRequestDTO.getPollOptions())
+                .pollEndTime(pollRequestDTO.getPollEndTime())
+                .multipleChoice(pollRequestDTO.isMultipleChoice())
+                .build();
+        pollRepository.save(pollEntity);
+    }
+
+    public void votingPoll(String postId, PollVotingRequestDTO pollRequestDTO) {
+        // 게시글 조회 및 검증
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
+
+        // 투표 데이터(PollEntity) 조회
+        PollEntity poll = pollRepository.findByPostId(post.get_id())
+                .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
+
+        // 투표 종료 여부 확인
+        if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
+            throw new PollTimeFailException("이미 종료된 투표입니다.");
+        }
+
+        // 사용자 투표 여부 검증
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        boolean hasAlreadyVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
+        if (hasAlreadyVoted) {
+            throw new PollDuplicateVoteException("이미 투표하셨습니다.");
+        }
+
+        //투표 항목 검증
+        List<Integer> selectedOptions = pollRequestDTO.getSelectedOptions();
+        if (!poll.isMultipleChoice() && selectedOptions.size() > 1) {
+            throw new PollOptionChoiceException("복수 선택이 허용되지 않은 투표입니다.");
+        }
+        for (Integer index : selectedOptions) {
+            if (index < 0 || index >= poll.getPollOptions().size()) {
+                throw new PollOptionChoiceException("잘못된 선택지입니다.");
+            }
+        }
+
+        //투표 기록
+        PollVoteEntity vote = PollVoteEntity.builder()
+                .pollId(poll.get_id())
+                .userId(userId)
+                .selectedOptions(selectedOptions) // 다중 선택 지원
+                .build();
+        pollVoteRepository.save(vote);
+
+        // 투표 항목 DB 반영
+        for (Integer index : selectedOptions) {
+            poll.vote(index);
+        }
+        pollRepository.save(poll);
+    }
+
+    public void deleteVoting(String postId) {
+        // 게시글 조회 및 검증
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
+
+        // 투표 데이터(PollEntity) 조회
+        PollEntity poll = pollRepository.findByPostId(post.get_id())
+                .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
+
+        if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
+            throw new PollTimeFailException("이미 종료된 투표입니다.");
+        }
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        PollVoteEntity pollVote = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
+                .orElseThrow(() -> new NotFoundException("유저의 투표 내역이 존재하지 않습니다."));
+
+        for (Integer index : pollVote.getSelectedOptions()) {
+            poll.deleteVote(index);
+        }
+        pollRepository.save(poll);
+        pollVoteRepository.delete(pollVote);
+    }
+}
