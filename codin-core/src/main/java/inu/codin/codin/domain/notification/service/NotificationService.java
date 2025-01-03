@@ -189,5 +189,9 @@ public class NotificationService {
     }
 
     public void readNotification(String notificationId){
+        NotificationEntity notificationEntity = notificationRepository.findById(new ObjectId(notificationId))
+                .orElseThrow(() -> new NotFoundException("해당 알림을 찾을 수 없습니다."));
+        notificationEntity.markAsRead();
+        notificationRepository.save(notificationEntity);
     }
 }
