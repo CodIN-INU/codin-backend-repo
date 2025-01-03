@@ -5,10 +5,8 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,8 +26,8 @@ public class PollCreateRequestDTO {
     private String content;
 
     @Schema(description = "투표 옵션 리스트", example = "[\"a\", \"b\", \"c\"]")
-    @NotNull
-    private List<@NotBlank String> pollOptions;
+    @Size(min = 2)
+    private List<String> pollOptions;
 
     @Schema(description = "복수 선택 가능 여부", example = "true")
     private boolean multipleChoice;
