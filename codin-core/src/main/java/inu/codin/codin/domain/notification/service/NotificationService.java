@@ -1,6 +1,8 @@
 package inu.codin.codin.domain.notification.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
+import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -8,7 +10,6 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -16,7 +17,6 @@ import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.service.FcmService;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -40,6 +40,7 @@ public class NotificationService {
     private final String NOTI_COMMENT_TITLE = "누군가가 내 게시글에 댓글을 달았어요!";
     private final String NOTI_REPLY_TITLE = "누군가가 내 댓글에 답글을 달았어요!";
     private final String NOTI_LIKE_TITLE = "나에게 첫 좋아요가 달렸어요!";
+    private final String NOTI_CHAT_TITLE = "에서 연락이 왔어요!";
 
 
     /**
@@ -177,5 +178,16 @@ public class NotificationService {
                 sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 댓글 보러 가기", post, user);
             }
         }
+    }
+
+    public void sendNotificationMessageByChat(ObjectId userId, ChattingRequestDto chattingRequestDto, ChatRoom chatRoom) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        Map<String, String> chat = new HashMap<>();
+        chat.put("chatRoomId", chatRoom.get_id().toString());
+        sendFcmMessageToUser(chatRoom.getRoomName()+NOTI_CHAT_TITLE, chattingRequestDto.getContent(), chat, user);
+    }
+
+    public void readNotification(String notificationId){
     }
 }
