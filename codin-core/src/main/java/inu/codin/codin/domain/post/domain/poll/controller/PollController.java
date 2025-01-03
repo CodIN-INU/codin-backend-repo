@@ -22,7 +22,7 @@ public class PollController {
 
     @Operation(summary = "투표 생성")
     @PostMapping
-    public ResponseEntity<?> createPoll(
+    public ResponseEntity<SingleResponse<?>> createPoll(
             @Valid @RequestBody PollCreateRequestDTO pollRequestDTO) {
 
         pollService.createPoll(pollRequestDTO);
@@ -32,12 +32,20 @@ public class PollController {
 
     @Operation(summary = "투표 실시")
     @PostMapping("/voting/{postId}")
-    public ResponseEntity<?> votingPoll(
+    public ResponseEntity<SingleResponse<?>> votingPoll(
             @PathVariable String postId,
             @Valid @RequestBody PollVotingRequestDTO pollRequestDTO) {
 
         pollService.votingPoll(postId, pollRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(200, "투표 실시 완료", null));
+    }
+
+    @Operation(summary = "투표 취소")
+    @DeleteMapping("/voting/{postId}")
+    public ResponseEntity<SingleResponse<?>> deleteVoting(@PathVariable String postId){
+        pollService.deleteVoting(postId);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "투표 취소 완료", null));
     }
 }

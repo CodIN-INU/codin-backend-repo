@@ -49,9 +49,15 @@ public class PollEntity extends BaseTimeEntity {
 
     //각 옵션의 투표 수 증가
     public void vote(int optionIndex) {
-        if (optionIndex < 0 || optionIndex >= pollOptions.size()) {
+        if (optionIndex < 0 || optionIndex >= this.pollOptions.size()) {
             throw new PollOptionChoiceException("잘못된 선택지입니다.");
         }
-        pollVotesCounts.set(optionIndex, pollVotesCounts.get(optionIndex) + 1);
+        this.pollVotesCounts.set(optionIndex, this.pollVotesCounts.get(optionIndex) + 1);
+    }
+
+    public void deleteVote(int optionIndex){
+        if (this.pollVotesCounts.get(optionIndex) - 1 < 0)
+            throw new PollOptionChoiceException("올바르지 않은 선택지입니다.");
+        this.pollVotesCounts.set(optionIndex, this.pollVotesCounts.get(optionIndex) - 1);
     }
 }

@@ -60,11 +60,9 @@ public class PollService {
     }
 
     public void votingPoll(String postId, PollVotingRequestDTO pollRequestDTO) {
-
         // 게시글 조회 및 검증
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
-        validateUserAndPost(post);
 
         // 투표 데이터(PollEntity) 조회
         PollEntity poll = pollRepository.findByPostId(post.get_id())
@@ -101,7 +99,6 @@ public class PollService {
                 .build();
         pollVoteRepository.save(vote);
 
-
         // 투표 항목 DB 반영
         for (Integer index : selectedOptions) {
             poll.vote(index);
@@ -109,11 +106,27 @@ public class PollService {
         pollRepository.save(poll);
     }
 
-    private void validateUserAndPost(PostEntity post) {
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().equals("POLL")){
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "투표 게시글에 대한 권한이 없습니다.");
+    public void deleteVoting(String postId) {
+        // 게시글 조회 및 검증
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
+
+        // 투표 데이터(PollEntity) 조회
+        PollEntity poll = pollRepository.findByPostId(post.get_id())
+                .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
+
+        if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
+            throw new PollTimeFailException("이미 종료된 투표입니다.");
         }
-        SecurityUtils.validateUser(post.getUserId());
+
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        PollVoteEntity pollVote = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
+                .orElseThrow(() -> new NotFoundException("유저의 투표 내역이 존재하지 않습니다."));
+
+        for (Integer index : pollVote.getSelectedOptions()) {
+            poll.deleteVote(index);
+        }
+        pollRepository.save(poll);
+        pollVoteRepository.delete(pollVote);
     }
 }
