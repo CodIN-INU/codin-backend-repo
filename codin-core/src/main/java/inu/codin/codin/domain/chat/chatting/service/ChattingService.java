@@ -33,14 +33,12 @@ public class ChattingService {
     private final ChattingRepository chattingRepository;
     private final S3Service s3Service;
 
-    //todo 이미지 채팅에 따른 S3 처리
-
     public ChattingResponseDto sendMessage(String id, ChattingRequestDto chattingRequestDto, Authentication authentication) {
         ChatRoom chatRoom = chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
         ObjectId userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto.getContent(), userId, chattingRequestDto.getContentType());
-        log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), userId, id);
+        log.info("[sendMessage] [{}]  (유저 {} , 채팅방 {})", chattingRequestDto.getContent(), userId, id);
         chattingRepository.save(chatting);
         return ChattingResponseDto.of(chatting);
     }
@@ -51,10 +49,12 @@ public class ChattingService {
                 .orElseThrow(() -> new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다."));
         List<ChattingResponseDto> chattingResponseDto = chattingRepository.findAllByChatRoomIdOrderByCreatedAt(new ObjectId(id), pageable)
                 .stream().map(ChattingResponseDto::of).toList();
+        log.info("[getAllMessage] 유저 {}, 채팅방 {}의 메세지 내역(page = {}) 반환", SecurityUtils.getCurrentUserId().toString(), id, page);
         return new ChattingAndUserIdResponseDto(chattingResponseDto, SecurityUtils.getCurrentUserId().toString());
     }
 
     public List<String> sendImageMessage(List<MultipartFile> chatImages) {
+        log.info("[sendImageMessage] 이미지 업로드");
         return s3Service.handleImageUpload(chatImages);
     }
 }
