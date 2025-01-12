@@ -38,6 +38,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new NotFoundException("Receive 유저를 찾을 수 없습니다.")); //Receive 유저에 대한 유효성 검사
         ChatRoom chatRoom = ChatRoom.of(chatRoomCreateRequestDto, senderId);
         chatRoomRepository.save(chatRoom);
+        log.info("[createChatRoom] {} 채팅방 생성, Maker : {}, Receiver : {}", chatRoom.get_id().toString(), senderId.toString(), chatRoomCreateRequestDto.getReceiverId())
         Map<String, String> response = new HashMap<>();
         response.put("chatRoomId", chatRoom.get_id().toString());
         return response;
@@ -49,6 +50,7 @@ public class ChatRoomService {
         return chatRooms.stream()
                 .map(chatRoom -> {
                     Chatting chat = customChattingRepository.findMostRecentByChatRoomId(chatRoom.get_id());
+                    log.info("[getAllChatRoomByUser] {}의 채팅방 반환", userId.toString());
                     return ChatRoomListResponseDto.of(chatRoom, chat);
                 }).toList();
     }
@@ -66,6 +68,7 @@ public class ChatRoomService {
             log.info("[LeaveChatRoom] 채팅방에 참여자가 없어 채팅방 삭제");
         }
         chatRoomRepository.save(chatRoom);
+        log.info("[leaveChatRoom] 유저 {}가 {} 채팅방 떠나기", userId, chatRoomId);
     }
 
     public void setNotificationChatRoom(String chatRoomId, UserDetails userDetails) {
@@ -76,5 +79,9 @@ public class ChatRoomService {
                 .filter(participants -> participants.getUserId().equals(userId))
                 .forEach(Participants::updateNotification);
         chatRoomRepository.save(chatRoom);
+        log.info("[setNotificationChatRoom] 유저 {} 의 채팅방 {}의 알림 설정 {}", userId.toString(), chatRoomId,
+                chatRoom.getParticipants().stream()
+                        .filter(participants -> participants.getUserId().equals(userId))
+                        .map(Participants::isNotificationsEnabled));
     }
 }
