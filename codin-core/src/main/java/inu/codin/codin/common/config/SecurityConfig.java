@@ -70,10 +70,7 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 // Content-Security-Policy 및 Frame-Options 설정
                 .headers(headers -> headers
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("frame-ancestors 'self' http://localhost:3000 http://localhost:8080 https://www.codin.co.kr https://www.codin.co.kr") // 특정 도메인만 허용
-                        )
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable) // X-Frame-Options 비활성화
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
                 );
 
 
