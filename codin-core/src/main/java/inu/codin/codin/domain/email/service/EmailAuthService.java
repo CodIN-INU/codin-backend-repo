@@ -5,6 +5,7 @@ import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class EmailAuthService {
 
     private final EmailAuthRepository emailAuthRepository;
     private final EmailSendService emailSendService;
+    private final UserRepository userRepository;
 
     public void sendAuthEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
 
@@ -63,6 +65,9 @@ public class EmailAuthService {
     }
 
     public void sendPasswordEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
+
+        userRepository.findByEmail(joinEmailSendRequestDto.getEmail())
+                .orElseThrow(() -> new EmailAuthFailException("회원가입을 먼저 진행해주세요."));
 
         String email = joinEmailSendRequestDto.getEmail();
         log.info("[sendAuthEmail] email : {}", email);
