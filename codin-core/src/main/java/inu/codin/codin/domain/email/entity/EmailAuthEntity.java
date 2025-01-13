@@ -39,6 +39,10 @@ public class EmailAuthEntity extends BaseTimeEntity {
         this.isVerified = true;
     }
 
+    public void unVerifyEmail(){
+        this.isVerified=false;
+    }
+
     /**
      * 10분 이상이면 만료됌
      */
