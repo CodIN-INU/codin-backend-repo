@@ -3,6 +3,7 @@ package inu.codin.codin.domain.user.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
+import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -37,9 +38,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.endpoints.internal.Not;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -148,17 +149,42 @@ public class UserService {
         }
     }
 
-    public void setUserPassword(@Valid UserPasswordRequestDto userPasswordRequestDto) {
-        UserEntity user = userRepository.findByEmail(userPasswordRequestDto.getEmail())
-                .orElseThrow(() -> new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다."));
+    public void setUserPassword(@Valid UserPasswordRequestDto userPasswordRequestDto, String code) {
+        UserEntity user = checkPasswordAuthNum(code);
         if (user.isChangePassword()){
             String encodedPassword = passwordEncoder.encode(userPasswordRequestDto.getPassword());
             user.updatePassword(encodedPassword);
-            user.changePassword();
+            user.canChangePassword();
             userRepository.save(user);
         } else {
             throw new UserPasswordChangeFailException("유저의 비밀번호를 변경할 수 없습니다. 이메일 인증을 먼저 진행해주세요.");
         }
+    }
+
+    public UserEntity checkPasswordAuthNum(String authNum) {
+        EmailAuthEntity emailAuthEntity = checkEmailAndAuthNum(authNum);
+        log.info("[checkAuthNumForPW] email : {}, authNum : {}", emailAuthEntity.getEmail(), authNum);
+
+        UserEntity user = userRepository.findByEmail(emailAuthEntity.getEmail())
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+        user.canChangePassword();
+        userRepository.save(user);
+        return user;
+    }
+
+    private EmailAuthEntity checkEmailAndAuthNum(String authNum) {
+        EmailAuthEntity emailAuthEntity = emailAuthRepository.findByAuthNum(authNum)
+                .orElseThrow(() -> new EmailAuthFailException("인증번호가 일치하지 않습니다.", authNum));
+
+        // 10분 이내에 인증하지 않을 시에 인증번호 만료
+        if (emailAuthEntity.isExpired()) {
+            throw new EmailAuthFailException("인증번호가 만료되었습니다.", emailAuthEntity.getEmail());
+        }
+
+        emailAuthEntity.verifyEmail();
+        emailAuthRepository.save(emailAuthEntity);
+        log.info("[checkAuthNumForPW] Can change password, email : {}", emailAuthEntity.getEmail());
+        return emailAuthEntity;
     }
 
     public void deleteUser(UserDeleteRequestDto userDeleteRequestDto) {

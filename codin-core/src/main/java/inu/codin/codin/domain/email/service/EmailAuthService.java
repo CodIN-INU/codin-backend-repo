@@ -1,13 +1,10 @@
 package inu.codin.codin.domain.email.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
-import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +19,6 @@ public class EmailAuthService {
 
     private final EmailAuthRepository emailAuthRepository;
     private final EmailSendService emailSendService;
-    private final UserRepository userRepository;
 
     public void sendAuthEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
 
@@ -78,6 +74,7 @@ public class EmailAuthService {
         if (emailAuth.isPresent()) {
             emailAuthEntity = emailAuth.get();
             emailAuthEntity.changeAuthNum(generateAuthNum());
+            emailAuthEntity.unVerifyEmail();
         }
         else {
             // 인증 생성 로직
@@ -90,14 +87,6 @@ public class EmailAuthService {
 
         // 비동기 이메일 전송 로직
         emailSendService.sendPasswordEmail(email, emailAuthEntity.getAuthNum());
-    }
-
-    public void checkPasswordAuthNum(JoinEmailCheckRequestDto joinEmailCheckRequestDto) {
-        checkEmailAndAuthNum(joinEmailCheckRequestDto);
-        UserEntity user = userRepository.findByEmail(joinEmailCheckRequestDto.getEmail())
-                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
-        user.changePassword();
-        userRepository.save(user);
     }
 
     private void checkEmailAndAuthNum(JoinEmailCheckRequestDto joinEmailCheckRequestDto) {
