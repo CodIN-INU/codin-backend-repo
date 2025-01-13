@@ -14,4 +14,6 @@ public interface EmailAuthRepository extends MongoRepository<EmailAuthEntity, Ob
 
     Optional<EmailAuthEntity> findByEmailAndAuthNum(String email, String authNum);
 
+    Optional<EmailAuthEntity> findByAuthNum(String authNum);
+
 }

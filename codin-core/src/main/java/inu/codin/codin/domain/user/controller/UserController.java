@@ -79,9 +79,10 @@ public class UserController {
     @Operation(
             summary = "비밀번호 재설정"
     )
-    @PutMapping("/password")
-    public ResponseEntity<SingleResponse<?>> setUserPassword(@RequestBody @Valid UserPasswordRequestDto userPasswordRequestDto){
-        userService.setUserPassword(userPasswordRequestDto);
+    @PutMapping("/password/{code}")
+    public ResponseEntity<SingleResponse<?>> setUserPassword(@RequestBody @Valid UserPasswordRequestDto userPasswordRequestDto,
+                                                             @PathVariable("code") String code){
+        userService.setUserPassword(userPasswordRequestDto, code);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "비밀번호 재설정 완료", null));
     }
