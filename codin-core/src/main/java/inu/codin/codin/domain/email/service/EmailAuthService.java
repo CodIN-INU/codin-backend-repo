@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.email.service;
 
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
@@ -67,7 +68,7 @@ public class EmailAuthService {
     public void sendPasswordEmail(JoinEmailSendRequestDto joinEmailSendRequestDto) {
 
         userRepository.findByEmail(joinEmailSendRequestDto.getEmail())
-                .orElseThrow(() -> new EmailAuthFailException("회원가입을 먼저 진행해주세요."));
+                .orElseThrow(() -> new NotFoundException("회원가입을 먼저 진행해주세요."));
 
         String email = joinEmailSendRequestDto.getEmail();
         log.info("[sendAuthEmail] email : {}", email);
