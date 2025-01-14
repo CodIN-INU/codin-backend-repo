@@ -42,6 +42,8 @@ public class CommentService {
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
+        log.info("댓글 추가 요청. postId: {}, 사용자: {}, 내용: {}", id, SecurityUtils.getCurrentUserId(), requestDTO.getContent());
+
         ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
@@ -64,6 +66,7 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String id) {
+        log.info("댓글 삭제 요청. commentId: {}", id);
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
@@ -128,6 +131,7 @@ public class CommentService {
     }
 
     public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
+        log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", id, requestDTO.getContent());
 
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
@@ -135,6 +139,9 @@ public class CommentService {
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
+
+        log.info("댓글 업데이트 완료. commentId: {}", commentId);
+
     }
 
     public UserInfo getUserInfoAboutPost(ObjectId commentId) {
