@@ -18,15 +18,16 @@ import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PollService {
 
     private final PostRepository postRepository;
@@ -35,6 +36,7 @@ public class PollService {
 
     @Transactional
     public void createPoll(PollCreateRequestDTO pollRequestDTO) {
+        log.info("투표 생성 요청 - title: {}, userId: {}", pollRequestDTO.getTitle(), SecurityUtils.getCurrentUserId());
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -48,6 +50,7 @@ public class PollService {
                 .postStatus(PostStatus.ACTIVE)
                 .build();
         postEntity = postRepository.save(postEntity);
+        log.info("게시글 저장 완료 - postId: {}", postEntity.get_id());
 
         // PollEntity 생성 및 저장
         PollEntity pollEntity = PollEntity.builder()
@@ -57,76 +60,98 @@ public class PollService {
                 .multipleChoice(pollRequestDTO.isMultipleChoice())
                 .build();
         pollRepository.save(pollEntity);
+        log.info("투표 저장 완료 - pollId: {}", pollEntity.get_id());
     }
 
     public void votingPoll(String postId, PollVotingRequestDTO pollRequestDTO) {
-        // 게시글 조회 및 검증
+        log.info("투표 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
+
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.warn("투표 실패 - 게시글 없음 - postId: {}", postId);
+                    return new NotFoundException("해당 게시물을 찾을 수 없습니다.");
+                });
 
-        // 투표 데이터(PollEntity) 조회
         PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
+                .orElseThrow(() -> {
+                    log.warn("투표 실패 - 투표 데이터 없음 - postId: {}", postId);
+                    return new NotFoundException("투표 데이터가 존재하지 않습니다.");
+                });
 
-        // 투표 종료 여부 확인
         if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
+            log.warn("투표 실패 - 투표 종료됨 - pollId: {}", poll.get_id());
             throw new PollTimeFailException("이미 종료된 투표입니다.");
         }
 
-        // 사용자 투표 여부 검증
         ObjectId userId = SecurityUtils.getCurrentUserId();
         boolean hasAlreadyVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
         if (hasAlreadyVoted) {
+            log.warn("투표 실패 - 중복 투표 - pollId: {}, userId: {}", poll.get_id(), userId);
             throw new PollDuplicateVoteException("이미 투표하셨습니다.");
         }
 
-        //투표 항목 검증
         List<Integer> selectedOptions = pollRequestDTO.getSelectedOptions();
         if (!poll.isMultipleChoice() && selectedOptions.size() > 1) {
+            log.warn("투표 실패 - 복수 선택 허용 안됨 - pollId: {}, userId: {}", poll.get_id(), userId);
             throw new PollOptionChoiceException("복수 선택이 허용되지 않은 투표입니다.");
         }
+
         for (Integer index : selectedOptions) {
             if (index < 0 || index >= poll.getPollOptions().size()) {
+                log.warn("투표 실패 - 잘못된 선택지 - pollId: {}, optionIndex: {}", poll.get_id(), index);
                 throw new PollOptionChoiceException("잘못된 선택지입니다.");
             }
         }
 
-        //투표 기록
         PollVoteEntity vote = PollVoteEntity.builder()
                 .pollId(poll.get_id())
                 .userId(userId)
-                .selectedOptions(selectedOptions) // 다중 선택 지원
+                .selectedOptions(selectedOptions)
                 .build();
         pollVoteRepository.save(vote);
+        log.info("투표 기록 저장 완료 - pollId: {}, userId: {}", poll.get_id(), userId);
 
-        // 투표 항목 DB 반영
         for (Integer index : selectedOptions) {
             poll.vote(index);
+            log.info("투표 항목 반영 - pollId: {}, optionIndex: {}", poll.get_id(), index);
         }
         pollRepository.save(poll);
+        log.info("투표 완료 - pollId: {}, userId: {}", poll.get_id(), userId);
     }
 
     public void deleteVoting(String postId) {
-        // 게시글 조회 및 검증
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("해당 게시물을 찾을 수 없습니다."));
+        log.info("투표 취소 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
 
-        // 투표 데이터(PollEntity) 조회
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> {
+                    log.warn("투표 취소 실패 - 게시글 없음 - postId: {}", postId);
+                    return new NotFoundException("해당 게시물을 찾을 수 없습니다.");
+                });
+
         PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new NotFoundException("투표 데이터가 존재하지 않습니다."));
+                .orElseThrow(() -> {
+                    log.warn("투표 취소 실패 - 투표 데이터 없음 - postId: {}", postId);
+                    return new NotFoundException("투표 데이터가 존재하지 않습니다.");
+                });
 
         if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
+            log.warn("투표 취소 실패 - 투표 종료됨 - pollId: {}", poll.get_id());
             throw new PollTimeFailException("이미 종료된 투표입니다.");
         }
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
         PollVoteEntity pollVote = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
-                .orElseThrow(() -> new NotFoundException("유저의 투표 내역이 존재하지 않습니다."));
+                .orElseThrow(() -> {
+                    log.warn("투표 취소 실패 - 유저 투표 내역 없음 - pollId: {}, userId: {}", poll.get_id(), userId);
+                    return new NotFoundException("유저의 투표 내역이 존재하지 않습니다.");
+                });
 
         for (Integer index : pollVote.getSelectedOptions()) {
             poll.deleteVote(index);
+            log.info("투표 항목 취소 반영 - pollId: {}, optionIndex: {}", poll.get_id(), index);
         }
         pollRepository.save(poll);
         pollVoteRepository.delete(pollVote);
+        log.info("투표 취소 완료 - pollId: {}, userId: {}", poll.get_id(), userId);
     }
 }
