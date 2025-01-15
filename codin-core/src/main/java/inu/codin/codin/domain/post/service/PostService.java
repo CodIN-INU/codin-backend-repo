@@ -137,9 +137,19 @@ public class PostService {
 
     // Post 정보를 처리하여 DTO를 생성하는 공통 메소드
     private PostDetailResponseDTO createPostDetailResponse(PostEntity post) {
+        String nickname;
+        String userImageUrl;
 
         //Post 관련 인자 처리
-        String nickname = post.isAnonymous() ? "익명" : getNicknameByUserId(post.getUserId());
+        if (post.isAnonymous()){
+            nickname = "익명";
+            userImageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
+        } else {
+            UserEntity user = userRepository.findById(post.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+            nickname = user.getNickname();
+            userImageUrl = user.getProfileImageUrl();
+        }
 
         int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id());
         int scrapCount = scrapService.getScrapCount(post.get_id());
@@ -168,14 +178,14 @@ public class PostService {
 
             //게시물 + 투표 DTO 생성
             return PostPollDetailResponseDTO.of(
-                    PostDetailResponseDTO.of(post, nickname, likeCount, scrapCount, hitsCount, commentCount, userInfo),
+                    PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo),
                     pollInfo
             );
         }
 
         log.info("일반 게시물 상세정보 생성 성공 PostId: {}", post.get_id());
         // 일반 게시물 처리
-        return PostDetailResponseDTO.of(post, nickname, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
     }
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
@@ -254,13 +264,6 @@ public class PostService {
                 .isLike(redisService.isPostLiked(postId, userId))
                 .isScrap(redisService.isPostScraped(postId, userId))
                 .build();
-    }
-
-    //user id 기반 nickname 반환
-    public String getNicknameByUserId(ObjectId userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        return user.getNickname();
     }
 
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
