@@ -69,15 +69,15 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
         SecurityUtils.validateUser(comment.getUserId());
 
-        // 댓글의 대댓글 조회
-        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
-        // 대댓글 Soft Delete 처리
-        replies.forEach(reply -> {
-            if (reply.getDeletedAt()!=null) {
-                reply.delete();
-                replyCommentRepository.save(reply);
-            }
-        });
+//        // 댓글의 대댓글 조회
+//        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
+//        // 대댓글 Soft Delete 처리
+//        replies.forEach(reply -> {
+//            if (reply.getDeletedAt()!=null) {
+//                reply.delete();
+//                replyCommentRepository.save(reply);
+//            }
+//        });
 
         // 댓글 Soft Delete 처리
         comment.delete();
