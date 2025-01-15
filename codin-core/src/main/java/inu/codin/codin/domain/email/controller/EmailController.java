@@ -43,7 +43,7 @@ public class EmailController {
     }
 
     @Operation(
-            summary = "비밀번호 찾기를 위한 이메일 인증"
+            summary = "비밀번호 재설정을 위한 이메일 전송"
     )
     @PostMapping("/auth/password")
     public ResponseEntity<SingleResponse<?>> sendPasswordEmail(
@@ -51,16 +51,6 @@ public class EmailController {
     ) {
         emailAuthService.sendPasswordEmail(emailAuthRequestDto);
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "이메일 인증 코드 전송 성공", null));
-    }
-
-    @Operation(summary = "비밀번호 재설정 인증 코드 확인 - 학교인증 X")
-    @PostMapping("/auth/password/check")
-    public ResponseEntity<SingleResponse<?>> checkPasswordAuthNum(
-            @RequestBody @Valid JoinEmailCheckRequestDto joinEmailCheckRequestDto
-    ) {
-        emailAuthService.checkPasswordAuthNum(joinEmailCheckRequestDto);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "이메일 인증 성공", null));
+                .body(new SingleResponse<>(200, "이메일 비밀번호 재설정 링크 전송 성공", null));
     }
 }
