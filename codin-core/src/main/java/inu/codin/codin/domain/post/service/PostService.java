@@ -239,12 +239,6 @@ public class PostService {
                 .build();
     }
 
-    //user id 기반 nickname 반환
-    public String getNicknameByUserId(ObjectId userId) {
-
-        return user.getNickname();
-    }
-
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, pageRequest);
