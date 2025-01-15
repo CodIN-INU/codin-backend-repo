@@ -156,7 +156,9 @@ public class PostService {
         int hitsCount = redisService.getHitsCount(post.get_id());
         int commentCount = post.getCommentCount();
 
-        UserInfo userInfo = getUserInfoAboutPost(post.get_id());
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+
+        UserInfo userInfo = getUserInfoAboutPost(userId, post.get_id());
 
         // 투표 게시물 처리
         if (post.getPostCategory() == PostCategory.POLL) {
@@ -164,11 +166,11 @@ public class PostService {
                     .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
 
             long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
-            List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), post.getUserId())
+            List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
                     .map(PollVoteEntity::getSelectedOptions)
                     .orElse(Collections.emptyList());
             boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
-            boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), post.getUserId());
+            boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
 
             //투표 DTO 생성
             PostPollDetailResponseDTO.PollInfo pollInfo = PostPollDetailResponseDTO.PollInfo.of(poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
@@ -258,8 +260,7 @@ public class PostService {
         }
     }
 
-    public UserInfo getUserInfoAboutPost(ObjectId postId){
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+    public UserInfo getUserInfoAboutPost(ObjectId userId, ObjectId postId){
         return UserInfo.builder()
                 .isLike(redisService.isPostLiked(postId, userId))
                 .isScrap(redisService.isPostScraped(postId, userId))
