@@ -27,6 +27,9 @@ public class CommentResponseDTO {
     @Schema(description = "유저 nickname 익명시 익명으로 표시됨")
     private final String nickname;
 
+    @Schema(description = "유저 이미지 url")
+    private final String userImageUrl;
+
     @Schema(description = "익명 여부", example = "true")
     @NotNull
     private final boolean anonymous;
@@ -48,13 +51,14 @@ public class CommentResponseDTO {
     private final UserInfo userInfo;
 
     public CommentResponseDTO(String _id, String userId, String content,
-                              String nickname, Boolean anonymous ,
+                              String nickname, String userImageUrl, Boolean anonymous ,
                               List<CommentResponseDTO> replies, int likeCount,
                               boolean isDeleted, LocalDateTime createdAt, UserInfo userInfo) {
         this._id = _id;
         this.userId = userId;
         this.content = content;
         this.nickname = nickname;
+        this.userImageUrl = userImageUrl;
         this.anonymous = anonymous;
         this.replies = replies;
         this.likeCount = likeCount;
