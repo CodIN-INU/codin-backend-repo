@@ -93,7 +93,7 @@ public class ChatRoomService {
         }
         chatRoomRepository.save(chatRoom);
         log.info("[채팅방 삭제 후 저장] 채팅방 ID: {} 저장 완료", chatRoomId);
-    }
+        }
 
     public void setNotificationChatRoom(String chatRoomId, UserDetails userDetails) {
         ObjectId userId = ((CustomUserDetails) userDetails).getId();
