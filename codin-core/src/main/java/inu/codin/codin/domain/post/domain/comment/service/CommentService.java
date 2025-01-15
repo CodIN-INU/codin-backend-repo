@@ -83,14 +83,13 @@ public class CommentService {
         comment.delete();
         commentRepository.save(comment);
 
-        // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
-        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-        post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
-        postRepository.save(post);
+//        // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
+//        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
+//                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+//        post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
+//        postRepository.save(post);
 
-        log.info("삭제된 commentId: {} , 대댓글 {} . 총 삭제 수: {} postId: {}",
-                commentId, replies.size(), (1 + replies.size()), post.get_id());
+        log.info("삭제된 commentId: {}", commentId);
     }
 
 
