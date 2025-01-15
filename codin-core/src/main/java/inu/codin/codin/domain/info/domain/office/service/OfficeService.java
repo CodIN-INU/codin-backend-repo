@@ -19,12 +19,14 @@ public class OfficeService {
     private final InfoRepository infoRepository;
 
     public OfficeDetailsResponseDto getOfficeByDepartment(Department department) {
+        log.info("[getOfficeByDepartment] '{}' 사무실 정보 조회 시작", department.getDescription());
         Office office = infoRepository.findOfficeByDepartment(department);
         log.info("[getOfficeByDepartment] '{}' 사무실 정보 열람", office.getDepartment().getDescription());
         return OfficeDetailsResponseDto.of(office);
     }
 
     public void createOfficeMember(Department department, OfficeMemberCreateUpdateRequestDto officeMemberCreateUpdateRequestDto) {
+        log.info("[createOfficeMember] '{}' 사무실에 멤버 추가 시도", department.getDescription());
         Office office = infoRepository.findOfficeByDepartment(department);
         OfficeMember officeMember = OfficeMember.of(officeMemberCreateUpdateRequestDto);
         office.addOfficeMember(officeMember);
