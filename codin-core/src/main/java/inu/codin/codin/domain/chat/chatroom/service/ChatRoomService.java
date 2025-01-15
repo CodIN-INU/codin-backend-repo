@@ -4,12 +4,11 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
-import inu.codin.codin.domain.chat.chatroom.entity.Participants;
+import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.CustomChattingRepository;
-import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +32,9 @@ public class ChatRoomService {
 
     public Map<String, String> createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
         ObjectId senderId = ((CustomUserDetails) userDetails).getId();
+        if (senderId.toString().equals(chatRoomCreateRequestDto.getReceiverId())){
+            throw new ChatRoomCreateFailException("자기 자신과는 채팅방을 생성할 수 없습니다.");
+        }
         log.info("[채팅방 생성 요청] 송신자 ID: {}, 수신자 ID: {}", senderId, chatRoomCreateRequestDto.getReceiverId());
 
         userRepository.findById(new ObjectId(chatRoomCreateRequestDto.getReceiverId()))
