@@ -40,7 +40,7 @@ public class ChattingService {
 
         ChatRoom chatRoom = chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> {
-                    log.error("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);
+                    log.warn("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);
                     return new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다.");
                 });
 
