@@ -40,12 +40,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,7 +61,7 @@ public class PostService {
     private final PollRepository pollRepository;
     private final PollVoteRepository pollVoteRepository;
 
-    public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
+    public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
         List<String> imageUrls = s3Service.handleImageUpload(postImages);
         ObjectId userId = SecurityUtils.getCurrentUserId();
@@ -86,7 +85,9 @@ public class PostService {
                 .build();
         postRepository.save(postEntity);
         log.info("게시물 성공적으로 생성됨. PostId: {}, UserId: {}", postEntity.get_id(), userId);
-
+        Map<String, String> response = new HashMap<>();
+        response.put("postId", postEntity.get_id().toString());
+        return response;
     }
 
 
