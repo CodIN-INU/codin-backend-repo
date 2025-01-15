@@ -2,6 +2,7 @@ package inu.codin.codin.infra.s3;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import inu.codin.codin.infra.s3.exception.*;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,10 @@ public class S3Service {
     }
     @Value("codin-s3-bucket")
     public String bucket;
+
+    @Getter
+    @Value("${cloud.aws.s3.defaultProfileImageUrl}")
+    private String defaultProfileImageUrl;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final int MAX_FILE_COUNT = 10; // 최대 파일 개수
@@ -120,4 +125,5 @@ public class S3Service {
             deleteFile(fileUrl);
         }
     }
+
 }

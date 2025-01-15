@@ -64,6 +64,12 @@ public class UserService {
         String imageUrl = null;
         if (userImage != null) imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
 
+        // imageUrl이 null이면 기본 이미지로 설정
+        if (imageUrl == null) {
+            imageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
+
+        }
+
         String encodedPassword = passwordEncoder.encode(userCreateRequestDto.getPassword());
 
         validateUserCreateRequest(userCreateRequestDto);
