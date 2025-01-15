@@ -15,7 +15,7 @@ public class PostPollDetailResponseDTO extends PostDetailResponseDTO {
 
     public PostPollDetailResponseDTO(PostDetailResponseDTO baseDTO, PollInfo poll) {
         super(baseDTO.getUserId(), baseDTO.get_id(), baseDTO.getTitle(), baseDTO.getContent(), baseDTO.getNickname(),
-                baseDTO.getPostCategory(), userImageUrl, baseDTO.getPostImageUrl(), baseDTO.isAnonymous(), baseDTO.getLikeCount(),
+                baseDTO.getPostCategory(), baseDTO.getUserImageUrl(), baseDTO.getPostImageUrl(), baseDTO.isAnonymous(), baseDTO.getLikeCount(),
                 baseDTO.getScrapCount(), baseDTO.getHits(), baseDTO.getCreatedAt(), baseDTO.getCommentCount(), baseDTO.getUserInfo());
         this.poll = poll;
     }
