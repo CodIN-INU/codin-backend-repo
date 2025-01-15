@@ -7,6 +7,7 @@ import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateReque
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
@@ -17,6 +18,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -39,6 +41,7 @@ public class CommentService {
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
     private final RedisService redisService;
+    private final S3Service s3Service;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -101,19 +104,31 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
-        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
-                comments.stream().map(CommentEntity::getUserId).distinct().toList()
-        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+        Map<ObjectId, UserDto> userMap = userRepository.findAllById(
+                        comments.stream()
+                                .filter(commentEntity -> !commentEntity.isAnonymous())
+                                .map(CommentEntity::getUserId)
+                                .distinct()
+                                .toList()
+                ).stream()
+                .collect(Collectors.toMap(
+                        UserEntity::get_id,
+                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl()) // DTO 생성
+                ));
+
+        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
         return comments.stream()
                 .map(comment -> {
-                    String nickname = comment.isAnonymous() ? "익명" : userNicknameMap.get(comment.getUserId());
+                    String nickname = comment.isAnonymous() ? "익명" : userMap.get(comment.getUserId()).nickname();
+                    String userImageUrl = comment.isAnonymous() ? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
                     boolean isDeleted = comment.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             comment.get_id().toString(),
                             comment.getUserId().toString(),
                             comment.getContent(),
                             nickname,
+                            userImageUrl,
                             comment.isAnonymous(),
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
@@ -121,9 +136,7 @@ public class CommentService {
                             comment.getCreatedAt(),
                             getUserInfoAboutPost(comment.get_id())
                     );
-
-
-                    })
+                })
                 .toList();
     }
 

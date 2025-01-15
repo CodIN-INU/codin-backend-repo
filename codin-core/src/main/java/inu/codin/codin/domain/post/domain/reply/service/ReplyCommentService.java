@@ -11,11 +11,13 @@ import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDT
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,7 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final RedisService redisService;
+    private final S3Service s3Service;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -91,21 +94,28 @@ public class ReplyCommentService {
     public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
 
-        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
-                replies.stream().map(ReplyCommentEntity::getUserId).distinct().toList()
-        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+        Map<ObjectId, UserDto> userMap = userRepository.findAllById(
+                replies.stream()
+                        .filter(replyCommentEntity -> !replyCommentEntity.isAnonymous())
+                        .map(ReplyCommentEntity::getUserId).distinct().toList()
+        ).stream()
+                .collect(Collectors.toMap(
+                        UserEntity::get_id,
+                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl())));
 
+        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
         return replies.stream()
                 .map(reply -> {
-                    String nickname = reply.isAnonymous() ? "익명" : userNicknameMap.get(reply.getUserId());
-
+                    String nickname = reply.isAnonymous() ? "익명" : userMap.get(reply.getUserId()).nickname();
+                    String userImageUrl = reply.isAnonymous() ? defaultImageUrl: userMap.get(reply.getUserId()).imageUrl();
                     boolean isDeleted = reply.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             reply.get_id().toString(),
                             reply.getUserId().toString(),
                             reply.getContent(),
                             nickname,
+                            userImageUrl,
                             reply.isAnonymous(),
                             List.of(), //대댓글은 대댓글이 없음
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
