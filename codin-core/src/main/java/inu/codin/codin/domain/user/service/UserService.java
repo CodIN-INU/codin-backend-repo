@@ -190,6 +190,9 @@ public class UserService {
     }
 
     public void setUserPassword(@Valid UserPasswordRequestDto userPasswordRequestDto, String code) {
+        if (code==null){
+            throw new UserPasswordChangeFailException("코드가 비어있거나 유효하지 않습니다.");
+        }
         log.info("[비밀번호 변경] 인증번호 확인 시작: {}", code);
 
         UserEntity user = checkPasswordAuthNum(code);
