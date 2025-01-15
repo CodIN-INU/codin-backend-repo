@@ -75,21 +75,21 @@ public class ReplyCommentService {
         reply.delete();
         replyCommentRepository.save(reply);
 
-        // 댓글 수 감소 (대댓글도 댓글 수에서 감소)
-        CommentEntity comment = commentRepository.findByIdAndNotDeleted(reply.getCommentId())
-                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+//        // 댓글 수 감소 (대댓글도 댓글 수에서 감소)
+//        CommentEntity comment = commentRepository.findByIdAndNotDeleted(reply.getCommentId())
+//                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+//
+//        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
+//                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+//        post.updateCommentCount(post.getCommentCount() - 1);
+//        postRepository.save(post);
 
-        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-        post.updateCommentCount(post.getCommentCount() - 1);
-        postRepository.save(post);
-
-        log.info("대댓글 성공적 삭제  replyId: {} , postId: {}.", replyId, post.get_id());
+        log.info("대댓글 성공적 삭제  replyId: {}", replyId);
     }
 
     // 특정 댓글의 대댓글 조회
     public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
-        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
+        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
 
         Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
                 replies.stream().map(ReplyCommentEntity::getUserId).distinct().toList()
