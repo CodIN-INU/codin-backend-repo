@@ -22,7 +22,10 @@ public class LabService {
 
     public LabThumbnailResponseDto getLabThumbnail(String id) {
         Lab lab = infoRepository.findLabById(new ObjectId(id))
-                .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.warn("[getLabThumbnail] 연구실 정보 조회 실패, 연구실 ID: {}", id);
+                    return new LabNotFoundException("연구실 정보를 찾을 수 없습니다.");
+                });
         log.info("[getLabThumbnail] {}의 연구실 정보 열람", id);
         return LabThumbnailResponseDto.of(lab);
     }
@@ -42,7 +45,10 @@ public class LabService {
 
     public void updateLab(LabCreateUpdateRequestDto labCreateUpdateRequestDto, String id) {
         Lab lab = infoRepository.findLabById(new ObjectId(id))
-                .orElseThrow(() -> new LabNotFoundException("연구실 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.warn("[updateLab] 연구실 정보 업데이트 실패, 연구실 ID: {}", id);
+                    return new LabNotFoundException("연구실 정보를 찾을 수 없습니다.");
+                });
         lab.update(labCreateUpdateRequestDto);
         infoRepository.save(lab);
         log.info("[updateLab] {}의 연구실 정보 업데이트", lab.get_id().toString());
