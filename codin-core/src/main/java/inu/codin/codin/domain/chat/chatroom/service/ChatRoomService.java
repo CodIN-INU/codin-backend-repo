@@ -38,7 +38,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new NotFoundException("Receive 유저를 찾을 수 없습니다.")); //Receive 유저에 대한 유효성 검사
         ChatRoom chatRoom = ChatRoom.of(chatRoomCreateRequestDto, senderId);
         chatRoomRepository.save(chatRoom);
-        log.info("[createChatRoom] {} 채팅방 생성, Maker : {}, Receiver : {}", chatRoom.get_id().toString(), senderId.toString(), chatRoomCreateRequestDto.getReceiverId())
+        log.info("[createChatRoom] {} 채팅방 생성, Maker : {}, Receiver : {}", chatRoom.get_id().toString(), senderId.toString(), chatRoomCreateRequestDto.getReceiverId());
         Map<String, String> response = new HashMap<>();
         response.put("chatRoomId", chatRoom.get_id().toString());
         return response;
