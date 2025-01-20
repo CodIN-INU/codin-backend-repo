@@ -3,6 +3,7 @@ package inu.codin.codin.domain.user.entity;
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
+import inu.codin.codin.domain.user.feign.dto.UserPortalSignUpResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,5 +67,15 @@ public class UserEntity extends BaseTimeEntity {
 
     public void updateProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public static UserEntity of(UserPortalSignUpResponseDto userPortalSignUpResponseDto){
+        return UserEntity.builder()
+                .studentId(userPortalSignUpResponseDto.getStudentId())
+                .email(userPortalSignUpResponseDto.getEmail())
+                .name(userPortalSignUpResponseDto.getName())
+                .password(userPortalSignUpResponseDto.getPassword())
+                .department(userPortalSignUpResponseDto.getDepartment())
+                .build();
     }
 }
