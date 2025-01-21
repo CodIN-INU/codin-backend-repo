@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.feign.dto;
+package inu.codin.codin.common.security.dto;
 
 import inu.codin.codin.common.Department;
 import lombok.Getter;
@@ -8,10 +8,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class UserPortalSignUpResponseDto {
+public class PortalLoginResponseDto {
     private String email;
     private String password;
     private String studentId;
     private String name;
     private Department department;
+    private String college;
+    private Boolean undergraduate;
 }
