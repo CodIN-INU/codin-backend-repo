@@ -3,7 +3,7 @@ package inu.codin.codin.domain.user.entity;
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
-import inu.codin.codin.domain.user.feign.dto.UserPortalSignUpResponseDto;
+import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +32,10 @@ public class UserEntity extends BaseTimeEntity {
 
     private Department department;
 
+    private String college;
+
+    private Boolean undergraduate;
+
     private UserRole role;
 
     private UserStatus status;
@@ -39,7 +43,7 @@ public class UserEntity extends BaseTimeEntity {
     private boolean changePassword = false;
 
     @Builder
-    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status) {
+    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status) {
         this.email = email;
         this.password = password;
         this.studentId = studentId;
@@ -47,6 +51,8 @@ public class UserEntity extends BaseTimeEntity {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.department = department;
+        this.college = college;
+        this.undergraduate = undergraduate;
         this.role = role;
         this.status = status;
     }
@@ -69,13 +75,15 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public static UserEntity of(UserPortalSignUpResponseDto userPortalSignUpResponseDto){
+    public static UserEntity of(PortalLoginResponseDto userPortalLoginResponseDto){
         return UserEntity.builder()
-                .studentId(userPortalSignUpResponseDto.getStudentId())
-                .email(userPortalSignUpResponseDto.getEmail())
-                .name(userPortalSignUpResponseDto.getName())
-                .password(userPortalSignUpResponseDto.getPassword())
-                .department(userPortalSignUpResponseDto.getDepartment())
+                .studentId(userPortalLoginResponseDto.getStudentId())
+                .email(userPortalLoginResponseDto.getEmail())
+                .name(userPortalLoginResponseDto.getName())
+                .password(userPortalLoginResponseDto.getPassword())
+                .department(userPortalLoginResponseDto.getDepartment())
+                .college(userPortalLoginResponseDto.getCollege())
+                .undergraduate(userPortalLoginResponseDto.getUndergraduate())
                 .build();
     }
 }
