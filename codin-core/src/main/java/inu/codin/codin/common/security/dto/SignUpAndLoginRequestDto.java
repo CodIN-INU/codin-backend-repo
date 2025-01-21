@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.dto.request;
+package inu.codin.codin.common.security.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserSignUpRequestDto {
+public class SignUpAndLoginRequestDto {
 
     @NotBlank
     private String studentId;
