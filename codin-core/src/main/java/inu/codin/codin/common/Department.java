@@ -9,6 +9,7 @@ public enum Department {
 
     IT_COLLEGE("정보기술대학"),
     COMPUTER_SCI("컴퓨터공학부"),
+    COMPUTER_SCI_NIGHT("컴퓨터공학부(야)"),
     INFO_COMM("정보통신공학과"),
     EMBEDDED("임베디드시스템공학과"),
     STAFF("교직원"),
