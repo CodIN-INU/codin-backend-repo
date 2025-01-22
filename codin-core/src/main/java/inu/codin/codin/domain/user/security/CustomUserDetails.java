@@ -73,11 +73,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     /**
-     * Spring Security에서 사용하는 유저네임은 email로 사용
+     * Spring Security에서 사용하는 유저네임은 studentId로 사용
      */
     @Override
     public String getUsername() {
-        return email;
+        return studentId;
     }
 
     @Override

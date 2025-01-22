@@ -30,6 +30,9 @@ public class LikeService {
     private final RedisHealthChecker redisHealthChecker;
 
     public String toggleLike(LikeRequestDto likeRequestDto) {
+        log.info("좋아요 토글 요청 - likeType: {}, id: {}", likeRequestDto.getLikeType(), likeRequestDto.getId());
+
+
         ObjectId likeId = new ObjectId(likeRequestDto.getId());
         ObjectId userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
@@ -39,41 +42,55 @@ public class LikeService {
 
         if (like != null && like.getDeletedAt() == null) {
             removeLike(like);
+            log.info("좋아요 취소 완료 - likeId: {}, userId: {}", like.get_id(), userId);
             return "좋아요가 삭제되었습니다.";
         }
         addLike(likeRequestDto.getLikeType(), likeId, userId);
+        log.info("좋아요 추가 완료 - likeType: {}, likeId: {}, userId: {}", likeRequestDto.getLikeType(), likeId, userId);
         return "좋아요가 추가되었습니다.";
     }
 
     public void addLike(LikeType likeType, ObjectId likeId, ObjectId userId) {
+        log.info("좋아요 추가 요청 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
         LikeEntity like = likeRepository.findByLikeTypeAndLikeTypeIdAndUserId(likeType, likeId, userId);
 
         if (like != null){
             if (like.getDeletedAt() != null) { //삭제된 상태라면 다시 좋아요 만들기
+                log.info("삭제된 좋아요 복구 - likeId: {}, userId: {}", like.get_id(), userId);
                 like.recreatedAt();
                 like.restore();
                 likeRepository.save(like);
-            } else throw new LikeCreateFailException("이미 좋아요가 눌러진 상태입니다.");
+                log.info("좋아요 복구 완료 - likeId: {}, userId: {}", like.get_id(), userId);
+            } else {
+                log.warn("좋아요 추가 실패 - 이미 좋아요가 눌려 있음 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
+                throw new LikeCreateFailException("이미 좋아요가 눌러진 상태입니다.");
+            }
         } else { //좋아요 내역이 없으면 새로 생성
             if (redisHealthChecker.isRedisAvailable()) {
                 redisService.addLike(likeType.name(), likeId, userId);
+                log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
             }
             likeRepository.save(LikeEntity.builder()
                     .likeType(likeType)
                     .likeTypeId(likeId)
                     .userId(userId)
                     .build());
-            if (likeType == LikeType.POST)
+            if (likeType == LikeType.POST) {
                 redisService.applyBestScore(1, likeId);
+                log.info("Redis에 Best Score 적용 - postId: {}", likeId);
+            }
         }
     }
 
     public void removeLike(LikeEntity like) {
+        log.info("좋아요 삭제 요청 - likeId: {}, userId: {}", like.get_id(), like.getUserId());
         if (redisHealthChecker.isRedisAvailable()) {
             redisService.removeLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
+            log.info("Redis에서 좋아요 삭제 - likeType: {}, likeId: {}, userId: {}", like.getLikeType(), like.getLikeTypeId(), like.getUserId());
         }
         like.delete();
         likeRepository.save(like);
+        log.info("좋아요 삭제 완료 - likeId: {}, userId: {}", like.get_id(), like.getUserId());
     }
 
     public int getLikeCount(LikeType entityType, ObjectId entityId) {
@@ -85,13 +102,16 @@ public class LikeService {
     }
 
     public void recoverRedisFromDB() {
+        log.info("Redis 복구 요청 - DB의 좋아요 데이터를 기반으로 복구 시작");
         likeRepository.findAll().forEach(like -> {
             redisService.addLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
+            log.info("Redis에 좋아요 복구 - likeType: {}, likeId: {}, userId: {}", like.getLikeType(), like.getLikeTypeId(), like.getUserId());
         });
     }
 
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
         ObjectId id = new ObjectId(likeRequestDto.getId());
+        log.info("엔티티 삭제 상태 확인 - likeType: {}, id: {}", likeRequestDto.getLikeType(), id);
         switch(likeRequestDto.getLikeType()){
             case POST -> postRepository.findByIdAndNotDeleted(id)
                     .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));

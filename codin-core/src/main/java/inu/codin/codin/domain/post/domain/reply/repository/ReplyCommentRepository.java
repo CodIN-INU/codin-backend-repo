@@ -14,6 +14,5 @@ public interface ReplyCommentRepository extends MongoRepository<ReplyCommentEnti
     @Query("{'_id': ?0, 'deletedAt': null}")
     Optional<ReplyCommentEntity> findByIdAndNotDeleted(ObjectId id);
 
-    @Query("{'commentId':  ?0, 'deletedAt':  null}")
-    List<ReplyCommentEntity> findByCommentIdAndNotDeleted(ObjectId commentId);
+    List<ReplyCommentEntity> findByCommentId(ObjectId commentId);
 }
