@@ -44,9 +44,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            ssh spring-server "sudo docker ps -a"
-            ssh spring-server "sudo docker rm -f codin-backend || true"
-            ssh spring-server "sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest"
-            ssh spring-server "sudo docker run -d -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest"
-            ssh spring-server "sudo docker images -f "dangling=true" -q | xargs sudo docker rmi || true" 
-            ssh spring-server "sudo docker ps -a"
+            sudo docker ps -a
+            sudo docker rm -f codin-backend || true
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+            sudo docker run -d -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+            sudo docker images -f "dangling=true" -q | xargs sudo docker rmi || true
+            sudo docker ps -a

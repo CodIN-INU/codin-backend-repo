@@ -50,7 +50,6 @@ public class ChattingService {
         log.info("[메시지 전송 성공] 메시지: [{}], 송신자 ID: {}, 채팅방 ID: {}", chattingRequestDto.getContent(), userId, id);
 
         chattingRepository.save(chatting);
-
         return ChattingResponseDto.of(chatting);
     }
 
