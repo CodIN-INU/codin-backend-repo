@@ -7,6 +7,7 @@ import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateReque
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.like.service.LikeService;
@@ -17,6 +18,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -39,9 +41,12 @@ public class CommentService {
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
     private final RedisService redisService;
+    private final S3Service s3Service;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
+        log.info("댓글 추가 요청. postId: {}, 사용자: {}, 내용: {}", id, SecurityUtils.getCurrentUserId(), requestDTO.getContent());
+
         ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
@@ -64,33 +69,33 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String id) {
+        log.info("댓글 삭제 요청. commentId: {}", id);
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
         SecurityUtils.validateUser(comment.getUserId());
 
-        // 댓글의 대댓글 조회
-        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentIdAndNotDeleted(commentId);
-        // 대댓글 Soft Delete 처리
-        replies.forEach(reply -> {
-            if (reply.getDeletedAt()!=null) {
-                reply.delete();
-                replyCommentRepository.save(reply);
-            }
-        });
+//        // 댓글의 대댓글 조회
+//        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
+//        // 대댓글 Soft Delete 처리
+//        replies.forEach(reply -> {
+//            if (reply.getDeletedAt()!=null) {
+//                reply.delete();
+//                replyCommentRepository.save(reply);
+//            }
+//        });
 
         // 댓글 Soft Delete 처리
         comment.delete();
         commentRepository.save(comment);
 
-        // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
-        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-        post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
-        postRepository.save(post);
+//        // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
+//        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
+//                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+//        post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
+//        postRepository.save(post);
 
-        log.info("삭제된 commentId: {} , 대댓글 {} . 총 삭제 수: {} postId: {}",
-                commentId, replies.size(), (1 + replies.size()), post.get_id());
+        log.info("삭제된 commentId: {}", commentId);
     }
 
 
@@ -101,19 +106,31 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
-        Map<ObjectId, String> userNicknameMap = userRepository.findAllById(
-                comments.stream().map(CommentEntity::getUserId).distinct().toList()
-        ).stream().collect(Collectors.toMap(UserEntity::get_id, UserEntity::getNickname));
+        Map<ObjectId, UserDto> userMap = userRepository.findAllById(
+                        comments.stream()
+                                .filter(commentEntity -> !commentEntity.isAnonymous())
+                                .map(CommentEntity::getUserId)
+                                .distinct()
+                                .toList()
+                ).stream()
+                .collect(Collectors.toMap(
+                        UserEntity::get_id,
+                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl()) // DTO 생성
+                ));
+
+        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
         return comments.stream()
                 .map(comment -> {
-                    String nickname = comment.isAnonymous() ? "익명" : userNicknameMap.get(comment.getUserId());
+                    String nickname = comment.isAnonymous() ? "익명" : userMap.get(comment.getUserId()).nickname();
+                    String userImageUrl = comment.isAnonymous() ? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
                     boolean isDeleted = comment.getDeletedAt() != null;
                     return new CommentResponseDTO(
                             comment.get_id().toString(),
                             comment.getUserId().toString(),
                             comment.getContent(),
                             nickname,
+                            userImageUrl,
                             comment.isAnonymous(),
                             replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
@@ -121,13 +138,12 @@ public class CommentService {
                             comment.getCreatedAt(),
                             getUserInfoAboutPost(comment.get_id())
                     );
-
-
-                    })
+                })
                 .toList();
     }
 
     public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
+        log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", id, requestDTO.getContent());
 
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
@@ -135,6 +151,9 @@ public class CommentService {
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
+
+        log.info("댓글 업데이트 완료. commentId: {}", commentId);
+
     }
 
     public UserInfo getUserInfoAboutPost(ObjectId commentId) {

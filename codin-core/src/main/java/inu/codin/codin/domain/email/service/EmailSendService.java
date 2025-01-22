@@ -59,7 +59,7 @@ public class EmailSendService {
             String htmlContent = templateEngine.process("password-email", context);
 
             helper.setTo(email);
-            helper.setSubject("[CODIN] 비밀번호 찾기 인증번호입니다.");
+            helper.setSubject("[CODIN] 비밀번호 재설정 링크입니다.");
             helper.setText(htmlContent, true);
 
             javaMailSender.send(message);
