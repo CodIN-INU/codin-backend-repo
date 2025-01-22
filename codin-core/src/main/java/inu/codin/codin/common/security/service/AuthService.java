@@ -85,6 +85,9 @@ public class AuthService {
                 String userDpmtNm = info[1];
                 Department department = Department.fromDescription(userDpmtNm);
                 userPortalLoginResponseDto.setDepartment(department);
+            } else if ("userCollNm".equals(fieldName)){
+                String userCollNm = info[1];
+                userPortalLoginResponseDto.setCollege(userCollNm);
             }
         }
         return userPortalLoginResponseDto;
