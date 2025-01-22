@@ -24,6 +24,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static feign.Util.ISO_8859_1;
 
@@ -68,30 +69,24 @@ public class AuthService {
         String[] arrayList = value.substring(1).split(", ");
         PortalLoginResponseDto userPortalLoginResponseDto = new PortalLoginResponseDto();
 
+        Map<String, Consumer<String>> fieldSetters = Map.of(
+                "studId", userPortalLoginResponseDto::setStudentId,
+                "userNm", userPortalLoginResponseDto::setName,
+                "userEml", userPortalLoginResponseDto::setEmail,
+                "userDpmtNm", v -> userPortalLoginResponseDto.setDepartment(Department.fromDescription(v)),
+                "userCollNm", userPortalLoginResponseDto::setCollege
+        );
+
         for (String user : arrayList) {
             String[] info = user.split("=");
-            String fieldName = info[0];
-
-            if ("studId".equals(fieldName)) {
-                String studId = info[1];
-                userPortalLoginResponseDto.setStudentId(studId);
-            } else if ("userNm".equals(fieldName)) {
-                String userNm = info[1];
-                userPortalLoginResponseDto.setName(userNm);
-            } else if ("userEml".equals(fieldName)) {
-                String userEml = info[1];
-                userPortalLoginResponseDto.setEmail(userEml);
-            } else if ("userDpmtNm".equals(fieldName)) {
-                String userDpmtNm = info[1];
-                Department department = Department.fromDescription(userDpmtNm);
-                userPortalLoginResponseDto.setDepartment(department);
-            } else if ("userCollNm".equals(fieldName)){
-                String userCollNm = info[1];
-                userPortalLoginResponseDto.setCollege(userCollNm);
+            if (info.length == 2 && fieldSetters.containsKey(info[0])) { // Only process known fields
+                fieldSetters.get(info[0]).accept(info[1]);
             }
         }
+
         return userPortalLoginResponseDto;
     }
+
 
     public boolean isUnderGraduate(@Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto){
         String basic = "Basic " + Base64.getEncoder().encodeToString((signUpAndLoginRequestDto.getStudentId() + ":" + signUpAndLoginRequestDto.getPassword()).getBytes(ISO_8859_1));
