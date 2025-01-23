@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.lecture.controller;
 
 import inu.codin.codin.common.Department;
-import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.dto.Option;
 import inu.codin.codin.domain.lecture.service.LectureService;
@@ -36,6 +35,17 @@ public class LectureController {
                 .body(new SingleResponse<>(200,
                         department.getDescription()+" 강의들 "+option.getDescription()+"순으로 정렬 반환",
                         lectureService.sortListOfLectures(department, option, page)));
+    }
+
+    @Operation(
+            summary = "교수명, 과목명, 과목코드 검색",
+            description = "keyword 입력을 통해 (교수명, 과목명, 과목코드) 중 일치하는 결과 반환"
+    )
+    @GetMapping("/search")
+    public ResponseEntity<SingleResponse<?>> searchLectures(@RequestParam("keyword") String keyword,
+                                                            @RequestParam("page") int page){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, keyword+" 의 검색 결과 반환", lectureService.searchLectures(keyword, page)));
     }
 
     @Operation(summary = "강의실 정보 반환")

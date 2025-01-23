@@ -21,12 +21,10 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,5 +85,15 @@ public class LectureService {
                     lecturePage.getTotalPages() -1,
                     lecturePage.hasNext()? lecturePage.getPageable().getPageNumber() + 1: -1);
         } else throw new WrongInputException("학과명을 잘못 입력하였습니다. department: " + department.getDescription());
+    }
+
+    public Object searchLectures(String keyword, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 20, Sort.by("lectureNm"));
+        Page<LectureEntity> lecturePage = lectureRepository.findAllByKeyword(keyword, pageRequest);
+        return LecturePageResponse.of(
+                lecturePage.stream().map(LectureListResponseDto::of).toList(),
+                lecturePage.getTotalPages() - 1,
+                lecturePage.hasNext()? lecturePage.getPageable().getPageNumber() + 1 : -1
+        );
     }
 }
