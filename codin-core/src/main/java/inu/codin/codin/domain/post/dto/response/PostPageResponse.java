@@ -21,12 +21,12 @@ public class PostPageResponse {
         this.nextPage = nextPage;
     }
 
-    public static PostPageResponse of(List<PostDetailResponseDTO> postPaging, long totalElements, long nextCursor) {
-        return PostPageResponse.newPagingHasNext(postPaging, totalElements, nextCursor);
+    public static PostPageResponse of(List<PostDetailResponseDTO> postPaging, long totalElements, long nextPage) {
+        return PostPageResponse.newPagingHasNext(postPaging, totalElements, nextPage);
     }
 
-    private static PostPageResponse newPagingHasNext(List<PostDetailResponseDTO> posts, long totalElements, long nextCursor) {
-        return new PostPageResponse(posts, totalElements, nextCursor);
+    private static PostPageResponse newPagingHasNext(List<PostDetailResponseDTO> posts, long totalElements, long nextPage) {
+        return new PostPageResponse(posts, totalElements, nextPage);
     }
 
 }
