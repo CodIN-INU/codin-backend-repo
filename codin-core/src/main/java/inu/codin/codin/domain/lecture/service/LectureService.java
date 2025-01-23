@@ -1,22 +1,32 @@
 package inu.codin.codin.domain.lecture.service;
 
+import inu.codin.codin.common.Department;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.lecture.dto.EmptyRoomResponseDto;
+import inu.codin.codin.domain.lecture.dto.LectureListResponseDto;
+import inu.codin.codin.domain.lecture.dto.LecturePageResponse;
+import inu.codin.codin.domain.lecture.dto.Option;
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
+import inu.codin.codin.domain.lecture.exception.WrongInputException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.lecture.repository.LectureRepositoryCustomImpl;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,5 +77,15 @@ public class LectureService {
                 .collect(Collectors.groupingBy(
                         EmptyRoomResponseDto::getRoomNum
                 ));
+    }
+
+    public LecturePageResponse sortListOfLectures(Department department, Option option, int page) {
+        if (department.equals(Department.EMBEDDED) || department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.OTHERS)) {
+            PageRequest pageRequest = PageRequest.of(page, 20, option==Option.LEC? Sort.by("lectureNm"):Sort.by("professor"));
+            Page<LectureEntity> lecturePage = lectureRepository.findAllByDepartment(pageRequest, department);
+            return LecturePageResponse.of(lecturePage.stream().map(LectureListResponseDto::of).toList(),
+                    lecturePage.getTotalPages() -1,
+                    lecturePage.hasNext()? lecturePage.getPageable().getPageNumber() + 1: -1);
+        } else throw new WrongInputException("학과명을 잘못 입력하였습니다. department: " + department.getDescription());
     }
 }
