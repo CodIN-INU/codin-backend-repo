@@ -9,15 +9,14 @@ import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,7 +158,7 @@ public class CommentService {
     public UserInfo getUserInfoAboutPost(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.builder()
-                .isLike(redisService.isCommentLiked(commentId, userId))
+                .isLike(likeService.isCommentLiked(commentId, userId))
                 .build();
     }
 

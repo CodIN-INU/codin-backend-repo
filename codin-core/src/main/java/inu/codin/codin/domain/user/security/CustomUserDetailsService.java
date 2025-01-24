@@ -17,10 +17,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String studentId) throws UsernameNotFoundException {
 
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없음, email :" + email));
+        UserEntity user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없음, studentId :" + studentId));
 
         if (!UserStatus.ACTIVE.equals(user.getStatus())) {
             throw new UserDisabledException("유저가 활성화되지 않았습니다");
