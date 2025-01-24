@@ -1,6 +1,6 @@
-package inu.codin.codin.domain.post.domain.scrap.repository;
+package inu.codin.codin.domain.scrap.repository;
 
-import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

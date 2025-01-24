@@ -1,7 +1,7 @@
-package inu.codin.codin.domain.post.domain.like.repository;
+package inu.codin.codin.domain.like.repository;
 
-import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.like.entity.LikeType;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

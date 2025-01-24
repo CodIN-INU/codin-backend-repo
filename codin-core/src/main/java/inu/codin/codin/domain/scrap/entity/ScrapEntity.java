@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.scrap.entity;
+package inu.codin.codin.domain.scrap.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import lombok.Builder;
