@@ -1,4 +1,4 @@
-package inu.codin.codin.infra.redis;
+package inu.codin.codin.infra.redis.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

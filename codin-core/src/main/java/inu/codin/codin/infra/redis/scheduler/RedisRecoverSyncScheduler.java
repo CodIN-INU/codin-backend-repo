@@ -1,8 +1,9 @@
-package inu.codin.codin.infra.redis;
+package inu.codin.codin.infra.redis.scheduler;
 
-import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.scrap.service.ScrapService;
+import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.exception.RedisUnavailableException;
+import inu.codin.codin.infra.redis.service.RedisLikeService;
+import inu.codin.codin.infra.redis.service.RedisScrapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,8 +17,8 @@ import java.time.Duration;
 public class RedisRecoverSyncScheduler {
 
     private final RedisHealthChecker redisHealthChecker;
-    private final LikeService likeService;
-    private final ScrapService scrapService;
+    private final RedisLikeService redisLikeService;
+    private final RedisScrapService redisScrapService;
 
     private Instant lastRecoveryTime = Instant.MIN; // 마지막 복구 시간
 
@@ -55,8 +56,8 @@ public class RedisRecoverSyncScheduler {
         }
         try {
             log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 복구 작업 시작...");
-            likeService.recoverRedisFromDB();
-            scrapService.recoverRedisFromDB();
+            redisLikeService.recoverRedisFromDB();
+            redisScrapService.recoverRedisFromDB();
             lastRecoveryTime = Instant.now();
             log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 데이터 복구 완료.");
         } catch (Exception e) {

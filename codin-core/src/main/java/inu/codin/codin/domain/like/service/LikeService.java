@@ -10,8 +10,9 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.infra.redis.RedisHealthChecker;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.config.RedisHealthChecker;
+import inu.codin.codin.infra.redis.service.RedisLikeService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -26,6 +27,7 @@ public class LikeService {
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
 
+    private final RedisLikeService redisLikeService;
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
@@ -51,7 +53,7 @@ public class LikeService {
 
     public void createLike(LikeType likeType, ObjectId likeId, ObjectId userId){
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.addLike(likeType.name(), likeId, userId);
+            redisLikeService.addLike(likeType.name(), likeId, userId);
             log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
         }
 
@@ -72,7 +74,7 @@ public class LikeService {
         ObjectId userId = like.getUserId();
 
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.addLike(likeType.name(), likeId, userId);
+            redisLikeService.addLike(likeType.name(), likeId, userId);
             log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
         }
 
@@ -89,7 +91,7 @@ public class LikeService {
 
     public void removeLike(LikeEntity like) {
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.removeLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
+            redisLikeService.removeLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
             log.info("Redis에서 좋아요 삭제 - likeType: {}, likeId: {}, userId: {}", like.getLikeType(), like.getLikeTypeId(), like.getUserId());
         }
         like.delete();
@@ -99,18 +101,18 @@ public class LikeService {
 
     public int getLikeCount(LikeType entityType, ObjectId entityId) {
         if (redisHealthChecker.isRedisAvailable()) {
-            return redisService.getLikeCount(entityType.name(), entityId);
+            return redisLikeService.getLikeCount(entityType.name(), entityId);
         }
         long count = likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
         return (int) Math.max(0, count);
     }
 
-    public void recoverRedisFromDB() {
-        log.info("Redis 복구 요청 - DB의 좋아요 데이터를 기반으로 복구 시작");
-        likeRepository.findAll().forEach(like -> {
-            redisService.addLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
-            log.info("Redis에 좋아요 복구 - likeType: {}, likeId: {}, userId: {}", like.getLikeType(), like.getLikeTypeId(), like.getUserId());
-        });
+    public boolean isPostLiked(ObjectId postId, ObjectId userId){
+        return redisLikeService.isPostLiked(postId, userId);
+    }
+
+    public boolean isCommentLiked(ObjectId commentId, ObjectId userId){
+        return redisLikeService.isCommentLiked(commentId, userId);
     }
 
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){

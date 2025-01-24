@@ -1,5 +1,6 @@
 package inu.codin.codin.infra.redis;
 
+import inu.codin.codin.infra.redis.dto.RedisProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

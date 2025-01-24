@@ -1,5 +1,6 @@
-package inu.codin.codin.domain.post.domain.hits;
+package inu.codin.codin.domain.post.domain.hits.repository;
 
+import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
