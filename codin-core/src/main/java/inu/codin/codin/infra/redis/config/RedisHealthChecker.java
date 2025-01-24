@@ -1,4 +1,4 @@
-package inu.codin.codin.infra.redis;
+package inu.codin.codin.infra.redis.config;
 
 import inu.codin.codin.infra.redis.exception.RedisUnavailableException;
 import lombok.RequiredArgsConstructor;

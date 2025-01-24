@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.hits;
+package inu.codin.codin.domain.post.domain.hits.entity;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;

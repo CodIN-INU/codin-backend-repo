@@ -16,7 +16,8 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.service.RedisLikeService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final RedisService redisService;
+    private final RedisLikeService redisLikeService;
     private final S3Service s3Service;
 
     // 대댓글 추가
@@ -139,7 +141,7 @@ public class ReplyCommentService {
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(redisService.isReplyLiked(replyId, userId))
+                .isLike(redisLikeService.isReplyLiked(replyId, userId))
                 .build();
     }
 

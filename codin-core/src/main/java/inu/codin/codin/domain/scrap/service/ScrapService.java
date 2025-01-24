@@ -6,8 +6,9 @@ import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.exception.ScrapCreateFailException;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.infra.redis.RedisHealthChecker;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.config.RedisHealthChecker;
+import inu.codin.codin.infra.redis.service.RedisScrapService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -21,6 +22,7 @@ public class ScrapService {
     private final PostRepository postRepository;
 
     private final RedisService redisService;
+    private final RedisScrapService redisScrapService;
     private final RedisHealthChecker redisHealthChecker;
 
     public String toggleScrap(String id) {
@@ -63,7 +65,7 @@ public class ScrapService {
             }
         } else {
             if (redisHealthChecker.isRedisAvailable()) {
-                redisService.addScrap(postId, userId);
+                redisScrapService.addScrap(postId, userId);
                 log.info("Redis에 스크랩 추가 - postId: {}, userId: {}", postId, userId);
             }
             scrapRepository.save(ScrapEntity.builder()
@@ -78,7 +80,7 @@ public class ScrapService {
     private void removeScrap(ScrapEntity scrap) {
         log.info("스크랩 삭제 요청 - postId: {}, userId: {}", scrap.getPostId(), scrap.getUserId());
         if (redisHealthChecker.isRedisAvailable()) {
-            redisService.removeScrap(scrap.getPostId(), scrap.getUserId());
+            redisScrapService.removeScrap(scrap.getPostId(), scrap.getUserId());
             log.info("Redis에서 스크랩 삭제 - postId: {}, userId: {}", scrap.getPostId(), scrap.getUserId());
         }
         scrap.delete();
@@ -88,20 +90,13 @@ public class ScrapService {
 
     public int getScrapCount(ObjectId postId) {
         if (redisHealthChecker.isRedisAvailable()) {
-            return redisService.getScrapCount(postId);
+            return redisScrapService.getScrapCount(postId);
         }
         long count = scrapRepository.countByPostIdAndDeletedAtIsNull(postId);
         return (int) Math.max(0, count);
     }
 
-    public void recoverRedisFromDB() {
-        log.info("Redis 복구 요청 - DB의 스크랩 데이터를 기반으로 복구 시작");
-
-        scrapRepository.findAll().forEach(scrap -> {
-            redisService.addScrap(scrap.getPostId(), scrap.getUserId());
-            log.info("Redis에 스크랩 복구 - postId: {}, userId: {}", scrap.getPostId(), scrap.getUserId());
-        });
-
-        log.info("Redis 복구 완료");
+    public boolean isPostScraped(ObjectId postId, ObjectId userId){
+        return redisScrapService.isPostScraped(postId, userId);
     }
 }

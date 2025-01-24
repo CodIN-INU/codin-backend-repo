@@ -1,11 +1,11 @@
-package inu.codin.codin.infra.redis;
+package inu.codin.codin.infra.redis.scheduler;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.hits.HitsEntity;
-import inu.codin.codin.domain.post.domain.hits.HitsRepository;
+import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
+import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
@@ -16,6 +16,10 @@ import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.infra.redis.config.RedisHealthChecker;
+import inu.codin.codin.infra.redis.service.RedisHitsService;
+import inu.codin.codin.infra.redis.service.RedisLikeService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -42,6 +46,8 @@ public class SyncScheduler {
     private final BestRepository bestRepository;
 
     private final RedisService redisService;
+    private final RedisLikeService redisLikeService;
+    private final RedisHitsService redisHitsService;
     private final RedisHealthChecker redisHealthChecker;
 
     @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
@@ -68,7 +74,7 @@ public class SyncScheduler {
 
         for (String redisKey : redisKeys) {
             String likeTypeId = redisKey.replace(entityType + ":likes:", "");
-            Set<String> likedUsers = redisService.getLikedUsers(entityType, likeTypeId);
+            Set<String> likedUsers = redisLikeService.getLikedUsers(entityType, likeTypeId);
             ObjectId likeId = new ObjectId(likeTypeId);
 
             // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
@@ -130,7 +136,7 @@ public class SyncScheduler {
 
         for (String redisKey : redisKeys) {
             String postId = redisKey.replace("post:scraps:", "");
-            Set<String> redisScrappedUsers = redisService.getLikedUsers("post", postId);
+            Set<String> redisScrappedUsers = redisLikeService.getLikedUsers("post", postId);
             ObjectId id = new ObjectId(postId);
 
             // MongoDB의 스크랩 데이터 가져오기
@@ -193,8 +199,8 @@ public class SyncScheduler {
             List<HitsEntity> dbHits = hitsRepository.findAllByPostId(postId);
 
             dbHits.forEach(hitsEntity -> {
-                if (redisService.validateHits(postId, hitsEntity.getUserId())) {
-                    redisService.addHits(postId, hitsEntity.getUserId());
+                if (redisHitsService.validateHits(postId, hitsEntity.getUserId())) {
+                    redisHitsService.addHits(postId, hitsEntity.getUserId());
                 }
             });
         });
@@ -210,7 +216,7 @@ public class SyncScheduler {
                         },
                         key -> {
                             String postId = key.replace("post:hits:", "");
-                            return redisService.getHitsUser(new ObjectId(postId));
+                            return redisHitsService.getHitsUser(new ObjectId(postId));
                         }
                         )
                 );

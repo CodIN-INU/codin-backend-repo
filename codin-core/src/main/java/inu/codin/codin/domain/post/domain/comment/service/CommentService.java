@@ -16,7 +16,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -158,7 +158,7 @@ public class CommentService {
     public UserInfo getUserInfoAboutPost(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.builder()
-                .isLike(redisService.isCommentLiked(commentId, userId))
+                .isLike(likeService.isCommentLiked(commentId, userId))
                 .build();
     }
 
