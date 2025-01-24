@@ -1,10 +1,7 @@
 package inu.codin.codin.infra.redis;
 
 
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.like.entity.LikeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;

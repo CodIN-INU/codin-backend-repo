@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.like.entity;
+package inu.codin.codin.domain.like.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import lombok.Builder;

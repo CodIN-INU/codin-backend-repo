@@ -1,13 +1,13 @@
-package inu.codin.codin.domain.post.domain.like.service;
+package inu.codin.codin.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.exception.LikeCreateFailException;
+import inu.codin.codin.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.like.dto.LikeRequestDto;
-import inu.codin.codin.domain.post.domain.like.entity.LikeEntity;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.domain.like.exception.LikeCreateFailException;
-import inu.codin.codin.domain.post.domain.like.repository.LikeRepository;
+import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;

@@ -1,10 +1,10 @@
-package inu.codin.codin.domain.post.domain.scrap.service;
+package inu.codin.codin.domain.scrap.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.scrap.entity.ScrapEntity;
-import inu.codin.codin.domain.post.domain.scrap.exception.ScrapCreateFailException;
-import inu.codin.codin.domain.post.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.scrap.exception.ScrapCreateFailException;
+import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.RedisHealthChecker;
 import inu.codin.codin.infra.redis.RedisService;
