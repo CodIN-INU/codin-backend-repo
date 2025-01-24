@@ -6,13 +6,14 @@ import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
-import inu.codin.codin.domain.post.domain.like.service.LikeService;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
-import inu.codin.codin.domain.post.domain.scrap.service.ScrapService;
+import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
@@ -28,7 +29,7 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.RedisService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -52,14 +53,15 @@ import java.util.Map;
 public class PostService {
     private final PostRepository postRepository;
     private final BestRepository bestRepository;
+    private final UserRepository userRepository;
+    private final PollRepository pollRepository;
+    private final PollVoteRepository pollVoteRepository;
 
     private final S3Service s3Service;
     private final LikeService likeService;
     private final ScrapService scrapService;
+    private final HitsService hitsService;
     private final RedisService redisService;
-    private final UserRepository userRepository;
-    private final PollRepository pollRepository;
-    private final PollVoteRepository pollVoteRepository;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
@@ -154,7 +156,7 @@ public class PostService {
 
         int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id());
         int scrapCount = scrapService.getScrapCount(post.get_id());
-        int hitsCount = redisService.getHitsCount(post.get_id());
+        int hitsCount = hitsService.getHitsCount(post.get_id());
         int commentCount = post.getCommentCount();
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
@@ -216,8 +218,8 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        if (redisService.validateHits(post.get_id(), userId)) {
-            redisService.addHits(post.get_id(), userId);
+        if (hitsService.validateHits(post.get_id(), userId)) {
+            hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
         }
 
@@ -263,8 +265,8 @@ public class PostService {
 
     public UserInfo getUserInfoAboutPost(ObjectId userId, ObjectId postId){
         return UserInfo.builder()
-                .isLike(redisService.isPostLiked(postId, userId))
-                .isScrap(redisService.isPostScraped(postId, userId))
+                .isLike(likeService.isPostLiked(postId, userId))
+                .isScrap(scrapService.isPostScraped(postId, userId))
                 .build();
     }
 
