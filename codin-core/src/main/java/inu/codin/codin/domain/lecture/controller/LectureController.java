@@ -35,7 +35,7 @@ public class LectureController {
     }
 
     @Operation(
-            summary = "교수명, 과목명, 과목코드 검색",
+            summary = "교수명, 과목명 검색",
             description = "keyword 입력을 통해 (교수명, 과목명, 과목코드) 중 일치하는 결과 반환"
     )
     @GetMapping("/search")
