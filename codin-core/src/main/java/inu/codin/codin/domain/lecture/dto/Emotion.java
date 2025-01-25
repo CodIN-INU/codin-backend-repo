@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.lecture.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
