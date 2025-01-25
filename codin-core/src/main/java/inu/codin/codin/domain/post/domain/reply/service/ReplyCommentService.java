@@ -41,7 +41,6 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final RedisService redisService;
-    private final RedisLikeService redisLikeService;
     private final S3Service s3Service;
 
     // 대댓글 추가
@@ -141,7 +140,7 @@ public class ReplyCommentService {
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(redisLikeService.isReplyLiked(replyId, userId))
+                .isLike(likeService.isReplyLiked(replyId, userId))
                 .build();
     }
 
