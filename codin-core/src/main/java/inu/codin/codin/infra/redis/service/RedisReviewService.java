@@ -37,6 +37,7 @@ public class RedisReviewService {
     public Emotion getEmotionRating(String lectureId){
         String redisKey = REVIEW_KEY + lectureId;
         double total = getParticipants(lectureId);
+        if (total == 0) return Emotion.builder().hard(0).ok(0).best(0).build();
         return Emotion.builder()
                 .hard(getPercentOfRating(redisKey, 0.25, 2.0, total))
                 .ok(getPercentOfRating(redisKey, 2.25, 4.0, total))
