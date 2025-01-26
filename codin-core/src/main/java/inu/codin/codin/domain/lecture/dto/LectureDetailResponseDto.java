@@ -1,11 +1,13 @@
 package inu.codin.codin.domain.lecture.dto;
 
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
 public class LectureDetailResponseDto extends LectureListResponseDto{
 
+    @Schema(description = "후기 평점들의 범위마다 100분율 계산", example = "hard : 30, ok : 20, best : 50")
     private Emotion emotion;
 
     public LectureDetailResponseDto(String _id, String lectureNm, String professor, double starRating, long participants, Emotion emotion) {

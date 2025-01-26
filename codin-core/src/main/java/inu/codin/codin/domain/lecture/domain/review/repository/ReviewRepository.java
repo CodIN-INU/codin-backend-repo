@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends MongoRepository<ReviewEntity, ObjectId> {
-    Page<ReviewEntity> findAllByLectureId(ObjectId lectureId, PageRequest pageRequest);
+    Page<ReviewEntity> findAllByLectureIdAndDeletedAtIsNull(ObjectId lectureId, PageRequest pageRequest);
 
-    Optional<ReviewEntity> findByLectureIdAndUserId(ObjectId lectureId, ObjectId userId);
+    Optional<ReviewEntity> findByLectureIdAndUserIdAndDeletedAtIsNull(ObjectId lectureId, ObjectId userId);
 }
