@@ -108,11 +108,20 @@ public class LikeService {
     }
 
     public boolean isPostLiked(ObjectId postId, ObjectId userId){
-        return redisLikeService.isPostLiked(postId, userId);
+        return redisLikeService.isLiked(LikeType.POST, postId, userId);
     }
 
     public boolean isCommentLiked(ObjectId commentId, ObjectId userId){
-        return redisLikeService.isCommentLiked(commentId, userId);
+        return redisLikeService.isLiked(LikeType.COMMENT, commentId, userId);
+    }
+
+    public boolean isReplyLiked(ObjectId replyId, ObjectId userId) {
+        return redisLikeService.isLiked(LikeType.COMMENT, replyId, userId);
+
+    }
+
+    public boolean isReviewLiked(ObjectId reviewId, ObjectId userId){
+        return redisLikeService.isLiked(LikeType.REVIEW, reviewId, userId);
     }
 
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
@@ -127,5 +136,6 @@ public class LikeService {
 
         }
     }
+
 
 }
