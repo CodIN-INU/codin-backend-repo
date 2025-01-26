@@ -2,11 +2,11 @@ package inu.codin.codin.domain.post.domain.reply.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
@@ -16,7 +16,6 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisLikeService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
@@ -41,7 +40,6 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final RedisService redisService;
-    private final RedisLikeService redisLikeService;
     private final S3Service s3Service;
 
     // 대댓글 추가
@@ -141,7 +139,7 @@ public class ReplyCommentService {
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(redisLikeService.isReplyLiked(replyId, userId))
+                .isLike(likeService.isReplyLiked(replyId, userId))
                 .build();
     }
 

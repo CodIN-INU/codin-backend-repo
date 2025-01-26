@@ -14,8 +14,7 @@ public interface LectureRepository extends MongoRepository<LectureEntity, Object
     Page<LectureEntity> findAllByDepartment(Pageable pageable, Department department);
 
     @Query("{ '$or': [ { 'lectureNm': { $regex: ?0, $options: 'i' } }, " +
-            "{ 'professor': { $regex: ?0, $options: 'i' } }, " +
-            "{ 'lectureCode': { $regex: ?0, $options: 'i' } } ] }")
+            "{ 'professor': { $regex: ?0, $options: 'i' } } ] }")
     Page<LectureEntity> findAllByKeyword(String keyword, Pageable pageable);
 
 }
