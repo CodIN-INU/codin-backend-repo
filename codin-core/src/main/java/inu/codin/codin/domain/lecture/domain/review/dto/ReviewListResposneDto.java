@@ -10,7 +10,6 @@ public class ReviewListResposneDto {
     private String _id;
     private String lectureId;
     private String userId;
-    private String title;
     private String content;
     private double starRating;
     private int likes;
@@ -18,11 +17,10 @@ public class ReviewListResposneDto {
     private String semester;
 
     @Builder
-    public ReviewListResposneDto(String _id, String lectureId, String userId, String title, String content, double starRating, int likes, boolean isLiked, String semester) {
+    public ReviewListResposneDto(String _id, String lectureId, String userId, String content, double starRating, int likes, boolean isLiked, String semester) {
         this._id = _id;
         this.lectureId = lectureId;
         this.userId = userId;
-        this.title = title;
         this.content = content;
         this.starRating = starRating;
         this.likes = likes;
@@ -35,7 +33,6 @@ public class ReviewListResposneDto {
                 ._id(reviewEntity.get_id().toString())
                 .lectureId(reviewEntity.getLectureId().toString())
                 .userId(reviewEntity.getUserId().toString())
-                .title(reviewEntity.getTitle())
                 .content(reviewEntity.getContent())
                 .starRating(reviewEntity.getStarRating())
                 .likes(likes)
