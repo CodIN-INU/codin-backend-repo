@@ -39,7 +39,7 @@ public class ReviewService {
             throw new WrongRatingException("잘못된 평점입니다. 0.25 ~ 5.0 사이의 점수를 입력해주세요.");
         }
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        Optional<ReviewEntity> review = reviewRepository.findByLectureIdAndUserId(new ObjectId(lectureId), userId);
+        Optional<ReviewEntity> review = reviewRepository.findByLectureIdAndUserIdAndDeletedAtIsNull(new ObjectId(lectureId), userId);
         if (review.isPresent()) {
             log.error("이미 유저가 작성한 후기가 존재합니다. userId: {}, lectureId: {}", userId, lectureId);
             throw new ReviewExistenceException("이미 유저가 작성한 후기가 존재합니다.");
@@ -54,7 +54,7 @@ public class ReviewService {
 
     public Object getListOfReviews(String lectureId, int page) {
         PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("created_at").descending());
-        Page<ReviewEntity> reviewPage = reviewRepository.findAllByLectureId(new ObjectId(lectureId), pageRequest);
+        Page<ReviewEntity> reviewPage = reviewRepository.findAllByLectureIdAndDeletedAtIsNull(new ObjectId(lectureId), pageRequest);
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return ReviewPageResponse.of(reviewPage.stream()
