@@ -3,6 +3,7 @@ package inu.codin.codin.domain.lecture.domain.room.controller;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.domain.room.service.LectureRoomService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/rooms")
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Lecture Room API", description = "강의실 현황 API")
 public class LectureRoomController {
 
     private final LectureRoomService lectureRoomService;
