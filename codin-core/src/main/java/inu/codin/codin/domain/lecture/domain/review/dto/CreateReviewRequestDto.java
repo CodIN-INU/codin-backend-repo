@@ -7,14 +7,12 @@ import lombok.Getter;
 public class CreateReviewRequestDto {
 
     @NotBlank
-    private String title;
-
-    @NotBlank
     private String content;
 
     @NotNull
     @Digits(integer = 1, fraction = 2)
     private double starRating;
 
+    @NotBlank
     private String semester;
 }
