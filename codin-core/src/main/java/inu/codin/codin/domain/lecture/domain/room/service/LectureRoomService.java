@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,16 +48,20 @@ public class LectureRoomService {
     }
 
 
-    public Map<Integer, List<EmptyRoomResponseDto>> statusOfEmptyRoom(int floor) {
+    public List<Map<Integer, List<EmptyRoomResponseDto>>> statusOfEmptyRoom() {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek today = now.getDayOfWeek();
-        List<LectureRoomEntity> roomEntities = getLecturesByFloor(floor);
-        return roomEntities.stream()
-                .filter(lecture -> lecture.getDayTime().containsKey(today))
-                .flatMap(lecture -> lecture.getDayTime().get(today).stream()
-                        .map(time -> EmptyRoomResponseDto.of(lecture, time)))
-                .collect(Collectors.groupingBy(
-                        EmptyRoomResponseDto::getRoomNum
-                ));
+        ArrayList<Map<Integer, List<EmptyRoomResponseDto>>> lectureRoom = new ArrayList<>();
+        for (int floor=1; floor<=5; floor++) {
+            List<LectureRoomEntity> roomEntities = getLecturesByFloor(floor);
+            lectureRoom.add(roomEntities.stream()
+                    .filter(lecture -> lecture.getDayTime().containsKey(today))
+                    .flatMap(lecture -> lecture.getDayTime().get(today).stream()
+                            .map(time -> EmptyRoomResponseDto.of(lecture, time)))
+                    .collect(Collectors.groupingBy(
+                            EmptyRoomResponseDto::getRoomNum
+                    )));
+        }
+        return lectureRoom;
     }
 }
