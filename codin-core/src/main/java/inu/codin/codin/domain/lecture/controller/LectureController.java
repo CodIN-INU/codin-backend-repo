@@ -6,6 +6,8 @@ import inu.codin.codin.domain.lecture.dto.Option;
 import inu.codin.codin.domain.lecture.service.LectureService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,7 +64,7 @@ public class LectureController {
     )
     @GetMapping("/search-review")
     public ResponseEntity<SingleResponse<?>> searchLecturesToReview(@RequestParam(required = false) Department department,
-                                                                    @RequestParam(required = false) Integer grade,
+                                                                    @RequestParam(required = false) @Min(1) @Max(4) Integer grade,
                                                                     @RequestParam(required = false) String semester,
                                                                     @RequestParam int page){
         return ResponseEntity.ok()
