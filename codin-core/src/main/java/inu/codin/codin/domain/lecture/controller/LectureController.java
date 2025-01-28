@@ -35,8 +35,18 @@ public class LectureController {
     }
 
     @Operation(
+            summary = "강의 별점 정보 반환",
+            description = "강의후기 > 상세보기 눌렀을 때 뜨는 강의 정보 반환"
+    )
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<SingleResponse<?>> getLectureDetails(@PathVariable("lectureId") String lectureId){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "강의 별점 정보 반환", lectureService.getLectureDetails(lectureId)));
+    }
+
+    @Operation(
             summary = "교수명, 과목명 검색",
-            description = "keyword 입력을 통해 (교수명, 과목명, 과목코드) 중 일치하는 결과 반환"
+            description = "keyword 입력을 통해 (교수명, 과목명) 중 일치하는 결과 반환"
     )
     @GetMapping("/search")
     public ResponseEntity<SingleResponse<?>> searchLectures(@RequestParam("keyword") String keyword,
@@ -46,14 +56,20 @@ public class LectureController {
     }
 
     @Operation(
-            summary = "강의 별점 정보 반환",
-            description = "강의후기 > 상세보기 눌렀을 때 뜨는 강의 정보 반환"
+            summary = "학과, 학년, 수강학기 로 강의 검색",
+            description = "수강 후기 작성 시 필요한 검색엔진<br>" +
+                    "학과, 학년, 수강학기 중 하나만으로도 검색 가능"
     )
-    @GetMapping("/{lectureId}")
-    public ResponseEntity<SingleResponse<?>> getLectureDetails(@PathVariable("lectureId") String lectureId){
+    @GetMapping("/search-review")
+    public ResponseEntity<SingleResponse<?>> searchLecturesToReview(@RequestParam(required = false) Department department,
+                                                                    @RequestParam(required = false) Integer grade,
+                                                                    @RequestParam(required = false) String semester,
+                                                                    @RequestParam int page){
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "강의 별점 정보 반환", lectureService.getLectureDetails(lectureId)));
+                .body(new SingleResponse<>(200, "필터링 된 강의들 반환 완료",
+                        lectureService.searchLecturesToReview(department, grade, semester, page)));
     }
+
 
 
 }
