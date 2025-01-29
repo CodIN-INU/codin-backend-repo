@@ -15,10 +15,4 @@ public class ReportExecuteRequestDto {
     private String comment; // 신고 처리에 대한 코멘트
     private SuspensionPeriod suspensionPeriod; // 정지 기간
 
-    public LocalDateTime getSuspensionEndDate() {
-        if (suspensionPeriod == null) {
-            return null;
-        }
-        return LocalDateTime.now().plusDays(suspensionPeriod.getDays());
-    }
 }
