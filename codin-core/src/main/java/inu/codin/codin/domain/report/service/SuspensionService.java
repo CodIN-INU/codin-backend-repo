@@ -30,7 +30,11 @@ public class SuspensionService {
 
             UserEntity user = userOpt.get();
             user.activateUser(); // 정지 해제
+            report.updateReportResolved();
+
             userRepository.save(user); // DB 반영
+            reportRepository.save(report);
+
 
             log.info("유저 {} 정지 해제 완료", user.get_id());
         }
