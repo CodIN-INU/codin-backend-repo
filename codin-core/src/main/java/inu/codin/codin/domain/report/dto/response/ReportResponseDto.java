@@ -80,6 +80,7 @@ public class ReportResponseDto {
         return ReportResponseDto.builder()
                 ._id(reportEntity.get_id().toString())
                 .reportingUserId(reportEntity.getReportingUserId().toString())
+                .reportedUserId(reportEntity.getReportedUserId().toString())
                 .reportTargetType(reportEntity.getReportTargetType())
                 .reportTargetId(reportEntity.getReportTargetId().toString())
                 .reportType(reportEntity.getReportType())
