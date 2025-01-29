@@ -31,6 +31,7 @@ public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId
     List<ReportEntity> findByReportingUserId(ObjectId userId);
 
     // 현재 정지 상태이며, 정지 종료일이 아직 남아있는 유저 조회
-    @Query("{'action.suspensionEndDate': { $gt: ?0 }}")
+    //정지 종료일(suspensionEndDate)이 현재 날짜보다 이전($lt)
+    @Query("{'reportStatus': 'SUSPENDED', 'action.suspensionEndDate': { $lt: ?0 }}")
     List<ReportEntity> findSuspendedUsers(LocalDateTime now);
 }

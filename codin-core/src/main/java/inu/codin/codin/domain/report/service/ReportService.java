@@ -186,10 +186,9 @@ public class ReportService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 신고가 존재하지 않습니다. ID: " + requestDto.getReportId()));
 
         // 이미 처리된 신고인지 확인
-        if (report.getReportStatus() == ReportStatus.RESOLVED) {
+        if (report.getReportStatus() == ReportStatus.SUSPENDED || report.getReportStatus() == ReportStatus.RESOLVED) {
             throw new IllegalStateException("이미 처리된 신고입니다.");
         }
-
 
         // 신고 처리 정보 생성
         ReportEntity.ReportActionEntity action = ReportEntity.ReportActionEntity.builder()
@@ -203,7 +202,7 @@ public class ReportService {
         //ReportEntity updatedReport = report.updateReport(action);
 
         // 기존 객체의 필드를 직접 수정 (새 객체 생성 X)
-        report.updateReportResolved(action);
+        report.updateReportSuspended(action);
 
 
         //유저 Suspended - 정지 상태로 변경

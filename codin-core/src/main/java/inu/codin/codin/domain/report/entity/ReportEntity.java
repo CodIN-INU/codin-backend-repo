@@ -60,15 +60,21 @@ public class ReportEntity extends BaseTimeEntity {
                 .reportTargetType(this.reportTargetType)
                 .reportTargetId(this.reportTargetId)
                 .reportType(this.reportType)
-                .reportStatus(ReportStatus.RESOLVED) // 상태 변경
+                .reportStatus(ReportStatus.SUSPENDED) // 상태 변경
                 .action(action) // 신고 처리 정보 업데이트
                 .build();
     }
 
-    public void updateReportResolved(ReportActionEntity action) {
-        this.reportStatus = ReportStatus.RESOLVED; // 상태 변경
+    public void updateReportSuspended(ReportActionEntity action) {
+        this.reportStatus = ReportStatus.SUSPENDED; // 상태 변경
         this.action = action; // 신고 처리 정보 업데이트
     }
+
+
+    public void updateReportResolved() {
+        this.reportStatus = ReportStatus.RESOLVED; // 상태 변경
+    }
+
 
 
 
