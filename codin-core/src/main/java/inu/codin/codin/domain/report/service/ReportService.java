@@ -161,8 +161,12 @@ public class ReportService {
         ObjectId ObjUserId = new ObjectId(userId);
 
 
-        List<ReportEntity> userReports = reportRepository.findByReportingUserId(ObjUserId);
-        return userReports.stream()
+        List<ReportEntity> reports = reportRepository.findByReportingUserId(ObjUserId);
+
+        log.info("DB에서 가져온 ReportEntity 리스트:");
+        reports.forEach(report -> log.info("ID: {}, ReportStatus: {}", report.get_id(), report.getReportStatus()));
+
+        return reports.stream()
                 .map(ReportResponseDto::from)
                 .collect(Collectors.toList());
     }

@@ -7,7 +7,7 @@ public enum ReportStatus {
     PENDING("대기"),
     RESOLVED("처리 완료");
 
-    private final String description;
+    private String description;
 
     ReportStatus(String description) {
         this.description = description;
