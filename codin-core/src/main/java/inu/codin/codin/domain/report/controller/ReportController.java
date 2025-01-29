@@ -70,7 +70,7 @@ public class ReportController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user")
     public ResponseEntity<?> getReportsByUserId(
-            @RequestParam("userId") @NotNull ObjectId userId) {
+            @RequestParam("userId") @NotNull String userId) {
 
         List<ReportResponseDto> userReports = reportService.getReportsByUserId(userId);
         return ResponseEntity.ok()
