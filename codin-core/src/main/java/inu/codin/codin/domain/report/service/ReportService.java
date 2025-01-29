@@ -18,13 +18,13 @@ import inu.codin.codin.domain.report.entity.SuspensionPeriod;
 import inu.codin.codin.domain.report.exception.ReportAlreadyExistsException;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class ReportService {
         );
 
         // null 방지: reportExists가 null이면 false로 처리
-        if (Boolean.TRUE.equals(reportExists)) {
+        if (reportExists) {
             log.warn("중복 신고 발견: reportingUserId={}, reportTargetId={}, reportTargetType={}",
                     userId,
                     reportCreateRequestDto.getReportTargetId(),
@@ -173,7 +173,8 @@ public class ReportService {
 
 
 
-    public void executeReport(ReportExecuteRequestDto requestDto) {
+    @Transactional
+    public void resolveReport(ReportExecuteRequestDto requestDto) {
         log.info("신고 처리 요청: {}", requestDto.getReportId());
         ObjectId userId = SecurityUtils.getCurrentUserId();
         ObjectId ReportId = new ObjectId(requestDto.getReportId());
@@ -206,6 +207,7 @@ public class ReportService {
         //유저 Suspended - 정지 상태로 변경
         Optional<UserEntity> user = userRepository.findById(report.getReportedUserId());
         if (user.isEmpty()) throw new NotFoundException("존재하지 않는 회원입니다.");
+
         //영구 정지
         if (requestDto.getSuspensionPeriod() == SuspensionPeriod.PERMANENT){
             user.get().disabledUser();
