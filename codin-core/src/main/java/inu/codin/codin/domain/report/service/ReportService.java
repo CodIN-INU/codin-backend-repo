@@ -26,6 +26,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -189,12 +190,13 @@ public class ReportService {
             throw new IllegalStateException("이미 처리된 신고입니다.");
         }
 
+
         // 신고 처리 정보 생성
         ReportEntity.ReportActionEntity action = ReportEntity.ReportActionEntity.builder()
                 .actionTakenById(userId)
                 .comment(requestDto.getComment())
                 .suspensionPeriod(requestDto.getSuspensionPeriod())
-                .suspensionEndDate(requestDto.getSuspensionEndDate())
+                .suspensionEndDate(LocalDateTime.now().plusDays(requestDto.getSuspensionPeriod().getDays()))
                 .build();
 
         // 엔티티 내부에서 업데이트 메서드 호출
