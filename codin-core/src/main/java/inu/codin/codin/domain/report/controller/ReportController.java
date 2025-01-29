@@ -1,20 +1,15 @@
 package inu.codin.codin.domain.report.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
-import inu.codin.codin.domain.report.entity.ReportEntity;
-import inu.codin.codin.domain.report.entity.ReportStatus;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
-import inu.codin.codin.domain.report.entity.ReportType;
 import inu.codin.codin.domain.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,7 +80,7 @@ public class ReportController {
     public ResponseEntity<?> handleReport(
             @RequestBody ReportExecuteRequestDto reportExecuteRequestDto) {
 
-        reportService.executeReport(reportExecuteRequestDto);
+        reportService.resolveReport(reportExecuteRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(200, "(관리자) 신고 처리",null));
