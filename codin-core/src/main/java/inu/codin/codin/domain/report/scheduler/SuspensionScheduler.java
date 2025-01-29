@@ -13,9 +13,10 @@ public class SuspensionScheduler {
 
     private final SuspensionService suspensionService;
 
-    @Scheduled(cron = "0 0 * * * ?") // 매 정시마다 실행
+    //@Scheduled(cron = "0 0 * * * ?") // 매 정시마다 실행
+    @Scheduled(cron = "0 * * * * ?") // 매 1분마다 실행
     public void checkAndReleaseSuspendedUsers() {
-        log.info("🚀 정지 해제 스케줄러 실행...");
+        log.info("정지 해제 스케줄러 실행...");
         suspensionService.releaseSuspendedUsers();
     }
 }
