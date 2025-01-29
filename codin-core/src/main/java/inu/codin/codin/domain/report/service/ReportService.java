@@ -155,10 +155,13 @@ public class ReportService {
     }
 
     // 특정 유저가 신고 내역 조회 (관리자)
-    public List<ReportResponseDto> getReportsByUserId(ObjectId userId) {
+    public List<ReportResponseDto> getReportsByUserId(String userId) {
         log.info("특정 유저 신고 내역 조회: userId={}", userId);
 
-        List<ReportEntity> userReports = reportRepository.findByReportingUserId(userId);
+        ObjectId ObjUserId = new ObjectId(userId);
+
+
+        List<ReportEntity> userReports = reportRepository.findByReportingUserId(ObjUserId);
         return userReports.stream()
                 .map(ReportResponseDto::from)
                 .collect(Collectors.toList());
