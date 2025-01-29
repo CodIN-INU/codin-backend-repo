@@ -78,4 +78,14 @@ public class UserEntity extends BaseTimeEntity {
                 .status(UserStatus.ACTIVE)
                 .build();
     }
+
+    public void suspendUser() {
+        this.status = UserStatus.SUSPENDED;
+    }
+    public void disabledUser() {
+        this.status = UserStatus.DISABLED;
+    }
+    public void activateUser() {
+        this.status = UserStatus.ACTIVE;
+    }
 }
