@@ -10,6 +10,7 @@ import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.parameters.P;
 
 @Document(collection = "users")
 @Getter
@@ -86,6 +87,8 @@ public class UserEntity extends BaseTimeEntity {
         this.status = UserStatus.DISABLED;
     }
     public void activateUser() {
-        this.status = UserStatus.ACTIVE;
+        if ( this.status == UserStatus.SUSPENDED) {
+            this.status = UserStatus.ACTIVE;
+        }
     }
 }
