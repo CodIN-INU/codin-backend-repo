@@ -47,7 +47,8 @@ public class ReportEntity extends BaseTimeEntity {
         this.reportTargetType = reportTargetType;
         this.reportTargetId = reportTargetId;
         this.reportType = reportType;
-        this.reportStatus = ReportStatus.PENDING;
+        // Null이면 PENDING, 아니면 그대로 유지
+        this.reportStatus = reportStatus != null ? reportStatus : ReportStatus.PENDING;
         this.action = action;
     }
 
