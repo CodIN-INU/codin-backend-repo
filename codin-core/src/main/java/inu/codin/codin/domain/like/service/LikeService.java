@@ -116,7 +116,7 @@ public class LikeService {
     }
 
     public boolean isReplyLiked(ObjectId replyId, ObjectId userId) {
-        return redisLikeService.isLiked(LikeType.COMMENT, replyId, userId);
+        return redisLikeService.isLiked(LikeType.REPLY, replyId, userId);
 
     }
 
