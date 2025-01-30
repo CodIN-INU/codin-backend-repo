@@ -138,6 +138,7 @@ public class ReplyCommentService {
     }
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
+        //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
         return CommentResponseDTO.UserInfo.builder()
                 .isLike(likeService.isReplyLiked(replyId, userId))
                 .build();
