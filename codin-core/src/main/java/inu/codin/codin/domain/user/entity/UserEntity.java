@@ -5,7 +5,6 @@ import inu.codin.codin.common.Department;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
-import inu.codin.codin.domain.user.dto.request.UserUpdateRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.notification;
 
+import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
     private final NotificationService notificationService;
+
+    @Operation(
+            summary = "알림 내역 반환"
+    )
+    @GetMapping()
+    public ResponseEntity<ListResponse<?>> getNotifications(){
+        return ResponseEntity.ok()
+                .body(new ListResponse<>(200, "알림 내역 반환 완료",
+                        notificationService.getNotification()));
+    }
 
     @Operation(summary = "알림 읽기")
     @GetMapping("/{notificationId}")

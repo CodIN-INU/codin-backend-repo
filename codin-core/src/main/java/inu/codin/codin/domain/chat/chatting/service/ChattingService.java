@@ -52,12 +52,12 @@ public class ChattingService {
 
         chattingRepository.save(chatting);
         log.info("Message [{}] send by member: {} to chatting room: {}", chattingRequestDto.getContent(), userId, id);
-        //Receiver의 알림 체크 후, 메세지 전송
-        for (Participants participant : chatRoom.getParticipants()){
-            if (participant.getUserId() != userId && participant.isNotificationsEnabled()){
-                notificationService.sendNotificationMessageByChat(participant.getUserId(), chattingRequestDto, chatRoom);
-            }
-        }
+//        //Receiver의 알림 체크 후, 메세지 전송
+//        for (Participants participant : chatRoom.getParticipants()){
+//            if (participant.getUserId() != userId && participant.isNotificationsEnabled()){
+//                notificationService.sendNotificationMessageByChat(participant.getUserId(), chattingRequestDto, chatRoom);
+//            }
+//        }
         return ChattingResponseDto.of(chatting);
     }
 
