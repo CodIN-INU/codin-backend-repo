@@ -13,6 +13,7 @@ import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDT
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.dto.response.UserDto;
+import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -72,8 +73,7 @@ public class ReplyCommentService {
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
-
-        notificationService.sendNotificationMessageByReply(comment.getUserId(), post.get_id().toString(), reply.getContent());
+        if (userId != comment.getUserId()) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
     }
 
     // 대댓글 삭제 (Soft Delete)

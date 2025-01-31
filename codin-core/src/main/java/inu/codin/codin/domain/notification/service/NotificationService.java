@@ -1,15 +1,18 @@
 package inu.codin.codin.domain.notification.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.notification.dto.NotificationListResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -23,6 +26,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -37,10 +41,10 @@ public class NotificationService {
     private final ReplyCommentRepository replyCommentRepository;
 
     private final FcmService fcmService;
-    private final String NOTI_COMMENT_TITLE = "누군가가 내 게시글에 댓글을 달았어요!";
-    private final String NOTI_REPLY_TITLE = "누군가가 내 댓글에 답글을 달았어요!";
-    private final String NOTI_LIKE_TITLE = "나에게 첫 좋아요가 달렸어요!";
-    private final String NOTI_CHAT_TITLE = "에서 연락이 왔어요!";
+    private final String NOTI_COMMENT = "댓글이 달렸습니다: ";
+    private final String NOTI_REPLY = "대댓글이 달렸습니다: ";
+    private final String NOTI_LIKE = "";
+    private final String NOTI_CHAT = "새로운 채팅이 있습니다.";
 
 
     /**
@@ -71,10 +75,10 @@ public class NotificationService {
         try {
             fcmService.sendFcmMessage(msgDto);
             log.info("[sendFcmMessage] 알림 전송 성공");
-            saveNotificationLog(msgDto);
         } catch (Exception e) {
             log.error("[sendFcmMessage] 알림 전송 실패 : {}", e.getMessage());
         }
+        saveNotificationLog(msgDto, data);
     }
 
     /**
@@ -104,11 +108,12 @@ public class NotificationService {
     }
 
     // 알림 로그를 저장하는 로직 (특정 사용자 대상)
-    private void saveNotificationLog(FcmMessageUserDto msgDto) {
+    private void saveNotificationLog(FcmMessageUserDto msgDto, Map<String, String> data) {
         NotificationEntity notificationEntity = NotificationEntity.builder()
                 .user(msgDto.getUser())
                 .title(msgDto.getTitle())
                 .message(msgDto.getBody())
+                .targetId(new ObjectId(data.get("id")))
                 .type("push")
                 .priority("high")
                 .build();
@@ -126,20 +131,22 @@ public class NotificationService {
         notificationRepository.save(notificationEntity);
     }
 
-    public void sendNotificationMessageByComment(ObjectId userId, String postId, String content) {
+    public void sendNotificationMessageByComment(PostCategory postCategory, ObjectId userId, String postId, String content) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
         Map<String, String> post = new HashMap<>();
-        post.put("postId", postId);
-        sendFcmMessageToUser(NOTI_COMMENT_TITLE, content, post, user);
+        post.put("id", postId);
+        String title = postCategory.getDescription().split("_")[0];
+        sendFcmMessageToUser(title, NOTI_COMMENT+content, post, user);
     }
 
-    public void sendNotificationMessageByReply(ObjectId userId, String postId, String content) {
+    public void sendNotificationMessageByReply(PostCategory postCategory, ObjectId userId, String postId, String content) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
         Map<String, String> post = new HashMap<>();
-        post.put("postId", postId);
-        sendFcmMessageToUser(NOTI_REPLY_TITLE, content, post, user);
+        post.put("id", postId);
+        String title = postCategory.getDescription().split("_")[0];
+        sendFcmMessageToUser(title, NOTI_REPLY+content, post, user);
     }
 
     public void sendNotificationMessageByLike(LikeType likeType, ObjectId id) {
@@ -150,8 +157,8 @@ public class NotificationService {
                 UserEntity user = userRepository.findById(postEntity.getUserId())
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
                 Map<String, String> post = new HashMap<>();
-                post.put("postId", postEntity.get_id().toString());
-                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 게시글 보러 가기", post, user);
+                post.put("id", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE, "내 게시글 보러 가기", post, user);
             }
             case REPLY -> {
                 ReplyCommentEntity replyCommentEntity = replyCommentRepository.findByIdAndNotDeleted(id)
@@ -163,8 +170,8 @@ public class NotificationService {
                 UserEntity user = userRepository.findById(replyCommentEntity.getUserId())
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
                 Map<String, String> post = new HashMap<>();
-                post.put("postId", postEntity.get_id().toString());
-                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 답글 보러 가기", post, user);
+                post.put("id", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE, "내 답글 보러 가기", post, user);
             }
             case COMMENT -> {
                 CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(id)
@@ -174,18 +181,18 @@ public class NotificationService {
                 UserEntity user = userRepository.findById(commentEntity.getUserId())
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
                 Map<String, String> post = new HashMap<>();
-                post.put("postId", postEntity.get_id().toString());
-                sendFcmMessageToUser(NOTI_LIKE_TITLE, "내 댓글 보러 가기", post, user);
+                post.put("id", postEntity.get_id().toString());
+                sendFcmMessageToUser(NOTI_LIKE, "내 댓글 보러 가기", post, user);
             }
         }
     }
 
-    public void sendNotificationMessageByChat(ObjectId userId, ChattingRequestDto chattingRequestDto, ChatRoom chatRoom) {
+    public void sendNotificationMessageByChat(ObjectId userId, ChatRoom chatRoom) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
         Map<String, String> chat = new HashMap<>();
-        chat.put("chatRoomId", chatRoom.get_id().toString());
-        sendFcmMessageToUser(chatRoom.getRoomName()+NOTI_CHAT_TITLE, chattingRequestDto.getContent(), chat, user);
+        chat.put("id", chatRoom.get_id().toString());
+        sendFcmMessageToUser("익명 채팅방", NOTI_CHAT, chat, user);
     }
 
     public void readNotification(String notificationId){
@@ -193,5 +200,16 @@ public class NotificationService {
                 .orElseThrow(() -> new NotFoundException("해당 알림을 찾을 수 없습니다."));
         notificationEntity.markAsRead();
         notificationRepository.save(notificationEntity);
+    }
+
+    public List<NotificationListResponseDto> getNotification() {
+        //todo 유저에게 맞는 토픽 알림들도 반환
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserEntity user = userRepository.findById(userId)
+                        .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다"));
+        List<NotificationEntity> notifications = notificationRepository.findAllByUser(user);
+        return notifications.stream()
+                .map(NotificationListResponseDto::of)
+                .toList();
     }
 }

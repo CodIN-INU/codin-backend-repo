@@ -4,11 +4,13 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
+import inu.codin.codin.domain.chat.chatroom.entity.Participants;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.CustomChattingRepository;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class ChatRoomService {
+
+    private final NotificationService notificationService;
 
     private final ChatRoomRepository chatRoomRepository;
     private final CustomChattingRepository customChattingRepository;
@@ -47,6 +51,12 @@ public class ChatRoomService {
         ChatRoom chatRoom = ChatRoom.of(chatRoomCreateRequestDto, senderId);
         chatRoomRepository.save(chatRoom);
         log.info("[채팅방 생성 완료] 채팅방 ID: {}, 송신자 ID: {}, 수신자 ID: {}", chatRoom.get_id(), senderId, chatRoomCreateRequestDto.getReceiverId());
+
+        for (Participants participant : chatRoom.getParticipants()){
+            if (participant.getUserId() != senderId && participant.isNotificationsEnabled()){
+                notificationService.sendNotificationMessageByChat(participant.getUserId(), chatRoom);
+            }
+        }
 
         Map<String, String> response = new HashMap<>();
         response.put("chatRoomId", chatRoom.get_id().toString());

@@ -3,7 +3,10 @@ package inu.codin.codin.domain.notification.entity;
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
 
 
 @Document(collection = "notification")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class NotificationEntity extends BaseTimeEntity {
 
     @Id @NotBlank
@@ -20,6 +25,8 @@ public class NotificationEntity extends BaseTimeEntity {
 
     @DBRef(lazy = true)
     private UserEntity user;
+
+    private ObjectId targetId;
 
     private String title;
 
@@ -36,8 +43,9 @@ public class NotificationEntity extends BaseTimeEntity {
     private String priority;
 
     @Builder
-    public NotificationEntity(UserEntity user, String title, String message, String type, String priority) {
+    public NotificationEntity(UserEntity user, ObjectId targetId, String title, String message, String type, String priority) {
         this.user = user;
+        this.targetId = targetId;
         this.title = title;
         this.message = message;
         this.type = type;

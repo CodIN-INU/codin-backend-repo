@@ -7,8 +7,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface NotificationRepository extends MongoRepository<NotificationEntity, ObjectId> {
     @Query("{ 'user': ?0, 'isRead': false, deletedAt: null }")
     long countUnreadNotificationsByUser(UserEntity user);
+
+    List<NotificationEntity> findAllByUser(UserEntity user);
 }
