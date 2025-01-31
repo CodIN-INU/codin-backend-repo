@@ -73,7 +73,7 @@ public class ReplyCommentService {
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
-        if (userId != comment.getUserId()) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
+        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
     }
 
     // 대댓글 삭제 (Soft Delete)
