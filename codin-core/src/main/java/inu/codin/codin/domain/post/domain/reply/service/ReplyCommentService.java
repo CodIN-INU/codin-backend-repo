@@ -13,7 +13,6 @@ import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDT
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.dto.response.UserDto;
-import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;

@@ -3,7 +3,6 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
-import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.notification.dto.NotificationListResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
