@@ -14,7 +14,6 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -118,20 +117,17 @@ public class UserService {
         }
     }
 
-    public void deleteUser(UserDeleteRequestDto userDeleteRequestDto) {
-        log.info("[회원 탈퇴 요청] 이메일: {}", userDeleteRequestDto.getEmail());
+    public void deleteUser() {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
 
-        UserEntity user = userRepository.findByEmail(userDeleteRequestDto.getEmail())
+        UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
-                    log.warn("[회원 탈퇴 실패] 유저 정보 없음: {}", userDeleteRequestDto.getEmail());
+                    log.warn("[회원 탈퇴 실패] 유저 정보 없음: {}", userId);
                     return new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다.");
                 });
-
-        SecurityUtils.validateUser(user.get_id());
         user.delete();
         userRepository.save(user);
-
-        log.info("[회원 탈퇴 성공] 이메일: {}", userDeleteRequestDto.getEmail());
+        log.info("[회원 탈퇴 성공] 이메일: {}", userId);
     }
 
     public UserInfoResponseDto getUserInfo() {
