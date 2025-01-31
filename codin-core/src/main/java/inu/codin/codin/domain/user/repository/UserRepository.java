@@ -10,6 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
+    @Query("{'_id':  ?0, 'deletedAt': null}")
+    Optional<UserEntity> findByUserId(ObjectId userId);
 
     @Query("{'email':  ?0, 'deletedAt': null, 'status':  { $in:  ['ACTIVE'] }}")
     Optional<UserEntity> findByEmail(String email);
