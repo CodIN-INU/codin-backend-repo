@@ -53,7 +53,7 @@ public class ChatRoomService {
         log.info("[채팅방 생성 완료] 채팅방 ID: {}, 송신자 ID: {}, 수신자 ID: {}", chatRoom.get_id(), senderId, chatRoomCreateRequestDto.getReceiverId());
 
         for (Participants participant : chatRoom.getParticipants()){
-            if (participant.getUserId() != senderId && participant.isNotificationsEnabled()){
+            if (!participant.getUserId().equals(senderId) && participant.isNotificationsEnabled()){
                 notificationService.sendNotificationMessageByChat(participant.getUserId(), chatRoom);
             }
         }
