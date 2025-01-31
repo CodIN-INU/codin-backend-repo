@@ -4,6 +4,7 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -39,14 +40,12 @@ public class ReplyCommentService {
     private final UserRepository userRepository;
 
     private final LikeService likeService;
+    private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
-        log.info("대댓글 추가 요청 - commentId: {}, content: {}, anonymous: {}",
-                id, requestDTO.getContent(), requestDTO.isAnonymous());
-
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
@@ -74,12 +73,11 @@ public class ReplyCommentService {
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
 
+        notificationService.sendNotificationMessageByReply(comment.getUserId(), post.get_id().toString(), reply.getContent());
     }
 
     // 대댓글 삭제 (Soft Delete)
     public void softDeleteReply(String replyId) {
-        log.info("대댓글 삭제 요청 - replyId: {}", replyId);
-
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(new ObjectId(replyId))
                 .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
         SecurityUtils.validateUser(reply.getUserId());
@@ -146,7 +144,6 @@ public class ReplyCommentService {
 
 
     public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
-        log.info("대댓글 수정 요청 - replyId: {}, newContent: {}", id, requestDTO.getContent());
 
         ObjectId replyId = new ObjectId(id);
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
