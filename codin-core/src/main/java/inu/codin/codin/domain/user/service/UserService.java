@@ -123,11 +123,11 @@ public class UserService {
         UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
                     log.warn("[회원 탈퇴 실패] 유저 정보 없음: {}", userId);
-                    return new NotFoundException("해당 이메일에 대한 유저 정보를 찾을 수 없습니다.");
+                    return new NotFoundException("해당 id에 대한 유저 정보를 찾을 수 없습니다.");
                 });
         user.delete();
         userRepository.save(user);
-        log.info("[회원 탈퇴 성공] 이메일: {}", userId);
+        log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
 
     public UserInfoResponseDto getUserInfo() {

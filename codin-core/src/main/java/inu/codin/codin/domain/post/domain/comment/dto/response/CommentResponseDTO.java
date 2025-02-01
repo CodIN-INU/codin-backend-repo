@@ -1,6 +1,8 @@
 package inu.codin.codin.domain.post.domain.comment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,6 +52,7 @@ public class CommentResponseDTO {
     @Schema(description = "해당 댓글 대한 유저 반응 여부")
     private final UserInfo userInfo;
 
+    @Builder
     public CommentResponseDTO(String _id, String userId, String content,
                               String nickname, String userImageUrl, Boolean anonymous ,
                               List<CommentResponseDTO> replies, int likeCount,
@@ -65,6 +68,38 @@ public class CommentResponseDTO {
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.userInfo = userInfo;
+    }
+
+    public static CommentResponseDTO commentOf(CommentEntity commentEntity, String nickname, String userImageUrl, List<CommentResponseDTO> repliesByCommentId, int like, UserInfo userInfoAboutPost){
+        return CommentResponseDTO.builder()
+                ._id(commentEntity.get_id().toString())
+                .userId(commentEntity.getUserId().toString())
+                .content(commentEntity.getContent())
+                .nickname(nickname)
+                .userImageUrl(userImageUrl)
+                .anonymous(commentEntity.isAnonymous())
+                .replies(repliesByCommentId)
+                .likeCount(like)
+                .isDeleted(commentEntity.getDeletedAt() != null)
+                .createdAt(commentEntity.getCreatedAt())
+                .userInfo(userInfoAboutPost)
+                .build();
+    }
+
+    public static CommentResponseDTO replyOf(ReplyCommentEntity replyCommentEntity, String nickname, String userImageUrl, List<CommentResponseDTO> repliesByCommentId, int like, UserInfo userInfoAboutPost){
+        return CommentResponseDTO.builder()
+                ._id(replyCommentEntity.get_id().toString())
+                .userId(replyCommentEntity.getUserId().toString())
+                .content(replyCommentEntity.getContent())
+                .nickname(nickname)
+                .userImageUrl(userImageUrl)
+                .anonymous(replyCommentEntity.isAnonymous())
+                .replies(repliesByCommentId)
+                .likeCount(like)
+                .isDeleted(replyCommentEntity.getDeletedAt() != null)
+                .createdAt(replyCommentEntity.getCreatedAt())
+                .userInfo(userInfoAboutPost)
+                .build();
     }
 
     @Getter

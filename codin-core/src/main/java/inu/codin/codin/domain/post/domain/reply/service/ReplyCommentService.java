@@ -101,39 +101,35 @@ public class ReplyCommentService {
 
     // 특정 댓글의 대댓글 조회
     public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
-
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
+        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
         Map<ObjectId, UserDto> userMap = userRepository.findAllById(
                 replies.stream()
-                        .filter(replyCommentEntity -> !replyCommentEntity.isAnonymous())
                         .map(ReplyCommentEntity::getUserId).distinct().toList()
         ).stream()
-                .collect(Collectors.toMap(
-                        UserEntity::get_id,
-                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl())));
-
-        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
+            .collect(Collectors.toMap(
+                    UserEntity::get_id,
+                    user -> new UserDto(user.getNickname(), user.getProfileImageUrl(), user.getDeletedAt() != null)
+            ));
 
         return replies.stream()
                 .map(reply -> {
-                    String nickname = reply.isAnonymous() ? "익명" : userMap.get(reply.getUserId()).nickname();
-                    String userImageUrl = reply.isAnonymous() ? defaultImageUrl: userMap.get(reply.getUserId()).imageUrl();
-                    boolean isDeleted = reply.getDeletedAt() != null;
-                    return new CommentResponseDTO(
-                            reply.get_id().toString(),
-                            reply.getUserId().toString(),
-                            reply.getContent(),
-                            nickname,
-                            userImageUrl,
-                            reply.isAnonymous(),
-                            List.of(), //대댓글은 대댓글이 없음
-                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
-                            isDeleted,
-                            reply.getCreatedAt(),
-                            getUserInfoAboutPost(reply.get_id())
+                    UserDto userDto = userMap.get(reply.getUserId());
 
-                    );
+                    String nickname;
+                    String userImageUrl;
+
+                    if (userDto.isDeleted()){
+                        nickname = "탈퇴한 사용자";
+                        userImageUrl = defaultImageUrl;
+                    } else {
+                        nickname = reply.isAnonymous()? "익명" : userMap.get(reply.getUserId()).nickname();
+                        userImageUrl = reply.isAnonymous()? defaultImageUrl: userMap.get(reply.getUserId()).imageUrl();
+                    }
+                    return CommentResponseDTO.replyOf(reply, nickname, userImageUrl, List.of(),
+                            likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
+                            getUserInfoAboutPost(reply.get_id()));
                 }).toList();
     }
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
