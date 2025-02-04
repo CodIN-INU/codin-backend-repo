@@ -4,6 +4,7 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
+import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +24,7 @@ import java.util.List;
 public class ReportController {
     private final ReportService reportService;
 
-    //신고 작성
+    //(User)신고 작성
     /**
       User -> User , Post, Comment, Reply
      **/
@@ -35,16 +36,15 @@ public class ReportController {
                 .body(new SingleResponse<>(201, "신고 생성 완료", null));
     }
 
-    //신고 목록 조회 (관리자)
-    /***
-     전체조회
-     ReportType 별 조회
-     + 특정 신고횟수 이상 조회
-     */
+    //(User) 특정 게시물의 신고 정보 조회 API
+    @Operation(summary = "특정 게시물의 신고 내역 조회")
+    @GetMapping("/summary/{reportTargetId}")
+    public ResponseEntity<?> getReportSummary(@PathVariable String reportTargetId) {
+        ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(reportTargetId);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "특정 게시물의 신고 내역 조회 완료", reportSummary));
+    }
 
-    //특정 유저 신고 상세 조회 (관리자)
-
-    //신고 처리 (관리자)
 
     // 특정 신고 타입 목록 조회 (관리자)
     @Operation(summary = "특정 신고 타입 목록 조회 (관리자)")
