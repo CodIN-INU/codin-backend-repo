@@ -59,6 +59,10 @@ public class PostDetailResponseDTO {
     @Schema(description = "조회수", example = "0")
     private final int hits;
 
+    private final int reportCount;
+
+
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
     private final LocalDateTime createdAt;
@@ -67,7 +71,7 @@ public class PostDetailResponseDTO {
     private final UserInfo userInfo;
 
     public PostDetailResponseDTO(String userId, String _id, String title, String content, String nickname , PostCategory postCategory, String userImageUrl, List < String > postImageUrls,
-                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfo userInfo){
+                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, int reportCount, UserInfo userInfo){
         this.userId = userId;
         this._id = _id;
         this.title = title;
@@ -82,6 +86,7 @@ public class PostDetailResponseDTO {
         this.commentCount = commentCount;
         this.hits = hits;
         this.createdAt = createdAt;
+        this.reportCount = reportCount;
         this.userInfo = userInfo;
     }
 
@@ -97,7 +102,7 @@ public class PostDetailResponseDTO {
         }
     }
 
-    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount, UserInfo userInfo) {
+    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount, int reportCount ,UserInfo userInfo) {
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
                 post.get_id().toString(),
@@ -113,8 +118,8 @@ public class PostDetailResponseDTO {
                 hitsCount,
                 post.getCreatedAt(),
                 commentCount,
-                userInfo
-        );
+                reportCount,
+                userInfo);
     }
 }
 

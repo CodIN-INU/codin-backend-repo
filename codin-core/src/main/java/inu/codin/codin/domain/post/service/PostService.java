@@ -158,6 +158,7 @@ public class PostService {
         int scrapCount = scrapService.getScrapCount(post.get_id());
         int hitsCount = hitsService.getHitsCount(post.get_id());
         int commentCount = post.getCommentCount();
+        int reportCount = post.getReportCount();
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -183,14 +184,14 @@ public class PostService {
 
             //게시물 + 투표 DTO 생성
             return PostPollDetailResponseDTO.of(
-                    PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo),
+                    PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, reportCount, userInfo),
                     pollInfo
             );
         }
 
         log.info("일반 게시물 상세정보 생성 성공 PostId: {}", post.get_id());
         // 일반 게시물 처리
-        return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, reportCount ,userInfo);
     }
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환

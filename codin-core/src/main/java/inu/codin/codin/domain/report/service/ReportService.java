@@ -11,10 +11,8 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
-import inu.codin.codin.domain.report.entity.ReportEntity;
-import inu.codin.codin.domain.report.entity.ReportStatus;
-import inu.codin.codin.domain.report.entity.ReportTargetType;
-import inu.codin.codin.domain.report.entity.SuspensionPeriod;
+import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
+import inu.codin.codin.domain.report.entity.*;
 import inu.codin.codin.domain.report.exception.ReportAlreadyExistsException;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -27,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,13 +63,13 @@ public class ReportService {
                 reportCreateRequestDto.getReportTargetId(),
                 reportCreateRequestDto.getReportTargetType());
 
-        Boolean reportExists = reportRepository.existsByReportingUserIdAndReportTargetIdAndReportTargetType(
+        boolean reportExists = reportRepository.existsByReportingUserIdAndReportTargetIdAndReportTargetType(
                 userId,
                 reportTargetId,
                 reportCreateRequestDto.getReportTargetType()
         );
+        log.info("reportExists: {}", reportExists);
 
-        // null 방지: reportExists가 null이면 false로 처리
         if (reportExists) {
             log.warn("중복 신고 발견: reportingUserId={}, reportTargetId={}, reportTargetType={}",
                     userId,
@@ -108,6 +107,25 @@ public class ReportService {
                 report.get_id(),
                 userId,
                 reportCreateRequestDto.getReportTargetId());
+
+        // 신고 대상 타입 == POST(게시물) reportCount 증가
+        if (reportCreateRequestDto.getReportTargetType() == ReportTargetType.POST) {
+            updatePostReportCount(reportTargetId);
+        }
+    }
+
+    //post 총 신고수 증가
+    private void updatePostReportCount(ObjectId postId) {
+        // 게시물 조회
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+
+        // 신고 수 업데이트
+        post.updateReportCount(post.getReportCount() + 1);
+
+        // 게시물 저장
+        postRepository.save(post);
+        log.info("게시물 신고 수 업데이트 완료: postId={}, reportCount={}", postId, post.getReportCount());
     }
 
     /**
@@ -132,6 +150,7 @@ public class ReportService {
                     return new NotFoundException("신고 대상(ID: " + reportTargetId + ", Type: " + reportTargetType + ")이 존재하지 않습니다.");
                 });
     }
+
 
 
 
@@ -228,8 +247,21 @@ public class ReportService {
 
 
 
+    public ReportSummaryResponseDTO getReportSummary(String reportTargetId) {
+        ObjectId targetId = new ObjectId(reportTargetId);
 
+        //int totalReports = reportRepository.countByReportTargetId(targetId);
 
+        // 모든 ReportType에 대해 개수 조회
+        Map<ReportType, Integer> reportTypeCounts = new HashMap<>();
+        for (ReportType reportType : ReportType.values()) {
+            int count =  reportRepository.countByReportTargetIdAndReportType(targetId, reportType);
+            if (count > 0) { // 개수가 0이면 굳이 넣을 필요 없음
+                reportTypeCounts.put(reportType, count);
+            }
+        }
 
+        return new ReportSummaryResponseDTO(reportTypeCounts);
+    }
 }
 
