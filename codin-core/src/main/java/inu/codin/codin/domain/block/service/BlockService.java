@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BlockService {
@@ -20,6 +22,11 @@ public class BlockService {
 
     public void blockUser(String strBlockedUserId) {
         ObjectId blockingUserId = SecurityUtils.getCurrentUserId();
+        // 유저 엔티티 조회
+        UserEntity user = userRepository.findById(blockingUserId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+
         ObjectId blockedUserId = new ObjectId(strBlockedUserId);
 
         // 중복 차단 방지
@@ -37,16 +44,17 @@ public class BlockService {
 
         blockRepository.save(block);
 
-        // 유저 엔티티 조회 후 수정
-        UserEntity user = userRepository.findById(blockingUserId)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
-
-        user.getBlockedUsers().add(blockedUserId); // 차단 유저 추가
+        //유저 차단 리스트에 추가 ( 조회 필터링 목적)
+        user.getBlockedUsers().add(blockedUserId);
         userRepository.save(user);
     }
 
     public void unblockUser(String strBlockedUserId) {
         ObjectId blockingUserId = SecurityUtils.getCurrentUserId();
+        // 유저 엔티티 조회
+        UserEntity user = userRepository.findById(blockingUserId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
         ObjectId blockedUserId = new ObjectId(strBlockedUserId);
         // 차단 정보 조회
         BlockEntity block = blockRepository.findByBlockingUserIdAndBlockedUserId(blockingUserId, blockedUserId)
@@ -55,11 +63,9 @@ public class BlockService {
         // 차단 해제
         blockRepository.delete(block);
 
-        // 유저 엔티티 조회 후 수정
-        UserEntity user = userRepository.findById(blockingUserId)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        user.getBlockedUsers().remove(blockedUserId); // 차단 유저 추가
+        //유저 차단 리스트에서 삭제 ( 조회 필터링 목적)
+        user.getBlockedUsers().remove(blockedUserId);
         userRepository.save(user);
     }
 
@@ -67,5 +73,12 @@ public class BlockService {
         if (blockRepository.existsByBlockingUserIdAndBlockedUserId(blockingUserId, blockedUserId)) {
             throw new AlreadyBlockedException("상대방을 차단했거나 차단당했습니다.");
         }
+    }
+
+    public List<ObjectId> getBlockedUsers() {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        return userRepository.findById(userId)
+                .map(UserEntity::getBlockedUsers)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
     }
 }

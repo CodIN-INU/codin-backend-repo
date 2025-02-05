@@ -4,6 +4,7 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.like.entity.LikeType;
@@ -42,10 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -62,6 +60,7 @@ public class PostService {
     private final ScrapService scrapService;
     private final HitsService hitsService;
     private final RedisService redisService;
+    private final BlockService blockService;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
@@ -196,11 +195,13 @@ public class PostService {
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
+
+        // 차단 목록 조회
+        List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
+
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page;
-        if (postCategory.equals(PostCategory.REQUEST) || postCategory.equals(PostCategory.COMMUNICATION) || postCategory.equals(PostCategory.EXTRACURRICULAR))
-            page = postRepository.findByPostCategoryStartingWithAndDeletedAtIsNullAndPostStatusInOrderByCreatedAt(postCategory.toString(), PostStatus.ACTIVE, pageRequest);
-        else page = postRepository.findAllByCategoryOrderByCreatedAt(postCategory, pageRequest);
+        page = postRepository.getPostsByCategoryWithBlockedUsers(postCategory.toString(), blockedUsersId ,pageRequest);
 
         log.info("모든 글 반환 성공 Category: {}, Page: {}", postCategory, pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
@@ -272,12 +273,17 @@ public class PostService {
     }
 
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
+        // 차단 목록 조회
+        List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
+
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, pageRequest);
+        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, blockedUsersId, pageRequest);
         log.info("키워드 기반 게시물 검색: {}, Page: {}", keyword, pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
+
     public List<PostDetailResponseDTO> getTop3BestPosts() {
+
         Map<String, Double> posts = redisService.getTopNPosts(3);
         List<PostEntity> bestPosts = posts.entrySet().stream()
                 .map(post -> {
