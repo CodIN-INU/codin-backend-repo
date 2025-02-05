@@ -8,6 +8,7 @@ import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reports")
+@Tag(name = "Reoprt API", description = "사용자 신고 기능")
 public class ReportController {
     private final ReportService reportService;
 
@@ -37,10 +39,10 @@ public class ReportController {
     }
 
     //(User) 특정 게시물의 신고 정보 조회 API
-    @Operation(summary = "특정 게시물의 신고 내역 조회")
-    @GetMapping("/summary/{reportTargetId}")
-    public ResponseEntity<?> getReportSummary(@PathVariable String reportTargetId) {
-        ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(reportTargetId);
+    @Operation(summary = "특정 게시물의 신고 내역 조회(사용자)")
+    @GetMapping("/summary/{postId}")
+    public ResponseEntity<?> getReportSummary(@PathVariable String postId) {
+        ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "특정 게시물의 신고 내역 조회 완료", reportSummary));
     }
