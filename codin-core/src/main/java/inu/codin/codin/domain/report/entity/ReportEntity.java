@@ -21,7 +21,7 @@ public class ReportEntity extends BaseTimeEntity {
     //신고한 유저
     private ObjectId reportingUserId;
 
-    //신고당 유저
+    //신고당한 유저
     private ObjectId reportedUserId;
 
     //신고 대상 타입 ( 유저, 게시물, 댓글, 대댓글)

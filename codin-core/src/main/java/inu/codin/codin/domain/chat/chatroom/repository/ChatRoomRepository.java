@@ -13,6 +13,6 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query("{ '_id': ?0, 'deletedAt': null }")
     Optional<ChatRoom> findById(ObjectId id);
 
-    @Query("{ 'participants': { '$elemMatch': { 'userId': ?0 } } , 'deleteAt':  null }")
-    List<ChatRoom> findByParticipant(ObjectId userId);
+    @Query("{ 'participants': { '$elemMatch': { 'userId': ?0 } }, 'deleteAt': null, 'participants.userId': { '$nin': ?1 } }")
+    List<ChatRoom> findByParticipant(ObjectId userId, List<ObjectId> blockedUsersId);
 }
