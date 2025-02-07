@@ -2,7 +2,6 @@ package inu.codin.codin.domain.user.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.user.dto.request.UserDeleteRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.service.UserService;
@@ -67,8 +66,8 @@ public class UserController {
             summary = "회원 탈퇴"
     )
     @DeleteMapping
-    public ResponseEntity<SingleResponse<?>> deleteUser(@RequestBody @Valid UserDeleteRequestDto userDeleteRequestDto){
-        userService.deleteUser(userDeleteRequestDto);
+    public ResponseEntity<SingleResponse<?>> deleteUser(){
+        userService.deleteUser();
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 탈퇴 완료", null));
     }

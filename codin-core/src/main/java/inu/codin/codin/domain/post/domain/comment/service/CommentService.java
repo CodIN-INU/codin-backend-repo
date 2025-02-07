@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
@@ -39,6 +40,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
+    private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
 
@@ -64,6 +66,8 @@ public class CommentService {
         redisService.applyBestScore(1, postId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
+        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
+
     }
 
     // 댓글 삭제 (Soft Delete)
@@ -105,38 +109,38 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
+        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
+
         Map<ObjectId, UserDto> userMap = userRepository.findAllById(
                         comments.stream()
-                                .filter(commentEntity -> !commentEntity.isAnonymous())
                                 .map(CommentEntity::getUserId)
                                 .distinct()
                                 .toList()
                 ).stream()
                 .collect(Collectors.toMap(
                         UserEntity::get_id,
-                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl()) // DTO 생성
+                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl(), user.getDeletedAt() != null)
                 ));
 
-        String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
         return comments.stream()
                 .map(comment -> {
-                    String nickname = comment.isAnonymous() ? "익명" : userMap.get(comment.getUserId()).nickname();
-                    String userImageUrl = comment.isAnonymous() ? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
-                    boolean isDeleted = comment.getDeletedAt() != null;
-                    return new CommentResponseDTO(
-                            comment.get_id().toString(),
-                            comment.getUserId().toString(),
-                            comment.getContent(),
-                            nickname,
-                            userImageUrl,
-                            comment.isAnonymous(),
-                            replyCommentService.getRepliesByCommentId(comment.get_id()), // 대댓글 조회
-                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()), // 댓글 좋아요 수
-                            isDeleted,
-                            comment.getCreatedAt(),
-                            getUserInfoAboutPost(comment.get_id())
-                    );
+                    UserDto userDto = userMap.get(comment.getUserId());
+
+                    String nickname;
+                    String userImageUrl;
+
+                    if (userDto.isDeleted()){
+                        nickname = "탈퇴한 사용자";
+                        userImageUrl = defaultImageUrl;
+                    } else {
+                        nickname = comment.isAnonymous()? "익명" : userMap.get(comment.getUserId()).nickname();
+                        userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
+                    }
+                    return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
+                            replyCommentService.getRepliesByCommentId(comment.get_id()),
+                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()),
+                            getUserInfoAboutPost(comment.get_id()));
                 })
                 .toList();
     }

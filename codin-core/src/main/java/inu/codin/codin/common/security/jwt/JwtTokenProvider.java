@@ -1,6 +1,6 @@
 package inu.codin.codin.common.security.jwt;
 
-import inu.codin.codin.common.security.service.RedisStorageService;
+import inu.codin.codin.infra.redis.RedisStorageService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
