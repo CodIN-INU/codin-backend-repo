@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.service;
+package inu.codin.codin.infra.redis;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
