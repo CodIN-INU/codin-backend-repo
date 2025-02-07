@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
@@ -39,6 +40,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
+    private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
 
@@ -64,6 +66,8 @@ public class CommentService {
         redisService.applyBestScore(1, postId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
+        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
+
     }
 
     // 댓글 삭제 (Soft Delete)
