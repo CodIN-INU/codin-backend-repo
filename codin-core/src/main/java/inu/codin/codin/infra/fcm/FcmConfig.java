@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Component
 @Slf4j
@@ -19,16 +20,21 @@ public class FcmConfig {
     private String fcmKeyPath;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         try {
-            FileInputStream serviceAccount = new FileInputStream(fcmKeyPath);
+            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream(fcmKeyPath);
+
+            if (serviceAccount == null) {
+                throw new RuntimeException("Firebase config file not found in classpath.");
+            }
+
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
             FirebaseApp.initializeApp(options);
             log.info("[init] FirebaseApp initialized");
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Error initializing Firebase: " + e.getMessage(), e);
         }
     }
 }
