@@ -11,12 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,23 +23,37 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AuthService authService;
 
-    @Operation(summary = "로그인")
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody SignUpAndLoginRequestDto loginRequestDto, HttpServletResponse response) {
 
-        UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken(loginRequestDto.getStudentId(), loginRequestDto.getPassword());
+    @Operation(
+            summary = "포탈 로그인",
+            description = "포탈 아이디, 비밀번호를 통해 로그인 진행 및 학적 정보 반환"
+    )
+    @PostMapping("/portal")
+    public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
+        Object result = authService.signUp(signUpAndLoginRequestDto, response);
+        if (result == null){
+            return ResponseEntity.ok()
+                    .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "로그인 완료"));
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new SingleResponse<>(201, "새로운 유저 등록 완료", result));
+        }
 
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        jwtService.createToken(response);
+    }
 
-        return ResponseEntity.ok().body(new SingleResponse<>(200, "로그인 성공", null));
+    @Operation(summary = "회원가입")
+    @PostMapping(value = "/signup/{studentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SingleResponse<?>> signUpUser(
+            @PathVariable("studentId") String studentId,
+            @RequestPart @Valid UserNicknameRequestDto userNicknameRequestDto,
+            @RequestPart(value = "userImage", required = false) MultipartFile userImage) {
+        authService.createUser(studentId, userNicknameRequestDto, userImage);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "회원가입 성공", null));
     }
 
     @Operation(summary = "로그아웃")
@@ -57,27 +68,5 @@ public class AuthController {
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         jwtService.reissueToken(request, response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "토큰 재발급 성공", null));
-    }
-
-    @Operation(
-            summary = "포탈 로그인",
-            description = "포탈 아이디, 비밀번호를 통해 로그인 진행 및 학적 정보 반환"
-    )
-    @PostMapping("/portal")
-    public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto) throws Exception {
-        authService.signUp(signUpAndLoginRequestDto);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "포탈 로그인을 통한 학적 정보 반환 완료", null));
-    }
-
-    @Operation(summary = "회원가입")
-    @PostMapping(value = "/signup/{studentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>> signUpUser(
-            @PathVariable("studentId") String studentId,
-            @RequestPart @Valid UserNicknameRequestDto userNicknameRequestDto,
-            @RequestPart(value = "userImage", required = false) MultipartFile userImage) {
-        authService.createUser(studentId, userNicknameRequestDto, userImage);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "회원가입 성공", null));
     }
 }
