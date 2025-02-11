@@ -33,16 +33,14 @@ public class AuthController {
     )
     @PostMapping("/portal")
     public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
-        Object result = authService.signUp(signUpAndLoginRequestDto, response);
-        if (result == null){
+        Integer result = authService.signUp(signUpAndLoginRequestDto, response);
+        if (result.equals(0)) {
             return ResponseEntity.ok()
-                    .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "로그인 완료"));
+                    .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "기존 유저 로그인 완료"));
         } else {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new SingleResponse<>(201, "새로운 유저 등록 완료", result));
+                    .body(new SingleResponse<>(201, "포탈 로그인 진행 완료", "새로운 유저 등록 완료"));
         }
-
-
     }
 
     @Operation(summary = "회원가입")
