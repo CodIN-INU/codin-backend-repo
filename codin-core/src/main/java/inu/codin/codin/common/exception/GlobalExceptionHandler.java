@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ExceptionResponse(e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(), HttpStatus.UNAUTHORIZED.value()));    }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST.value()));    }
 
 }
