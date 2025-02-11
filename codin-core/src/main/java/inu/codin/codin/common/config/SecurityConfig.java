@@ -100,19 +100,18 @@ public class SecurityConfig {
 
     // 토큰 없이 접근 가능한 URL
     private static final String[] PERMIT_ALL = {
-            "/auth/login",
             "/auth/reissue",
             "/auth/logout",
-            "/users/signup",
-            "/email/auth/check",
-            "/email/auth/send",
-            "/email/auth/password",
-            "/email/auth/password/check",
-            "/users/password",
+            "/auth/portal",
+            "/auth/signup/**",
+//            "/email/auth/check",
+//            "/email/auth/send",
+//            "/email/auth/password",
+//            "/email/auth/password/check",
             "/v3/api/test1",
             "/ws-stomp/**",
-            "/chat",
-            "/chat/image",
+//            "/chat",
+//            "/chat/image",
             "/chats/**"
     };
 
