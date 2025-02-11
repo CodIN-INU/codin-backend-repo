@@ -10,6 +10,7 @@ import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.service.RedisAuthService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -44,9 +45,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final JwtService jwtService;
+    private final RedisAuthService redisAuthService;
     private final PasswordEncoder passwordEncoder;
 
-    public Object signUp(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response){
+    public Integer signUp(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response){
         try {//학번으로 회원가입 유무 판단
             Optional<UserEntity> user = userRepository.findByStudentId(signUpAndLoginRequestDto.getStudentId());
             if (user.isPresent()) {
@@ -57,14 +59,12 @@ public class AuthService {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 jwtService.createToken(response);
-                return null;
+                return 0;
             }
-
             PortalLoginResponseDto userPortalLoginResponseDto
                     = returnPortalInfo(signUpAndLoginRequestDto);
-            UserEntity userEntity = UserEntity.of(userPortalLoginResponseDto);
-            userRepository.save(userEntity);
-            return userEntity.get_id().toString();
+            redisAuthService.saveUserData(signUpAndLoginRequestDto.getStudentId(), userPortalLoginResponseDto);
+            return 1;
         } catch (Exception e) {
             log.error("로그인 중 오류 발생", e);
             throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
@@ -118,8 +118,7 @@ public class AuthService {
 
     public void createUser(String studentId, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage) {
 
-        UserEntity user = userRepository.findByStudentId(studentId)
-                        .orElseThrow(() -> new UserCreateFailException("존재하지 않는 학번입니다. 포탈 로그인부터 진행해주세요."));
+        PortalLoginResponseDto userData = redisAuthService.getUserData(studentId);
         log.info("[createUser] 요청 데이터: {}", studentId);
 
         String imageUrl = null;
@@ -135,6 +134,7 @@ public class AuthService {
 
         }
 
+        UserEntity user = UserEntity.of(userData);
         user.updateNickname(new UserNicknameRequestDto(userNicknameRequestDto.getNickname()));
         user.updateProfileImageUrl(imageUrl);
         userRepository.save(user);
