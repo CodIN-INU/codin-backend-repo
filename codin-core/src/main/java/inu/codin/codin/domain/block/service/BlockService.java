@@ -32,11 +32,8 @@ public class BlockService {
         // 중복 차단 방지
         checkUserBlocked(blockingUserId,blockedUserId);
 
-        if (blockRepository.existsByBlockingUserIdAndBlockedUserId(blockingUserId, blockedUserId)) {
-            throw new AlreadyBlockedException("상대방을 차단했거나 차단당했습니다.");
-        }
 
-        // 차단 정보 저장
+        // 차단 정보 저
         BlockEntity block = BlockEntity.builder()
                 .blockingUserId(blockingUserId)
                 .blockedUserId(blockedUserId)
@@ -71,7 +68,7 @@ public class BlockService {
 
     public void checkUserBlocked(ObjectId blockingUserId, ObjectId blockedUserId) {
         if (blockRepository.existsByBlockingUserIdAndBlockedUserId(blockingUserId, blockedUserId)) {
-            throw new AlreadyBlockedException("상대방을 차단했거나 차단당했습니다.");
+            throw new AlreadyBlockedException("이미 상대방을 차단했습니다.");
         }
     }
 
