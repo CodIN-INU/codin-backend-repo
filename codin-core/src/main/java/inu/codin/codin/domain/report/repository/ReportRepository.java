@@ -1,10 +1,11 @@
 package inu.codin.codin.domain.report.repository;
 
+import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
 import inu.codin.codin.domain.report.entity.ReportEntity;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.entity.ReportType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 
 @Repository
 public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId> {
@@ -40,4 +41,5 @@ public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId
 
     // 특정 게시물의 특정 신고 유형 개수
     int countByReportTargetIdAndReportType(ObjectId reportTargetId, ReportType reportType);
+
 }

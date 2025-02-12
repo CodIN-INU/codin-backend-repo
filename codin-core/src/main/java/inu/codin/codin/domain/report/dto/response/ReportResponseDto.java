@@ -3,6 +3,7 @@ package inu.codin.codin.domain.report.dto.response;
 import inu.codin.codin.domain.report.entity.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import inu.codin.codin.domain.report.entity.ReportTargetType;
@@ -56,7 +57,7 @@ public class ReportResponseDto {
         private String actionTakenById;
 
         // 신고에 대한 코멘트
-        private String comment;
+        //private String comment;
 
         // 정지 기간 Enum
         private String suspensionPeriod;
@@ -68,7 +69,6 @@ public class ReportResponseDto {
         public ReportActionDto(ReportActionEntity actionEntity) {
             if (actionEntity != null) {
                 this.actionTakenById = actionEntity.getActionTakenById().toString();
-                this.comment = actionEntity.getComment();
                 this.suspensionPeriod = actionEntity.getSuspensionPeriod() != null ? actionEntity.getSuspensionPeriod().name() : null;
                 this.suspensionEndDate = actionEntity.getSuspensionEndDate() != null ? actionEntity.getSuspensionEndDate().toString() : null;
             }
@@ -86,6 +86,19 @@ public class ReportResponseDto {
                 .reportType(reportEntity.getReportType())
                 .reportStatus(reportEntity.getReportStatus())
                 .action(reportEntity.getAction() != null ? new ReportActionDto(reportEntity.getAction()) : null)
+                .build();
+    }
+
+    // Document를 ReportResponseDto로 변환
+    public static ReportResponseDto fromDoc(Document doc) {
+        return ReportResponseDto.builder()
+                ._id(doc.getObjectId("_id").toString())
+                .reportingUserId(doc.getObjectId("reportingUserId").toString())
+                .reportedUserId(doc.getObjectId("reportedUserId").toString())
+                .reportTargetType(ReportTargetType.valueOf(doc.getString("reportTargetType")))
+                .reportTargetId(doc.getObjectId("reportTargetId").toString())
+                .reportType(ReportType.valueOf(doc.getString("reportType")))  // Enum 변환
+                .reportStatus(ReportStatus.valueOf(doc.getString("reportStatus")))  // Enum 변환
                 .build();
     }
 }
