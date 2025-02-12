@@ -2,15 +2,18 @@ package inu.codin.codin.domain.user.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "users")
 @Getter
@@ -41,10 +44,12 @@ public class UserEntity extends BaseTimeEntity {
 
     private UserStatus status;
 
+    private List<ObjectId> blockedUsers = new ArrayList<>();
+
     private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
-    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status) {
+    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status, List<ObjectId> blockedUsers) {
         this.email = email;
         this.password = password;
         this.studentId = studentId;
@@ -56,6 +61,7 @@ public class UserEntity extends BaseTimeEntity {
         this.undergraduate = undergraduate;
         this.role = role;
         this.status = status;
+        this.blockedUsers = (blockedUsers != null) ? blockedUsers : new ArrayList<>(); // ✅ 기본값 설정
     }
 
     public void updateNickname(UserNicknameRequestDto userNicknameRequestDto) {
@@ -79,6 +85,19 @@ public class UserEntity extends BaseTimeEntity {
                 .profileImageUrl("")
                 .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
+                .blockedUsers(new ArrayList<>())
                 .build();
+    }
+
+    public void suspendUser() {
+        this.status = UserStatus.SUSPENDED;
+    }
+    public void disabledUser() {
+        this.status = UserStatus.DISABLED;
+    }
+    public void activateUser() {
+        if ( this.status == UserStatus.SUSPENDED) {
+            this.status = UserStatus.ACTIVE;
+        }
     }
 }

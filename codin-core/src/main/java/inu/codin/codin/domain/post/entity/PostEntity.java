@@ -32,8 +32,11 @@ public class PostEntity extends BaseTimeEntity {
     private int likeCount = 0; // 좋아요 카운트 (redis)
     private int scrapCount = 0; // 스크랩 카운트 (redis)
 
+    private Integer reportCount = 0; // 신고 카운트
+
     @Builder
-    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus, int commentCount, int likeCount, int scrapCount) {
+    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus,
+                      int commentCount, int likeCount, int scrapCount, Integer reportCount) {
         this._id = _id;
         this.userId = userId;
         this.title = title;
@@ -45,6 +48,7 @@ public class PostEntity extends BaseTimeEntity {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
+        this.reportCount = (reportCount == null) ? 0 : reportCount;
     }
 
     public void updatePostContent(String content, List<String> postImageUrls) {
@@ -80,6 +84,11 @@ public class PostEntity extends BaseTimeEntity {
     //스크랩 수 업데이트
     public void updateScrapCount(int scrapCount) {
         this.scrapCount=scrapCount;
+    }
+
+    //신고 수 업데이트
+    public void updateReportCount(int reportCount) {
+        this.reportCount=reportCount;
     }
 
 
