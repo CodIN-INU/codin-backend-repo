@@ -2,28 +2,29 @@ package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.service.RedisAnonService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +36,6 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ReplyCommentRepository replyCommentRepository;
 
     private final UserRepository userRepository;
     private final LikeService likeService;
@@ -43,6 +43,7 @@ public class CommentService {
     private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
+    private final RedisAnonService redisAnonService;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -64,10 +65,19 @@ public class CommentService {
         // 댓글 수 증가
         post.updateCommentCount(post.getCommentCount() + 1);
         redisService.applyBestScore(1, postId);
+        setAnonNumber(post, userId);
         postRepository.save(post);
         log.info("댓글 추가완료 postId: {}.", postId);
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
 
+    }
+
+    private void setAnonNumber(PostEntity post, ObjectId userId) {
+        if (post.getUserId().equals(userId)){ //글쓴이
+            redisAnonService.setWriter(post.get_id().toString(), userId.toString());
+        } else {
+            redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+        }
     }
 
     // 댓글 삭제 (Soft Delete)
@@ -126,7 +136,7 @@ public class CommentService {
         return comments.stream()
                 .map(comment -> {
                     UserDto userDto = userMap.get(comment.getUserId());
-
+                    int anonNum = redisAnonService.getAnonNumber(postId.toString(), comment.getUserId().toString());
                     String nickname;
                     String userImageUrl;
 
@@ -134,7 +144,9 @@ public class CommentService {
                         nickname = "탈퇴한 사용자";
                         userImageUrl = defaultImageUrl;
                     } else {
-                        nickname = comment.isAnonymous()? "익명" : userMap.get(comment.getUserId()).nickname();
+                        nickname = comment.isAnonymous()?
+                                anonNum==0? "글쓴이" : "익명" + anonNum
+                                                : userMap.get(comment.getUserId()).nickname();
                         userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
