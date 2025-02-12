@@ -5,6 +5,7 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.AlreadyBlockedException;
 import inu.codin.codin.domain.block.exception.NotBlockedException;
+import inu.codin.codin.domain.block.exception.SelfBlockedException;
 import inu.codin.codin.domain.block.repository.BlockRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -22,12 +23,18 @@ public class BlockService {
 
     public void blockUser(String strBlockedUserId) {
         ObjectId blockingUserId = SecurityUtils.getCurrentUserId();
+
+        if (blockingUserId.equals(new ObjectId(strBlockedUserId))){
+            throw new SelfBlockedException("자기 자신을 차단할 수 없습니다.");
+        }
         // 유저 엔티티 조회
         UserEntity user = userRepository.findById(blockingUserId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
 
         ObjectId blockedUserId = new ObjectId(strBlockedUserId);
+        userRepository.findById(blockedUserId)
+                .orElseThrow(() -> new NotFoundException("차단할 사용자를 찾을 수 없습니다."));
 
         // 중복 차단 방지
         checkUserBlocked(blockingUserId,blockedUserId);
