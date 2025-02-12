@@ -84,7 +84,7 @@ public class ReportEntity extends BaseTimeEntity {
         private ObjectId actionTakenById;
 
         //신고에 대한 코멘트
-        private String comment;
+        //private String comment;
 
         // 정지 기간 Enum
         private SuspensionPeriod suspensionPeriod;
@@ -93,10 +93,8 @@ public class ReportEntity extends BaseTimeEntity {
         private LocalDateTime suspensionEndDate;
 
         @Builder
-        public ReportActionEntity(ObjectId actionTakenById, String comment,
-                                  SuspensionPeriod suspensionPeriod, LocalDateTime suspensionEndDate) {
+        public ReportActionEntity(ObjectId actionTakenById, SuspensionPeriod suspensionPeriod, LocalDateTime suspensionEndDate) {
             this.actionTakenById = actionTakenById;
-            this.comment = comment;
             this.suspensionPeriod = suspensionPeriod;
             this.suspensionEndDate = suspensionEndDate;
         }
