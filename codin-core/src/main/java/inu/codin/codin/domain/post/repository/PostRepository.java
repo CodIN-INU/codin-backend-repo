@@ -26,6 +26,14 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
     @Query("{'deletedAt': null, 'postStatus': { $in: ['ACTIVE'] }, 'postCategory': { $regex: '^?0' } , 'userId': { $nin: ?1 }}")
     Page<PostEntity> getPostsByCategoryWithBlockedUsers(String postCategory, List<ObjectId> blockedUsersId, PageRequest pageRequest);
 
+    @Query("{'deletedAt': null, " +
+            "'postStatus': { $in: ['ACTIVE'] }, " +
+            "'userId': { $nin: ?0 }, " +
+            "'reportCount': { $gte: 1 } }") // 신고 카운트가 1 이상인 경우만 반환
+    Page<PostEntity> getPostsWithReportedAndBlockedUsers(List<ObjectId> blockedUsersId, PageRequest pageRequest);
+
+
+
     @Query("{ '$or': [ "
             +
             "{ 'content': { $regex: ?0, $options: 'i' }, 'userId': { $nin: ?1 }  }, "

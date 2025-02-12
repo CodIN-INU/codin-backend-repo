@@ -207,6 +207,19 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
+    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    public PostPageResponse getReportedPosts(int pageNumber) {
+
+        // 차단 목록 조회
+        List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
+
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+        Page<PostEntity> page;
+        page = postRepository.getPostsWithReportedAndBlockedUsers(blockedUsersId ,pageRequest);
+
+        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
+
     // 게시물 리스트 가져오기
     public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
