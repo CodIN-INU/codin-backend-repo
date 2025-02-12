@@ -10,25 +10,25 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
+import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
 import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
 import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
 import inu.codin.codin.domain.report.entity.*;
 import inu.codin.codin.domain.report.exception.ReportAlreadyExistsException;
+import inu.codin.codin.domain.report.repository.CustomReportRepository;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +41,7 @@ public class ReportService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyRepository;
+    private final CustomReportRepository customReportRepository;
 
 
     public void createReport(@Valid ReportCreateRequestDto reportCreateRequestDto) {
@@ -133,23 +134,17 @@ public class ReportService {
 
 
     // 신고 목록 조회 (관리자)
-    public List<ReportResponseDto> getAllReports(ReportTargetType reportTargetType, Integer minReportCount) {
-        log.info("신고 목록 조회: reportType={}, minReportCount={}", reportTargetType, minReportCount);
 
-        List<ReportEntity> reports;
-        if (reportTargetType != null) {
-            reports = reportRepository.findByReportTargetType(reportTargetType);
-        } else if (minReportCount != null) {
-            reports = reportRepository.findReportsByMinReportCount(minReportCount);
-        } else {
-            reports = reportRepository.findAll();
+        public List<ReportCountResponseDto> getAllReports() {
+
+            List<Document> aggregationResults = customReportRepository.findPendingReportsOrderedGroupedBy();
+
+             return aggregationResults.stream()
+                    .map(ReportCountResponseDto::from)  // 변환 메서드 호출
+                     .collect(Collectors.toList());
         }
 
-        // ReportEntity를 ReportResponseDto로 변환
-        return reports.stream()
-                .map(ReportResponseDto::from)
-                .collect(Collectors.toList());
-    }
+
 
     // 특정 유저가 신고 내역 조회 (관리자)
     public List<ReportResponseDto> getReportsByUserId(String userId) {

@@ -3,6 +3,7 @@ package inu.codin.codin.domain.report.controller;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
+import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
 import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
 import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
@@ -50,14 +51,12 @@ public class ReportController {
 
 
     // 특정 신고 타입 목록 조회 (관리자)
-    @Operation(summary = "특정 신고 타입 목록 조회 (관리자)")
+    @Operation(summary = "Pending(신고 처리 대기) 신고 내역 오름차순 정렬 조회 (관리자)")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getReports(
-            @RequestParam(required = false) ReportTargetType reportTargetType,
-            @RequestParam(required = false) Integer minReportCount) {
+    public ResponseEntity<?> getReports(){
 
-        List<ReportResponseDto> reports = reportService.getAllReports(reportTargetType, minReportCount);
+        List<ReportCountResponseDto> reports = reportService.getAllReports();
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "특정 신고 타입 목록 조회", reports));
     }
