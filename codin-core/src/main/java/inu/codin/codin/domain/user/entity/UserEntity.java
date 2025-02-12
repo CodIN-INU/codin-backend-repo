@@ -2,15 +2,15 @@ package inu.codin.codin.domain.user.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.common.Department;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
+import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.security.core.parameters.P;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,8 @@ public class UserEntity extends BaseTimeEntity {
     private UserStatus status;
 
     private List<ObjectId> blockedUsers = new ArrayList<>();
+
+    private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
     public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status, List<ObjectId> blockedUsers) {

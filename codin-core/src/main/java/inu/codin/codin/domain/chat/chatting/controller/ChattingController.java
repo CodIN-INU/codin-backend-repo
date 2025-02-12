@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.chat.chatting.controller;
 
-import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.chat.chatting.service.ChattingService;
