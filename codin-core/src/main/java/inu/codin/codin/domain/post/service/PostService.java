@@ -142,16 +142,22 @@ public class PostService {
         String nickname;
         String userImageUrl;
 
-        //Post 관련 인자 처리
-        if (post.isAnonymous()){
-            nickname = "익명";
-            userImageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
+        UserEntity user = userRepository.findById(post.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        if (user.getDeletedAt() == null){
+            if (post.isAnonymous()){
+                nickname = "익명";
+                userImageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
+            } else {
+                nickname = user.getNickname();
+                userImageUrl = user.getProfileImageUrl();
+            }
         } else {
-            UserEntity user = userRepository.findById(post.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-            nickname = user.getNickname();
-            userImageUrl = user.getProfileImageUrl();
+            nickname = "탈퇴한 사용자";
+            userImageUrl = s3Service.getDefaultProfileImageUrl();
         }
+
+        //Post 관련 인자 처리
 
         int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id());
         int scrapCount = scrapService.getScrapCount(post.get_id());
@@ -186,8 +192,6 @@ public class PostService {
                     pollInfo
             );
         }
-
-        log.info("일반 게시물 상세정보 생성 성공 PostId: {}", post.get_id());
         // 일반 게시물 처리
         return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount ,userInfo);
     }
