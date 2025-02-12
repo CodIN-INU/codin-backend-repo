@@ -157,7 +157,6 @@ public class PostService {
         int scrapCount = scrapService.getScrapCount(post.get_id());
         int hitsCount = hitsService.getHitsCount(post.get_id());
         int commentCount = post.getCommentCount();
-        int reportCount = post.getReportCount();
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -183,14 +182,14 @@ public class PostService {
 
             //게시물 + 투표 DTO 생성
             return PostPollDetailResponseDTO.of(
-                    PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, reportCount, userInfo),
+                    PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo),
                     pollInfo
             );
         }
 
         log.info("일반 게시물 상세정보 생성 성공 PostId: {}", post.get_id());
         // 일반 게시물 처리
-        return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount, reportCount ,userInfo);
+        return PostDetailResponseDTO.of(post, nickname, userImageUrl, likeCount, scrapCount, hitsCount, commentCount ,userInfo);
     }
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
@@ -204,19 +203,6 @@ public class PostService {
         page = postRepository.getPostsByCategoryWithBlockedUsers(postCategory.toString(), blockedUsersId ,pageRequest);
 
         log.info("모든 글 반환 성공 Category: {}, Page: {}", postCategory, pageNumber);
-        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
-    }
-
-    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
-    public PostPageResponse getReportedPosts(int pageNumber) {
-
-        // 차단 목록 조회
-        List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
-
-        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page;
-        page = postRepository.getPostsWithReportedAndBlockedUsers(blockedUsersId ,pageRequest);
-
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 

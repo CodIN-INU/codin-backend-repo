@@ -1,8 +1,6 @@
 package inu.codin.codin.domain.post.repository;
 
-import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.post.entity.PostStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +28,7 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
             "'postStatus': { $in: ['ACTIVE'] }, " +
             "'userId': { $nin: ?0 }, " +
             "'reportCount': { $gte: 1 } }") // 신고 카운트가 1 이상인 경우만 반환
-    Page<PostEntity> getPostsWithReportedAndBlockedUsers(List<ObjectId> blockedUsersId, PageRequest pageRequest);
+    Page<PostEntity> getPostsWithReported(PageRequest pageRequest);
 
 
 

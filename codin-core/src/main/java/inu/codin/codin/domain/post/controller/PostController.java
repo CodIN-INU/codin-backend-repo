@@ -100,16 +100,6 @@ public class PostController {
                 .body(new SingleResponse<>(200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
     }
 
-    @Operation(
-            summary = "삭제되지 않은 신고된 모든 게시물 조회"
-    )
-    @GetMapping("/reported")
-    public ResponseEntity<SingleResponse<PostPageResponse>> getAllPosts(@RequestParam("page") @NotNull int pageNumber) {
-        PostPageResponse postpages= postService.getReportedPosts(pageNumber);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "삭제되지 않은 신고된 모든 게시물 조회 성공", postpages));
-    }
-
 
     @Operation(summary = "해당 게시물 상세 조회 (댓글 조회는 Comment에서 따로 조회)")
     @GetMapping("/{postId}")

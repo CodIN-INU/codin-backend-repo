@@ -2,6 +2,7 @@ package inu.codin.codin.domain.report.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
@@ -28,7 +29,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ReportService {
+
+    private final BlockService blockService;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -94,6 +100,15 @@ public class ReportService {
             updatePostReportCount(reportTargetId);
         }
     }
+
+//    public ReportPageResponse getReportedPosts(int pageNumber) {
+//
+//        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+//        Page<PostEntity> page;
+//        page = postRepository.getPostsWithReported(pageRequest);
+//
+//        return ReportPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+//    }
 
     //post 총 신고수 증가
     private void updatePostReportCount(ObjectId postId) {
