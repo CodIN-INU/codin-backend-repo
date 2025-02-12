@@ -189,7 +189,6 @@ public class ReportService {
         // 신고 처리 정보 생성
         ReportEntity.ReportActionEntity action = ReportEntity.ReportActionEntity.builder()
                 .actionTakenById(userId)
-                .comment(requestDto.getComment())
                 .suspensionPeriod(requestDto.getSuspensionPeriod())
                 .suspensionEndDate(LocalDateTime.now().plusDays(requestDto.getSuspensionPeriod().getDays()))
                 .build();
