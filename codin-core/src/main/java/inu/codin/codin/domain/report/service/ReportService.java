@@ -219,7 +219,7 @@ public class ReportService {
         //userRepository.save(user);
         log.info("신고가 처리되었습니다. ID: {}, 처리자: {}", report.get_id(), userId);
 
-        ReportResponseDto.from(report);
+        //ReportResponseDto.from(report);
     }
 
 
