@@ -38,8 +38,9 @@ public class ReportController {
                 .body(new SingleResponse<>(201, "신고 생성 완료", null));
     }
 
-    //(User) 특정 게시물의 신고 정보 조회 API
-    @Operation(summary = "특정 게시물의 신고 내역 조회(사용자)")
+    //(Admin) 특정 게시물의 신고 정보 조회 API
+    @Operation(summary = "특정 게시물의 신고 내역 조회(관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/summary/{postId}")
     public ResponseEntity<?> getReportSummary(@PathVariable String postId) {
         ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(postId);
