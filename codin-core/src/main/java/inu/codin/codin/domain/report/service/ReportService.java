@@ -55,20 +55,12 @@ public class ReportService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         ObjectId reportTargetId = new ObjectId(reportCreateRequestDto.getReportTargetId());
 
-        log.info("신고 유저 검증 완료: userId={}", userId);
-
-        // 중복 신고 방지
-        log.info("중복 신고 검증: reportingUserId={}, reportTargetId={}, reportTargetType={}",
-                userId,
-                reportCreateRequestDto.getReportTargetId(),
-                reportCreateRequestDto.getReportTargetType());
 
         boolean reportExists = reportRepository.existsByReportingUserIdAndReportTargetIdAndReportTargetType(
                 userId,
                 reportTargetId,
                 reportCreateRequestDto.getReportTargetType()
         );
-        log.info("reportExists: {}", reportExists);
 
         if (reportExists) {
             log.warn("중복 신고 발견: reportingUserId={}, reportTargetId={},",
@@ -77,17 +69,8 @@ public class ReportService {
             throw new ReportAlreadyExistsException("중복신고 : 이미 해당 대상에 대한 신고를 시행했습니다.");
         }
 
-        // 신고 대상 타입 별 유효성 검증
-        log.info("신고 대상 유효성 검증: reportTargetType={}, reportTargetId={}",
-                reportCreateRequestDto.getReportTargetType(),
-                reportCreateRequestDto.getReportTargetId());
-
         // 신고 대상 검증 및 userId 가져오기
         ObjectId reportedUserId = validateAndGetReportedUserId(reportCreateRequestDto.getReportTargetType(), reportTargetId);
-
-        log.info("신고 대상 유효성 검증 완료: reportTargetType={}, reportTargetId={}",
-                reportCreateRequestDto.getReportTargetType(),
-                reportCreateRequestDto.getReportTargetId());
 
         // 신고 엔티티 생성
         ReportEntity report = ReportEntity.builder()
@@ -97,8 +80,6 @@ public class ReportService {
                 .reportTargetType(reportCreateRequestDto.getReportTargetType())
                 .reportType(reportCreateRequestDto.getReportType())
                 .build();
-
-        log.info("신고 엔티티 생성 완료: {}", report);
 
         // 신고 저장
         reportRepository.save(report);
@@ -124,7 +105,6 @@ public class ReportService {
 
         // 게시물 저장
         postRepository.save(post);
-        log.info("게시물 신고 수 업데이트 완료: postId={}, reportCount={}", postId, post.getReportCount());
     }
 
     /**
@@ -139,13 +119,11 @@ public class ReportService {
                 ReportTargetType.REPLY, id -> replyRepository.findById(id).map(ReplyCommentEntity::getUserId)
         );
 
-        log.info("신고 대상 검증 및 userId 조회: reportTargetType={}, reportTargetId={}", reportTargetType, reportTargetId);
-
         // 검증 및 userId 조회
         return Optional.ofNullable(validators.get(reportTargetType))
                 .flatMap(validator -> validator.apply(reportTargetId))
                 .orElseThrow(() -> {
-                    log.error("유효하지 않은 신고 대상: reportTargetId={}, reportTargetType={}", reportTargetId, reportTargetType);
+                    log.warn("유효하지 않은 신고 대상: reportTargetId={}, reportTargetType={}", reportTargetId, reportTargetType);
                     return new NotFoundException("신고 대상(ID: " + reportTargetId + ", Type: " + reportTargetType + ")이 존재하지 않습니다.");
                 });
     }
