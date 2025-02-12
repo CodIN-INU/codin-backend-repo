@@ -6,7 +6,6 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
 import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
