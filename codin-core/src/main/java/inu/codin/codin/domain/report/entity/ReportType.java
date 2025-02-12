@@ -4,13 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum ReportType {
-    INAPPROPRIATE_CONTENT("게시판 성격에 부적절"),
-    POLITICAL("부적절한 정치적 의견"),
-    FRAUD("사칭/사기"),
-    SPAM("도배/낚시"),
-    COMMERCIAL_AD("상업적 광고"),
-    ABUSE("욕설"),
-    OBSCENE("음란물 및 불건전함");
+    POLITICAL("정치 및 선거운동"),
+    ABUSE("욕설 및 폭력"),
+    FRAUD("사기 및 사칭"),
+    SPAM("도배 및 불쾌함"),
+    COMMERCIAL_AD("홍보 및 부적절"),
+    OBSCENE("음란물 및 불건전"),
+    ETC("기타");
 
 
     private final String description;
