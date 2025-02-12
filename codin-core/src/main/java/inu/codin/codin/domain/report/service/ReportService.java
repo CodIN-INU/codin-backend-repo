@@ -71,10 +71,9 @@ public class ReportService {
         log.info("reportExists: {}", reportExists);
 
         if (reportExists) {
-            log.warn("중복 신고 발견: reportingUserId={}, reportTargetId={}, reportTargetType={}",
+            log.warn("중복 신고 발견: reportingUserId={}, reportTargetId={},",
                     userId,
-                    reportCreateRequestDto.getReportTargetId(),
-                    reportCreateRequestDto.getReportTargetType());
+                    reportCreateRequestDto.getReportTargetId());
             throw new ReportAlreadyExistsException("중복신고 : 이미 해당 대상에 대한 신고를 시행했습니다.");
         }
 
