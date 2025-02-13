@@ -9,6 +9,7 @@ import inu.codin.codin.common.util.AESUtil;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
+import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisAuthService;
 import inu.codin.codin.infra.s3.S3Service;
@@ -118,6 +119,10 @@ public class AuthService {
 
     public void createUser(String studentId, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage) {
 
+        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
+        if (nickNameDuplicate.isPresent()){
+            throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
+        }
         PortalLoginResponseDto userData = redisAuthService.getUserData(studentId);
         log.info("[createUser] 요청 데이터: {}", studentId);
 
@@ -135,7 +140,7 @@ public class AuthService {
         }
 
         UserEntity user = UserEntity.of(userData);
-        user.updateNickname(new UserNicknameRequestDto(userNicknameRequestDto.getNickname()));
+        user.updateNickname(userNicknameRequestDto);
         user.updateProfileImageUrl(imageUrl);
         userRepository.save(user);
 
