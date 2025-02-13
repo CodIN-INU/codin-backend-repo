@@ -131,8 +131,8 @@ public class ReplyCommentService {
                     String userImageUrl;
 
                     if (userDto.isDeleted()){
-                        nickname = "탈퇴한 사용자";
-                        userImageUrl = defaultImageUrl;
+                        nickname = userMap.get(reply.getUserId()).nickname();
+                        userImageUrl = userMap.get(reply.getUserId()).imageUrl();
                     } else {
                         nickname = reply.isAnonymous()?
                                 anonNum==0? "글쓴이" : "익명"+anonNum
