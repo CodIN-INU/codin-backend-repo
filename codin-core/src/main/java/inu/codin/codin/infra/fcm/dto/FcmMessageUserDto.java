@@ -3,7 +3,6 @@ package inu.codin.codin.infra.fcm.dto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.Map;
 

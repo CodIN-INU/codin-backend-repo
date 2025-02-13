@@ -3,20 +3,21 @@ package inu.codin.codin.domain.user.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
-import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
-import inu.codin.codin.domain.scrap.entity.ScrapEntity;
-import inu.codin.codin.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -144,6 +146,12 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
     public void updateUserInfo(@Valid UserNicknameRequestDto userNicknameRequestDto) {
+
+        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
+        if (nickNameDuplicate.isPresent()){
+            throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
+        }
+
         ObjectId userId = SecurityUtils.getCurrentUserId();
         log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
 

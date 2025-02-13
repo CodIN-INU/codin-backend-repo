@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.chat.chatroom.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
@@ -33,6 +34,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final CustomChattingRepository customChattingRepository;
     private final UserRepository userRepository;
+    private final BlockService blockService;
 
     public Map<String, String> createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto, UserDetails userDetails) {
         ObjectId senderId = ((CustomUserDetails) userDetails).getId();
@@ -67,8 +69,10 @@ public class ChatRoomService {
     public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
         ObjectId userId = ((CustomUserDetails) userDetails).getId();
         log.info("[유저의 채팅방 조회] 유저 ID: {}", userId);
+        // 차단 목록 조회
+        List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
 
-        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId);
+        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId, blockedUsersId);
         log.info("[채팅방 조회 결과] 유저 ID: {}가 참여 중인 채팅방 개수: {}", userId, chatRooms.size());
         return chatRooms.stream()
                 .map(chatRoom -> {

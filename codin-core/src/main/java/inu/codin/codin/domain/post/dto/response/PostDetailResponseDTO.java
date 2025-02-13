@@ -59,6 +59,7 @@ public class PostDetailResponseDTO {
     @Schema(description = "조회수", example = "0")
     private final int hits;
 
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "생성 일자", example = "2024-12-02 20:10:18")
     private final LocalDateTime createdAt;
@@ -97,7 +98,7 @@ public class PostDetailResponseDTO {
         }
     }
 
-    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount, UserInfo userInfo) {
+    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount ,UserInfo userInfo) {
         return new PostDetailResponseDTO(
                 post.getUserId().toString(),
                 post.get_id().toString(),
@@ -113,8 +114,7 @@ public class PostDetailResponseDTO {
                 hitsCount,
                 post.getCreatedAt(),
                 commentCount,
-                userInfo
-        );
+                userInfo);
     }
 }
 
