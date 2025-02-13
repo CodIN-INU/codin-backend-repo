@@ -2,7 +2,6 @@ package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.email.repository.EmailAuthRepository;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
@@ -27,7 +26,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,14 +38,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final EmailAuthRepository emailAuthRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
 
-    private final PasswordEncoder passwordEncoder;
     private final PostService postService;
     private final S3Service s3Service;
 
@@ -74,7 +70,7 @@ public class UserService {
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         switch (interactionType) {
-            case LIKE:
+            case LIKE -> {
                 log.info("[좋아요 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
@@ -82,9 +78,9 @@ public class UserService {
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages()-1, likePage.hasNext()? likePage.getPageable().getPageNumber() + 1 : -1);
-
-            case SCRAP:
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
+            }
+            case SCRAP -> {
                 log.info("[스크랩 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserScrap = scrapPage.getContent().stream()
@@ -92,9 +88,9 @@ public class UserService {
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[스크랩 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", scrapPage.getTotalPages(), scrapPage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), scrapPage.getTotalPages()-1, scrapPage.hasNext()? scrapPage.getPageable().getPageNumber() + 1 : -1);
-
-            case COMMENT:
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
+            }
+            case COMMENT -> {
                 log.info("[댓글 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<CommentEntity> commentPage = commentRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
                 List<PostEntity> postUserComment = commentPage.getContent().stream()
@@ -111,11 +107,12 @@ public class UserService {
                         .stream()
                         .toList();
                 log.info("[댓글 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", commentPage.getTotalPages(), commentPage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages()-1, commentPage.hasNext()? commentPage.getPageable().getPageNumber() + 1 : -1);
-
-            default:
+                return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
+            }
+            default -> {
                 log.warn("[유효하지 않은 상호작용 타입] 유저 ID: {}, 상호작용 타입: {}", userId, interactionType);
                 throw new IllegalArgumentException("지원하지 않는 타입입니다.");
+            }
         }
     }
 
@@ -128,6 +125,8 @@ public class UserService {
                     return new NotFoundException("해당 id에 대한 유저 정보를 찾을 수 없습니다.");
                 });
         user.delete();
+        user.updateNickname(new UserNicknameRequestDto("탈퇴한 사용자"));
+        user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
