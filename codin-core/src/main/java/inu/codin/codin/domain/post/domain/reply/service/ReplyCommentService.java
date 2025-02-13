@@ -17,6 +17,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.redis.service.RedisAnonService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ public class ReplyCommentService {
     private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
+    private final RedisAnonService redisAnonService;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -67,12 +69,23 @@ public class ReplyCommentService {
         log.info("대댓글 추가전, commentCount: {}", post.getCommentCount());
         post.updateCommentCount(post.getCommentCount() + 1);
         redisService.applyBestScore(1, post.get_id());
+        setAnonNumber(post, userId);
+        redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+
         postRepository.save(post);
         log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
+    }
+
+    private void setAnonNumber(PostEntity post, ObjectId userId) {
+        if (post.getUserId().equals(userId)){ //글쓴이
+            redisAnonService.setWriter(post.get_id().toString(), userId.toString());
+        } else {
+            redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+        }
     }
 
     // 대댓글 삭제 (Soft Delete)
@@ -113,15 +126,17 @@ public class ReplyCommentService {
         return replies.stream()
                 .map(reply -> {
                     UserDto userDto = userMap.get(reply.getUserId());
-
+                    int anonNum = redisAnonService.getAnonNumber(commentRepository.findById(reply.getCommentId()).get().getPostId().toString(), reply.getUserId().toString());
                     String nickname;
                     String userImageUrl;
 
                     if (userDto.isDeleted()){
-                        nickname = "탈퇴한 사용자";
-                        userImageUrl = defaultImageUrl;
+                        nickname = userMap.get(reply.getUserId()).nickname();
+                        userImageUrl = userMap.get(reply.getUserId()).imageUrl();
                     } else {
-                        nickname = reply.isAnonymous()? "익명" : userMap.get(reply.getUserId()).nickname();
+                        nickname = reply.isAnonymous()?
+                                anonNum==0? "글쓴이" : "익명"+anonNum
+                                        : userMap.get(reply.getUserId()).nickname();
                         userImageUrl = reply.isAnonymous()? defaultImageUrl: userMap.get(reply.getUserId()).imageUrl();
                     }
                     return CommentResponseDTO.replyOf(reply, nickname, userImageUrl, List.of(),

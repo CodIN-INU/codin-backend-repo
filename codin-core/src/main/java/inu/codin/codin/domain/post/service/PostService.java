@@ -153,8 +153,8 @@ public class PostService {
                 userImageUrl = user.getProfileImageUrl();
             }
         } else {
-            nickname = "탈퇴한 사용자";
-            userImageUrl = s3Service.getDefaultProfileImageUrl();
+            nickname = user.getNickname();
+            userImageUrl = user.getProfileImageUrl();
         }
 
         //Post 관련 인자 처리
