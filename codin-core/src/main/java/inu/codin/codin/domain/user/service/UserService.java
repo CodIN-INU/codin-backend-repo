@@ -2,18 +2,17 @@ package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.email.repository.EmailAuthRepository;
-import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
-import inu.codin.codin.domain.scrap.entity.ScrapEntity;
-import inu.codin.codin.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.scrap.entity.ScrapEntity;
+import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -26,7 +25,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,14 +36,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final EmailAuthRepository emailAuthRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
 
-    private final PasswordEncoder passwordEncoder;
     private final PostService postService;
     private final S3Service s3Service;
 
@@ -126,6 +122,8 @@ public class UserService {
                     return new NotFoundException("해당 id에 대한 유저 정보를 찾을 수 없습니다.");
                 });
         user.delete();
+        user.updateNickname(new UserNicknameRequestDto("탈퇴한 사용자"));
+        user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
