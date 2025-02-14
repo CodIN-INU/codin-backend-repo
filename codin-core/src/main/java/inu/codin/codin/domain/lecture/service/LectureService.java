@@ -37,18 +37,17 @@ public class LectureService {
         return LectureDetailResponseDto.of(lectureEntity, ave, emotion, participants);
     }
 
-    public LecturePageResponse sortListOfLectures(Department department, Option option, int page) {
+    public LecturePageResponse sortListOfLectures(Department department, String keyword, Option option, int page) {
         if (department.equals(Department.EMBEDDED) || department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.OTHERS)) {
             PageRequest pageRequest = PageRequest.of(page, 20, option==Option.LEC? Sort.by("lectureNm"):Sort.by("professor"));
-            Page<LectureEntity> lecturePage = lectureRepository.findAllByDepartment(pageRequest, department);
+            Page<LectureEntity> lecturePage;
+            if (keyword == null){
+                lecturePage = lectureRepository.findAllByDepartment(pageRequest, department);
+            } else {
+                lecturePage = lectureRepository.findAllByKeywordAndDepartment(department, keyword, pageRequest);
+            }
             return getLecturePageResponse(lecturePage);
         } else throw new WrongInputException("학과명을 잘못 입력하였습니다. department: " + department.getDescription());
-    }
-
-    public LecturePageResponse searchLectures(String keyword, int page) {
-        PageRequest pageRequest = PageRequest.of(page, 20, Sort.by("lectureNm"));
-        Page<LectureEntity> lecturePage = lectureRepository.findAllByKeyword(keyword, pageRequest);
-        return getLecturePageResponse(lecturePage);
     }
 
     public LecturePageResponse searchLecturesToReview(Department department, Integer grade, String semester, int page) {
