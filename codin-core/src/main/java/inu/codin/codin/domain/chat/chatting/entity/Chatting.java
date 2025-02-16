@@ -2,6 +2,7 @@ package inu.codin.codin.domain.chat.chatting.entity;
 
 import inu.codin.codin.common.BaseTimeEntity;
 import inu.codin.codin.domain.chat.chatting.dto.ContentType;
+import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,22 +28,30 @@ public class Chatting extends BaseTimeEntity {
 
     private ObjectId chatRoomId;
 
-    private ContentType type;
+    private ContentType contentType;
+
+    private int unreadCount;
 
     @Builder
-    public Chatting(ObjectId senderId, String content, ObjectId chatRoomId, ContentType type) {
+    public Chatting(ObjectId senderId, String content, ObjectId chatRoomId, ContentType contentType, int unreadCount) {
         this.senderId = senderId;
         this.content = content;
         this.chatRoomId = chatRoomId;
-        this.type = type;
+        this.contentType = contentType;
+        this.unreadCount = unreadCount;
     }
 
-    public static Chatting of(ObjectId chatRoomId, String content, ObjectId senderId, ContentType type) {
+    public static Chatting of(ObjectId chatRoomId, ChattingRequestDto chattingRequestDto, ObjectId senderId, int unreadCount) {
         return Chatting.builder()
                 .senderId(senderId)
-                .content(content)
+                .content(chattingRequestDto.getContent())
                 .chatRoomId(chatRoomId)
-                .type(type)
+                .contentType(chattingRequestDto.getContentType())
+                .unreadCount(unreadCount)
                 .build();
+    }
+
+    public void minusUnread(){
+        this.unreadCount--;
     }
 }
