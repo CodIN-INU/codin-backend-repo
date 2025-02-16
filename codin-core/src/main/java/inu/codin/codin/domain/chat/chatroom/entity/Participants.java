@@ -1,6 +1,9 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
+import inu.codin.codin.domain.chat.chatting.entity.Chatting;
+import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 

@@ -9,5 +9,7 @@ import java.util.List;
 
 public interface ChattingRepository extends MongoRepository<Chatting, String> {
 
-    List<Chatting> findAllByChatRoomIdOrderByCreatedAt(ObjectId id, Pageable pageable);
+    List<Chatting> findAllByChatRoomIdOrderByCreatedAtDesc(ObjectId chatRoomId);
+
+    List<Chatting> findAllByChatRoomId(ObjectId id, Pageable pageable);
 }
