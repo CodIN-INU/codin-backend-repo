@@ -28,9 +28,9 @@ public class ChatRoomController {
             summary = "채팅방 생성"
     )
     @PostMapping
-    public ResponseEntity<SingleResponse<?>> createChatRoom(@RequestBody ChatRoomCreateRequestDto chatRoomCreateRequestDto, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<SingleResponse<?>> createChatRoom(@RequestBody ChatRoomCreateRequestDto chatRoomCreateRequestDto){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "채팅방 생성 완료", chatRoomService.createChatRoom(chatRoomCreateRequestDto, userDetails)));
+                .body(new SingleResponse<>(201, "채팅방 생성 완료", chatRoomService.createChatRoom(chatRoomCreateRequestDto)));
     }
 
     @Operation(
@@ -39,15 +39,15 @@ public class ChatRoomController {
     @GetMapping
     public ResponseEntity<ListResponse<ChatRoomListResponseDto>> getAllChatRoomByUser(@AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "채팅방 리스트 반환 완료",chatRoomService.getAllChatRoomByUser(userDetails)));
+                .body(new ListResponse<>(200, "채팅방 리스트 반환 완료", chatRoomService.getAllChatRoomByUser(userDetails)));
     }
 
     @Operation(
             summary = "채팅방 나가기"
     )
     @DeleteMapping("/{chatRoomId}")
-    public ResponseEntity<SingleResponse<?>> leaveChatRoom(@PathVariable("chatRoomId") String chatRoomId, @AuthenticationPrincipal UserDetails userDetails){
-        chatRoomService.leaveChatRoom(chatRoomId, userDetails);
+    public ResponseEntity<SingleResponse<?>> leaveChatRoom(@PathVariable("chatRoomId") String chatRoomId){
+        chatRoomService.leaveChatRoom(chatRoomId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "채팅방 나가기 완료", null));
     }
@@ -56,8 +56,8 @@ public class ChatRoomController {
             summary = "채팅방 알림 여부 수정"
     )
     @GetMapping("/notification/{chatRoomId}")
-    public ResponseEntity<SingleResponse<?>> setNotificationChatRoom(@PathVariable("chatRoomId") String chatRoomId, @AuthenticationPrincipal UserDetails userDetails){
-        chatRoomService.setNotificationChatRoom(chatRoomId, userDetails);
+    public ResponseEntity<SingleResponse<?>> setNotificationChatRoom(@PathVariable("chatRoomId") String chatRoomId){
+        chatRoomService.setNotificationChatRoom(chatRoomId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "채팅방 알림 여부 수정 완료", null));
     }
