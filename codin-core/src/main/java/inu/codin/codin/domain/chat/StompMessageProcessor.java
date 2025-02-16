@@ -6,6 +6,7 @@ import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
+import inu.codin.codin.domain.chat.chatting.service.ChattingService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.domain.user.security.CustomUserDetailsService;
@@ -36,6 +37,7 @@ public class StompMessageProcessor implements ChannelInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ChattingService chattingService;
     private final Map<String, String> sessionStore = new ConcurrentHashMap<>();
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -88,6 +90,7 @@ public class StompMessageProcessor implements ChannelInterceptor {
 
     private void enterToChatRoom(StompHeaderAccessor headerAccessor){
         Result result = getResult(headerAccessor);
+        chattingService.updateUnreadCount(result.chatroom.get_id(), result.user.get_id());
         result.chatroom.getParticipants().enter(result.user.get_id());
         chatRoomRepository.save(result.chatroom);
     }
