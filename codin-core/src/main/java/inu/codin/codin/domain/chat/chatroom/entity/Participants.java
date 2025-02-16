@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
