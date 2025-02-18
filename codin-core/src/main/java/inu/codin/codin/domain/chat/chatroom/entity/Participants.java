@@ -1,24 +1,53 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
-import lombok.Builder;
+import inu.codin.codin.domain.chat.chatting.entity.Chatting;
+import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
 public class Participants {
 
-    private final ObjectId userId;
-    private boolean notificationsEnabled;
+    private Map<ObjectId, ParticipantInfo> info = new ConcurrentHashMap<>();
 
-    @Builder
-    public Participants(ObjectId userId, boolean notificationsEnabled) {
-        this.userId = userId;
-        this.notificationsEnabled = notificationsEnabled;
+    public void create(ObjectId memberId){
+        info.put(memberId, ParticipantInfo.enter(memberId));
     }
 
-    public void updateNotification() {
-        this.notificationsEnabled = !notificationsEnabled;
+    public boolean getMessage(ObjectId receiver) {
+        ParticipantInfo member;
+        if((member=info.get(receiver))==null) {
+            return false;
+        }
+        member.plusUnread();
+        return true;
+    }
+
+    public boolean enter(ObjectId memberId){
+        ParticipantInfo participantInfo;
+        if ((participantInfo = info.get(memberId))==null) {
+            return false;
+        }
+
+        participantInfo.connect();
+        info.put(memberId, participantInfo);
+        return true;
+    }
+
+    public boolean exit(ObjectId memberId) {
+        ParticipantInfo participantInfo;
+        if ((participantInfo = info.get(memberId))==null) {
+            return false;
+        }
+
+        participantInfo.disconnect();
+        info.put(memberId, participantInfo);
+        return true;
     }
 }
