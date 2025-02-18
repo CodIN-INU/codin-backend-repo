@@ -39,4 +39,8 @@ public abstract class BaseTimeEntity {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void setUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
 }

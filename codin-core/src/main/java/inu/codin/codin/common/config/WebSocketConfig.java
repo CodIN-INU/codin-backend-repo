@@ -1,6 +1,6 @@
 package inu.codin.codin.common.config;
 
-import inu.codin.codin.domain.chat.chatting.ChatPreHandler;
+import inu.codin.codin.domain.chat.StompMessageProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -15,7 +15,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final ChatPreHandler chatPreHandler;
+    private final StompMessageProcessor stompMessageProcessor;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stomp") //handshake endpoint
@@ -39,6 +39,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(chatPreHandler);
+        registration.interceptors(stompMessageProcessor);
     }
 }
