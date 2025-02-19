@@ -112,7 +112,8 @@ public class SecurityConfig {
             "/ws-stomp/**",
 //            "/chat",
 //            "/chat/image",
-            "/chats/**"
+            "/chats/**",
+            "/info/**"
     };
 
     // Swagger 접근 가능한 URL

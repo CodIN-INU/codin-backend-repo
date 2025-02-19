@@ -37,8 +37,11 @@ public class ChattingResponseDto {
 
     private final String currentUserId;
 
+    private final int unread;
+
+
     @Builder
-    public ChattingResponseDto(String id, String senderId, String content, ContentType contentType, LocalDateTime createdAt, String chatRoomId, String currentUserId) {
+    public ChattingResponseDto(String id, String senderId, String content, ContentType contentType, LocalDateTime createdAt, String chatRoomId, String currentUserId, int unread) {
         this.id = id;
         this.senderId = senderId;
         this.content = content;
@@ -46,6 +49,7 @@ public class ChattingResponseDto {
         this.createdAt = createdAt;
         this.chatRoomId = chatRoomId;
         this.currentUserId = currentUserId;
+        this.unread = unread;
     }
 
     public static ChattingResponseDto of(Chatting chatting){
@@ -54,8 +58,9 @@ public class ChattingResponseDto {
                 .senderId(chatting.getSenderId().toString())
                 .content(chatting.getContent())
                 .createdAt(chatting.getCreatedAt())
-                .contentType(chatting.getType())
+                .contentType(chatting.getContentType())
                 .chatRoomId(chatting.getChatRoomId().toString())
+                .unread(chatting.getUnreadCount())
                 .build();
     }
 
@@ -65,9 +70,10 @@ public class ChattingResponseDto {
                 .senderId(chatting.getSenderId().toString())
                 .content(chatting.getContent())
                 .createdAt(chatting.getCreatedAt())
-                .contentType(chatting.getType())
+                .contentType(chatting.getContentType())
                 .chatRoomId(chatting.getChatRoomId().toString())
                 .currentUserId(currentUserId.toString())
+                .unread(chatting.getUnreadCount())
                 .build();
     }
 }
