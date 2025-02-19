@@ -186,11 +186,11 @@ public class NotificationService {
         }
     }
 
-    public void sendNotificationMessageByChat(ObjectId userId, ChatRoom chatRoom) {
+    public void sendNotificationMessageByChat(ObjectId userId, ObjectId chatRoomId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
         Map<String, String> chat = new HashMap<>();
-        chat.put("id", chatRoom.get_id().toString());
+        chat.put("id", chatRoomId.toString());
         sendFcmMessageToUser("익명 채팅방", NOTI_CHAT, chat, user);
     }
 
