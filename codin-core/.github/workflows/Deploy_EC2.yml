@@ -37,16 +37,18 @@ jobs:
       - name: Build Docker image And Push
         run: docker buildx build --platform linux/amd64,linux/arm64 -t inucodin/codin-backend:latest --push .
 
-      - name: Deploy to EC2
+      - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{secrets.PASSWORD}}
+          port: ${{secrets.PORT}}
           script: |
             sudo docker ps -a
             sudo docker rm -f codin-backend || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-            sudo docker run -d --net codin-docker-setup_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+            sudo docker run -d --net codin-docker-_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
             sudo docker images -f "dangling=true" -q | xargs sudo docker rmi || true
             sudo docker ps -a
