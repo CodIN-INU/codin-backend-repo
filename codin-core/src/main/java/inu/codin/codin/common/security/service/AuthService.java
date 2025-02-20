@@ -1,13 +1,17 @@
 package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.Department;
+import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
+import inu.codin.codin.common.security.enums.AuthResultStatus;
 import inu.codin.codin.common.security.feign.inu.InuClient;
 import inu.codin.codin.common.security.feign.portal.PortalClient;
 import inu.codin.codin.common.util.AESUtil;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -23,14 +27,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static feign.Util.ISO_8859_1;
@@ -40,110 +44,223 @@ import static feign.Util.ISO_8859_1;
 @Slf4j
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final PortalClient portalClient;
-    private final InuClient inuClient;
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final JwtService jwtService;
-    private final RedisAuthService redisAuthService;
-    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
-    public Integer signUp(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response){
-        try {//학번으로 회원가입 유무 판단
-            Optional<UserEntity> user = userRepository.findByStudentId(signUpAndLoginRequestDto.getStudentId());
-            if (user.isPresent()) {
-                UsernamePasswordAuthenticationToken authenticationToken
-                        = new UsernamePasswordAuthenticationToken(signUpAndLoginRequestDto.getStudentId(), signUpAndLoginRequestDto.getPassword());
 
-                Authentication authentication = authenticationManager.authenticate(authenticationToken);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+    /**
+     * Google OAuth2를 통해 사용자 정보를 등록하고 로그인 처리하는 메소드
+     * - 첫 로그인 시: 신규 회원이면 DB에 등록할 때 userStatus를 DISABLED로 설정 (프로필 미완료)
+     * - 기존 회원이면, userStatus가 ACTIVE인 경우에만 JWT 토큰을 발급하여 정식 로그인 처리
+     *   만약 userStatus가 DISABLED이면 프로필 설정이 필요하다는 상태로 처리
+     */
+    public AuthResultStatus oauthLogin(OAuth2User oAuth2User, HttpServletResponse response) {
 
-                jwtService.createToken(response);
-                return 0;
+        // OAuth2 제공자로부터 받은 모든 속성을 로그 출력 (디버깅용)
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        attributes.forEach((key, value) -> {
+            log.info("OAuth2 attribute: {} = {}", key, value);
+        });
+
+        // 기본 속성 추출
+        String email = (String) attributes.get("email");
+        String sub = (String) attributes.get("sub");  // 고유 식별자 (필요시 저장)
+        String name = (String) attributes.get("family_name");  // 예: "김기수"
+        String department = (String) attributes.get("given_name"); // 예: "/컴퓨터공학부"
+
+        log.info("OAuth2 login: email={}, sub={}, name={}, department={}",
+                email, sub, name, department);
+
+        // 회원 존재 여부 판단: email 기준
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            UserEntity existingUser = optionalUser.get();
+            log.info("기존 회원 로그인: {}", email);
+            if (existingUser.getStatus() != null && existingUser.getStatus().equals(UserStatus.ACTIVE)) {
+
+                // 프로필 설정 완료된 회원: 정상 로그인 처리
+                issueJwtToken(email, response);
+
+                log.info("정상 로그인 완료: {}", email);
+                return AuthResultStatus.LOGIN_SUCCESS;
+            } else {
+                // 프로필 설정 미완료: JWT 토큰 미발급, 프론트엔드에서 프로필 설정 페이지로 유도
+                log.info("회원 프로필 설정 미완료 (userStatus={}) : {}", existingUser.getStatus(), email);
+                return AuthResultStatus.PROFILE_INCOMPLETE;
             }
-            PortalLoginResponseDto userPortalLoginResponseDto
-                    = returnPortalInfo(signUpAndLoginRequestDto);
-            redisAuthService.saveUserData(signUpAndLoginRequestDto.getStudentId(), userPortalLoginResponseDto);
-            return 1;
-        } catch (Exception e) {
-            log.error("로그인 중 오류 발생", e);
-            throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+        } else {
+            log.info("신규 회원 등록: {}", email);
+            String deptDesc = (department != null) ? department.replace("/", "").trim() : "";
+            Department dept = Department.fromDescription(deptDesc);
+
+            // 신규 회원 등록 시, userStatus를 DISABLED(비활성)으로 설정하여 프로필 설정 미완료 상태로 처리
+            UserEntity newUser = UserEntity.builder()
+                    .email(email)
+                    .name(name)
+                    .department(dept)
+                    .profileImageUrl(s3Service.getDefaultProfileImageUrl()) // 기본 프로필 이미지 사용
+                    .status(UserStatus.DISABLED)
+                    .role(UserRole.USER)
+                    .build();
+            userRepository.save(newUser);
+            log.info("신규 회원 등록 완료 (프로필 미완료): {}", newUser);
+            return AuthResultStatus.NEW_USER_REGISTERED;
+            // 신규 회원은 프로필 설정 완료 전까지는 JWT 토큰을 발급 안 함.
         }
-
     }
 
-    private PortalLoginResponseDto returnPortalInfo(SignUpAndLoginRequestDto signUpAndLoginRequestDto) throws Exception {
-        String html = portalClient.signUp(
-                "submit",
-                AESUtil.encrypt(signUpAndLoginRequestDto.getStudentId()),
-                AESUtil.encrypt(signUpAndLoginRequestDto.getPassword())
-        );
-        Document doc = Jsoup.parse(html);
-        String value = doc.select(".main").select("input[type=hidden]").attr("value");
-        PortalLoginResponseDto userPortalLoginResponseDto = readJson(value);
-        String password = passwordEncoder.encode(signUpAndLoginRequestDto.getPassword());
-        userPortalLoginResponseDto.setPassword(password);
-        userPortalLoginResponseDto.setUndergraduate(isUnderGraduate(signUpAndLoginRequestDto));
-        return userPortalLoginResponseDto;
-    }
-
-    private PortalLoginResponseDto readJson(String value) {
-        String[] arrayList = value.substring(1).split(", ");
-        PortalLoginResponseDto userPortalLoginResponseDto = new PortalLoginResponseDto();
-
-        Map<String, Consumer<String>> fieldSetters = Map.of(
-                "studId", userPortalLoginResponseDto::setStudentId,
-                "userNm", userPortalLoginResponseDto::setName,
-                "userEml", userPortalLoginResponseDto::setEmail,
-                "userDpmtNm", v -> userPortalLoginResponseDto.setDepartment(Department.fromDescription(v)),
-                "userCollNm", userPortalLoginResponseDto::setCollege
-        );
-
-        for (String user : arrayList) {
-            String[] info = user.split("=");
-            if (info.length == 2 && fieldSetters.containsKey(info[0])) { // Only process known fields
-                fieldSetters.get(info[0]).accept(info[1]);
-            }
-        }
-
-        return userPortalLoginResponseDto;
-    }
-
-
-    public boolean isUnderGraduate(@Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto){
-        String basic = "Basic " + Base64.getEncoder().encodeToString((signUpAndLoginRequestDto.getStudentId() + ":" + signUpAndLoginRequestDto.getPassword()).getBytes(ISO_8859_1));
-        Map<String, String> graduate = inuClient.status(basic);
-        return graduate.get("undergraduate").equals("true");
-    }
-
-    public void createUser(String studentId, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage) {
-
+    /**
+     * 최초 로그인 후, 사용자에게 닉네임과 프로필 이미지를 설정받아 DB를 업데이트하는 메소드.
+     * 프로필 설정 완료 후 userStatus를 ACTIVE로 업데이트하여 정식 회원가입을 완료.
+     */
+    public void completeUserProfile(String email, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage, HttpServletResponse response) {
+        // 중복 닉네임 검사
         Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
         if (nickNameDuplicate.isPresent()){
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
-        PortalLoginResponseDto userData = redisAuthService.getUserData(studentId);
-        log.info("[createUser] 요청 데이터: {}", studentId);
 
+        // DB에서 해당 사용자를 이메일로 조회
+        Optional<UserEntity> userOpt = userRepository.findByEmailAndDisabled(email);
+        if (userOpt.isEmpty()){
+            throw new NotFoundException("사용자를 찾을 수 없습니다.");
+        }
+        UserEntity user = userOpt.get();
+        log.info("[completeUserProfile] 사용자 조회 성공: {}", email);
+
+        // 프로필 이미지 업로드 처리
         String imageUrl = null;
-        if (userImage != null) {
-            log.info("[회원가입] 프로필 이미지 업로드 중...");
+        if (userImage != null && !userImage.isEmpty()) {
+            log.info("[프로필 설정] 프로필 이미지 업로드 중...");
             imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
-            log.info("[회원가입] 프로필 이미지 업로드 완료: {}", imageUrl);
+            log.info("[프로필 설정] 프로필 이미지 업로드 완료: {}", imageUrl);
         }
-
-        // imageUrl이 null이면 기본 이미지로 설정
+        // 업로드된 이미지가 없으면 기본 프로필 이미지 URL 사용
         if (imageUrl == null) {
-            imageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
-
+            imageUrl = s3Service.getDefaultProfileImageUrl();
         }
 
-        UserEntity user = UserEntity.of(userData);
+        // 사용자 정보 업데이트: 닉네임, 프로필 이미지 URL 업데이트 및 userStatus를 ACTIVE(활성)으로 변경
         user.updateNickname(userNicknameRequestDto);
         user.updateProfileImageUrl(imageUrl);
+        user.disabledToactivateUser();
         userRepository.save(user);
 
-        log.info("[signUpUser] SIGN UP SUCCESS!! : {}", user.getStudentId());
+        log.info("[completeUserProfile] 프로필 설정 완료: {}", user.getEmail());
+
+        // 프로필 설정 완료 후 정식 회원으로 간주하여 JWT 토큰 재발급
+        issueJwtToken(user.getEmail(), response);
     }
+
+    private void issueJwtToken(String email, HttpServletResponse response) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        jwtService.createToken(response);
+    }
+
+
+
+
+//
+//    public Integer signUp(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response){
+//        try {//학번으로 회원가입 유무 판단
+//            Optional<UserEntity> user = userRepository.findByStudentId(signUpAndLoginRequestDto.getStudentId());
+//            if (user.isPresent()) {
+//                UsernamePasswordAuthenticationToken authenticationToken
+//                        = new UsernamePasswordAuthenticationToken(signUpAndLoginRequestDto.getStudentId(), signUpAndLoginRequestDto.getPassword());
+//
+//                Authentication authentication = authenticationManager.authenticate(authenticationToken);
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//                jwtService.createToken(response);
+//                return 0;
+//            }
+//            PortalLoginResponseDto userPortalLoginResponseDto
+//                    = returnPortalInfo(signUpAndLoginRequestDto);
+//            redisAuthService.saveUserData(signUpAndLoginRequestDto.getStudentId(), userPortalLoginResponseDto);
+//            return 1;
+//        } catch (Exception e) {
+//            log.error("로그인 중 오류 발생", e);
+//            throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+//        }
+//
+//    }
+//
+//    private PortalLoginResponseDto returnPortalInfo(SignUpAndLoginRequestDto signUpAndLoginRequestDto) throws Exception {
+//        String html = portalClient.signUp(
+//                "submit",
+//                AESUtil.encrypt(signUpAndLoginRequestDto.getStudentId()),
+//                AESUtil.encrypt(signUpAndLoginRequestDto.getPassword())
+//        );
+//        Document doc = Jsoup.parse(html);
+//        String value = doc.select(".main").select("input[type=hidden]").attr("value");
+//        PortalLoginResponseDto userPortalLoginResponseDto = readJson(value);
+//        String password = passwordEncoder.encode(signUpAndLoginRequestDto.getPassword());
+//        userPortalLoginResponseDto.setPassword(password);
+//        userPortalLoginResponseDto.setUndergraduate(isUnderGraduate(signUpAndLoginRequestDto));
+//        return userPortalLoginResponseDto;
+//    }
+//
+//    private PortalLoginResponseDto readJson(String value) {
+//        String[] arrayList = value.substring(1).split(", ");
+//        PortalLoginResponseDto userPortalLoginResponseDto = new PortalLoginResponseDto();
+//
+//        Map<String, Consumer<String>> fieldSetters = Map.of(
+//                "studId", userPortalLoginResponseDto::setStudentId,
+//                "userNm", userPortalLoginResponseDto::setName,
+//                "userEml", userPortalLoginResponseDto::setEmail,
+//                "userDpmtNm", v -> userPortalLoginResponseDto.setDepartment(Department.fromDescription(v)),
+//                "userCollNm", userPortalLoginResponseDto::setCollege
+//        );
+//
+//        for (String user : arrayList) {
+//            String[] info = user.split("=");
+//            if (info.length == 2 && fieldSetters.containsKey(info[0])) { // Only process known fields
+//                fieldSetters.get(info[0]).accept(info[1]);
+//            }
+//        }
+//
+//        return userPortalLoginResponseDto;
+//    }
+//
+//
+//    public boolean isUnderGraduate(@Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto){
+//        String basic = "Basic " + Base64.getEncoder().encodeToString((signUpAndLoginRequestDto.getStudentId() + ":" + signUpAndLoginRequestDto.getPassword()).getBytes(ISO_8859_1));
+//        Map<String, String> graduate = inuClient.status(basic);
+//        return graduate.get("undergraduate").equals("true");
+//    }
+//
+//    public void createUser(String studentId, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage) {
+//
+//        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
+//        if (nickNameDuplicate.isPresent()){
+//            throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
+//        }
+//        PortalLoginResponseDto userData = redisAuthService.getUserData(studentId);
+//        log.info("[createUser] 요청 데이터: {}", studentId);
+//
+//        String imageUrl = null;
+//        if (userImage != null) {
+//            log.info("[회원가입] 프로필 이미지 업로드 중...");
+//            imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
+//            log.info("[회원가입] 프로필 이미지 업로드 완료: {}", imageUrl);
+//        }
+//
+//        // imageUrl이 null이면 기본 이미지로 설정
+//        if (imageUrl == null) {
+//            imageUrl = s3Service.getDefaultProfileImageUrl(); // S3Service에서 기본 이미지 URL 가져오기
+//
+//        }
+//
+//        UserEntity user = UserEntity.of(userData);
+//        user.updateNickname(userNicknameRequestDto);
+//        user.updateProfileImageUrl(imageUrl);
+//        userRepository.save(user);
+//
+//        log.info("[signUpUser] SIGN UP SUCCESS!! : {}", user.getStudentId());
+//    }
 }

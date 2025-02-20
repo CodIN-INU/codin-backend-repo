@@ -100,4 +100,10 @@ public class UserEntity extends BaseTimeEntity {
             this.status = UserStatus.ACTIVE;
         }
     }
+
+    public void disabledToactivateUser() {
+        if ( this.status == UserStatus.DISABLED) {
+            this.status = UserStatus.ACTIVE;
+        }
+    }
 }
