@@ -74,7 +74,7 @@ public class AuthService {
                 email, sub, name, department);
 
         // 회원 존재 여부 판단: email 기준
-        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+        Optional<UserEntity> optionalUser = userRepository.findByEmailAndDisabledAndActive(email);
         if (optionalUser.isPresent()) {
             UserEntity existingUser = optionalUser.get();
             log.info("기존 회원 로그인: {}", email);
