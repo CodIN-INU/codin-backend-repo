@@ -49,18 +49,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
-                .csrf(CsrfConfigurer::disable) // CSRF 비활성화
-                .formLogin(FormLoginConfigurer::disable) // Form 로그인 비활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안 함
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(SWAGGER_AUTH_PATHS).hasRole("ADMIN")
-                        .requestMatchers(PERMIT_ALL).permitAll()
-                        .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
-                        .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
-                        .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
-                        .anyRequest().hasRole("USER")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // cors 설정
+                .csrf(CsrfConfigurer::disable) // csrf 비활성화
+                .formLogin(FormLoginConfigurer::disable) // form login 비활성화
+                .sessionManagement(sessionManagement -> sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지 않음
                 )
+                // authorizeHttpRequests 메서드를 통해 요청에 대한 권한 설정
+                .authorizeHttpRequests((authorizeHttpRequests) ->
+                        authorizeHttpRequests
+                                .requestMatchers(PERMIT_ALL).permitAll()
+                                .requestMatchers(SWAGGER_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
+                                .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
+                                .anyRequest().hasRole("USER")
+                )
+                // Swagger 접근 시 httpBasic 인증 사용
                 .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
@@ -82,13 +87,12 @@ public class SecurityConfig {
 
 
 
+        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
+        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
+
         return http.build();
     }
 
-
-    /**
-     * AuthenticationManager 설정
-     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -96,17 +100,11 @@ public class SecurityConfig {
         return authenticationManagerBuilder.build();
     }
 
-    /**
-     * 역할 계층 설정
-     */
     @Bean
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_MANAGER > ROLE_USER");
     }
 
-    /**
-     * 비밀번호 암호화 설정
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -123,8 +121,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://www.codin.co.kr",
                 "https://codin.inu.ac.kr",
-                "https://front-end-peach-two.vercel.app",
-                "http://localhost:8080"
+                "https://front-end-peach-two.vercel.app"
         ));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
@@ -147,35 +144,27 @@ public class SecurityConfig {
             "/chats/**"
     };
 
-    /**
-     * Swagger 접근 가능한 URL
-     */
+    // Swagger 접근 가능한 URL
     private static final String[] SWAGGER_AUTH_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/v3/api-docs",
-            "/swagger-resources/**"
+            "/swagger-resources/**",
     };
 
-    /**
-     * User 권한 URL
-     */
+    // User 권한 URL
     private static final String[] USER_AUTH_PATHS = {
             "/v3/api/test2",
-            "/v3/api/test3"
+            "/v3/api/test3",
     };
 
-    /**
-     * Admin 권한 URL
-     */
+    // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
-            "/v3/api/test4"
+            "/v3/api/test4",
     };
 
-    /**
-     * Manager 권한 URL
-     */
+    // Manager 권한 URL
     private static final String[] MANAGER_AUTH_PATHS = {
-            "/v3/api/test5"
+            "/v3/api/test5",
     };
 }
