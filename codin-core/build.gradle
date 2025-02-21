@@ -70,6 +70,8 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.15.3'
 	//json
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
+	//oauth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
