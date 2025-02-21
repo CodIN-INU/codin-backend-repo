@@ -77,7 +77,7 @@ public class CustomUserDetails implements UserDetails {
      */
     @Override
     public String getUsername() {
-        return studentId;
+        return email;
     }
 
     @Override
