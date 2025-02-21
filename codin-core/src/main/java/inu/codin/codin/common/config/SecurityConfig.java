@@ -87,8 +87,8 @@ public class SecurityConfig {
 
 
 
-        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
-        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
+        // http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
+        // http.setSharedObject(RoleHierarchy.class, roleHierarchy());
 
         return http.build();
     }
