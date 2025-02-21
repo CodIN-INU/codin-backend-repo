@@ -4,6 +4,9 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
+import inu.codin.codin.common.security.service.CustomOAuth2UserService;
+import inu.codin.codin.common.security.util.OAuth2LoginFailureHandler;
+import inu.codin.codin.common.security.util.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +41,9 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -68,6 +74,12 @@ public class SecurityConfig {
                 )
                 // 예외 처리 필터 추가
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
+                //oauth2 로그인 설정 추가
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 // Content-Security-Policy 및 Frame-Options 설정
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
@@ -98,22 +110,38 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 토큰 없이 접근 가능한 URL
+    /**
+     * CORS 설정
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://www.codin.co.kr",
+                "https://codin.inu.ac.kr",
+                "https://front-end-peach-two.vercel.app"
+        ));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    /**
+     * 토큰 없이 접근 가능한 URL
+     */
     private static final String[] PERMIT_ALL = {
             "/auth/reissue",
             "/auth/logout",
-            "/auth/portal",
             "/auth/signup/**",
-//            "/email/auth/check",
-//            "/email/auth/send",
-//            "/email/auth/password",
-//            "/email/auth/password/check",
+            "/auth/google",
             "/v3/api/test1",
             "/ws-stomp/**",
-//            "/chat",
-//            "/chat/image",
-            "/chats/**",
-            "/info/**"
+            "/chats/**"
     };
 
     // Swagger 접근 가능한 URL
@@ -139,22 +167,4 @@ public class SecurityConfig {
     private static final String[] MANAGER_AUTH_PATHS = {
             "/v3/api/test5",
     };
-
-
-    /**
-     * CORS 설정
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.codin.co.kr" , "https://front-end-peach-two.vercel.app"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
 }
