@@ -46,9 +46,11 @@ jobs:
           password: ${{secrets.PASSWORD}}
           port: ${{secrets.PORT}}
           script: |
-            echo ${{ secrets.PASSWORD }} | sudo -S docker ps -a
-            sudo docker rm -f codin-backend || true
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-            sudo docker run -d --net codin-docker-_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-            sudo docker images -f "dangling=true" -q | xargs sudo docker rmi || true
-            sudo docker ps -a
+            echo ${{ secrets.PASSWORD }} | sudo -S su -c "
+              docker ps -a
+              docker rm -f codin-backend || true
+              docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+              docker run -d --net codin-docker-_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+              docker images -f "dangling=true" -q | xargs sudo docker rmi || true
+              docker ps -a
+            "
