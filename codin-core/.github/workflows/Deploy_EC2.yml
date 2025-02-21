@@ -46,7 +46,7 @@ jobs:
           password: ${{secrets.PASSWORD}}
           port: ${{secrets.PORT}}
           script: |
-            sudo docker ps -a
+            echo ${{ secrets.PASSWORD }} | sudo -S docker ps -a
             sudo docker rm -f codin-backend || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
             sudo docker run -d --net codin-docker-_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
