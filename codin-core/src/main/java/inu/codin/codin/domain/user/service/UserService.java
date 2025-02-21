@@ -125,7 +125,7 @@ public class UserService {
                     return new NotFoundException("해당 id에 대한 유저 정보를 찾을 수 없습니다.");
                 });
         user.delete();
-        user.updateNickname(new UserNicknameRequestDto("탈퇴한 사용자"));
+        user.updateNickname("탈퇴한 사용자");
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
         log.info("[회원 탈퇴 성공] _id: {}", userId);
@@ -160,7 +160,7 @@ public class UserService {
                     return new NotFoundException("유저 정보를 찾을 수 없습니다.");
                 });
 
-        user.updateNickname(userNicknameRequestDto);
+        user.updateNickname(userNicknameRequestDto.getNickname());
         userRepository.save(user);
         log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, userNicknameRequestDto);
     }
