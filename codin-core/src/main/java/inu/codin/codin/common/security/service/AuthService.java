@@ -2,42 +2,28 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.Department;
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
-import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.enums.AuthResultStatus;
-import inu.codin.codin.common.security.feign.inu.InuClient;
-import inu.codin.codin.common.security.feign.portal.PortalClient;
-import inu.codin.codin.common.util.AESUtil;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
-import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisAuthService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
-import java.util.function.Consumer;
-
-import static feign.Util.ISO_8859_1;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,9 +46,6 @@ public class AuthService {
 
         // OAuth2 제공자로부터 받은 모든 속성을 로그 출력 (디버깅용)
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        attributes.forEach((key, value) -> {
-            log.info("OAuth2 attribute: {} = {}", key, value);
-        });
 
         // 기본 속성 추출
         String email = (String) attributes.get("email");
@@ -115,20 +98,20 @@ public class AuthService {
      * 최초 로그인 후, 사용자에게 닉네임과 프로필 이미지를 설정받아 DB를 업데이트하는 메소드.
      * 프로필 설정 완료 후 userStatus를 ACTIVE로 업데이트하여 정식 회원가입을 완료.
      */
-    public void completeUserProfile(String email, UserNicknameRequestDto userNicknameRequestDto, MultipartFile userImage, HttpServletResponse response) {
+    public void completeUserProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage, HttpServletResponse response) {
         // 중복 닉네임 검사
-        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
+        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userProfileRequestDto.getNickname());
         if (nickNameDuplicate.isPresent()){
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
         // DB에서 해당 사용자를 이메일로 조회
-        Optional<UserEntity> userOpt = userRepository.findByEmailAndDisabled(email);
+        Optional<UserEntity> userOpt = userRepository.findByEmailAndDisabled(userProfileRequestDto.getEmail());
         if (userOpt.isEmpty()){
             throw new NotFoundException("사용자를 찾을 수 없습니다.");
         }
         UserEntity user = userOpt.get();
-        log.info("[completeUserProfile] 사용자 조회 성공: {}", email);
+        log.info("[completeUserProfile] 사용자 조회 성공: {}", userProfileRequestDto.getEmail());
 
         // 프로필 이미지 업로드 처리
         String imageUrl = null;
@@ -143,9 +126,9 @@ public class AuthService {
         }
 
         // 사용자 정보 업데이트: 닉네임, 프로필 이미지 URL 업데이트 및 userStatus를 ACTIVE(활성)으로 변경
-        user.updateNickname(userNicknameRequestDto);
+        user.updateNickname(userProfileRequestDto.getNickname());
         user.updateProfileImageUrl(imageUrl);
-        user.disabledToactivateUser();
+        user.activation();
         userRepository.save(user);
 
         log.info("[completeUserProfile] 프로필 설정 완료: {}", user.getEmail());
