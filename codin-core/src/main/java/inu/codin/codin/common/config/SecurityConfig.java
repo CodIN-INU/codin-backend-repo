@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -70,7 +69,7 @@ public class SecurityConfig {
                                 .anyRequest().hasRole("USER")
                 )
                 // Swagger 접근 시 httpBasic 인증 사용
-                .httpBasic(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
@@ -80,7 +79,6 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
-//                        .loginProcessingUrl("/api/login/oauth2/code/google")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
