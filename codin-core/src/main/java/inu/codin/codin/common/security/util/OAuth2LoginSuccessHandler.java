@@ -33,6 +33,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
+        log.info(BASEURL);
+
         // 상황에 따라 서로 다른 응답 메시지를 반환
         switch (result) {
             case LOGIN_SUCCESS:
