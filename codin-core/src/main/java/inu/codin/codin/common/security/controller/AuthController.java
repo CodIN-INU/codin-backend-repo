@@ -74,8 +74,8 @@ public class AuthController {
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        jwtService.deleteToken();
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        jwtService.deleteToken(response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "로그아웃 성공", null));
     }
 

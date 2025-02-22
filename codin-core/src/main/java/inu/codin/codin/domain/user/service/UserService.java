@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
@@ -19,6 +20,7 @@ import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class UserService {
 
     private final PostService postService;
     private final S3Service s3Service;
+    private final JwtService jwtService;
 
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
@@ -116,7 +119,7 @@ public class UserService {
         }
     }
 
-    public void deleteUser() {
+    public void deleteUser(HttpServletResponse response) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         UserEntity user = userRepository.findByUserId(userId)
@@ -128,6 +131,8 @@ public class UserService {
         user.updateNickname("탈퇴한 사용자");
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
+
+        jwtService.deleteToken(response);
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
 

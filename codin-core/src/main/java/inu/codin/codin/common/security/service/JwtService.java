@@ -117,11 +117,28 @@ public class JwtService {
     /**
      * 로그아웃 - Refresh Token 삭제
      */
-    public void deleteToken() {
+    public void deleteToken(HttpServletResponse response) {
         // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
         // SecurityContext에 Authentication 객체가 없는 경우는 없다.
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         redisStorageService.deleteRefreshToken(authentication.getName());
+        deleteCookie(response);
         log.info("[deleteToken] Refresh Token 삭제 완료");
+    }
+
+    private void deleteCookie(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("Authorization", "");
+        jwtCookie.setMaxAge(0);  // 쿠키 삭제
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(true);
+        jwtCookie.setPath("/");  // 쿠키가 적용될 경로
+        response.addCookie(jwtCookie);
+
+        Cookie refreshCookie = new Cookie("RefreshToken", "");
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0); // 7일
+        response.addCookie(refreshCookie);
     }
 }
