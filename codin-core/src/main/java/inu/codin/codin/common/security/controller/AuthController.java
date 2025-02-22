@@ -28,7 +28,7 @@ public class AuthController {
 
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/api/oauth2/authorization/google");
+        response.sendRedirect("/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }

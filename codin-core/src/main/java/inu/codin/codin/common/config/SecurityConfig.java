@@ -76,7 +76,10 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .loginProcessingUrl("/api/login/oauth2/code/google")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
@@ -84,12 +87,6 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
                 );
-
-
-
-        // http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
-        // http.setSharedObject(RoleHierarchy.class, roleHierarchy());
-
         return http.build();
     }
 
@@ -141,9 +138,7 @@ public class SecurityConfig {
             "/auth/google",
             "/v3/api/test1",
             "/ws-stomp/**",
-            "/chats/**",
-            "/oauth2/**",
-            "/login/**"
+            "/chats/**"
     };
 
     // Swagger 접근 가능한 URL

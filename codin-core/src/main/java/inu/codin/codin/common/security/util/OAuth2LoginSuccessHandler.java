@@ -1,18 +1,23 @@
 package inu.codin.codin.common.security.util;
 
 import inu.codin.codin.common.security.enums.AuthResultStatus;
+import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.service.AuthService;
+import inu.codin.codin.common.security.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +37,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         switch (result) {
             case LOGIN_SUCCESS:
                 writer.write("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
-                log.info("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
                 break;
             case NEW_USER_REGISTERED:
                 writer.write("{\"code\":201, \"message\":\"신규 회원 등록 완료. 프로필 설정이 필요합니다.\"}");
@@ -45,8 +49,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 break;
         }
         writer.flush();
-
-
 
     }
 }
