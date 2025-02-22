@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -18,6 +19,10 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${server.domain}")
+    private String BASEURL;
+
     private final  AuthService authService;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -28,20 +33,24 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
-        response.setHeader("result", String.valueOf(result));
         // 상황에 따라 서로 다른 응답 메시지를 반환
         switch (result) {
             case LOGIN_SUCCESS:
-                writer.write("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/main");
+                log.info("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
                 break;
             case NEW_USER_REGISTERED:
-                writer.write("{\"code\":201, \"message\":\"신규 회원 등록 완료. 프로필 설정이 필요합니다.\"}");
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/auth/profile");
+                log.info("{\"code\":201, \"message\":\"신규 회원 등록 완료. 프로필 설정이 필요합니다.\"}");
+
                 break;
             case PROFILE_INCOMPLETE:
-                writer.write("{\"code\":200, \"message\":\"회원 프로필 설정 미완료. 프로필 설정 페이지로 이동해주세요.\"}");
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/auth/profile");
+                log.info("{\"code\":200, \"message\":\"회원 프로필 설정 미완료. 프로필 설정 페이지로 이동해주세요.\"}");
                 break;
             default:
-                writer.write("{\"code\":500, \"message\":\"알 수 없는 오류 발생\"}");
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
+                log.info("{\"code\":500, \"message\":\"알 수 없는 오류 발생\"}");
                 break;
         }
         writer.flush();

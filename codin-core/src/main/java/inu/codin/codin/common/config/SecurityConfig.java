@@ -8,6 +8,7 @@ import inu.codin.codin.common.security.service.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.OAuth2LoginFailureHandler;
 import inu.codin.codin.common.security.util.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -44,6 +45,9 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Value("${server.domain}")
+    private String BASEURL;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -116,13 +120,11 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "https://www.codin.co.kr",
+                BASEURL,
                 "https://codin.inu.ac.kr",
                 "https://front-end-peach-two.vercel.app"
         ));
-        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

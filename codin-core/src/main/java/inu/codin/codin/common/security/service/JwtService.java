@@ -6,6 +6,7 @@ import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
 import inu.codin.codin.infra.redis.RedisStorageService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -87,11 +88,24 @@ public class JwtService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
-        // 응답 헤더에 Access Token 추가
-        response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
+        Cookie jwtCookie = new Cookie("Authorization", newToken.getAccessToken());
+        jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
+        jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
+        jwtCookie.setPath("/");       // 모든 요청에 포함
+        jwtCookie.setMaxAge(60 * 60); // 1시간 유지
+        jwtCookie.setDomain("www.codin.co.kr");
+        jwtCookie.setAttribute("SameSite", "None");
+        response.addCookie(jwtCookie);
 
-        // 헤더에 Access Token 추가
-        response.addHeader("X-Refresh-Token", newToken.getRefreshToken());
+
+        Cookie refreshCookie = new Cookie("RefreshToken", newToken.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+        refreshCookie.setDomain("www.codin.co.kr");
+        refreshCookie.setAttribute("SameSite", "None");
+        response.addCookie(refreshCookie);
 
         log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Refresh : {}",authentication.getName(), newToken.getRefreshToken());
     }

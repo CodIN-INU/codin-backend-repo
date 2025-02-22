@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.ForwardedHeaderFilter;
@@ -18,6 +19,9 @@ import java.util.List;
 @EnableWebMvc
 @RequiredArgsConstructor
 public class SwaggerConfig {
+
+    @Value("${server.domain}")
+    private String BASEURL;
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -45,7 +49,7 @@ public class SwaggerConfig {
                 .components(new Components().addSecuritySchemes("JWT", securityScheme))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Server"), // Local Server
-                        new Server().url("https://www.codin.co.kr/api").description("Production Server") // Production Server
+                        new Server().url(BASEURL+"/api").description("Production Server") // Production Server
                 ));
     }
 
