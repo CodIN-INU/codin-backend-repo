@@ -90,6 +90,9 @@ public class SecurityConfig {
 
 
 
+        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
+        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
+
         return http.build();
     }
 
@@ -110,21 +113,38 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 토큰 없이 접근 가능한 URL
+    /**
+     * CORS 설정
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://www.codin.co.kr",
+                "https://codin.inu.ac.kr",
+                "https://front-end-peach-two.vercel.app"
+        ));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    /**
+     * 토큰 없이 접근 가능한 URL
+     */
     private static final String[] PERMIT_ALL = {
             "/auth/reissue",
             "/auth/logout",
-            "/auth/portal",
             "/auth/signup/**",
-//            "/email/auth/check",
-//            "/email/auth/send",
-//            "/email/auth/password",
-//            "/email/auth/password/check",
+            "/auth/google",
             "/v3/api/test1",
             "/ws-stomp/**",
-//            "/chat",
-//            "/chat/image",
-            "/chats/**",
+            "/chats/**"
     };
 
     // Swagger 접근 가능한 URL
@@ -150,22 +170,4 @@ public class SecurityConfig {
     private static final String[] MANAGER_AUTH_PATHS = {
             "/v3/api/test5",
     };
-
-
-    /**
-     * CORS 설정
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.codin.co.kr" , "https://front-end-peach-two.vercel.app"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
 }

@@ -1,20 +1,17 @@
 package inu.codin.codin.common.security.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.service.AuthService;
 import inu.codin.codin.common.security.service.JwtService;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,13 +34,12 @@ public class AuthController {
     }
 
     @Operation(summary = "회원 정보 입력 마무리")
-    @PostMapping(value = "/signup/{email}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<?>> completeUserProfile(
-            @PathVariable("email") String email,
-            @RequestPart @Valid UserNicknameRequestDto userNicknameRequestDto,
+            @RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage,
             HttpServletResponse response) {
-        authService.completeUserProfile(email, userNicknameRequestDto, userImage, response);
+        authService.completeUserProfile(userProfileRequestDto, userImage, response);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 정보 입력 마무리 성공", null));
     }

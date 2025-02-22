@@ -64,8 +64,8 @@ public class UserEntity extends BaseTimeEntity {
         this.blockedUsers = (blockedUsers != null) ? blockedUsers : new ArrayList<>(); // ✅ 기본값 설정
     }
 
-    public void updateNickname(UserNicknameRequestDto userNicknameRequestDto) {
-        this.nickname = userNicknameRequestDto.getNickname();
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public void updateProfileImageUrl(String profileImageUrl) {
@@ -101,7 +101,7 @@ public class UserEntity extends BaseTimeEntity {
         }
     }
 
-    public void disabledToactivateUser() {
+    public void activation() {
         if ( this.status == UserStatus.DISABLED) {
             this.status = UserStatus.ACTIVE;
         }
