@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(PERMIT_ALL).permitAll()
-                                .requestMatchers(SWAGGER_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(SWAGGER_AUTH_PATHS).permitAll()
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
@@ -76,7 +76,10 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .loginProcessingUrl("/api/login/oauth2/code/google")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
@@ -84,12 +87,6 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
                 );
-
-
-
-        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
-        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
-
         return http.build();
     }
 
