@@ -87,12 +87,6 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
                 );
-
-
-
-        http.setSharedObject(AuthenticationManager.class, authenticationManager(http));
-        http.setSharedObject(RoleHierarchy.class, roleHierarchy());
-
         return http.build();
     }
 
