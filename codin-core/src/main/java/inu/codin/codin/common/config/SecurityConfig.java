@@ -76,7 +76,7 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
-                        .loginProcessingUrl("/api/login/oauth2/code/google")
+//                        .loginProcessingUrl("/api/login/oauth2/code/google")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
