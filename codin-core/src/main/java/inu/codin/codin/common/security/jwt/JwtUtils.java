@@ -26,7 +26,7 @@ public class JwtUtils {
         }
 
         if (StringUtils.hasText(bearerToken)) {
-            return bearerToken.substring(7);
+            return bearerToken;
         }
         return null;
     }
