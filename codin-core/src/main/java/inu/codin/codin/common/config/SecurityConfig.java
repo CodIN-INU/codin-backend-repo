@@ -119,6 +119,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 BASEURL,
+                "https://www.codin.co.kr",
                 "https://front-end-peach-two.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
