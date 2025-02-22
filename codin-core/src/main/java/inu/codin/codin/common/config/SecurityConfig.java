@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(PERMIT_ALL).permitAll()
-                                .requestMatchers(SWAGGER_AUTH_PATHS).hasRole("ADMIN")
+                                .requestMatchers(SWAGGER_AUTH_PATHS).permitAll()
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
@@ -141,7 +141,9 @@ public class SecurityConfig {
             "/auth/google",
             "/v3/api/test1",
             "/ws-stomp/**",
-            "/chats/**"
+            "/chats/**",
+            "/oauth2/**",
+            "/login/**"
     };
 
     // Swagger 접근 가능한 URL

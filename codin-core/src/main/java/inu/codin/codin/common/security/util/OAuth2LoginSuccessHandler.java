@@ -33,10 +33,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
+        String redirectUrl = "/api/login/oauth2/code";
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+
         // 상황에 따라 서로 다른 응답 메시지를 반환
         switch (result) {
             case LOGIN_SUCCESS:
                 writer.write("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
+                log.info("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
                 break;
             case NEW_USER_REGISTERED:
                 writer.write("{\"code\":201, \"message\":\"신규 회원 등록 완료. 프로필 설정이 필요합니다.\"}");
@@ -49,6 +53,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 break;
         }
         writer.flush();
+
+
 
     }
 }
