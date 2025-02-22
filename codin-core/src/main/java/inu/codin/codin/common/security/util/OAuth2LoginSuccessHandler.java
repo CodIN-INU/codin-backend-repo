@@ -1,23 +1,18 @@
 package inu.codin.codin.common.security.util;
 
 import inu.codin.codin.common.security.enums.AuthResultStatus;
-import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.service.AuthService;
-import inu.codin.codin.common.security.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -32,9 +27,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
-
-        String redirectUrl = "/api/login/oauth2/code";
-        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 
         // 상황에 따라 서로 다른 응답 메시지를 반환
         switch (result) {
