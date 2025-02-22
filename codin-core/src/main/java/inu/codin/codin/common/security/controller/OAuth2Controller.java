@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/login/oauth2/code")
+@RequestMapping("/login/oauth2/code")
 public class OAuth2Controller {
 
     @GetMapping("/google")
