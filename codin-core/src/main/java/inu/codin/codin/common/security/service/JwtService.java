@@ -97,7 +97,7 @@ public class JwtService {
         jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
         jwtCookie.setPath("/");       // 모든 요청에 포함
         jwtCookie.setMaxAge(60 * 60); // 1시간 유지
-        jwtCookie.setDomain("www.codin.co.kr");
+        jwtCookie.setDomain(BASERURL.split("//")[1]);
         jwtCookie.setAttribute("SameSite", "None");
         response.addCookie(jwtCookie);
 
@@ -107,7 +107,7 @@ public class JwtService {
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
-        refreshCookie.setDomain("www.codin.co.kr");
+        refreshCookie.setDomain(BASERURL.split("//")[1]);
         refreshCookie.setAttribute("SameSite", "None");
         response.addCookie(refreshCookie);
 
