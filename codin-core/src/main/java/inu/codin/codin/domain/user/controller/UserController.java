@@ -7,6 +7,7 @@ import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -66,8 +67,8 @@ public class UserController {
             summary = "회원 탈퇴"
     )
     @DeleteMapping
-    public ResponseEntity<SingleResponse<?>> deleteUser(){
-        userService.deleteUser();
+    public ResponseEntity<SingleResponse<?>> deleteUser(HttpServletResponse response){
+        userService.deleteUser(response);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 탈퇴 완료", null));
     }

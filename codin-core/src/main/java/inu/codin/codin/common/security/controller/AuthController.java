@@ -28,7 +28,7 @@ public class AuthController {
 
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/oauth2/authorization/google");
+        response.sendRedirect("/api/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }
@@ -74,8 +74,8 @@ public class AuthController {
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        jwtService.deleteToken();
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        jwtService.deleteToken(response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "로그아웃 성공", null));
     }
 

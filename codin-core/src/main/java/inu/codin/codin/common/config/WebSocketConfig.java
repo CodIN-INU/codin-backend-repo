@@ -2,6 +2,7 @@ package inu.codin.codin.common.config;
 
 import inu.codin.codin.domain.chat.StompMessageProcessor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -15,11 +16,14 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    @Value("${server.domain}")
+    private String BASEURL;
+
     private final StompMessageProcessor stompMessageProcessor;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stomp") //handshake endpoint
-                .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:8080", "https://www.codin.co.kr")
+                .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:8080", BASEURL)
                 .withSockJS();
     }
 
