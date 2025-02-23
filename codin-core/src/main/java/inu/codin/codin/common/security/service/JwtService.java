@@ -111,7 +111,7 @@ public class JwtService {
         refreshCookie.setAttribute("SameSite", "None");
         response.addCookie(refreshCookie);
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Refresh : {}",authentication.getName(), newToken.getRefreshToken());
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
     }
 
     /**
