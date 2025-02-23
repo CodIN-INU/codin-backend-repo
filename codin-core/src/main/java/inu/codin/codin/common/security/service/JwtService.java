@@ -6,10 +6,12 @@ import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
 import inu.codin.codin.infra.redis.RedisStorageService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +30,9 @@ public class JwtService {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
+
+    @Value("${server.domain}")
+    private String BASERURL;
 
     /**
      * 최초 로그인 시 Access Token, Refresh Token 발급
@@ -87,23 +92,53 @@ public class JwtService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
-        // 응답 헤더에 Access Token 추가
-        response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
+        Cookie jwtCookie = new Cookie("Authorization", newToken.getAccessToken());
+        jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
+        jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
+        jwtCookie.setPath("/");       // 모든 요청에 포함
+        jwtCookie.setMaxAge(60 * 60); // 1시간 유지
+        jwtCookie.setDomain(BASERURL.split("//")[1]);
+        jwtCookie.setAttribute("SameSite", "None");
+        response.addCookie(jwtCookie);
 
-        // 헤더에 Access Token 추가
-        response.addHeader("X-Refresh-Token", newToken.getRefreshToken());
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Refresh : {}",authentication.getName(), newToken.getRefreshToken());
+        Cookie refreshCookie = new Cookie("RefreshToken", newToken.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+        refreshCookie.setDomain(BASERURL.split("//")[1]);
+        refreshCookie.setAttribute("SameSite", "None");
+        response.addCookie(refreshCookie);
+
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
     }
 
     /**
      * 로그아웃 - Refresh Token 삭제
      */
-    public void deleteToken() {
+    public void deleteToken(HttpServletResponse response) {
         // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
         // SecurityContext에 Authentication 객체가 없는 경우는 없다.
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         redisStorageService.deleteRefreshToken(authentication.getName());
+        deleteCookie(response);
         log.info("[deleteToken] Refresh Token 삭제 완료");
+    }
+
+    private void deleteCookie(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("Authorization", "");
+        jwtCookie.setMaxAge(0);  // 쿠키 삭제
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(true);
+        jwtCookie.setPath("/");  // 쿠키가 적용될 경로
+        response.addCookie(jwtCookie);
+
+        Cookie refreshCookie = new Cookie("RefreshToken", "");
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0); // 7일
+        response.addCookie(refreshCookie);
     }
 }

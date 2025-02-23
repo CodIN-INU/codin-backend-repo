@@ -8,12 +8,12 @@ import inu.codin.codin.common.security.service.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.OAuth2LoginFailureHandler;
 import inu.codin.codin.common.security.util.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,6 +45,9 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
+    @Value("${server.domain}")
+    private String BASEURL;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -66,7 +69,7 @@ public class SecurityConfig {
                                 .anyRequest().hasRole("USER")
                 )
                 // Swagger 접근 시 httpBasic 인증 사용
-                .httpBasic(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
@@ -76,7 +79,6 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
-                        .loginProcessingUrl("/api/login/oauth2/code/google")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
@@ -116,13 +118,11 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
+                BASEURL,
                 "https://www.codin.co.kr",
-                "https://codin.inu.ac.kr",
                 "https://front-end-peach-two.vercel.app"
         ));
-        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setExposedHeaders(List.of("Authorization", "x-refresh-token"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
@@ -138,7 +138,8 @@ public class SecurityConfig {
             "/auth/google",
             "/v3/api/test1",
             "/ws-stomp/**",
-            "/chats/**"
+            "/chats/**",
+            "/login/oauth2/code/**"
     };
 
     // Swagger 접근 가능한 URL

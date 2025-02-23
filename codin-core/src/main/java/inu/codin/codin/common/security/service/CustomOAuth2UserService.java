@@ -27,6 +27,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
         log.info("email: {}", email);
 
+        if (email.equals("inu.codin@gmail.com")) return oAuth2User;
+
         // Only Allow @inu.ac.kr
         if (email == null || !email.trim().endsWith("@inu.ac.kr")) {
             OAuth2Error oauth2Error = new OAuth2Error(
@@ -37,7 +39,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
         }
 
-        log.info("email2: {}", email);
         return oAuth2User;
     }
 }
