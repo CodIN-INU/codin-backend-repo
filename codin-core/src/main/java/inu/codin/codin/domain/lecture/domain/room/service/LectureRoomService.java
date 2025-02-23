@@ -15,15 +15,16 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LectureRoomService {
 
     private final MongoTemplate mongoTemplate;
+
 
     public List<LectureRoomEntity> getLecturesByFloor(int floor) {
 
@@ -51,17 +52,33 @@ public class LectureRoomService {
     public List<Map<Integer, List<EmptyRoomResponseDto>>> statusOfEmptyRoom() {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek today = now.getDayOfWeek();
-        ArrayList<Map<Integer, List<EmptyRoomResponseDto>>> lectureRoom = new ArrayList<>();
-        for (int floor=1; floor<=5; floor++) {
+        ArrayList<Map<Integer, List<EmptyRoomResponseDto>>> result = new ArrayList<>();
+        int[] rooms = new int[]{102, 104, 105, 107, 111, 205, 211, 302, 304, 305, 306, 311, 313, 314, 317, 406, 407, 408, 415, 416, 417, 501, 502, 504, 505, 511};
+
+        for (int floor = 1; floor <= 5; floor++) {
+            Map<Integer, List<EmptyRoomResponseDto>> lectureRoom = new HashMap<>();
+            for (int room : rooms){
+                if ((room / 100) == floor) {
+                    lectureRoom.put(room, new ArrayList<>());
+                }
+            }
+
             List<LectureRoomEntity> roomEntities = getLecturesByFloor(floor);
-            lectureRoom.add(roomEntities.stream()
+            List<EmptyRoomResponseDto> dtos = roomEntities.stream()
                     .filter(lecture -> lecture.getDayTime().containsKey(today))
                     .flatMap(lecture -> lecture.getDayTime().get(today).stream()
-                            .map(time -> EmptyRoomResponseDto.of(lecture, time)))
-                    .collect(Collectors.groupingBy(
-                            EmptyRoomResponseDto::getRoomNum
-                    )));
-        }
-        return lectureRoom;
+                            .map(time -> {
+                                EmptyRoomResponseDto dto = EmptyRoomResponseDto.of(lecture, time);
+                                if (lectureRoom.containsKey(dto.getRoomNum())) {
+                                    lectureRoom.get(dto.getRoomNum()).add(dto);
+                                } else {
+                                    lectureRoom.put(dto.getRoomNum(), List.of(dto));
+                                }
+                                return dto;
+                            })).toList();
+
+            result.add(lectureRoom);
+            }
+        return result;
     }
 }
