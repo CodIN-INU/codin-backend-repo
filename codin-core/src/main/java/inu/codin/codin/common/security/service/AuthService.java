@@ -8,6 +8,7 @@ import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
+import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
@@ -35,7 +36,6 @@ public class AuthService {
     private final S3Service s3Service;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
 
     /**
      * Google OAuth2를 통해 사용자 정보를 등록하고 로그인 처리하는 메소드
@@ -138,20 +138,20 @@ public class AuthService {
         issueJwtToken(user.getEmail(), response);
     }
 
-    private void issueJwtToken(String email, HttpServletResponse response) {
+
+    public void login(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
+        Optional<UserEntity> user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail());
+        if (user.isPresent()) {
+            issueJwtToken(signUpAndLoginRequestDto.getEmail(), response);
+        } throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+    }
+
+    public void issueJwtToken(String email, HttpServletResponse response) {
+        jwtService.deleteToken(response);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         jwtService.createToken(response);
     }
-
-
-
-
-
-    public void login(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response){
-
-    }
-
 }
