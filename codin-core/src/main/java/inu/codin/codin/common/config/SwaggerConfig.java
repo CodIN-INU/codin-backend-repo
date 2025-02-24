@@ -33,23 +33,22 @@ public class SwaggerConfig {
 
         // Bearer Auth 설정
         SecurityScheme securityScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-                .in(SecurityScheme.In.HEADER)
-                .name("Authorization");
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.COOKIE)
+                .name("access_token");
 
         // Bearer Auth를 사용하는 Security Requirement 설정
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("JWT");
+                .addList("cookieAuth");
 
         return new OpenAPI()
                 .info(info)
                 .security(List.of(securityRequirement))
-                .components(new Components().addSecuritySchemes("JWT", securityScheme))
+                .components(new Components().addSecuritySchemes("cookieAuth", securityScheme))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Server"), // Local Server
-                        new Server().url(BASEURL+"/api").description("Production Server") // Production Server
+                        new Server().url(BASEURL+"/api").description("Production Server"), // Production Server
+                        new Server().url("https://www.codin.co.kr/api").description("Production Server")
                 ));
     }
 
