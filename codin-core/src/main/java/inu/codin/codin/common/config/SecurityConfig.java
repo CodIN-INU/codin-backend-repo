@@ -132,7 +132,8 @@ public class SecurityConfig {
             "/v3/api/test1",
             "/ws-stomp/**",
             "/chats/**",
-            "/login/oauth2/code/**"
+            "/login/oauth2/code/**",
+            "/chat/**"
     };
 
     // Swagger 접근 가능한 URL
