@@ -92,7 +92,7 @@ public class JwtService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
-        Cookie jwtCookie = new Cookie("Authorization", newToken.getAccessToken());
+        Cookie jwtCookie = new Cookie("access_token", newToken.getAccessToken());
         jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
         jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
         jwtCookie.setPath("/");       // 모든 요청에 포함
@@ -102,7 +102,7 @@ public class JwtService {
         response.addCookie(jwtCookie);
 
 
-        Cookie refreshCookie = new Cookie("RefreshToken", newToken.getRefreshToken());
+        Cookie refreshCookie = new Cookie("refresh_token", newToken.getRefreshToken());
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
@@ -127,14 +127,14 @@ public class JwtService {
     }
 
     private void deleteCookie(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("Authorization", "");
+        Cookie jwtCookie = new Cookie("access_token", "");
         jwtCookie.setMaxAge(0);  // 쿠키 삭제
         jwtCookie.setHttpOnly(true);
         jwtCookie.setSecure(true);
         jwtCookie.setPath("/");  // 쿠키가 적용될 경로
         response.addCookie(jwtCookie);
 
-        Cookie refreshCookie = new Cookie("RefreshToken", "");
+        Cookie refreshCookie = new Cookie("refresh_token", "");
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");

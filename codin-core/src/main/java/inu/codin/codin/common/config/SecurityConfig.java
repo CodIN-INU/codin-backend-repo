@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -84,10 +83,6 @@ public class SecurityConfig {
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
-                )
-                // Content-Security-Policy 및 Frame-Options 설정
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 비활성화
                 );
         return http.build();
     }
@@ -118,6 +113,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
+                "http://localhost:8080",
                 BASEURL,
                 "https://www.codin.co.kr",
                 "https://front-end-peach-two.vercel.app"
@@ -132,10 +128,7 @@ public class SecurityConfig {
      * 토큰 없이 접근 가능한 URL
      */
     private static final String[] PERMIT_ALL = {
-            "/auth/reissue",
-            "/auth/logout",
-            "/auth/signup/**",
-            "/auth/google",
+            "/auth/**",
             "/v3/api/test1",
             "/ws-stomp/**",
             "/chats/**",

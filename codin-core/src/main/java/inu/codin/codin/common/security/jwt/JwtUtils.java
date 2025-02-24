@@ -10,7 +10,7 @@ public class JwtUtils {
 
     /**
      * 쿠키에서 Access 토큰 추출
-     * HTTP Cookies : "Authorization" : "..."
+     * HTTP Cookies : "access_token" : "..."
      * @return (null, 빈 문자열)의 경우 null 반환
      */
     public String getAccessToken(HttpServletRequest request) {
@@ -18,7 +18,7 @@ public class JwtUtils {
         String bearerToken = null;
         if (request.getCookies() != null){
             for (Cookie cookie : request. getCookies()){
-                if ("Authorization".equals(cookie.getName())){
+                if ("access_token".equals(cookie.getName())){
                     bearerToken = cookie.getValue();
                     break;
                 }
@@ -33,14 +33,14 @@ public class JwtUtils {
 
     /**
      * 쿠키에서 Refresh 토큰 추출
-     * HTTP Cookies : "RefreshToken" : "..."
+     * HTTP Cookies : "refresh_token" : "..."
      * @return RefreshToken이 없는 경우 null 반환
      */
     public String getRefreshToken(HttpServletRequest request) {
         String refreshToken = null;
         if (request.getCookies() != null){
             for (Cookie cookie : request. getCookies()){
-                if ("RefreshToken".equals(cookie.getName())){
+                if ("refresh_token".equals(cookie.getName())){
                     refreshToken = cookie.getValue();
                     break;
                 }
