@@ -61,20 +61,10 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
-//        authService.login(signUpAndLoginRequestDto, response);
-        Optional<UserEntity> user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail());
-        if (user.isPresent()) {
-            jwtService.deleteToken(response);
-            UsernamePasswordAuthenticationToken authenticationToken
-                    = new UsernamePasswordAuthenticationToken(signUpAndLoginRequestDto.getEmail(), signUpAndLoginRequestDto.getPassword());
+        authService.login(signUpAndLoginRequestDto, response);
 
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            jwtService.createToken(response);
-            return ResponseEntity.ok()
-                    .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "기존 유저 로그인 완료"));
-        } throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "기존 유저 로그인 완료"));
 
     }
 
