@@ -5,16 +5,18 @@ import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.jwt.JwtAuthenticationToken;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
+import inu.codin.codin.domain.user.security.CustomUserDetailsService;
 import inu.codin.codin.infra.redis.RedisStorageService;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,7 +31,7 @@ public class JwtService {
     private final RedisStorageService redisStorageService;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Value("${server.domain}")
     private String BASERURL;
@@ -140,5 +142,27 @@ public class JwtService {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0); // 7일
         response.addCookie(refreshCookie);
+    }
+
+    public void setAuthentication(ServletServerHttpRequest serverHttpRequest){
+        String accessToken = jwtUtils.getAccessToken(serverHttpRequest.getServletRequest());
+
+        // Access Token이 있는 경우
+        if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
+            if (jwtTokenProvider.validateAccessToken(accessToken)) {
+                String email = jwtTokenProvider.getUsername(accessToken);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
+                if (userDetails != null) {
+                    // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
+                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+        } else {
+            SecurityContextHolder.clearContext();
+            throw new MalformedJwtException("[Chatting] JWT를 찾을 수 없습니다.");
+        }
     }
 }
