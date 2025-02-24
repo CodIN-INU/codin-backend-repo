@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -65,6 +64,7 @@ public class AuthController {
 //        authService.login(signUpAndLoginRequestDto, response);
         Optional<UserEntity> user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail());
         if (user.isPresent()) {
+            jwtService.deleteToken(response);
             UsernamePasswordAuthenticationToken authenticationToken
                     = new UsernamePasswordAuthenticationToken(signUpAndLoginRequestDto.getEmail(), signUpAndLoginRequestDto.getPassword());
 
