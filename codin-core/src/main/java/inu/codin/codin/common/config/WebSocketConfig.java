@@ -1,6 +1,8 @@
 package inu.codin.codin.common.config;
 
-import inu.codin.codin.domain.chat.StompMessageProcessor;
+import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.codin.common.stomp.HttpHandShakeInterceptor;
+import inu.codin.codin.common.stomp.StompMessageProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +22,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private String BASEURL;
 
     private final StompMessageProcessor stompMessageProcessor;
+    private final JwtService jwtService;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stomp") //handshake endpoint
                 .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:8080", BASEURL)
-                .withSockJS();
+                .withSockJS()
+                .setInterceptors(new HttpHandShakeInterceptor(jwtService));
     }
 
     @Override
