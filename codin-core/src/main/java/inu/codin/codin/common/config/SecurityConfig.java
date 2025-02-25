@@ -115,7 +115,6 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:8080",
                 BASEURL,
-                "https://www.codin.co.kr",
                 "https://front-end-peach-two.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
@@ -141,7 +140,7 @@ public class SecurityConfig {
             "/ws-stomp/**",
             "/chats/**",
             "/login/oauth2/code/**",
-            "/chat/**"
+//            "/chat/**"
     };
 
     // Swagger 접근 가능한 URL
