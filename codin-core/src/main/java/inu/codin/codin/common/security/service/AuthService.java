@@ -143,7 +143,7 @@ public class AuthService {
         Optional<UserEntity> user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail());
         if (user.isPresent()) {
             issueJwtToken(signUpAndLoginRequestDto.getEmail(), response);
-        } throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+        } else throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
     }
 
     public void issueJwtToken(String email, HttpServletResponse response) {
