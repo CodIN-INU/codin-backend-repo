@@ -34,8 +34,6 @@ public class AuthController {
 
     private final JwtService jwtService;
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
