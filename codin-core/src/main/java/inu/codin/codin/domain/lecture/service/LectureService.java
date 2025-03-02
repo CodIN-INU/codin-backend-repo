@@ -51,9 +51,14 @@ public class LectureService {
 
     public List<LectureSearchListResponseDto> searchLecturesToReview(Department department, Integer grade, String semester) {
         List<LectureEntity> lectures = findLectures(department, grade, semester);
-        return lectures.stream()
-                .map(LectureSearchListResponseDto::of)
-                .toList();
+        if (semester != null) return lectures.stream()
+                                    .map(lecture -> LectureSearchListResponseDto.of(lecture, semester))
+                                    .toList();
+
+        else return lectures.stream()
+                    .map(LectureSearchListResponseDto::of)
+                    .flatMap(List::stream)
+                    .toList();
     }
 
     private LecturePageResponse getLecturePageResponse(Page<LectureEntity> lecturePage) {
