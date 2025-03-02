@@ -1,10 +1,9 @@
 package inu.codin.codin.common.security.jwt;
 
+import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.infra.redis.RedisStorageService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
@@ -112,10 +111,10 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) { // 토큰 만료
             log.error("[validateAccessToken] 토큰 만료 : {}", e.getMessage());
-            return false;
+            throw new JwtException(SecurityErrorCode.EXPIRED_TOKEN, "access_token");
         } catch (Exception e) { // 토큰 변조
             log.error("[validateAccessToken] 유효하지 않은 토큰 : {}", e.getMessage());
-            return false;
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "access_token");
         }
     }
 
@@ -139,10 +138,10 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) { // 토큰 만료
             log.error("[validateRefreshToken] 토큰 만료 : {}", e.getMessage());
-            return false;
+            throw new JwtException(SecurityErrorCode.EXPIRED_TOKEN, "refresh_token");
         } catch (Exception e) { // 토큰 변조
             log.error("[validateRefreshToken] 유효하지 않은 토큰 : {}", e.getMessage());
-            return false;
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "refresh_token");
         }
     }
 
