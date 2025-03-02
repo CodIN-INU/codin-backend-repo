@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.codin.common.dto.Department;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;

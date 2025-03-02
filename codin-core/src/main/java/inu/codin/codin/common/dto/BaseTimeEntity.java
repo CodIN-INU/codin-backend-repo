@@ -1,4 +1,4 @@
-package inu.codin.codin.common;
+package inu.codin.codin.common.dto;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;

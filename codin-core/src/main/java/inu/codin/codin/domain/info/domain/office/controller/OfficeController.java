@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.domain.office.controller;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.info.domain.office.dto.request.OfficeMemberCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.office.dto.request.OfficeUpdateRequestDto;

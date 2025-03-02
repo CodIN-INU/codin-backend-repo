@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.like.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
