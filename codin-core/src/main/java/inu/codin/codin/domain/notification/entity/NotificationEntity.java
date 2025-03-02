@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.notification.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;

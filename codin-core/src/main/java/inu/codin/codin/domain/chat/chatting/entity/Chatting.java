@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.chat.chatting.dto.ContentType;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import jakarta.validation.constraints.NotBlank;
