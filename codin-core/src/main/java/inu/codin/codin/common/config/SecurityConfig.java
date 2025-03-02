@@ -1,5 +1,6 @@
 package inu.codin.codin.common.config;
 
+import inu.codin.codin.common.dto.PermitAllProperties;
 import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
@@ -43,6 +44,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final PermitAllProperties permitAllProperties;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -60,30 +62,29 @@ public class SecurityConfig {
                 // authorizeHttpRequests 메서드를 통해 요청에 대한 권한 설정
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers(PERMIT_ALL).permitAll()
-                                .requestMatchers(SWAGGER_AUTH_PATHS).permitAll()
+                                .requestMatchers(permitAllProperties.getUrls().toArray(new String[0])).permitAll()
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
                                 .anyRequest().hasRole("USER")
                 )
-                // Swagger 접근 시 httpBasic 인증 사용
+                //oauth2 로그인 설정 추가
+                .oauth2Login(oauth2 -> oauth2
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(customOAuth2UserService)
+                                )
+                                .successHandler(oAuth2LoginSuccessHandler)
+                                .failureHandler(oAuth2LoginFailureHandler)
+                )
+                                // Swagger 접근 시 httpBasic 인증 사용
 //                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils),
+                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils, permitAllProperties),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
-                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
-                //oauth2 로그인 설정 추가
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                );
+                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
         return http.build();
     }
 
@@ -131,25 +132,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * 토큰 없이 접근 가능한 URL
-     */
-    private static final String[] PERMIT_ALL = {
-            "/auth/**",
-            "/v3/api/test1",
-            "/ws-stomp/**",
-            "/chats/**",
-            "/login/oauth2/code/**",
-//            "/chat/**"
-    };
-
-    // Swagger 접근 가능한 URL
-    private static final String[] SWAGGER_AUTH_PATHS = {
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/v3/api-docs",
-            "/swagger-resources/**",
-    };
 
     // User 권한 URL
     private static final String[] USER_AUTH_PATHS = {

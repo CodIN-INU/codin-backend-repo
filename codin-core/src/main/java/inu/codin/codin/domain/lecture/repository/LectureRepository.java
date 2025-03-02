@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.repository;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
