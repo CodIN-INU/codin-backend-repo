@@ -1,10 +1,9 @@
 package inu.codin.codin.domain.user.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
