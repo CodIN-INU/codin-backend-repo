@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.user.security;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;

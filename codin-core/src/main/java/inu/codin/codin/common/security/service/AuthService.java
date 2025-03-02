@@ -1,6 +1,6 @@
 package inu.codin.codin.common.security.service;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.enums.AuthResultStatus;

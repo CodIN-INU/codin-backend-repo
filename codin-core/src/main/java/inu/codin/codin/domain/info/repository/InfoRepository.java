@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.repository;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.info.domain.lab.entity.Lab;
 import inu.codin.codin.domain.info.domain.office.entity.Office;
 import inu.codin.codin.domain.info.domain.professor.entity.Professor;

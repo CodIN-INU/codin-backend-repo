@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.domain.poll.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

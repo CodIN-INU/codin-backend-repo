@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
