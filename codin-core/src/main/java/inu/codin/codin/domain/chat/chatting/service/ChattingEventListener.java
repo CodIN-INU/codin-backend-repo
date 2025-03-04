@@ -4,12 +4,18 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.dto.event.ChattingArrivedEvent;
+import inu.codin.codin.domain.chat.chatting.dto.event.UpdateUnreadCountEvent;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +23,7 @@ public class ChattingEventListener {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChattingRepository chattingRepository;
+    private final SimpMessageSendingOperations template;
 
     @Async
     @EventListener
@@ -34,6 +41,22 @@ public class ChattingEventListener {
         chatRoom.updateLastMessage(chatting.getContent());
         chatRoomRepository.save(chatRoom);
         chattingRepository.save(chatting);
+
+    }
+
+
+    @EventListener
+    public void updateUnreadCountEvent(UpdateUnreadCountEvent updateUnreadCountEvent){
+        List<Map<String, String>> result = new ArrayList<>();
+        for (Chatting chat : updateUnreadCountEvent.getChattingList()){
+            Map<String, String> payload = Map.of(
+                    "id", chat.get_id().toString(),
+                    "unread", String.valueOf(chat.getUnreadCount())
+            );
+            result.add(payload);
+        }
+
+        template.convertAndSend("/queue/unread/"+ updateUnreadCountEvent.getChatRoomId(), result);
 
     }
 

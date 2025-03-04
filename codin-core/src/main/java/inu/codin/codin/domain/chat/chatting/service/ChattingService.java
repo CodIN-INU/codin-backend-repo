@@ -94,17 +94,4 @@ public class ChattingService {
 
         return imageUrls;
     }
-
-    public void updateUnreadCount(ObjectId chatRoomId, ObjectId userId){
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                        .orElseThrow(()-> new NotFoundException("채팅방을 찾을 수 없습니다."));
-        chattingRepository.findAllByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
-                .stream()
-                .limit(chatRoom.getParticipants().getInfo().get(userId).getUnreadMessage())
-                .forEach(chatting -> {
-                    chatting.minusUnread();
-                    chattingRepository.save(chatting);
-                });
-
-    }
 }
