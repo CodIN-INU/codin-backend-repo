@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.service;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.lecture.dto.*;
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
@@ -10,7 +10,6 @@ import inu.codin.codin.infra.redis.service.RedisReviewService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -50,10 +49,16 @@ public class LectureService {
         } else throw new WrongInputException("학과명을 잘못 입력하였습니다. department: " + department.getDescription());
     }
 
-    public LecturePageResponse searchLecturesToReview(Department department, Integer grade, String semester, int page) {
-        PageRequest pageRequest = PageRequest.of(page, 20, Sort.by("lectureNm"));
-        Page<LectureEntity> lecturePage = findLectures(department, grade, semester, pageRequest);
-        return getLecturePageResponse(lecturePage);
+    public List<LectureSearchListResponseDto> searchLecturesToReview(Department department, Integer grade, String semester) {
+        List<LectureEntity> lectures = findLectures(department, grade, semester);
+        if (semester != null) return lectures.stream()
+                                    .map(lecture -> LectureSearchListResponseDto.of(lecture, semester))
+                                    .toList();
+
+        else return lectures.stream()
+                    .map(LectureSearchListResponseDto::of)
+                    .flatMap(List::stream)
+                    .toList();
     }
 
     private LecturePageResponse getLecturePageResponse(Page<LectureEntity> lecturePage) {
@@ -66,7 +71,7 @@ public class LectureService {
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public Page<LectureEntity> findLectures(Department department, Integer grade, String semester, PageRequest pageRequest) {
+    public List<LectureEntity> findLectures(Department department, Integer grade, String semester) {
         Query query = new Query();
 
         if (department != null) {
@@ -81,10 +86,8 @@ public class LectureService {
             query.addCriteria(Criteria.where("semester").in(List.of(semester)));
         }
 
-        long total = mongoTemplate.count(query, LectureEntity.class);
-        query.with(pageRequest);
+        query.with(Sort.by(Sort.Direction.ASC, "lectureNm"));
 
-        List<LectureEntity> lectures = mongoTemplate.find(query, LectureEntity.class);
-        return new PageImpl<>(lectures, pageRequest, total);
+        return mongoTemplate.find(query, LectureEntity.class);
     }
 }

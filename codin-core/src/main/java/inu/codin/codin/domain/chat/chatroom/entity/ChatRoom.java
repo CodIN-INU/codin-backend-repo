@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
-import inu.codin.codin.common.BaseTimeEntity;
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
