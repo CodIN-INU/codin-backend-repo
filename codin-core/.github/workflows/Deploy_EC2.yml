@@ -35,7 +35,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image And Push
-        run: docker buildx build --platform linux/amd64,linux/arm64 -t inucodin/codin-backend:latest --push .
+        run: docker buildx build -t inucodin/codin-backend:latest --push .
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
