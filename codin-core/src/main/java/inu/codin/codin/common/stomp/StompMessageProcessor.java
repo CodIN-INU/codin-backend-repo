@@ -6,7 +6,6 @@ import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.service.ChattingService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisChatService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StompMessageProcessor implements ChannelInterceptor {
 
     private final ChattingService chattingService;
-    private final RedisChatService redisChatService;
     private final Map<String, String> sessionStore = new ConcurrentHashMap<>();
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -78,14 +76,12 @@ public class StompMessageProcessor implements ChannelInterceptor {
     }
     private void exitToChatRoom(StompHeaderAccessor headerAccessor) {
         Result result = getResult(headerAccessor);
-        redisChatService.exitToChatroom(result.chatroom().get_id().toString());
         result.chatroom().getParticipants().exit(result.user().get_id());
         chatRoomRepository.save(result.chatroom());
     }
 
     private void enterToChatRoom(StompHeaderAccessor headerAccessor){
         Result result = getResult(headerAccessor);
-        redisChatService.enterToChatroom(result.chatroom().get_id().toString());
         chattingService.updateUnreadCount(result.chatroom.get_id(), result.user.get_id());
         result.chatroom.getParticipants().enter(result.user.get_id());
         chatRoomRepository.save(result.chatroom);

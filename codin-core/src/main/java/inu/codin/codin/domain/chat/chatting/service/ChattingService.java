@@ -5,6 +5,7 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
+import inu.codin.codin.domain.chat.chatroom.service.ChatRoomService;
 import inu.codin.codin.domain.chat.chatting.dto.event.ChattingArrivedEvent;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.chat.chatting.dto.response.ChattingAndUserIdResponseDto;
@@ -13,7 +14,6 @@ import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
-import inu.codin.codin.infra.redis.service.RedisChatService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class ChattingService {
     private final ChattingRepository chattingRepository;
     private final S3Service s3Service;
     private final NotificationService notificationService;
-    private final RedisChatService redisChatService;
+    private final ChatRoomService chatRoomService;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChattingResponseDto sendMessage(String id, ChattingRequestDto chattingRequestDto, Authentication authentication) {
@@ -48,7 +48,7 @@ public class ChattingService {
                 });
 
         ObjectId userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
-        Integer countOfParticipating = redisChatService.countOfChatRoomParticipant(chatRoom.get_id().toString());
+        Integer countOfParticipating = chatRoomService.countOfParticipating(chatRoom.get_id());
         Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto, userId,
                 chatRoom.getParticipants().getInfo().size()-countOfParticipating);
 
