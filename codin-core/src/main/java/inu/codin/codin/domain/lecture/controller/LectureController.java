@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.lecture.controller;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
+import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.dto.Option;
 import inu.codin.codin.domain.lecture.service.LectureService;
@@ -54,15 +55,12 @@ public class LectureController {
                     "학과, 학년, 수강학기 중 하나만으로도 검색 가능"
     )
     @GetMapping("/search-review")
-    public ResponseEntity<SingleResponse<?>> searchLecturesToReview(@RequestParam(required = false) Department department,
+    public ResponseEntity<ListResponse<?>> searchLecturesToReview(@RequestParam(required = false) Department department,
                                                                     @RequestParam(required = false) @Min(1) @Max(4) Integer grade,
-                                                                    @RequestParam(required = false) String semester,
-                                                                    @RequestParam int page){
+                                                                    @RequestParam(required = false) String semester){
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "필터링 된 강의들 반환 완료",
-                        lectureService.searchLecturesToReview(department, grade, semester, page)));
+                .body(new ListResponse<>(200, "필터링 된 강의들 반환 완료",
+                        lectureService.searchLecturesToReview(department, grade, semester)));
     }
-
-
 
 }

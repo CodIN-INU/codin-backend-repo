@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.entity;
 
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

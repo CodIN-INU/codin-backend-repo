@@ -4,7 +4,7 @@ import inu.codin.codin.domain.info.domain.office.dto.request.OfficeMemberCreateU
 import inu.codin.codin.domain.info.domain.office.dto.request.OfficeUpdateRequestDto;
 import inu.codin.codin.domain.info.domain.office.dto.response.OfficeDetailsResponseDto;
 import inu.codin.codin.domain.info.domain.office.entity.Office;
-import inu.codin.codin.common.Department;
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.info.domain.office.entity.OfficeMember;
 import inu.codin.codin.domain.info.repository.InfoRepository;
 import lombok.RequiredArgsConstructor;
