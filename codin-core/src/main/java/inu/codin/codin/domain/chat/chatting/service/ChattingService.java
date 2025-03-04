@@ -13,6 +13,7 @@ import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
+import inu.codin.codin.infra.redis.service.RedisChatService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class ChattingService {
     private final ChattingRepository chattingRepository;
     private final S3Service s3Service;
     private final NotificationService notificationService;
+    private final RedisChatService redisChatService;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChattingResponseDto sendMessage(String id, ChattingRequestDto chattingRequestDto, Authentication authentication) {
@@ -46,7 +48,9 @@ public class ChattingService {
                 });
 
         ObjectId userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
-        Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto, userId, chatRoom.getParticipants().getInfo().size());
+        Integer countOfParticipating = redisChatService.countOfChatRoomParticipant(chatRoom.get_id().toString());
+        Chatting chatting = Chatting.of(chatRoom.get_id(), chattingRequestDto, userId,
+                chatRoom.getParticipants().getInfo().size()-countOfParticipating);
 
         log.info("[메시지 전송 성공] 메시지: [{}], 송신자 ID: {}, 채팅방 ID: {}", chattingRequestDto.getContent(), userId, id);
 
