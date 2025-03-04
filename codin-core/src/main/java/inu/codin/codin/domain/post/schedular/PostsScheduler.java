@@ -32,7 +32,9 @@ public class PostsScheduler {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             log.warn("Exited department python with error code" + exitCode);
-            log.info("[PostsScheduler] 학과 공지사항 업데이트 완료");
+            if (exitCode == 0)
+                log.info("[PostsScheduler] 학과 공지사항 업데이트 완료");
+            else log.warn("[PostsScheduler] 학과 공지사항 업데이트 실패");
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e.getStackTrace()[0]);
             throw new SchedulerException(e.getMessage());
@@ -50,7 +52,9 @@ public class PostsScheduler {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             log.warn("Exited starinu python with error code" + exitCode);
-            log.info("[PostsScheduler] STARINU 게시글 업데이트 완료");
+            if (exitCode == 0)
+                log.info("[PostsScheduler] STARINU 공지사항 업데이트 완료");
+            else log.warn("[PostsScheduler] STARINU 공지사항 업데이트 실패");
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e.getStackTrace()[0]);
             throw new SchedulerException(e.getMessage());
