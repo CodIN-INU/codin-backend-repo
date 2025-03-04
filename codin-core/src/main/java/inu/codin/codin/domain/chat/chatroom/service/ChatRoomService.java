@@ -8,6 +8,7 @@ import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.dto.event.ChatRoomNotificationEvent;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
+import inu.codin.codin.domain.chat.chatroom.entity.Participants;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
@@ -126,5 +127,15 @@ public class ChatRoomService {
         info.get(userId).updateNotification();
         chatRoomRepository.save(chatRoom);
         log.info("[알림 설정 완료] 채팅방 ID: {}에 알림 설정 완료", chatRoomId);
+    }
+
+    public Integer countOfParticipating(ObjectId chatRoomId){
+        ChatRoom chatroom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
+        int count = 0;
+        for (ParticipantInfo info : chatroom.getParticipants().getInfo().values()){
+            if (info.isConnected()) count++;
+        }
+        return count;
     }
 }
