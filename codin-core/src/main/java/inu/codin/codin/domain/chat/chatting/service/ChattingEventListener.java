@@ -26,9 +26,7 @@ public class ChattingEventListener {
                 .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다. ID: "+ chatting.getChatRoomId()));
         chatRoom.getParticipants().getInfo().forEach(
                 (id, participantInfo) -> {
-                    if (participantInfo.isConnected()) {
-                        chatting.minusUnread();
-                    } else {
+                    if (!participantInfo.isConnected()) {
                         participantInfo.plusUnread();
                     }
                 }
@@ -36,6 +34,7 @@ public class ChattingEventListener {
         chatRoom.updateLastMessage(chatting.getContent());
         chatRoomRepository.save(chatRoom);
         chattingRepository.save(chatting);
+
     }
 
 }
