@@ -25,8 +25,7 @@ public class PostsScheduler {
     public void departmentPostsScheduler() {
         try {
             String fileName = "department.py";
-            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3", "\""+
-                    PATH + fileName+"\"");
+            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",PATH + fileName);
             System.out.println(PATH);
             System.out.println("Running command: " + processBuilder.command());
             Process process = processBuilder.start();
