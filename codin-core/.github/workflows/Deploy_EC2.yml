@@ -50,7 +50,9 @@ jobs:
               docker ps -a
               docker rm -f codin-backend || true
               docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-              docker run -d --net codin-docker_default -p 8080:8080 --name codin-backend ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
+              docker run -d --net codin-docker_default -p 8080:8080 --name codin-backend \
+                -v /opt/project/backend-data/post_data/:/opt/project/backend-data/post_data/ \
+                ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest              
               docker images -f "dangling=true" -q | xargs sudo docker rmi || true
               docker ps -a
             "
