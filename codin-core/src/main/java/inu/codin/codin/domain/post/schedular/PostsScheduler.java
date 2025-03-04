@@ -26,6 +26,7 @@ public class PostsScheduler {
             String fileName = "department.py";
             ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",
                     PATH + fileName);
+            System.out.println("Running command: " + processBuilder.command());
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             log.warn("Exited department python with error code" + exitCode);
