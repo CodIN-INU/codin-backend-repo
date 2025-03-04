@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.schedular;
 
 import inu.codin.codin.domain.post.exception.SchedulerException;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class PostsScheduler {
 
     @Value("${schedule.path}")
-    private static String PATH;
+    private String PATH;
 
     @Scheduled(cron = "${schedule.department.cron}", zone = "Asia/Seoul")
     @Async
@@ -26,6 +27,7 @@ public class PostsScheduler {
             String fileName = "department.py";
             ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",
                     PATH + fileName);
+            System.out.println(PATH);
             System.out.println("Running command: " + processBuilder.command());
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
