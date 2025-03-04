@@ -25,8 +25,8 @@ public class PostsScheduler {
     public void departmentPostsScheduler() {
         try {
             String fileName = "department.py";
-            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("python3",
-                    PATH + fileName);
+            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3", "\""+
+                    PATH + fileName+"\"");
             System.out.println(PATH);
             System.out.println("Running command: " + processBuilder.command());
             Process process = processBuilder.start();
@@ -47,7 +47,7 @@ public class PostsScheduler {
     public void starinuPostsScheduler(){
         try {
             String fileName = "starinu.py";
-            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("python3",
+            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",
                     PATH + fileName);
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
