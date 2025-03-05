@@ -184,7 +184,15 @@ public class ReportService {
         }
 
         // 신고 처리 정보 생성
-        ReportEntity.ReportActionEntity action = ReportEntity.ReportActionEntity.builder()
+        ReportEntity.ReportActionEntity action = null;
+        if (requestDto.getSuspensionPeriod().equals(SuspensionPeriod.PERMANENT)){
+            action = ReportEntity.ReportActionEntity.builder()
+                    .actionTakenById(userId)
+                    .suspensionPeriod(requestDto.getSuspensionPeriod())
+                    .suspensionEndDate(LocalDateTime.of(9999,12,31,23,59))
+                    .build();
+        }
+        else action = ReportEntity.ReportActionEntity.builder()
                 .actionTakenById(userId)
                 .suspensionPeriod(requestDto.getSuspensionPeriod())
                 .suspensionEndDate(LocalDateTime.now().plusDays(requestDto.getSuspensionPeriod().getDays()))
