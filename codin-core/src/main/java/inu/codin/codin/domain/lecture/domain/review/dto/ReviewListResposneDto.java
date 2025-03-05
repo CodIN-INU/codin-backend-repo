@@ -25,7 +25,7 @@ public class ReviewListResposneDto {
     private double starRating;
 
     @Schema(description = "좋아요 수", example = "3")
-    private int likes;
+    private int likeCount;
 
     @Schema(description = "유저의 좋아요 반영 여부", example = "true")
     private boolean isLiked;
@@ -34,25 +34,25 @@ public class ReviewListResposneDto {
     private String semester;
 
     @Builder
-    public ReviewListResposneDto(String _id, String lectureId, String userId, String content, double starRating, int likes, boolean isLiked, String semester) {
+    public ReviewListResposneDto(String _id, String lectureId, String userId, String content, double starRating, int likeCount, boolean isLiked, String semester) {
         this._id = _id;
         this.lectureId = lectureId;
         this.userId = userId;
         this.content = content;
         this.starRating = starRating;
-        this.likes = likes;
+        this.likeCount = likeCount;
         this.isLiked = isLiked;
         this.semester = semester;
     }
 
-    public static ReviewListResposneDto of(ReviewEntity reviewEntity, boolean isLiked, int likes){
+    public static ReviewListResposneDto of(ReviewEntity reviewEntity, boolean isLiked, int likeCount){
         return ReviewListResposneDto.builder()
                 ._id(reviewEntity.get_id().toString())
                 .lectureId(reviewEntity.getLectureId().toString())
                 .userId(reviewEntity.getUserId().toString())
                 .content(reviewEntity.getContent())
                 .starRating(reviewEntity.getStarRating())
-                .likes(likes)
+                .likeCount(likeCount)
                 .isLiked(isLiked)
                 .semester(reviewEntity.getSemester())
                 .build();
