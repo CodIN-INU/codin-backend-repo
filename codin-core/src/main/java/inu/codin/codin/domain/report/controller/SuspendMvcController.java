@@ -16,8 +16,8 @@ public class SuspendMvcController {
     @GetMapping
     public String getSuspendedView(@RequestParam("endDate") String endDate, Model model){
         LocalDateTime dateTime = LocalDateTime.parse(endDate);
-        LocalDateTime adjustedDateTime = dateTime.plusHours(1);
-        String formattedDate = adjustedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH시"));
+        LocalDateTime adjustedDateTime = dateTime.plusDays(1);
+        String formattedDate = adjustedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         model.addAttribute("endDate", formattedDate);
         return "suspend";
     }
