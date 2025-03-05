@@ -8,6 +8,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,6 +37,11 @@ public class RedisScrapService {
         String redisKey = SCRAP_KEY + postId.toString();
         Long scrapCount = redisTemplate.opsForSet().size(redisKey);
         return scrapCount != null ? scrapCount.intValue() : 0;
+    }
+
+    public Set<String> getScrapedUsers(ObjectId postId) {
+        String redisKey = SCRAP_KEY + postId.toString();
+        return redisTemplate.opsForSet().members(redisKey);
     }
 
     public boolean isPostScraped(ObjectId postId, ObjectId userId){
