@@ -19,6 +19,6 @@ public class SuspendMvcController {
         LocalDateTime adjustedDateTime = dateTime.plusHours(1);
         String formattedDate = adjustedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH시"));
         model.addAttribute("endDate", formattedDate);
-        return "suspends";
+        return "suspend";
     }
 }
