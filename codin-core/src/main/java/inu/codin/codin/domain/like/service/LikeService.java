@@ -2,6 +2,7 @@ package inu.codin.codin.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.exception.LikeCreateFailException;
@@ -26,6 +27,7 @@ public class LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
+    private final ReviewRepository reviewRepository;
 
     private final RedisLikeService redisLikeService;
     private final RedisService redisService;
@@ -133,6 +135,8 @@ public class LikeService {
                     .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
             case COMMENT -> commentRepository.findByIdAndNotDeleted(id)
                     .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+            case REVIEW -> reviewRepository.findByLectureIdAndDeletedAtIsNull(id)
+                    .orElseThrow(() ->new NotFoundException("수강 후기를 찾을 수 없습니다"));
 
         }
     }
