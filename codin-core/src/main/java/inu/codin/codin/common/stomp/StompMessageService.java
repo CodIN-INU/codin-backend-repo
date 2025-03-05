@@ -68,7 +68,7 @@ public class StompMessageService {
         }
         ChatRoom chatroom = chatRoomRepository.findById(new ObjectId(chatroomId))
                 .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
-        UserEntity user = userRepository.findByEmailAndDisabledAndActive(email)
+        UserEntity user = userRepository.findByEmailAndStatusAll(email)
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
         Result result = new Result(chatroom, user);
         return result;

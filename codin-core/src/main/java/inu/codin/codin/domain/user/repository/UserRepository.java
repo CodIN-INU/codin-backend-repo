@@ -16,14 +16,11 @@ public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
     @Query("{'email':  ?0, 'deletedAt': null, 'status':  { $in:  ['ACTIVE'] }}")
     Optional<UserEntity> findByEmail(String email);
 
-    @Query("{'studentId':  ?0, 'deletedAt': null, 'status':  { $in:  ['ACTIVE'] }}")
-    Optional<UserEntity> findByStudentId(String studentId);
-
     Optional<UserEntity> findByNicknameAndDeletedAtIsNull(String nickname);
 
     @Query("{'email':  ?0, 'deletedAt': null, 'status':  { $in:  ['DISABLED'] }}")
     Optional<UserEntity> findByEmailAndDisabled(String email);
 
-    @Query("{'email':  ?0, 'deletedAt': null, 'status':  { $in:  ['DISABLED', 'ACTIVE'] }}")
-    Optional<UserEntity> findByEmailAndDisabledAndActive(String email);
+    @Query("{'email':  ?0, 'deletedAt': null }")
+    Optional<UserEntity> findByEmailAndStatusAll(String email);
 }
