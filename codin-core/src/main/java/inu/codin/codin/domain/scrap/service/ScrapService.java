@@ -60,7 +60,7 @@ public class ScrapService {
                 scrap.restore();
                 scrapRepository.save(scrap);
             } else {
-                log.warn("스크랩 추가 실패 - 이미 스크랩된 상태 - postId: {}, userId: {}", postId, userId);
+                log.info("스크랩 추가 실패 - 이미 스크랩된 상태 - postId: {}, userId: {}", postId, userId);
                 throw new ScrapCreateFailException("이미 스크랩이 된 상태입니다.");
             }
         } else {
