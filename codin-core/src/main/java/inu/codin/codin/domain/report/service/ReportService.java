@@ -200,7 +200,7 @@ public class ReportService {
         user.get().suspendUser();
         //영구 정지
         if (requestDto.getSuspensionPeriod() == SuspensionPeriod.PERMANENT){
-            user.get().updateTotalSuspensionEndDate(LocalDateTime.of(9999, 12 ,31, 22, 59));
+            user.get().updateTotalSuspensionEndDate(LocalDateTime.of(9999, 12 ,30, 23, 59));
         } else {
             LocalDateTime totalSuspensionEndDate = user.get().getTotalSuspensionEndDate();
             user.get().updateTotalSuspensionEndDate(
