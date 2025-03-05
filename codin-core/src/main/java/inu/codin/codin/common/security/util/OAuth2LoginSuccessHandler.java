@@ -50,7 +50,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 log.info("{\"code\":200, \"message\":\"회원 프로필 설정 미완료. 프로필 설정 페이지로 이동해주세요.\"}");
             }
             case SUSPENDED_USER -> {
-                getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/suspends?endDate=" + authService.getSuspensionEndDate(oAuth2User));
+                //todo MVC 호출을 위해 api가 붙음, 이후 삭제 예정
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+ "/api/suspends?endDate=" + authService.getSuspensionEndDate(oAuth2User));
                 log.info("{\"code\":200, \"message\":\"정지된 회원에 대하여 정지 화면 호출\"}");
             }
             default -> {
