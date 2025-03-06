@@ -62,7 +62,7 @@ public class AuthController {
         authService.login(signUpAndLoginRequestDto, response);
 
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "포탈 로그인 진행 완료", "기존 유저 로그인 완료"));
+                .body(new SingleResponse<>(200, "로그인 성공", "기존 유저 로그인 완료"));
 
     }
 
