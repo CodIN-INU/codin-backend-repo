@@ -137,13 +137,17 @@ public class AuthService {
 
         // 업로드된 이미지가 없으면 기본 프로필 이미지 URL 사용
         String imageUrl = null;
-        if (userImage == null && userImage.isEmpty()) {
-            imageUrl = s3Service.getDefaultProfileImageUrl();
-        } else {
+        if (userImage != null && !userImage.isEmpty()) {
+            log.info("[프로필 설정] 프로필 이미지 업로드 중...");
             imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
             log.info("[프로필 설정] 프로필 이미지 업로드 완료: {}", imageUrl);
         }
-        
+        // 업로드된 이미지가 없으면 기본 프로필 이미지 URL 사용
+        if (imageUrl == null) {
+            imageUrl = s3Service.getDefaultProfileImageUrl();
+        }
+
+
         // 사용자 정보 업데이트: 닉네임, 프로필 이미지 URL 업데이트 및 userStatus를 ACTIVE(활성)으로 변경
         user.updateNickname(userProfileRequestDto.getNickname());
         user.updateProfileImageUrl(imageUrl);
