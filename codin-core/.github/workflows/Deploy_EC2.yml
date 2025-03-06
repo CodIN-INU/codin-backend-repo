@@ -41,7 +41,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
           cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
