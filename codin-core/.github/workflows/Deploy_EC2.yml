@@ -34,7 +34,7 @@ jobs:
           password: ${{secrets.PASSWORD}}
           port: ${{secrets.PORT}}
           source: ./build/libs/*.jar
-          target: /opt/project
+          target: /app
           debug: true
 
 #      - name: Deploy to Server
