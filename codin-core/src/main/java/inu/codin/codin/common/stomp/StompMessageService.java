@@ -34,7 +34,7 @@ public class StompMessageService {
 
     public void connectSession(StompHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        sessionStore.put(sessionId, null);
+        sessionStore.put(sessionId, "");
         log.info("[STOMP CONNECT] session 연결 : {}", sessionId);
     }
 
@@ -71,7 +71,8 @@ public class StompMessageService {
         } else {
             throw new UsernameNotFoundException("헤더에서 유저를 찾을 수 없습니다.");
         }
-        String chatroomId = sessionStore.get(headerAccessor.getSessionId());
+        log.info(headerAccessor.toString());
+        String chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
         if (chatroomId == null || !ObjectId.isValid(chatroomId)) {
             throw new IllegalArgumentException("세션에서 가져올 수 없거나, 올바른 chatRoomId가 아닙니다: " + chatroomId);
         }
