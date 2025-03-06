@@ -19,11 +19,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Remove previous snapshot.jar
-        run: rm -rf ./build/libs/*.jar
-
-      - name: Build with Gradle
-        run: ./gradlew build -x test
+#      - name: Remove previous snapshot.jar
+#        run: rm -rf ./build/libs/*.jar
+#
+#      - name: Build with Gradle
+#        run: ./gradlew build -x test
 
       - name: SCP to Server
         uses: appleboy/scp-action@master
@@ -34,7 +34,7 @@ jobs:
           password: ${{secrets.PASSWORD}}
           port: ${{secrets.PORT}}
           source: ./build/libs/*.jar
-          target: /opt/project/
+          target: /opt/project
 
 #      - name: Deploy to Server
 #        uses: appleboy/ssh-action@master
