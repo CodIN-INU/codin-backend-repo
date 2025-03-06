@@ -35,6 +35,7 @@ jobs:
           port: ${{secrets.PORT}}
           source: ./build/libs/*.jar
           target: /opt/project
+          debug: true
 
 #      - name: Deploy to Server
 #        uses: appleboy/ssh-action@master
