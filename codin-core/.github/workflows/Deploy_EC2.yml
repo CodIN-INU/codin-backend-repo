@@ -37,8 +37,8 @@ jobs:
       - name: Build Docker image And Push
         uses: docker/build-push-action@v5
         env:
-          REGISTRY: docker.io
-          REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ steps.login-ecr.outputs.repo }}
           IMAGE_TAG: latest
         with:
           context: .
