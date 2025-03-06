@@ -22,6 +22,7 @@ public class LectureUploadService {
 
     public void uploadNewSemesterRooms(MultipartFile file) {
         try {
+            saveFile(file);
             String pythonNm = "dayTimeOfRoom.py";
             ProcessBuilder processBuilder = new ProcessBuilder(
                     PYTHON_DIR, UPLOAD_DIR + pythonNm, UPLOAD_DIR+file.getOriginalFilename()
@@ -46,8 +47,6 @@ public class LectureUploadService {
 
     public void uploadNewSemesterLectures(MultipartFile file){
         try {
-            saveFile(file);
-
             String pythonNm = "infoOfLecture.py";
             ProcessBuilder processBuilder = new ProcessBuilder(
                     PYTHON_DIR, UPLOAD_DIR + pythonNm, UPLOAD_DIR+file.getOriginalFilename()
