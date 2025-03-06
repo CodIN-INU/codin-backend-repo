@@ -9,6 +9,7 @@ import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StompMessageService {
 
     private final Map<String, String> sessionStore = new ConcurrentHashMap<>();
@@ -32,18 +34,15 @@ public class StompMessageService {
 
     public void connectSession(StompHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        String chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
-        sessionStore.put(sessionId, chatroomId);
-    }
-
-    public void exitToChatRoom(StompHeaderAccessor headerAccessor) {
-        Result result = getResult(headerAccessor);
-        result.chatroom().getParticipants().exit(result.user().get_id());
-        chatRoomRepository.save(result.chatroom());
+        sessionStore.put(sessionId, null);
+        log.info("[STOMP CONNECT] session 연결 : {}", sessionId);
     }
 
     public void enterToChatRoom(StompHeaderAccessor headerAccessor){
         Result result = getResult(headerAccessor);
+        sessionStore.put(headerAccessor.getSessionId(), result.chatroom().get_id().toString());
+        log.info("[STOMP SUBSCRIBE] session : {}, chatRoomId : {} ", headerAccessor.getSessionId(), result.chatroom().get_id().toString());
+
         List<Chatting> chattings = updateUnreadCount(result.chatroom.get_id(), result.user.get_id());
         result.chatroom.getParticipants().enter(result.user.get_id());
         chatRoomRepository.save(result.chatroom);
@@ -51,8 +50,18 @@ public class StompMessageService {
             eventPublisher.publishEvent(new UpdateUnreadCountEvent(this, chattings, result.chatroom.get_id().toString()));
     }
 
+    public void exitToChatRoom(StompHeaderAccessor headerAccessor) {
+        Result result = getResult(headerAccessor);
+        result.chatroom().getParticipants().exit(result.user().get_id());
+        chatRoomRepository.save(result.chatroom());
+        sessionStore.remove(headerAccessor.getSessionId());
+        log.info("[STOMP UNSUBSCRIBE] session : {}, chatRoomId : {} ", headerAccessor.getSessionId(), result.chatroom().get_id().toString());
+    }
+
     public void disconnectSession(StompHeaderAccessor headerAccessor){
         sessionStore.remove(headerAccessor.getSessionId());
+        log.info("[STOMP DISCONNECT] session : {} ", headerAccessor.getSessionId());
+
     }
 
     private Result getResult(StompHeaderAccessor headerAccessor) {
