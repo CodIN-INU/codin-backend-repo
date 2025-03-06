@@ -19,11 +19,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        UserEntity user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmailAndStatusAll(email)
                 .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없음, email :" + email));
 
         if (!UserStatus.ACTIVE.equals(user.getStatus())) {
-            throw new UserDisabledException("유저가 활성화되지 않았습니다");
+            throw new UserDisabledException("유저가 활성화되지 않았습니다, status : "+ user.getStatus());
         }
 
         return CustomUserDetails.from(user);
