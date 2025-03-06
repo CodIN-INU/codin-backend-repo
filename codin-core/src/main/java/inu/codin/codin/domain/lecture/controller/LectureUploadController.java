@@ -3,6 +3,7 @@ package inu.codin.codin.domain.lecture.controller;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.service.LectureUploadService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/upload")
 @RequiredArgsConstructor
+@Tag(name = "Lecture Upload API", description = "강의 내역 및 강의실 현황 업데이트 API")
 public class LectureUploadController {
 
     private final LectureUploadService lectureUploadService;
