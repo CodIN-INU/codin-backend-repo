@@ -44,7 +44,7 @@ public class LectureUploadController {
     public ResponseEntity<?> uploadNewSemesterRooms(@RequestParam("excelFile") MultipartFile file) {
         lectureUploadService.uploadNewSemesterRooms(file);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, file.getName()+"의 강의실 현황 업데이트", null));
+                .body(new SingleResponse<>(201, file.getOriginalFilename()+"의 강의실 현황 업데이트", null));
 
     }
 
