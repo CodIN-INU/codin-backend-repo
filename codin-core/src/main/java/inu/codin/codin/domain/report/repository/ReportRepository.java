@@ -1,11 +1,8 @@
 package inu.codin.codin.domain.report.repository;
 
-import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
 import inu.codin.codin.domain.report.entity.ReportEntity;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.entity.ReportType;
-import lombok.extern.slf4j.Slf4j;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -34,7 +31,7 @@ public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId
     // 현재 정지 상태이며, 정지 종료일이 아직 남아있는 유저 조회
     //정지 종료일(suspensionEndDate)이 현재 날짜보다 이전($lt)
     @Query("{'reportStatus': 'SUSPENDED', 'action.suspensionEndDate': { $lt: ?0 }}")
-    List<ReportEntity> findSuspendedUsers(LocalDateTime now);
+    List<ReportEntity> findSuspendedReports(LocalDateTime now);
 
     // 특정 게시물의 전체 신고 개수
     int countByReportTargetId(ObjectId reportTargetId);

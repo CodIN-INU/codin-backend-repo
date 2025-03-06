@@ -29,10 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,14 +98,6 @@ public class ReportService {
         }
     }
 
-//    public ReportPageResponse getReportedPosts(int pageNumber) {
-//
-//        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-//        Page<PostEntity> page;
-//        page = postRepository.getPostsWithReported(pageRequest);
-//
-//        return ReportPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
-//    }
 
     //post 총 신고수 증가
     private void updatePostReportCount(ObjectId postId) {
@@ -166,8 +155,6 @@ public class ReportService {
         log.info("특정 유저 신고 내역 조회: userId={}", userId);
 
         ObjectId ObjUserId = new ObjectId(userId);
-
-
         List<ReportEntity> reports = reportRepository.findByReportingUserId(ObjUserId);
 
         log.info("DB에서 가져온 ReportEntity 리스트:");
@@ -197,46 +184,48 @@ public class ReportService {
         }
 
         // 신고 처리 정보 생성
-        ReportEntity.ReportActionEntity action = ReportEntity.ReportActionEntity.builder()
+        ReportEntity.ReportActionEntity action = null;
+        if (requestDto.getSuspensionPeriod().equals(SuspensionPeriod.PERMANENT)){
+            action = ReportEntity.ReportActionEntity.builder()
+                    .actionTakenById(userId)
+                    .suspensionPeriod(requestDto.getSuspensionPeriod())
+                    .suspensionEndDate(LocalDateTime.of(9999,12,31,23,59))
+                    .build();
+        }
+        else action = ReportEntity.ReportActionEntity.builder()
                 .actionTakenById(userId)
                 .suspensionPeriod(requestDto.getSuspensionPeriod())
                 .suspensionEndDate(LocalDateTime.now().plusDays(requestDto.getSuspensionPeriod().getDays()))
                 .build();
 
-        // 엔티티 내부에서 업데이트 메서드 호출
-        //ReportEntity updatedReport = report.updateReport(action);
-
         // 기존 객체의 필드를 직접 수정 (새 객체 생성 X)
         report.updateReportSuspended(action);
-
 
         //유저 Suspended - 정지 상태로 변경
         Optional<UserEntity> user = userRepository.findById(report.getReportedUserId());
         if (user.isEmpty()) throw new NotFoundException("존재하지 않는 회원입니다.");
 
+        user.get().suspendUser();
         //영구 정지
         if (requestDto.getSuspensionPeriod() == SuspensionPeriod.PERMANENT){
-            user.get().disabledUser();
+            user.get().updateTotalSuspensionEndDate(LocalDateTime.of(9999, 12 ,30, 23, 59));
         } else {
-            user.get().suspendUser();
+            LocalDateTime totalSuspensionEndDate = user.get().getTotalSuspensionEndDate();
+            user.get().updateTotalSuspensionEndDate(
+                    Objects.requireNonNullElseGet(totalSuspensionEndDate, LocalDateTime::now)
+                            .plusDays(requestDto.getSuspensionPeriod().getDays()));
         }
-
-
         // 업데이트된 신고 저장
         reportRepository.save(report);
         userRepository.save(user.get());
-        //userRepository.save(user);
         log.info("신고가 처리되었습니다. ID: {}, 처리자: {}", report.get_id(), userId);
 
-        //ReportResponseDto.from(report);
     }
 
 
 
     public ReportSummaryResponseDTO getReportSummary(String reportTargetId) {
         ObjectId targetId = new ObjectId(reportTargetId);
-
-        //int totalReports = reportRepository.countByReportTargetId(targetId);
 
         // 모든 ReportType에 대해 개수 조회
         Map<ReportType, Integer> reportTypeCounts = new HashMap<>();
