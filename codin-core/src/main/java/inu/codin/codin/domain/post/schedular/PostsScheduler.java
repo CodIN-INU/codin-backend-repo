@@ -20,14 +20,19 @@ public class PostsScheduler {
     @Value("${schedule.path}")
     private String PATH;
 
+    @Value("${lecture.python.path}")
+    private String PYTHON_DIR;
+
     @Scheduled(cron = "${schedule.department.cron}", zone = "Asia/Seoul")
     @Async
     public void departmentPostsScheduler() {
         try {
             String fileName = "department.py";
-            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",PATH + fileName);
-            System.out.println(PATH);
-            System.out.println("Running command: " + processBuilder.command());
+            ProcessBuilder processBuilder =
+                    new ProcessBuilder().inheritIO().command(
+                            PYTHON_DIR,
+                            PATH + fileName
+                    );
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             log.warn("Exited department python with error code" + exitCode);
@@ -46,8 +51,11 @@ public class PostsScheduler {
     public void starinuPostsScheduler(){
         try {
             String fileName = "starinu.py";
-            ProcessBuilder processBuilder = new ProcessBuilder().inheritIO().command("/usr/bin/python3",
-                    PATH + fileName);
+            ProcessBuilder processBuilder =
+                    new ProcessBuilder().inheritIO().command(
+                            PYTHON_DIR,
+                            PATH + fileName
+                    );
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             log.warn("Exited starinu python with error code" + exitCode);
