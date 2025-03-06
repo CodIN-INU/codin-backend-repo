@@ -34,27 +34,30 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
-        log.info(BASEURL);
 
         // 상황에 따라 서로 다른 응답 메시지를 반환
         switch (result) {
-            case LOGIN_SUCCESS:
-                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/main");
+            case LOGIN_SUCCESS -> {
+                getRedirectStrategy().sendRedirect(request, response, BASEURL + "/main");
                 log.info("{\"code\":200, \"message\":\"정상 로그인 완료\"}");
-                break;
-            case NEW_USER_REGISTERED:
-                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/auth/profile?email="+oAuth2User.getAttribute("email"));
+            }
+            case NEW_USER_REGISTERED -> {
+                getRedirectStrategy().sendRedirect(request, response, BASEURL + "/auth/profile?email=" + oAuth2User.getAttribute("email"));
                 log.info("{\"code\":201, \"message\":\"신규 회원 등록 완료. 프로필 설정이 필요합니다.\"}");
-
-                break;
-            case PROFILE_INCOMPLETE:
-                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/auth/profile?email="+oAuth2User.getAttribute("email"));
+            }
+            case PROFILE_INCOMPLETE -> {
+                getRedirectStrategy().sendRedirect(request, response, BASEURL + "/auth/profile?email=" + oAuth2User.getAttribute("email"));
                 log.info("{\"code\":200, \"message\":\"회원 프로필 설정 미완료. 프로필 설정 페이지로 이동해주세요.\"}");
-                break;
-            default:
-                getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
+            }
+            case SUSPENDED_USER -> {
+                //todo MVC 호출을 위해 api가 붙음, 이후 삭제 예정
+                getRedirectStrategy().sendRedirect(request, response, BASEURL+ "/api/suspends?endDate=" + authService.getSuspensionEndDate(oAuth2User));
+                log.info("{\"code\":200, \"message\":\"정지된 회원에 대하여 정지 화면 호출\"}");
+            }
+            default -> {
+                getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login");
                 log.info("{\"code\":500, \"message\":\"알 수 없는 오류 발생\"}");
-                break;
+            }
         }
         writer.flush();
 

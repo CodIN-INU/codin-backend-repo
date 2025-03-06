@@ -27,17 +27,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
         log.info("email: {}", email);
 
-        if (email.equals("inu.codin@gmail.com")) return oAuth2User;
+//        if (email.equals("inu.codin@gmail.com")) return oAuth2User;
 
         // Only Allow @inu.ac.kr
-        if (email == null || !email.trim().endsWith("@inu.ac.kr")) {
-            OAuth2Error oauth2Error = new OAuth2Error(
-                    "invalid_email_domain",
-                    "허용되지 않은 이메일 도메인입니다. @inu.ac.kr 이어야합니다",
-                    null
-            );
-            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
-        }
+//        if (email == null || !email.trim().endsWith("@inu.ac.kr")) {
+//            OAuth2Error oauth2Error = new OAuth2Error(
+//                    "invalid_email_domain",
+//                    "허용되지 않은 이메일 도메인입니다. @inu.ac.kr 이어야합니다",
+//                    null
+//            );
+//            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
+//        }
 
         return oAuth2User;
     }
