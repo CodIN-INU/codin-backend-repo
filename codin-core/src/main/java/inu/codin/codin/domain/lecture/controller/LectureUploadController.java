@@ -37,9 +37,8 @@ public class LectureUploadController {
     }
 
     @Operation(
-            summary = "강의실 현황 업데이트 (!! 꼭 '/lectures/upload_new' 이후에 실행할 것 !!)",
-            description = "!! 꼭 '/lectures/upload_new' 이후에 실행할 것 !!" +
-                    "<br> 강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
+            summary = "강의실 현황 업데이트",
+            description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(value = "/rooms", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
