@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,8 @@ public class UserEntity extends BaseTimeEntity {
     private UserRole role;
 
     private UserStatus status;
+
+    private LocalDateTime totalSuspensionEndDate; //정지 게시물이 늘어날수록 정지 종료일이 중첩
 
     private List<ObjectId> blockedUsers = new ArrayList<>();
 
@@ -91,18 +94,19 @@ public class UserEntity extends BaseTimeEntity {
     public void suspendUser() {
         this.status = UserStatus.SUSPENDED;
     }
-    public void disabledUser() {
-        this.status = UserStatus.DISABLED;
-    }
+
     public void activateUser() {
         if ( this.status == UserStatus.SUSPENDED) {
             this.status = UserStatus.ACTIVE;
         }
     }
-
     public void activation() {
         if ( this.status == UserStatus.DISABLED) {
             this.status = UserStatus.ACTIVE;
         }
+    }
+
+    public void updateTotalSuspensionEndDate(LocalDateTime totalSuspensionEndDate){
+        this.totalSuspensionEndDate = totalSuspensionEndDate;
     }
 }

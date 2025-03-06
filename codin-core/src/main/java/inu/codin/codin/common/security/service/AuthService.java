@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,12 +40,64 @@ public class AuthService {
 
     /**
      * Google OAuth2를 통해 사용자 정보를 등록하고 로그인 처리하는 메소드
-     * - 첫 로그인 시: 신규 회원이면 DB에 등록할 때 userStatus를 DISABLED로 설정 (프로필 미완료)
      * - 기존 회원이면, userStatus가 ACTIVE인 경우에만 JWT 토큰을 발급하여 정식 로그인 처리
-     *   만약 userStatus가 DISABLED이면 프로필 설정이 필요하다는 상태로 처리
+     * - 첫 로그인 시: 신규 회원이면 DB에 등록할 때 userStatus를 DISABLED로 설정 (프로필 미완료)
+     *   userStatus가 DISABLED이면 프로필 설정이 필요하다는 상태로 처리
+     * - userStatus가 SUSPEND이면 정지된 회원
      */
     public AuthResultStatus oauthLogin(OAuth2User oAuth2User, HttpServletResponse response) {
 
+        InfoFromOAuth2User info = getInfoFromOAuth2User(oAuth2User);
+
+        // 회원 존재 여부 판단: email 기준
+        Optional<UserEntity> optionalUser = userRepository.findByEmailAndStatusAll(info.email());
+        if (optionalUser.isPresent()) {
+            UserEntity existingUser = optionalUser.get();
+            log.info("기존 회원 로그인: {}", info.email());
+
+            switch(existingUser.getStatus()){
+                case ACTIVE -> {
+                    // 프로필 설정 완료된 회원: 정상 로그인 처리
+                    issueJwtToken(info.email(), response);
+                    log.info("정상 로그인 완료: {}", info.email());
+                    return AuthResultStatus.LOGIN_SUCCESS;
+                }
+                case DISABLED -> {
+                    // 프로필 설정 미완료: JWT 토큰 미발급, 프론트엔드에서 프로필 설정 페이지로 유도
+                    log.info("회원 프로필 설정 미완료 (userStatus={}) : {}", existingUser.getStatus(), info.email());
+                    return AuthResultStatus.PROFILE_INCOMPLETE;
+                } case SUSPENDED -> {
+                    //정지된 유저
+                    log.info("정지된 유저 : email - {} ", info.email());
+                    return AuthResultStatus.SUSPENDED_USER;
+                } default -> {
+                    log.error("유저의 상태가 ACTIVE, DISABLED, SUSPENDED 외의 값을 가지고 있습니다. UserStatus : {}", existingUser.getStatus() );
+                    throw new NotFoundException("유저의 상태(Status)를 알 수 없습니다. _id : "+ existingUser.get_id().toString() + ", status : " + existingUser.getStatus());
+                }
+            }
+
+        } else {
+            log.info("신규 회원 등록: {}", info.email());
+            String deptDesc = (info.department() != null) ? info.department().replace("/", "").trim() : "";
+            Department dept = Department.fromDescription(deptDesc);
+
+            // 신규 회원 등록 시, userStatus를 DISABLED(비활성)으로 설정하여 프로필 설정 미완료 상태로 처리
+            UserEntity newUser = UserEntity.builder()
+                    .email(info.email())
+                    .name(info.name())
+                    .department(dept)
+                    .profileImageUrl(s3Service.getDefaultProfileImageUrl()) // 기본 프로필 이미지 사용
+                    .status(UserStatus.DISABLED)
+                    .role(UserRole.USER)
+                    .build();
+            userRepository.save(newUser);
+            log.info("신규 회원 등록 완료 (프로필 미완료): {}", newUser);
+            return AuthResultStatus.NEW_USER_REGISTERED;
+            // 신규 회원은 프로필 설정 완료 전까지는 JWT 토큰을 발급 안 함.
+        }
+    }
+
+    private static InfoFromOAuth2User getInfoFromOAuth2User(OAuth2User oAuth2User) {
         // OAuth2 제공자로부터 받은 모든 속성을 로그 출력 (디버깅용)
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
@@ -56,43 +109,11 @@ public class AuthService {
 
         log.info("OAuth2 login: email={}, sub={}, name={}, department={}",
                 email, sub, name, department);
+        InfoFromOAuth2User info = new InfoFromOAuth2User(email, name, department);
+        return info;
+    }
 
-        // 회원 존재 여부 판단: email 기준
-        Optional<UserEntity> optionalUser = userRepository.findByEmailAndDisabledAndActive(email);
-        if (optionalUser.isPresent()) {
-            UserEntity existingUser = optionalUser.get();
-            log.info("기존 회원 로그인: {}", email);
-            if (existingUser.getStatus() != null && existingUser.getStatus().equals(UserStatus.ACTIVE)) {
-
-                // 프로필 설정 완료된 회원: 정상 로그인 처리
-                issueJwtToken(email, response);
-
-                log.info("정상 로그인 완료: {}", email);
-                return AuthResultStatus.LOGIN_SUCCESS;
-            } else {
-                // 프로필 설정 미완료: JWT 토큰 미발급, 프론트엔드에서 프로필 설정 페이지로 유도
-                log.info("회원 프로필 설정 미완료 (userStatus={}) : {}", existingUser.getStatus(), email);
-                return AuthResultStatus.PROFILE_INCOMPLETE;
-            }
-        } else {
-            log.info("신규 회원 등록: {}", email);
-            String deptDesc = (department != null) ? department.replace("/", "").trim() : "";
-            Department dept = Department.fromDescription(deptDesc);
-
-            // 신규 회원 등록 시, userStatus를 DISABLED(비활성)으로 설정하여 프로필 설정 미완료 상태로 처리
-            UserEntity newUser = UserEntity.builder()
-                    .email(email)
-                    .name(name)
-                    .department(dept)
-                    .profileImageUrl(s3Service.getDefaultProfileImageUrl()) // 기본 프로필 이미지 사용
-                    .status(UserStatus.DISABLED)
-                    .role(UserRole.USER)
-                    .build();
-            userRepository.save(newUser);
-            log.info("신규 회원 등록 완료 (프로필 미완료): {}", newUser);
-            return AuthResultStatus.NEW_USER_REGISTERED;
-            // 신규 회원은 프로필 설정 완료 전까지는 JWT 토큰을 발급 안 함.
-        }
+    private record InfoFromOAuth2User(String email, String name, String department) {
     }
 
     /**
@@ -114,18 +135,15 @@ public class AuthService {
         UserEntity user = userOpt.get();
         log.info("[completeUserProfile] 사용자 조회 성공: {}", userProfileRequestDto.getEmail());
 
-        // 프로필 이미지 업로드 처리
+        // 업로드된 이미지가 없으면 기본 프로필 이미지 URL 사용
         String imageUrl = null;
-        if (userImage != null && !userImage.isEmpty()) {
-            log.info("[프로필 설정] 프로필 이미지 업로드 중...");
+        if (userImage == null && userImage.isEmpty()) {
+            imageUrl = s3Service.getDefaultProfileImageUrl();
+        } else {
             imageUrl = s3Service.handleImageUpload(List.of(userImage)).get(0);
             log.info("[프로필 설정] 프로필 이미지 업로드 완료: {}", imageUrl);
         }
-        // 업로드된 이미지가 없으면 기본 프로필 이미지 URL 사용
-        if (imageUrl == null) {
-            imageUrl = s3Service.getDefaultProfileImageUrl();
-        }
-
+        
         // 사용자 정보 업데이트: 닉네임, 프로필 이미지 URL 업데이트 및 userStatus를 ACTIVE(활성)으로 변경
         user.updateNickname(userProfileRequestDto.getNickname());
         user.updateProfileImageUrl(imageUrl);
@@ -133,7 +151,6 @@ public class AuthService {
         userRepository.save(user);
 
         log.info("[completeUserProfile] 프로필 설정 완료: {}", user.getEmail());
-
         // 프로필 설정 완료 후 정식 회원으로 간주하여 JWT 토큰 재발급
         issueJwtToken(user.getEmail(), response);
     }
@@ -153,5 +170,15 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         jwtService.createToken(response);
+    }
+    
+    public LocalDateTime getSuspensionEndDate(OAuth2User oAuth2User){
+        InfoFromOAuth2User info = getInfoFromOAuth2User(oAuth2User);
+
+        Optional<UserEntity> optionalUser = userRepository.findByEmailAndStatusAll(info.email());
+        if (optionalUser.isPresent()){
+            UserEntity user = optionalUser.get();
+            return user.getTotalSuspensionEndDate();
+        } else throw new NotFoundException("유저를 찾을 수 없습니다. _id: " + optionalUser.get().get_id().toString());
     }
 }
