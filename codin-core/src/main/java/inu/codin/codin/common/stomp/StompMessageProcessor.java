@@ -35,15 +35,12 @@ public class StompMessageProcessor implements ChannelInterceptor {
                 stompMessageService.connectSession(headerAccessor);
             }
             case SUBSCRIBE -> {
-                log.info("[STOMP] Subscribe" );
                 stompMessageService.enterToChatRoom(headerAccessor);
             }
             case UNSUBSCRIBE -> {
-                log.info("[STOMP] UnSubscribe" );
                 stompMessageService.exitToChatRoom(headerAccessor);
             }
             case DISCONNECT -> {
-                log.info("[STOMP] DISCONNECT");
                 stompMessageService.exitToChatRoom(headerAccessor);
                 stompMessageService.disconnectSession(headerAccessor);
             }
