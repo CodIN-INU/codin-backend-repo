@@ -131,7 +131,7 @@ public class SyncScheduler {
                     replyRepo.save(reply);
                 }
             } else if (repository instanceof ReviewRepository reviewRepo) {
-                ReviewEntity review = reviewRepo.findByLectureIdAndDeletedAtIsNull(entityId).orElse(null);
+                ReviewEntity review = reviewRepo.findBy_idAndDeletedAtIsNull(entityId).orElse(null);
                 if (review != null && review.getLikeCount() != likeCount) {
                     log.info("ReviewEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
                     review.updateLikeCount(likeCount);

@@ -135,7 +135,7 @@ public class LikeService {
                     .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
             case COMMENT -> commentRepository.findByIdAndNotDeleted(id)
                     .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
-            case REVIEW -> reviewRepository.findByLectureIdAndDeletedAtIsNull(id)
+            case REVIEW -> reviewRepository.findBy_idAndDeletedAtIsNull(id)
                     .orElseThrow(() ->new NotFoundException("수강 후기를 찾을 수 없습니다"));
 
         }
