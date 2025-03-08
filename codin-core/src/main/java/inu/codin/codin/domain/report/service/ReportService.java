@@ -16,6 +16,7 @@ import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
 import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
 import inu.codin.codin.domain.report.entity.*;
 import inu.codin.codin.domain.report.exception.ReportAlreadyExistsException;
+import inu.codin.codin.domain.report.exception.ReportUnsupportedTypeException;
 import inu.codin.codin.domain.report.repository.CustomReportRepository;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -186,7 +187,7 @@ public class ReportService {
                 .toList();
 
         if (pendingReports.isEmpty()) {
-            throw new IllegalStateException("이미 처리된 신고입니다.");
+            throw new ReportAlreadyExistsException("이미 처리된 신고입니다.");
         }
 
         //  정지 종료일 계산
@@ -273,7 +274,7 @@ public class ReportService {
                 replyRepository.save(reply);
                 log.info("신고된 대댓글 삭제: {}", reportTargetId);
             }
-            default -> throw new IllegalArgumentException("잘못된 신고 대상 타입입니다.");
+            default -> throw new ReportUnsupportedTypeException("잘못된 신고 대상 타입입니다.");
         }
     }
 
