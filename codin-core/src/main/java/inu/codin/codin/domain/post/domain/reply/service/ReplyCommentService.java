@@ -6,6 +6,7 @@ import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
@@ -15,6 +16,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisAnonService;
@@ -39,6 +41,7 @@ public class ReplyCommentService {
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
 
     private final LikeService likeService;
     private final NotificationService notificationService;
@@ -144,6 +147,7 @@ public class ReplyCommentService {
                             getUserInfoAboutPost(reply.get_id()));
                 }).toList();
     }
+
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
@@ -164,5 +168,22 @@ public class ReplyCommentService {
 
         log.info("대댓글 수정 완료 - replyId: {}", replyId);
 
+    }
+
+    public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(String id, String reportedEntityId) {
+        ObjectId commentId = new ObjectId(id);
+        List<CommentResponseDTO> replies = getRepliesByCommentId(commentId);
+
+        return replies.stream()
+                .map(reply -> {
+                    ObjectId ReportTargetId = new ObjectId(reportedEntityId);
+                    boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
+                    boolean isReplyReported = existsInReportDB && reply.get_id().equals(reportedEntityId);
+
+                    log.info("🔹 대댓글 ID: {}, 신고 여부: {}", reply.get_id(), isReplyReported);
+
+                    return ReportedCommentDetailResponseDTO.from(reply, isReplyReported);
+                })
+                .toList();
     }
 }
