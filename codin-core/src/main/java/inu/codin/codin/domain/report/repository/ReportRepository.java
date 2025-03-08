@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.report.repository;
 
+import inu.codin.codin.domain.report.dto.ReportInfo;
 import inu.codin.codin.domain.report.entity.ReportEntity;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.entity.ReportType;
@@ -39,4 +40,14 @@ public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId
     // 특정 게시물의 특정 신고 유형 개수
     int countByReportTargetIdAndReportType(ObjectId reportTargetId, ReportType reportType);
 
+    //reportTargetId를 기준으로 신고 개수, 엔터티 타입, 작성자 ID 조회
+    @Aggregation(pipeline = {
+            "{ '$match': { 'reportStatus': 'PENDING' } }",
+            "{ '$group': { '_id': '$reportTargetId', 'reportCount': { '$sum': 1 }, 'entityType': { '$first': '$reportTargetType' }, 'userId': { '$first': '$reportedUserId' } } }",
+            "{ '$sort': { 'reportCount': -1 } }",
+            "{ '$project': { 'reportedEntityId': '$_id', 'reportCount': 1, 'entityType': 1, 'userId': 1, '_id': 0 } }"
+    })
+    List<ReportInfo> findAllReportedEntities();
+
+    boolean existsByReportTargetId(ObjectId reportTargetId);
 }

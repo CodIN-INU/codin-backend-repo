@@ -168,11 +168,11 @@ public class ReportService {
 
 
     @Transactional
-    public void resolveReport(ReportExecuteRequestDto requestDto) {
+    public void handleReport(ReportExecuteRequestDto requestDto) {
         log.info("신고 처리 요청: {}", requestDto.getReportId());
+        //현재 관리자 ID
         ObjectId userId = SecurityUtils.getCurrentUserId();
         ObjectId ReportId = new ObjectId(requestDto.getReportId());
-
 
         // 신고 존재 확인
         ReportEntity report = reportRepository.findById(ReportId)
@@ -215,6 +215,8 @@ public class ReportService {
                     Objects.requireNonNullElseGet(totalSuspensionEndDate, LocalDateTime::now)
                             .plusDays(requestDto.getSuspensionPeriod().getDays()));
         }
+
+        deleteReportedEntity(report.getReportTargetId(), report.getReportTargetType());
         // 업데이트된 신고 저장
         reportRepository.save(report);
         userRepository.save(user.get());
@@ -237,6 +239,59 @@ public class ReportService {
         }
 
         return new ReportSummaryResponseDTO(reportTypeCounts);
+    }
+
+    @Transactional
+    public void deleteReportedEntity(ObjectId reportTargetId, ReportTargetType targetType) {
+
+        switch (targetType) {
+            case POST -> {
+                PostEntity post = postRepository.findById(reportTargetId)
+                        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                post.delete();
+                postRepository.save(post);
+                log.info(" 신고된 게시글 삭제: {}", reportTargetId);
+            }
+            case COMMENT -> {
+                CommentEntity comment = commentRepository.findById(reportTargetId)
+                        .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                comment.delete();
+                commentRepository.save(comment);
+                log.info(" 신고된 댓글 삭제: {}", reportTargetId);
+            }
+            case REPLY -> {
+                ReplyCommentEntity reply = replyRepository.findById(reportTargetId)
+                        .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+                reply.delete();
+                replyRepository.save(reply);
+                log.info("신고된 대댓글 삭제: {}", reportTargetId);
+            }
+            default -> throw new IllegalArgumentException("잘못된 신고 대상 타입입니다.");
+        }
+    }
+
+    public void resolveReport(String reportId) {
+        log.info(" 신고대상 유지 요청: 신고 ID: {}", reportId);
+
+        ObjectId reportObjectId = new ObjectId(reportId);
+        ObjectId userId = SecurityUtils.getCurrentUserId(); // 현재 유저 ID
+
+        //  신고 존재 확인
+        ReportEntity report = reportRepository.findById(reportObjectId)
+                .orElseThrow(() -> new NotFoundException("해당 신고가 존재하지 않습니다. ID: " + reportId));
+
+        //  이미 처리된 신고인지 확인 (RESOLVED, SUSPENDED 상태면 예외 발생)
+        if (report.getReportStatus() == ReportStatus.RESOLVED || report.getReportStatus() == ReportStatus.SUSPENDED) {
+            throw new IllegalStateException("이미 처리된 신고입니다. 상태: " + report.getReportStatus());
+        }
+
+        // 신고 상태를 `RESOLVED`로 변경
+        report.ReportResolved(userId);
+
+        // 변경된 신고 저장
+        reportRepository.save(report);
+
+        log.info(" 신고 유지 완료: 신고 ID: {}, 처리자: {}", report.get_id(), userId);
     }
 }
 
