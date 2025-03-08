@@ -12,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -72,7 +74,15 @@ public class StompMessageService {
             throw new UsernameNotFoundException("헤더에서 유저를 찾을 수 없습니다.");
         }
         log.info(headerAccessor.toString());
-        String chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
+        String chatroomId;
+        if (Objects.equals(headerAccessor.getCommand(), StompCommand.DISCONNECT)){ //UNSCRIBE 하지 않은 상태에서 DISCONNECT라면 UNSCRIBE도 같이
+            if (!sessionStore.get(headerAccessor.getSessionId()).isEmpty()) {
+                chatroomId = sessionStore.get(headerAccessor.getSessionId());
+                sessionStore.remove(headerAccessor.getSessionId());
+            } else return null;
+
+        }
+        else chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
         if (chatroomId == null || !ObjectId.isValid(chatroomId)) {
             throw new IllegalArgumentException("세션에서 가져올 수 없거나, 올바른 chatRoomId가 아닙니다: " + chatroomId);
         }
