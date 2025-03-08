@@ -50,14 +50,14 @@ public class ReportController {
 //                .body(new SingleResponse<>(200, "삭제되지 않은 신고된 모든 게시물 조회 성공", postpages));
 //    }
 
-    //(Admin) 특정 게시물의 신고 정보 조회 API
+    //(Admin) 특정 대상 신고 정보 조회 API
     @Operation(summary = "특정 게시물의 신고 내역 조회(관리자)")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/summary/{postId}")
-    public ResponseEntity<?> getReportSummary(@PathVariable String postId) {
-        ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(postId);
+    @GetMapping("/summary/{reportedEntityId}")
+    public ResponseEntity<?> getReportSummary(@PathVariable String reportedEntityId) {
+        ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(reportedEntityId);
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "특정 게시물의 신고 내역 조회 완료", reportSummary));
+                .body(new SingleResponse<>(200, "특정 대상 신고 내역 조회 완료", reportSummary));
     }
 
 
@@ -93,10 +93,24 @@ public class ReportController {
     public ResponseEntity<?> handleReport(
             @RequestBody ReportExecuteRequestDto reportExecuteRequestDto) {
 
-        reportService.resolveReport(reportExecuteRequestDto);
+        reportService.handleReport(reportExecuteRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(200, "(관리자) 신고 처리",null));
+    }
+
+    // 신고 처리 (관리자)
+    @Operation(summary = "신고 처리-유지하기 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/resolveReport/{reportId}")
+    public ResponseEntity<?> resolveReport(
+            @PathVariable String reportId
+    ) {
+
+        reportService.resolveReport(reportId);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new SingleResponse<>(200, "(관리자) 신고 처리 - 유지하기",null));
     }
 
 }
