@@ -8,6 +8,7 @@ import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.ReportedPostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,6 +110,35 @@ public class PostController {
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }
+
+    @Operation(
+            summary = "신고된 게시물 전체 조회"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/Allreported")
+    public ResponseEntity<SingleResponse<PostPageResponse>> getAllReportedPosts(@RequestParam("page") @NotNull int pageNumber) {
+        PostPageResponse postpages= postService.getAllReportedPosts(pageNumber);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(
+                        200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
+    }
+
+    @Operation(
+            summary = "신고된 게시물 상세 조회"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/reported/posts/{postId}")
+    public ResponseEntity<SingleResponse<ReportedPostDetailResponseDTO>> getPostWithDetail(
+            @PathVariable String postId,
+            @RequestParam(required = false) String reportedEntityId) {
+
+        ReportedPostDetailResponseDTO responseDTO=postService.getReportedPostWithDetail(postId, reportedEntityId);
+        return ResponseEntity.ok(new SingleResponse<>(
+                 200, "게시글 상세 조회 성공",responseDTO
+                ));
+    }
+
+
 
     @Operation(summary = "게시물 이미지 삭제")
     @DeleteMapping("/{postId}/images")
