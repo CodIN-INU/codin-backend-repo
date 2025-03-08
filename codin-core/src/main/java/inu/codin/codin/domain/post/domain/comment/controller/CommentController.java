@@ -62,6 +62,7 @@ public class CommentController {
 
     }
 
+    @Operation(summary = "신고된 댓글 목록 조회 - 관리자")
     // 신고된 댓글 목록 조회
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{postId}/reported-comments")

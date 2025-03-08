@@ -112,7 +112,7 @@ public class PostController {
     }
 
     @Operation(
-            summary = "신고된 게시물 전체 조회"
+            summary = "신고된 게시물 전체 조회 - 관리자"
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/Allreported")
@@ -124,7 +124,7 @@ public class PostController {
     }
 
     @Operation(
-            summary = "신고된 게시물 상세 조회"
+            summary = "신고된 게시물 상세 조회 - 관리자"
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/reported/posts/{postId}")
