@@ -5,12 +5,14 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,5 +60,18 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).
                 body(new SingleResponse<>(200, "댓글 수정되었습니다.", null));
 
+    }
+
+    // 신고된 댓글 목록 조회
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{postId}/reported-comments")
+    public ResponseEntity<SingleResponse<List<ReportedCommentDetailResponseDTO>>> getReportedCommentsByPostId(
+            @PathVariable String postId,
+            @RequestParam String reportedEntityId) {
+
+        return ResponseEntity.ok(new SingleResponse<>(
+                200, "신고된 댓글 조회 성공",
+                commentService.getReportedCommentsByPostId(postId, reportedEntityId)
+        ));
     }
 }
