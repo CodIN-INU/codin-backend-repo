@@ -50,4 +50,6 @@ public interface ReportRepository extends MongoRepository<ReportEntity, ObjectId
     List<ReportInfo> findAllReportedEntities();
 
     boolean existsByReportTargetId(ObjectId reportTargetId);
+
+    List<ReportEntity> findByReportTargetId(ObjectId targetObjectId);
 }
