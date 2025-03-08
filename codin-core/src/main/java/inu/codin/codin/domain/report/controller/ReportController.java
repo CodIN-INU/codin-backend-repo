@@ -89,25 +89,25 @@ public class ReportController {
     // 신고 처리 (관리자)
     @Operation(summary = "신고 처리 (관리자)")
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{reportId}")
+    @PutMapping("/{reportTargetId}")
     public ResponseEntity<?> handleReport(
             @RequestBody ReportExecuteRequestDto reportExecuteRequestDto) {
 
         reportService.handleReport(reportExecuteRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(200, "(관리자) 신고 처리",null));
+                .body(new SingleResponse<>(200, "(관리자) 신고 처리 - 정지하기",null));
     }
 
     // 신고 처리 (관리자)
     @Operation(summary = "신고 처리-유지하기 (관리자)")
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/resolveReport/{reportId}")
+    @PutMapping("/resolveReport/{reportTargetId}")
     public ResponseEntity<?> resolveReport(
-            @PathVariable String reportId
+            @PathVariable String reportTargetId
     ) {
 
-        reportService.resolveReport(reportId);
+        reportService.resolveReport(reportTargetId);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(200, "(관리자) 신고 처리 - 유지하기",null));
