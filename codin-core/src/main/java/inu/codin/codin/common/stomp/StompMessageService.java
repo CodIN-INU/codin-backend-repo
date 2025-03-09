@@ -71,6 +71,7 @@ public class StompMessageService {
         if (headerAccessor.getUser() != null) {
             email = headerAccessor.getUser().getName();
         } else {
+            log.error("헤더에서 유저를 찾을 수 없습니다. command : {}, sessionId : {}", headerAccessor.getCommand(), headerAccessor.getSessionId());
             throw new UsernameNotFoundException("헤더에서 유저를 찾을 수 없습니다.");
         }
         log.info(headerAccessor.toString());
@@ -84,14 +85,23 @@ public class StompMessageService {
         }
         else chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
         if (chatroomId == null || !ObjectId.isValid(chatroomId)) {
-            throw new IllegalArgumentException("세션에서 가져올 수 없거나, 올바른 chatRoomId가 아닙니다: " + chatroomId);
+            log.error("chatRoomId을 찾을 수 없습니다. command : {}, sessionId : {}, chatRoomId : {}",
+                    headerAccessor.getCommand(), headerAccessor.getSessionId(), chatroomId);
+            throw new NotFoundException("chatRoomId을 찾을 수 없습니다. chatroomId : " + chatroomId);
         }
         ChatRoom chatroom = chatRoomRepository.findById(new ObjectId(chatroomId))
-                .orElseThrow(() -> new NotFoundException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.error("채팅방을 찾을 수 없습니다. command : {}, sessionId : {}, chatroomId : {}",
+                            headerAccessor.getCommand(), headerAccessor.getSessionId(), chatroomId);
+                    return new NotFoundException("채팅방을 찾을 수 없습니다.");
+                });
         UserEntity user = userRepository.findByEmailAndStatusAll(email)
-                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
-        Result result = new Result(chatroom, user);
-        return result;
+                .orElseThrow(() -> {
+                    log.error("유저를 찾을 수 없습니다. command : {}, sessionId : {}, email : {}",
+                            headerAccessor.getCommand(), headerAccessor.getSessionId(), email);
+                    return new NotFoundException("유저를 찾을 수 없습니다.");
+                });
+        return new Result(chatroom, user);
     }
 
 
