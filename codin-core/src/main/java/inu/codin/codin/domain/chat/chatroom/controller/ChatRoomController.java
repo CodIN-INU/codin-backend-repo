@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,12 +32,12 @@ public class ChatRoomController {
     }
 
     @Operation(
-            summary = "사용자가 포함된 모든 채팅방 리스트 반환"
+            summary = "사용자가 나가지 않은 채팅방 리스트 반환"
     )
     @GetMapping
-    public ResponseEntity<ListResponse<ChatRoomListResponseDto>> getAllChatRoomByUser(@AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<ListResponse<ChatRoomListResponseDto>> getAllChatRoomByUser(){
         return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "채팅방 리스트 반환 완료", chatRoomService.getAllChatRoomByUser(userDetails)));
+                .body(new ListResponse<>(200, "채팅방 리스트 반환 완료", chatRoomService.getAllChatRoomByUser()));
     }
 
     @Operation(
