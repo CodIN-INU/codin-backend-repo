@@ -8,19 +8,15 @@ import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.dto.event.ChatRoomNotificationEvent;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
-import inu.codin.codin.domain.chat.chatroom.entity.Participants;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
-import inu.codin.codin.domain.chat.chatting.repository.CustomChattingRepository;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -67,13 +63,13 @@ public class ChatRoomService {
         return response;
     }
 
-    public List<ChatRoomListResponseDto> getAllChatRoomByUser(UserDetails userDetails) {
-        ObjectId userId = ((CustomUserDetails) userDetails).getId();
+    public List<ChatRoomListResponseDto> getAllChatRoomByUser() {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
         log.info("[유저의 채팅방 조회] 유저 ID: {}", userId);
         // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
 
-        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipant(userId);
+        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipantIsNotLeavedAndDeletedIsNull(userId);
         log.info("[채팅방 조회 결과] 유저 ID: {}가 참여 중인 채팅방 개수: {}", userId, chatRooms.size());
         return chatRooms.stream()
                 .filter(chatRoom -> chatRoom.getParticipants().getInfo().keySet().stream()
@@ -83,7 +79,7 @@ public class ChatRoomService {
 
     public void leaveChatRoom(String chatRoomId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        log.info("[채팅방 탈퇴 요청] 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
+        log.info("[채팅방 나가기 요청] 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> {
@@ -92,23 +88,23 @@ public class ChatRoomService {
                 });
 
         Map<ObjectId, ParticipantInfo> info = chatRoom.getParticipants().getInfo();
-        log.info("[채팅방 확인] 채팅방 ID: {}, 참여자 수: {}", chatRoomId, info.size());
-
         if (info.containsKey(userId)){
-            info.remove(userId);
+            info.get(userId).leave();
+            info.get(userId).disconnect();
         } else {
             log.warn("[채팅방 탈퇴 실패] 유저 ID: {}는 채팅방에 참여하지 않았습니다.", userId);
             throw new ChatRoomNotFoundException("회원이 포함된 채팅방을 찾을 수 없습니다.");
         }
-        log.info("[채팅방 탈퇴 성공] 유저 ID: {}가 채팅방에서 탈퇴", userId);
 
-//        if (chatRoom.getParticipants().isEmpty()) {
-//            chatRoom.delete();
-//            log.info("[채팅방 삭제] 채팅방 ID: {}에 더 이상 참여자가 없어 채팅방을 삭제합니다.", chatRoomId);
-//        }
+        boolean isAllLeaved = chatRoom.getParticipants().getInfo().values()
+                .stream()
+                .allMatch(ParticipantInfo::isLeaved);  // 모든 참가자가 떠났는지 확인
+
+        if (isAllLeaved){
+            chatRoom.delete();
+            log.info("[채팅방 삭제] 채팅방 ID: {}에 더 이상 참여자가 없어 채팅방을 삭제합니다.", chatRoomId);
+        }
         chatRoomRepository.save(chatRoom);
-        log.info("[채팅방 삭제 후 저장] 채팅방 ID: {} 저장 완료", chatRoomId);
-
         }
 
     public void setNotificationChatRoom(String chatRoomId) {
