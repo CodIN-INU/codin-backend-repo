@@ -13,6 +13,6 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query("{ '_id': ?0, 'deletedAt': null }")
     Optional<ChatRoom> findById(ObjectId id);
 
-    @Query("{ 'participants.info.?0.userId': ?0, 'deletedAt': null }")
-    List<ChatRoom> findByParticipant(ObjectId userId);
+    @Query("{ 'participants.info.?0.userId': ?0, 'participants.info.?0.isLeaved': false, 'deletedAt': null }")
+    List<ChatRoom> findByParticipantIsNotLeavedAndDeletedIsNull(ObjectId userId);
 }
