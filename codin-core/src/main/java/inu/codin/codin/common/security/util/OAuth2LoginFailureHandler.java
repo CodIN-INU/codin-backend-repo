@@ -2,6 +2,7 @@ package inu.codin.codin.common.security.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @Component
+@Slf4j
 public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
@@ -31,6 +33,7 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
         PrintWriter writer = response.getWriter();
         writer.write("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
+        log.error("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
         writer.flush();
     }
 }
