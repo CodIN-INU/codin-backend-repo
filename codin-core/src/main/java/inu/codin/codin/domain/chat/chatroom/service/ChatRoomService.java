@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.chat.chatroom.service;
 
+import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
@@ -20,10 +21,7 @@ import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +84,9 @@ public class ChatRoomService {
         return chatRooms.stream()
                 .filter(chatRoom -> chatRoom.getParticipants().getInfo().keySet().stream()
                         .noneMatch(blockedUsersId::contains))
+                .sorted(Comparator.comparing(BaseTimeEntity::getUpdatedAt,Comparator.reverseOrder()))
                 .map(chatRoom -> ChatRoomListResponseDto.of(chatRoom, userId)).toList();
+
     }
 
     public void leaveChatRoom(String chatRoomId) {
