@@ -23,18 +23,14 @@ public class ChatRoom extends BaseTimeEntity {
     private String roomName;
 
     @NotBlank
-    private ObjectId referenceId; //채팅방이 시작한 곳의 id
-
-    @NotBlank
     private Participants participants; //참가자들의 userId (1:1 채팅에서는 두 명의 id만 들어감)
 
     private String lastMessage;
 
 
     @Builder
-    public ChatRoom(String roomName, ObjectId referenceId, Participants participants, String lastMessage) {
+    public ChatRoom(String roomName, Participants participants, String lastMessage) {
         this.roomName = roomName;
-        this.referenceId = referenceId;
         this.participants = participants;
         this.lastMessage = lastMessage;
     }
@@ -45,7 +41,6 @@ public class ChatRoom extends BaseTimeEntity {
         participants.create(new ObjectId(chatRoomCreateRequestDto.getReceiverId()));
         return ChatRoom.builder()
                 .roomName(chatRoomCreateRequestDto.getRoomName())
-                .referenceId(new ObjectId(chatRoomCreateRequestDto.getReferenceId()))
                 .participants(participants)
                 .build();
     }
