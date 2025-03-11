@@ -62,17 +62,4 @@ public class CommentController {
 
     }
 
-    @Operation(summary = "신고된 댓글 목록 조회 - 관리자")
-    // 신고된 댓글 목록 조회
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{postId}/reported-comments")
-    public ResponseEntity<SingleResponse<List<ReportedCommentDetailResponseDTO>>> getReportedCommentsByPostId(
-            @PathVariable String postId,
-            @RequestParam String reportedEntityId) {
-        List<ReportedCommentDetailResponseDTO> responseDTOS =  commentService.getReportedCommentsByPostId(postId, reportedEntityId);
-        return ResponseEntity.ok(new SingleResponse<>(
-                200, "신고된 댓글 조회 성공",
-                responseDTOS
-        ));
-    }
 }
