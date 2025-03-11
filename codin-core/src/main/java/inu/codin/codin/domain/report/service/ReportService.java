@@ -153,33 +153,6 @@ public class ReportService {
 
 
 
-    // 신고 목록 조회 (관리자)
-
-        public List<ReportCountResponseDto> getAllReports() {
-
-            List<Document> aggregationResults = customReportRepository.findPendingReportsOrderedGroupedBy();
-
-             return aggregationResults.stream()
-                    .map(ReportCountResponseDto::from)  // 변환 메서드 호출
-                     .collect(Collectors.toList());
-        }
-
-
-
-    // 특정 유저가 신고 내역 조회 (관리자)
-    public List<ReportResponseDto> getReportsByUserId(String userId) {
-        log.info("특정 유저 신고 내역 조회: userId={}", userId);
-
-        ObjectId ObjUserId = new ObjectId(userId);
-        List<ReportEntity> reports = reportRepository.findByReportingUserId(ObjUserId);
-
-        log.info("DB에서 가져온 ReportEntity 리스트:");
-        reports.forEach(report -> log.info("ID: {}, ReportStatus: {}", report.get_id(), report.getReportStatus()));
-
-        return reports.stream()
-                .map(ReportResponseDto::from)
-                .collect(Collectors.toList());
-    }
 
 
 
