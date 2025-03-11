@@ -1,16 +1,14 @@
 package inu.codin.codin.domain.report.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
+
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
-import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.post.dto.response.ReportedPostDetailResponseDTO;
+
+
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
-import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
-import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
-import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
-import inu.codin.codin.domain.report.entity.ReportTargetType;
+import inu.codin.codin.domain.report.dto.response.*;
+
 import inu.codin.codin.domain.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -123,7 +121,7 @@ public class ReportController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/list")
     public ResponseEntity<?> getAllReportedPosts(@RequestParam("page") @NotNull int pageNumber){
-        PostPageResponse postpages = reportService.getAllReportedPosts(pageNumber);
+        ReportPageResponse postpages = reportService.getAllReportedPosts(pageNumber);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "(관리자) 신고 전체 조회",postpages));
     }

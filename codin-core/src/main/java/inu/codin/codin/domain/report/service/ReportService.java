@@ -2,28 +2,24 @@ package inu.codin.codin.domain.report.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.block.service.BlockService;
+
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
+
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.post.dto.response.PostReportResponse;
-import inu.codin.codin.domain.post.dto.response.ReportedPostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.report.dto.ReportInfo;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
-import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
-import inu.codin.codin.domain.report.dto.response.ReportResponseDto;
-import inu.codin.codin.domain.report.dto.response.ReportSummaryResponseDTO;
+import inu.codin.codin.domain.report.dto.response.*;
 import inu.codin.codin.domain.report.entity.*;
 import inu.codin.codin.domain.report.exception.ReportAlreadyExistsException;
 import inu.codin.codin.domain.report.exception.ReportUnsupportedTypeException;
@@ -32,7 +28,7 @@ import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -330,7 +326,7 @@ public class ReportService {
      *
      */
 
-    public PostPageResponse getAllReportedPosts(int pageNumber) {
+    public ReportPageResponse getAllReportedPosts(int pageNumber) {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
 
         List<ReportInfo> reportInfos = reportRepository.findAllReportedEntities();
@@ -341,7 +337,7 @@ public class ReportService {
         Page<ReportInfo> reportInfoPage = new PageImpl<>(reportInfos.subList(start, end), pageRequest, reportInfos.size());
 
         // 신고된 엔터티 조회 및 변환
-        List<PostDetailResponseDTO> reportedPosts = reportInfoPage.getContent().stream()
+        List<ReportListResponseDto> reportedPosts = reportInfoPage.getContent().stream()
                 .map(this::getReportedPostDetail)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -350,24 +346,24 @@ public class ReportService {
         long lastPage = reportInfoPage.getTotalPages() - 1;
         long nextPage = reportInfoPage.hasNext() ? pageNumber + 1 : -1;
 
-        return PostPageResponse.of(reportedPosts, lastPage, nextPage);
+        return ReportPageResponse.of(reportedPosts, lastPage, nextPage);
     }
 
-    private Optional<PostReportResponse> getReportedPostDetail(ReportInfo reportInfo) {
+    private Optional<ReportListResponseDto> getReportedPostDetail(ReportInfo reportInfo) {
         ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
 
         return switch (reportInfo.getEntityType()) {
             case POST -> postService.getPostDetailById(entityId) // ✅ PostService 활용
-                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo));
+                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo));
 
             case COMMENT -> commentRepository.findById(entityId)
                     .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                            .map(postDTO -> PostReportResponse.from(postDTO, reportInfo)));
+                            .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo)));
 
             case REPLY -> replyCommentRepository.findById(entityId)
                     .flatMap(reply -> commentRepository.findById(reply.getCommentId())
                             .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo))));
+                                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo))));
 
             default -> Optional.empty();
         };
