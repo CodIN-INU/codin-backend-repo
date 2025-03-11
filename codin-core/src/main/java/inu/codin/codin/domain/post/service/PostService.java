@@ -326,75 +326,9 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-
-
-    public PostPageResponse getAllReportedPosts(int pageNumber) {
-        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-
-        List<ReportInfo> reportInfos = reportRepository.findAllReportedEntities();
-
-        // Page 변환
-        int start = Math.min((int) pageRequest.getOffset(), reportInfos.size());
-        int end = Math.min((start + pageRequest.getPageSize()), reportInfos.size());
-        Page<ReportInfo> reportInfoPage = new PageImpl<>(reportInfos.subList(start, end), pageRequest, reportInfos.size());
-
-
-        List<PostDetailResponseDTO> reportedPosts = reportInfoPage.getContent().stream()
-                .map(this::getReportedPostDetail)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-        long lastPage = reportInfoPage.getTotalPages() - 1;
-        long nextPage = reportInfoPage.hasNext() ? pageNumber + 1 : -1;
-
-        return PostPageResponse.of(reportedPosts, lastPage, nextPage);
-    }
-
-    // 신고된 개별 엔터티를 PostReportDetailResponse로 변환하는 메서드
-    private Optional<PostReportResponse> getReportedPostDetail(ReportInfo reportInfo) {
-        ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
-
-        return switch (reportInfo.getEntityType()) {
-            case POST -> postRepository.findById(entityId)
-                    .map(this::createPostDetailResponse)
-                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo));
-
-            case COMMENT -> commentRepository.findById(entityId)
-                    .flatMap(comment -> postRepository.findById(comment.getPostId())
-                            .map(this::createPostDetailResponse)
-                            .map(postDTO -> PostReportResponse.from(postDTO, reportInfo)));
-
-            case REPLY -> replyCommentRepository.findById(entityId)
-                    .flatMap(reply -> commentRepository.findById(reply.getCommentId())
-                            .flatMap(comment -> postRepository.findById(comment.getPostId())
-                                    .map(this::createPostDetailResponse)
-                                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo))));
-
-            default -> Optional.empty();
-        };
-    }
-
-    //신고된 게시물 상세조회
-    public ReportedPostDetailResponseDTO getReportedPostWithDetail(String postId, String reportedEntityId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        if (hitsService.validateHits(post.get_id(), userId)) {
-            hitsService.addHits(post.get_id(), userId);
-            log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
-        }
-
-        // 게시글이 신고된 경우 표시 추가
-        ObjectId ReportTargetId = new ObjectId(reportedEntityId);
-        boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
-        boolean isReported = existsInReportDB && post.get_id().equals(ReportTargetId);
-
-        PostDetailResponseDTO postDetailResponse = createPostDetailResponse(post);
-        //여기에 isReported 추가
-
-        return ReportedPostDetailResponseDTO.from(isReported, postDetailResponse);
+    public Optional<PostDetailResponseDTO> getPostDetailById(ObjectId postId) {
+        return postRepository.findById(postId)
+                .map(this::createPostDetailResponse);
     }
 }
 
