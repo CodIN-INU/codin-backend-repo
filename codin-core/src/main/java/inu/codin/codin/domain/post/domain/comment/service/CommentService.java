@@ -197,15 +197,16 @@ public class CommentService {
 
         return comments.stream()
                 .map(comment -> {
+                    log.info("commentUserId: {}", comment.getUserId());
                     ObjectId ReportTargetId = new ObjectId(reportedEntityId);
                     boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
                     boolean isCommentReported = existsInReportDB && comment.get_id().equals(reportedEntityId);
                     log.info("🔸 댓글 ID: {}, 신고 여부: {}", comment.get_id(), isCommentReported);
 
-                    // ✅ 대댓글 리스트 변환 (신고 여부 반영)
+                    // 대댓글 리스트 변환 (신고 여부 반영)
                     List<ReportedCommentDetailResponseDTO> reportedReplies = replyCommentService.getReportedRepliesByCommentId(comment.get_id(), reportedEntityId);
 
-                    // ✅ `CommentResponseDTO`에서 `ReportedCommentResponseDTO`로 변환하여 신고 여부 추가
+                    // `CommentResponseDTO`에서 `ReportedCommentResponseDTO`로 변환하여 신고 여부 추가
                     return ReportedCommentDetailResponseDTO.from(comment.repliesFrom(reportedReplies), isCommentReported);
                 })
                 .toList();

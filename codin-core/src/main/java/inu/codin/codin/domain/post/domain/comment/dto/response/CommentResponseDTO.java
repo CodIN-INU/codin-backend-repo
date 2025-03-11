@@ -109,6 +109,7 @@ public class CommentResponseDTO {
 
         return CommentResponseDTO.builder()
                 ._id(this._id)
+                .userId(this.userId)
                 .content(this.content)
                 .nickname(this.nickname)
                 .userImageUrl(this.userImageUrl)
