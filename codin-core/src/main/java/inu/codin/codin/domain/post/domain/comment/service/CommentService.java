@@ -182,34 +182,4 @@ public class CommentService {
     }
 
 
-//    public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
-//        // 기존 댓글 목록 조회
-//        List<CommentResponseDTO> comments = getCommentsByPostId(postId);
-//
-//        // 신고 여부 추가
-//        return comments.stream()
-//                .map(comment -> ReportedCommentDetailResponseDTO.from( comment.get_id().equals(reportedEntityId), comment))
-//                .toList();
-//    }
-
-    public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
-        List<CommentResponseDTO> comments = getCommentsByPostId(postId);
-
-        return comments.stream()
-                .map(comment -> {
-                    log.info("commentUserId: {}", comment.getUserId());
-                    ObjectId ReportTargetId = new ObjectId(reportedEntityId);
-                    boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
-                    boolean isCommentReported = existsInReportDB && comment.get_id().equals(reportedEntityId);
-                    log.info("🔸 댓글 ID: {}, 신고 여부: {}", comment.get_id(), isCommentReported);
-
-                    // 대댓글 리스트 변환 (신고 여부 반영)
-                    List<ReportedCommentDetailResponseDTO> reportedReplies = replyCommentService.getReportedRepliesByCommentId(comment.get_id(), reportedEntityId);
-
-                    // `CommentResponseDTO`에서 `ReportedCommentResponseDTO`로 변환하여 신고 여부 추가
-                    return ReportedCommentDetailResponseDTO.from(comment.repliesFrom(reportedReplies), isCommentReported);
-                })
-                .toList();
-    }
-
 }

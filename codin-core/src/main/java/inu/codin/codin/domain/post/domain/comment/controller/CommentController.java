@@ -69,10 +69,10 @@ public class CommentController {
     public ResponseEntity<SingleResponse<List<ReportedCommentDetailResponseDTO>>> getReportedCommentsByPostId(
             @PathVariable String postId,
             @RequestParam String reportedEntityId) {
-
+        List<ReportedCommentDetailResponseDTO> responseDTOS =  commentService.getReportedCommentsByPostId(postId, reportedEntityId);
         return ResponseEntity.ok(new SingleResponse<>(
                 200, "신고된 댓글 조회 성공",
-                commentService.getReportedCommentsByPostId(postId, reportedEntityId)
+                responseDTOS
         ));
     }
 }

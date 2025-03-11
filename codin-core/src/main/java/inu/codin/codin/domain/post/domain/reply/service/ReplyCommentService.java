@@ -170,20 +170,4 @@ public class ReplyCommentService {
 
     }
 
-    public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(String id, String reportedEntityId) {
-        ObjectId commentId = new ObjectId(id);
-        List<CommentResponseDTO> replies = getRepliesByCommentId(commentId);
-
-        return replies.stream()
-                .map(reply -> {
-                    ObjectId ReportTargetId = new ObjectId(reportedEntityId);
-                    boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
-                    boolean isReplyReported = existsInReportDB && reply.get_id().equals(reportedEntityId);
-
-                    log.info("🔹 대댓글 ID: {}, 신고 여부: {}", reply.get_id(), isReplyReported);
-
-                    return ReportedCommentDetailResponseDTO.from(reply, isReplyReported);
-                })
-                .toList();
-    }
 }
