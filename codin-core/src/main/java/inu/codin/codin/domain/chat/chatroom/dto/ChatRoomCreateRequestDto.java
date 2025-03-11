@@ -16,4 +16,8 @@ public class ChatRoomCreateRequestDto {
     @NotBlank
     @Schema(description = "채팅 수신자", example = "1111111")
     private String receiverId;
+
+    @NotBlank
+    @Schema(description = "채팅이 시작된 게시글, 댓글, 댓글의 id", example = "65asdf")
+    private String referenceId;
 }
