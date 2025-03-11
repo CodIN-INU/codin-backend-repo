@@ -111,34 +111,6 @@ public class PostController {
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }
 
-    @Operation(
-            summary = "신고된 게시물 전체 조회 - 관리자"
-    )
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/Allreported")
-    public ResponseEntity<SingleResponse<PostPageResponse>> getAllReportedPosts(@RequestParam("page") @NotNull int pageNumber) {
-        PostPageResponse postpages= postService.getAllReportedPosts(pageNumber);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(
-                        200, "카테고리별 삭제 되지 않은 모든 게시물 조회 성공", postpages));
-    }
-
-    @Operation(
-            summary = "신고된 게시물 상세 조회 - 관리자"
-    )
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/reported/posts/{postId}")
-    public ResponseEntity<SingleResponse<ReportedPostDetailResponseDTO>> getPostWithDetail(
-            @PathVariable String postId,
-            @RequestParam(required = false) String reportedEntityId) {
-
-        ReportedPostDetailResponseDTO responseDTO=postService.getReportedPostWithDetail(postId, reportedEntityId);
-        return ResponseEntity.ok(new SingleResponse<>(
-                 200, "게시글 상세 조회 성공",responseDTO
-                ));
-    }
-
-
 
     @Operation(summary = "게시물 이미지 삭제")
     @DeleteMapping("/{postId}/images")
