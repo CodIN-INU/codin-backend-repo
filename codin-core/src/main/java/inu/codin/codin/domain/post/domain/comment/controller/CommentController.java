@@ -5,14 +5,12 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
