@@ -9,6 +9,7 @@ import inu.codin.codin.domain.chat.chatroom.dto.event.ChatRoomNotificationEvent;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailException;
+import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomExistedException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.notification.service.NotificationService;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +40,9 @@ public class ChatRoomService {
 
     public Map<String, String> createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
         ObjectId senderId = SecurityUtils.getCurrentUserId();
-        if (senderId.toString().equals(chatRoomCreateRequestDto.getReceiverId())){
-            throw new ChatRoomCreateFailException("자기 자신과는 채팅방을 생성할 수 없습니다.");
-        }
-        log.info("[채팅방 생성 요청] 송신자 ID: {}, 수신자 ID: {}", senderId, chatRoomCreateRequestDto.getReceiverId());
+        isValidated(chatRoomCreateRequestDto, senderId); //유효성 검사
 
+        log.info("[채팅방 생성 요청] 송신자 ID: {}, 수신자 ID: {}", senderId, chatRoomCreateRequestDto.getReceiverId());
         userRepository.findById(new ObjectId(chatRoomCreateRequestDto.getReceiverId()))
                 .orElseThrow(() -> {
                     log.error("[Receive 유저 확인 실패] 수신자 ID: {}를 찾을 수 없습니다.", chatRoomCreateRequestDto.getReceiverId());
@@ -61,6 +61,18 @@ public class ChatRoomService {
         response.put("chatRoomId", chatRoom.get_id().toString());
         log.info("[채팅방 생성 응답] 생성된 채팅방 ID: {}", chatRoom.get_id());
         return response;
+    }
+
+    private void isValidated(ChatRoomCreateRequestDto chatRoomCreateRequestDto, ObjectId senderId) {
+        if (senderId.toString().equals(chatRoomCreateRequestDto.getReceiverId())){
+            throw new ChatRoomCreateFailException("자기 자신과는 채팅방을 생성할 수 없습니다.");
+        }
+
+        Optional<ChatRoom> existedChatroom = chatRoomRepository.findByReferenceIdAndParticipantsContaining(new ObjectId(chatRoomCreateRequestDto.getReferenceId()),
+                senderId, new ObjectId(chatRoomCreateRequestDto.getReceiverId()));
+        if (existedChatroom.isPresent()){
+            throw new ChatRoomExistedException("해당 reference에서 시작된 채팅방이 존재합니다.", 403, existedChatroom.get().get_id());
+        }
     }
 
     public List<ChatRoomListResponseDto> getAllChatRoomByUser() {
