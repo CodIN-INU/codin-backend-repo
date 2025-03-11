@@ -9,7 +9,6 @@ import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateReque
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
-import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;

@@ -6,7 +6,6 @@ import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
-import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
