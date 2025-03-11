@@ -391,6 +391,40 @@ public class ReportService {
     }
 
 
-    
+    public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
+        List<CommentResponseDTO> comments = commentService.getCommentsByPostId(postId);
+
+        return comments.stream()
+                .map(comment -> {
+                    ObjectId ReportTargetId = new ObjectId(reportedEntityId);
+                    boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
+                    boolean isCommentReported = existsInReportDB && comment.get_id().equals(reportedEntityId);
+                    log.info("🔸 댓글 ID: {}, 신고 여부: {}", comment.get_id(), isCommentReported);
+
+                    // 대댓글 리스트 변환 (신고 여부 반영)
+                    List<ReportedCommentDetailResponseDTO> reportedReplies = getReportedRepliesByCommentId(comment.get_id(), reportedEntityId);
+
+                    // `CommentResponseDTO`에서 `ReportedCommentResponseDTO`로 변환하여 신고 여부 추가
+                    return ReportedCommentDetailResponseDTO.from(comment.repliesFrom(reportedReplies), isCommentReported);
+                })
+                .toList();
+    }
+
+    public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(String id, String reportedEntityId) {
+        ObjectId commentId = new ObjectId(id);
+        List<CommentResponseDTO> replies = replyCommentService.getRepliesByCommentId(commentId);
+
+        return replies.stream()
+                .map(reply -> {
+                    ObjectId ReportTargetId = new ObjectId(reportedEntityId);
+                    boolean existsInReportDB = reportRepository.existsByReportTargetId(ReportTargetId);
+                    boolean isReplyReported = existsInReportDB && reply.get_id().equals(reportedEntityId);
+
+                    log.info("🔹 대댓글 ID: {}, 신고 여부: {}", reply.get_id(), isReplyReported);
+
+                    return ReportedCommentDetailResponseDTO.from(reply, isReplyReported);
+                })
+                .toList();
+    }
 }
 
