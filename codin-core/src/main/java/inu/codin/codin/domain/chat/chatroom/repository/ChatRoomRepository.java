@@ -15,4 +15,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
     @Query("{ 'participants.info.?0.userId': ?0, 'participants.info.?0.isLeaved': false, 'deletedAt': null }")
     List<ChatRoom> findByParticipantIsNotLeavedAndDeletedIsNull(ObjectId userId);
+
+    @Query("{ 'referenceId': ?0, 'participants.info.?1.userId': ?1, 'participants.info.?2.userId': ?2, 'deletedAt': null }")
+    Optional<ChatRoom> findByReferenceIdAndParticipantsContaining(ObjectId referenceId, ObjectId userId, ObjectId receiverId);
 }
