@@ -2,6 +2,7 @@ package inu.codin.codin.common.exception;
 
 import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomExistedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,5 +38,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST.value()));    }
+
+    @ExceptionHandler(ChatRoomExistedException.class)
+    public ResponseEntity<ExceptionResponse> handleChatRoomExistedException(ChatRoomExistedException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getMessage() +"/"+ e.getChatRoomId(), e.getErrorCode()));
+    }
 
 }
