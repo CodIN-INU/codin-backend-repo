@@ -3,12 +3,22 @@ package inu.codin.codin.domain.report.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
+import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.PostReportResponse;
+import inu.codin.codin.domain.post.dto.response.ReportedPostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.report.dto.ReportInfo;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
@@ -22,10 +32,15 @@ import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,12 +54,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReportService {
 
-    private final BlockService blockService;
+    private final PostService postService;
+    private final CommentService commentService;
+    private final ReplyCommentService replyCommentService;
+
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyRepository;
+    private final ReplyCommentRepository replyCommentRepository;
     private final CustomReportRepository customReportRepository;
 
 
@@ -303,5 +322,75 @@ public class ReportService {
 
         log.info("총 {}개의 신고가 유지 처리되었습니다. 대상 ID: {}", reports.size(), reportTargetId);
     }
+
+
+    /***
+     *
+     * 신고 조회 로직
+     *
+     */
+
+    public PostPageResponse getAllReportedPosts(int pageNumber) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
+
+        List<ReportInfo> reportInfos = reportRepository.findAllReportedEntities();
+
+        // 페이지 변환
+        int start = Math.min((int) pageRequest.getOffset(), reportInfos.size());
+        int end = Math.min((start + pageRequest.getPageSize()), reportInfos.size());
+        Page<ReportInfo> reportInfoPage = new PageImpl<>(reportInfos.subList(start, end), pageRequest, reportInfos.size());
+
+        // 신고된 엔터티 조회 및 변환
+        List<PostDetailResponseDTO> reportedPosts = reportInfoPage.getContent().stream()
+                .map(this::getReportedPostDetail)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        long lastPage = reportInfoPage.getTotalPages() - 1;
+        long nextPage = reportInfoPage.hasNext() ? pageNumber + 1 : -1;
+
+        return PostPageResponse.of(reportedPosts, lastPage, nextPage);
+    }
+
+    private Optional<PostReportResponse> getReportedPostDetail(ReportInfo reportInfo) {
+        ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
+
+        return switch (reportInfo.getEntityType()) {
+            case POST -> postService.getPostDetailById(entityId) // ✅ PostService 활용
+                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo));
+
+            case COMMENT -> commentRepository.findById(entityId)
+                    .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
+                            .map(postDTO -> PostReportResponse.from(postDTO, reportInfo)));
+
+            case REPLY -> replyCommentRepository.findById(entityId)
+                    .flatMap(reply -> commentRepository.findById(reply.getCommentId())
+                            .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
+                                    .map(postDTO -> PostReportResponse.from(postDTO, reportInfo))));
+
+            default -> Optional.empty();
+        };
+    }
+
+    public ReportedPostDetailResponseDTO getReportedPostWithDetail(String postId, String reportedEntityId) {
+        ObjectId entityId = new ObjectId(postId);
+        ObjectId reportTargetId = new ObjectId(reportedEntityId);
+
+        // 게시글이 신고된 경우 표시 추가
+        boolean existsInReportDB = reportRepository.existsByReportTargetId(reportTargetId);
+        if (!existsInReportDB) {
+            throw new NotFoundException("해당 신고 대상이 존재하지 않습니다. 신고 ID: " + reportedEntityId);
+        }
+        PostDetailResponseDTO postDetailResponse = postService.getPostDetailById(entityId)
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+        boolean isReported = entityId.equals(reportTargetId);
+
+
+        return ReportedPostDetailResponseDTO.from(isReported, postDetailResponse);
+    }
+
+
+    
 }
 

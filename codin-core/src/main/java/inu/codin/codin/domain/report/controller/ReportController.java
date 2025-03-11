@@ -1,7 +1,10 @@
 package inu.codin.codin.domain.report.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.codin.domain.post.domain.comment.dto.response.ReportedCommentDetailResponseDTO;
+import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.ReportedPostDetailResponseDTO;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportCountResponseDto;
@@ -27,6 +30,7 @@ import java.util.List;
 @Tag(name = "Reoprt API", description = "사용자 신고 기능")
 public class ReportController {
     private final ReportService reportService;
+    private final CommentService commentService;
 
     //(User)신고 작성
     /**
@@ -112,5 +116,39 @@ public class ReportController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(200, "(관리자) 신고 처리 - 유지하기",null));
     }
+
+
+
+    @Operation(summary = "모든 신고 조회하기 - 오름차순 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/list")
+    public ResponseEntity<?> getAllReportedPosts(@RequestParam("page") @NotNull int pageNumber){
+        PostPageResponse postpages = reportService.getAllReportedPosts(pageNumber);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "(관리자) 신고 전체 조회",postpages));
+    }
+
+
+    @Operation(summary = "게시글 신고 상세조회  (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/post/{postId}/{reportedEntityId}")
+    public ResponseEntity<?> getReportedPost (@PathVariable String postId,
+                                              @PathVariable String reportedEntityId) {
+        ReportedPostDetailResponseDTO responseDTO = reportService.getReportedPostWithDetail(postId, reportedEntityId);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "(관리자) 신고 게시글 상세 조회",responseDTO));
+    }
+
+    @Operation(summary = "댓글,대댓글 신고 상세조회 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/comments/{postId}/{reportedEntityId}")
+    public ResponseEntity<?> getReportedComments(@PathVariable String postId,
+                                                 @PathVariable String reportedEntityId){
+        List<ReportedCommentDetailResponseDTO> responseDTOS =  reportService.getReportedCommentsByPostId(postId, reportedEntityId);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "(관리자) 신고 댓글/대댓글 상세 조회",responseDTOS));
+    }
+
+
 
 }
