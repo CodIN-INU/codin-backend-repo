@@ -42,49 +42,15 @@ public class ReportController {
                 .body(new SingleResponse<>(201, "신고 생성 완료", null));
     }
 
-//    @Operation(
-//            summary = "삭제되지 않은 신고된 모든 게시물 조회"
-//    )
-//    @GetMapping("/post")
-//    public ResponseEntity<SingleResponse<PostPageResponse>> getAllPosts(@RequestParam("page") @NotNull int pageNumber) {
-//        PostPageResponse postpages= reportService.getReportedPosts(pageNumber);
-//        return ResponseEntity.ok()
-//                .body(new SingleResponse<>(200, "삭제되지 않은 신고된 모든 게시물 조회 성공", postpages));
-//    }
 
     //(Admin) 특정 대상 신고 정보 조회 API
-    @Operation(summary = "특정 게시물의 신고 내역 조회(관리자)")
+    @Operation(summary = "특정 게시글,댓글 신고 내역 상세조회(관리자)")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/summary/{reportedEntityId}")
     public ResponseEntity<?> getReportSummary(@PathVariable String reportedEntityId) {
         ReportSummaryResponseDTO reportSummary = reportService.getReportSummary(reportedEntityId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "특정 대상 신고 내역 조회 완료", reportSummary));
-    }
-
-
-    // 특정 신고 타입 목록 조회 (관리자)
-    @Operation(summary = "Pending(신고 처리 대기) 신고 내역 오름차순 정렬 조회 (관리자)")
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public ResponseEntity<?> getReports(){
-
-        List<ReportCountResponseDto> reports = reportService.getAllReports();
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "특정 신고 타입 목록 조회", reports));
-    }
-
-
-    // 특정 유저 신고 내역 조회 (관리자)
-    @Operation(summary = "특정 유저 신고 내역 조회 (관리자)")
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user")
-    public ResponseEntity<?> getReportsByUserId(
-            @RequestParam("userId") @NotNull String userId) {
-
-        List<ReportResponseDto> userReports = reportService.getReportsByUserId(userId);
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "특정 유저가 신고한 내역 조회", userReports));
     }
 
 
