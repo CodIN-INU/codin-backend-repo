@@ -75,7 +75,14 @@ public class ReportEntity extends BaseTimeEntity {
         this.reportStatus = ReportStatus.RESOLVED; // 상태 변경
     }
 
-
+    public void ReportResolved(ObjectId actionTakenById) {
+        this.reportStatus = ReportStatus.RESOLVED; // ✅ 신고 상태 변경 (유지)
+        this.action = ReportActionEntity.builder()
+                .actionTakenById(actionTakenById) // ✅ 관리자 ID 저장
+                .suspensionPeriod(null) // ✅ 유지하는 경우 정지 기간 없음
+                .suspensionEndDate(null) // ✅ 유지하는 경우 정지 종료일 없음
+                .build();
+    }
 
 
     @Getter

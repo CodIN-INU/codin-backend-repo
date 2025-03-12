@@ -19,7 +19,7 @@ public class ReportCreateRequestDto {
     @NotBlank
     private String reportTargetId;
 
-    @Schema(description = " 신고 유형 ( 게시글 부적절, 스팸 ,,.)", example = "INAPPROPRIATE_CONTENT, COMMERCIAL_AD , ABUSE , OBSCENE, POLITICAL,FRAUD , SPAM ,,")
+    @Schema(description = " 신고 유형 ( 게시글 부적절, 스팸 ,,.)", example = "FRAUD, ABUSE, COMMERCIAL_AD, OBSCENE, POLITICAL, ETC, SPAM")
     @NotNull
     private ReportType reportType;
 }

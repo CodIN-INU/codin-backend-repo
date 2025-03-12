@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.domain.comment.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.report.dto.response.ReportedCommentDetailResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -99,6 +100,26 @@ public class CommentResponseDTO {
                 .isDeleted(replyCommentEntity.getDeletedAt() != null)
                 .createdAt(replyCommentEntity.getCreatedAt())
                 .userInfo(userInfoAboutPost)
+                .build();
+    }
+
+    // 기존 객체에서 replies 리스트만 변경
+    public CommentResponseDTO repliesFrom(List<ReportedCommentDetailResponseDTO> updatedReplies) {
+        List<CommentResponseDTO> commentReplies = updatedReplies.stream()
+                .map(reply -> (CommentResponseDTO) reply) // 변환
+                .toList();
+
+        return CommentResponseDTO.builder()
+                ._id(this._id)
+                .userId(this.userId)
+                .content(this.content)
+                .nickname(this.nickname)
+                .userImageUrl(this.userImageUrl)
+                .anonymous(this.anonymous)
+                .replies(commentReplies) // 수정된 대댓글 리스트 적용
+                .likeCount(this.likeCount)
+                .createdAt(this.createdAt)
+                .userInfo(this.userInfo)
                 .build();
     }
 

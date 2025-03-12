@@ -9,20 +9,22 @@ import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
+import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.dto.response.*;
+import inu.codin.codin.domain.report.dto.ReportInfo;
+import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
-import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.post.dto.response.PostPollDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -37,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,6 +65,9 @@ public class PostService {
     private final HitsService hitsService;
     private final RedisService redisService;
     private final BlockService blockService;
+    private final ReportRepository reportRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyCommentRepository replyCommentRepository;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
@@ -135,6 +142,8 @@ public class PostService {
         }
         SecurityUtils.validateUser(post.getUserId());
     }
+
+
 
 
     // Post 정보를 처리하여 DTO를 생성하는 공통 메소드
@@ -233,6 +242,8 @@ public class PostService {
 
 
 
+
+
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
@@ -313,6 +324,11 @@ public class PostService {
         Page<PostEntity> page = bests.map(bestEntity -> postRepository.findByIdAndNotDeleted(bestEntity.getPostId())
                 .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.")));
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
+
+    public Optional<PostDetailResponseDTO> getPostDetailById(ObjectId postId) {
+        return postRepository.findById(postId)
+                .map(this::createPostDetailResponse);
     }
 }
 
