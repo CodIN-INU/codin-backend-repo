@@ -15,6 +15,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisAnonService;
@@ -39,6 +40,7 @@ public class ReplyCommentService {
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
 
     private final LikeService likeService;
     private final NotificationService notificationService;
@@ -144,6 +146,7 @@ public class ReplyCommentService {
                             getUserInfoAboutPost(reply.get_id()));
                 }).toList();
     }
+
     public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
@@ -165,4 +168,5 @@ public class ReplyCommentService {
         log.info("대댓글 수정 완료 - replyId: {}", replyId);
 
     }
+
 }

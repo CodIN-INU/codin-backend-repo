@@ -15,6 +15,7 @@ import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisAnonService;
@@ -36,6 +37,7 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final ReportRepository reportRepository;
 
     private final UserRepository userRepository;
     private final LikeService likeService;
@@ -146,7 +148,7 @@ public class CommentService {
                     } else {
                         nickname = comment.isAnonymous()?
                                 anonNum==0? "글쓴이" : "익명" + anonNum
-                                                : userMap.get(comment.getUserId()).nickname();
+                                : userMap.get(comment.getUserId()).nickname();
                         userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
@@ -177,5 +179,6 @@ public class CommentService {
                 .isLike(likeService.isCommentLiked(commentId, userId))
                 .build();
     }
+
 
 }
