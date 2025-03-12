@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.report.dto.ReportInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -116,5 +117,7 @@ public class PostDetailResponseDTO {
                 commentCount,
                 userInfo);
     }
+
+
 }
 

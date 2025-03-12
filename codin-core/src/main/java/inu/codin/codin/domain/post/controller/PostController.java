@@ -109,6 +109,7 @@ public class PostController {
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }
 
+
     @Operation(summary = "게시물 이미지 삭제")
     @DeleteMapping("/{postId}/images")
     public ResponseEntity<SingleResponse<?>> deletePostImage(
