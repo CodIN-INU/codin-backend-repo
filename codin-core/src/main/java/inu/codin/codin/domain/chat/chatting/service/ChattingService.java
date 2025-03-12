@@ -83,7 +83,6 @@ public class ChattingService {
                     log.warn("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);
                     return new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다.");
                 });
-        log.info("[메시지 조회] 채팅방 ID: {}, 페이지: {}", id, page);
 
         Pageable pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
         chatRoomRepository.findById(new ObjectId(id))
