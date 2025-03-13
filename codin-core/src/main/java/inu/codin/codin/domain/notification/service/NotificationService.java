@@ -109,7 +109,7 @@ public class NotificationService {
     // 알림 로그를 저장하는 로직 (특정 사용자 대상)
     private void saveNotificationLog(FcmMessageUserDto msgDto, Map<String, String> data) {
         NotificationEntity notificationEntity = NotificationEntity.builder()
-                .user(msgDto.getUser())
+                .userId(msgDto.getUserId())
                 .title(msgDto.getTitle())
                 .message(msgDto.getBody())
                 .targetId(new ObjectId(data.get("id")))
