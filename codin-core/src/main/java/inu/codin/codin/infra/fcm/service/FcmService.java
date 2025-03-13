@@ -36,8 +36,7 @@ public class FcmService {
     public void saveFcmToken(@Valid FcmTokenRequest fcmTokenRequest) {
         // 유저의 FCM 토큰이 존재하는지 확인
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = getUserEntityFromUserId(userId);
-        Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByUser(user);
+        Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByUserId(userId);
 
         if (fcmToken.isPresent()) { // 이미 존재하는 유저라면 토큰 추가
             FcmTokenEntity fcmTokenEntity = fcmToken.get();
@@ -46,7 +45,7 @@ public class FcmService {
         }
         else { // 존재하지 않는 FCM 토큰이라면 저장
             FcmTokenEntity newFcmTokenEntity = FcmTokenEntity.builder()
-                    .user(user)
+                    .userId(userId)
                     .fcmTokenList(List.of(fcmTokenRequest.getFcmToken()))
                     .deviceType(fcmTokenRequest.getDeviceType())
                     .build();
@@ -60,11 +59,12 @@ public class FcmService {
      */
     public void sendFcmMessage(FcmMessageUserDto fcmMessageUserDto) {
         // 유저의 알림 설정 조회
-        UserEntity user = fcmMessageUserDto.getUser();
-        NotificationPreference userPreference = fcmMessageUserDto.getUser().getNotificationPreference();
+        ObjectId userId = fcmMessageUserDto.getUserId();
+        UserEntity user = getUserEntityFromUserId(userId);
+        NotificationPreference userPreference = user.getNotificationPreference();
 
         // 유저의 FCM 토큰 조회
-        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user).orElseThrow(()
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUserId(userId).orElseThrow(()
                 -> new FcmTokenNotFoundException("유저에게 FCM 토큰이 존재하지 않습니다."));
 
         // 알림 설정에 따라 알림 전송
@@ -130,26 +130,21 @@ public class FcmService {
     private void handleFirebaseMessagingException(FirebaseMessagingException e, FcmTokenEntity fcmTokenEntity, String fcmToken) {
         MessagingErrorCode errorCode = e.getMessagingErrorCode();
         switch (errorCode) {
-            case INVALID_ARGUMENT: // FCM 토큰이 유효하지 않을 때
-                log.error("Invalid argument error for token: {}", fcmToken);
-                break;
-            case UNREGISTERED: // FCM 토큰이 등록되지 않았을 때
+            case INVALID_ARGUMENT -> // FCM 토큰이 유효하지 않을 때
+                    log.error("Invalid argument error for token: {}", fcmToken);
+            case UNREGISTERED -> { // FCM 토큰이 등록되지 않았을 때
                 log.warn("Unregistered token: {}. Removing from database.", fcmToken);
                 removeFcmToken(fcmTokenEntity, fcmToken);
-                break;
-            case QUOTA_EXCEEDED: // FCM 토큰의 전송량이 초과되었을 때
-                log.error("Quota exceeded for token: {}", fcmToken);
-                // 에러관리 및 리포팅 기능 추가
-                break;
-            case SENDER_ID_MISMATCH: // FCM 토큰의 발신자 ID가 일치하지 않을 때
-                log.error("Sender ID mismatch for token: {}", fcmToken);
-                break;
-            case THIRD_PARTY_AUTH_ERROR: // FCM 토큰의 인증이 실패했을 때
-                log.error("Third-party authentication error for token: {}", fcmToken);
-                break;
-            default: // 그 외의 에러
-                log.error("Unknown error for token: {}", fcmToken);
-                break;
+            }
+            case QUOTA_EXCEEDED -> // FCM 토큰의 전송량이 초과되었을 때
+                    log.error("Quota exceeded for token: {}", fcmToken);
+            // 에러관리 및 리포팅 기능 추가
+            case SENDER_ID_MISMATCH -> // FCM 토큰의 발신자 ID가 일치하지 않을 때
+                    log.error("Sender ID mismatch for token: {}", fcmToken);
+            case THIRD_PARTY_AUTH_ERROR -> // FCM 토큰의 인증이 실패했을 때
+                    log.error("Third-party authentication error for token: {}", fcmToken);
+            default -> // 그 외의 에러
+                    log.error("Unknown error for token: {}", fcmToken);
         }
     }
 
@@ -165,8 +160,7 @@ public class FcmService {
      */
     public void subscribeTopic(String topic) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = getUserEntityFromUserId(userId);
-        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 
         for (String token : fcmTokenEntity.getFcmTokenList()) {
@@ -185,8 +179,7 @@ public class FcmService {
      */
     public void unsubscribeTopic(String topic) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserEntity user = getUserEntityFromUserId(userId);
-        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUser(user)
+        FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 
         for (String token : fcmTokenEntity.getFcmTokenList()) {
