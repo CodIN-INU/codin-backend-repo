@@ -18,18 +18,17 @@ import java.util.List;
 public class FcmTokenEntity extends BaseTimeEntity {
 
     @Id
-    private ObjectId id;
+    private ObjectId _id;
 
-    @DBRef
-    private UserEntity user;
+    private ObjectId userId;
 
     private List<String> fcmTokenList;
 
     private String deviceType;
 
     @Builder
-    public FcmTokenEntity(UserEntity user, List<String> fcmTokenList, String deviceType) {
-        this.user = user;
+    public FcmTokenEntity(ObjectId userId, List<String> fcmTokenList, String deviceType) {
+        this.userId = userId;
         this.fcmTokenList = fcmTokenList;
         this.deviceType = deviceType;
     }
