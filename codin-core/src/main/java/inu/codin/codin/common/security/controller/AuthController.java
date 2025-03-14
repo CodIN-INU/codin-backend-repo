@@ -2,12 +2,9 @@ package inu.codin.codin.common.security.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
-import inu.codin.codin.common.security.service.AuthService;
+import inu.codin.codin.common.security.service.AuthCommonService;
 import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
-import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.exception.UserCreateFailException;
-import inu.codin.codin.domain.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,15 +13,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -33,13 +25,20 @@ import java.util.Optional;
 public class AuthController {
 
     private final JwtService jwtService;
-    private final AuthService authService;
+    private final AuthCommonService authCommonService;
 
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/api/oauth2/authorization/google");
+        response.sendRedirect("/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
+    }
+
+    @GetMapping("/apple")
+    public ResponseEntity<SingleResponse<?>> appleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/apple");
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "apple OAuth2 Login Redirect",null));
     }
 
     @Operation(summary = "회원 정보 입력 마무리")
@@ -48,7 +47,7 @@ public class AuthController {
             @RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage,
             HttpServletResponse response) {
-        authService.completeUserProfile(userProfileRequestDto, userImage, response);
+        authCommonService.completeUserProfile(userProfileRequestDto, userImage, response);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 정보 입력 마무리 성공", null));
     }
@@ -59,7 +58,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
-        authService.login(signUpAndLoginRequestDto, response);
+        authCommonService.login(signUpAndLoginRequestDto, response);
 
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "로그인 성공", "기존 유저 로그인 완료"));
