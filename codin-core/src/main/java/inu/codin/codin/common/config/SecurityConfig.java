@@ -5,9 +5,11 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
+import inu.codin.codin.common.security.service.AppleOAuth2UserService;
 import inu.codin.codin.common.security.service.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.OAuth2LoginFailureHandler;
 import inu.codin.codin.common.security.util.OAuth2LoginSuccessHandler;
+import inu.codin.codin.common.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +26,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -45,6 +53,9 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final PermitAllProperties permitAllProperties;
+
+    private final AppleOAuth2UserService appleOAuth2UserService;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -70,8 +81,12 @@ public class SecurityConfig {
                 )
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
+                                 .authorizationEndpoint(authorization -> authorization
+                                         .authorizationRequestResolver(
+                                                 new CustomAuthorizationRequestResolver(clientRegistrationRepository))
+                                  )
                                 .userInfoEndpoint(userInfo -> userInfo
-                                        .userService(customOAuth2UserService)
+                                        .userService(delegatingOAuth2UserService())
                                 )
                                 .successHandler(oAuth2LoginSuccessHandler)
                                 .failureHandler(oAuth2LoginFailureHandler)
@@ -86,6 +101,20 @@ public class SecurityConfig {
                 // 예외 처리 필터 추가
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
         return http.build();
+    }
+
+    private OAuth2UserService<OAuth2UserRequest, OAuth2User> delegatingOAuth2UserService() {
+        return userRequest -> {
+            String registrationId = userRequest.getClientRegistration().getRegistrationId();
+            if ("apple".equals(registrationId)) {
+                return appleOAuth2UserService.loadUser(userRequest);
+            } else if ("google".equals(registrationId)) {
+                return customOAuth2UserService.loadUser(userRequest);
+            } else {
+                throw new OAuth2AuthenticationException(new OAuth2Error("unsupported_provider"),
+                        "지원되지 않는 공급자입니다: " + registrationId);
+            }
+        };
     }
 
     @Bean
