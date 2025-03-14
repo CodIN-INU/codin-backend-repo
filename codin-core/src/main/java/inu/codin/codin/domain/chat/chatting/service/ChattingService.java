@@ -7,6 +7,7 @@ import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatroom.service.ChatRoomService;
 import inu.codin.codin.domain.chat.chatting.dto.event.ChattingArrivedEvent;
+import inu.codin.codin.domain.chat.chatting.dto.event.ChattingNotificationEvent;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.chat.chatting.dto.response.ChattingAndUserIdResponseDto;
 import inu.codin.codin.domain.chat.chatting.dto.response.ChattingResponseDto;
@@ -62,16 +63,10 @@ public class ChattingService {
                 .forEach(ParticipantInfo::remain);
         chatRoomRepository.save(chatRoom);
 
-        eventPublisher.publishEvent(new ChattingArrivedEvent(this, chatting));
         //상대 유저가 접속하지 않은 상태라면 unread 개수 업데이트 및 마지막 대화 내용 업데이트
-
-//        //Receiver의 알림 체크 후, 메세지 전송
-//        for (Participants participant : chatRoom.getParticipants()){
-//            if (participant.getUserId() != userId && participant.isNotificationsEnabled()){
-//                notificationService.sendNotificationMessageByChat(participant.getUserId(), chattingRequestDto, chatRoom);
-//            }
-//        }
-
+        eventPublisher.publishEvent(new ChattingArrivedEvent(this, chatting));
+        //알림 보내기
+        eventPublisher.publishEvent(new ChattingNotificationEvent(this, userId, chatRoom));
 
         return ChattingResponseDto.of(chatting);
     }
@@ -83,7 +78,6 @@ public class ChattingService {
                     log.warn("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);
                     return new ChatRoomNotFoundException("채팅방을 찾을 수 없습니다.");
                 });
-        log.info("[메시지 조회] 채팅방 ID: {}, 페이지: {}", id, page);
 
         Pageable pageable = PageRequest.of(page, 20, Sort.by("createdAt").descending());
         chatRoomRepository.findById(new ObjectId(id))
