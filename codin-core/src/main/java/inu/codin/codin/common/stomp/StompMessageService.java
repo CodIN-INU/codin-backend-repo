@@ -77,7 +77,7 @@ public class StompMessageService {
         log.info(headerAccessor.toString());
         String chatroomId;
         if (Objects.equals(headerAccessor.getCommand(), StompCommand.DISCONNECT)){ //UNSCRIBE 하지 않은 상태에서 DISCONNECT라면 UNSCRIBE도 같이
-            if (!sessionStore.get(headerAccessor.getSessionId()).isEmpty()) {
+            if (sessionStore.containsKey(headerAccessor.getSessionId())) {
                 chatroomId = sessionStore.get(headerAccessor.getSessionId());
                 sessionStore.remove(headerAccessor.getSessionId());
             } else return null;
