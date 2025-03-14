@@ -3,6 +3,7 @@ package inu.codin.codin.infra.fcm.dto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import lombok.Builder;
 import lombok.Data;
+import org.bson.types.ObjectId;
 
 import java.util.Map;
 
@@ -13,15 +14,15 @@ import java.util.Map;
 @Data
 public class FcmMessageUserDto {
 
-    private UserEntity user;
+    private ObjectId userId;
     private String title;
     private String body;
     private String imageUrl;
     private Map<String, String> data;
 
     @Builder
-    public FcmMessageUserDto(UserEntity user, String title, String body, String imageUrl, Map<String, String> data) {
-        this.user = user;
+    public FcmMessageUserDto(ObjectId userId, String title, String body, String imageUrl, Map<String, String> data) {
+        this.userId = userId;
         this.title = title;
         this.body = body;
         this.imageUrl = imageUrl;
