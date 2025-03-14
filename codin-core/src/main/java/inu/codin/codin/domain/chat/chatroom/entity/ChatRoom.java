@@ -11,6 +11,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "chatroom")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -30,13 +32,16 @@ public class ChatRoom extends BaseTimeEntity {
 
     private String lastMessage;
 
+    private LocalDateTime currentMessageDate;
+
 
     @Builder
-    public ChatRoom(String roomName, ObjectId referenceId, Participants participants, String lastMessage) {
+    public ChatRoom(String roomName, ObjectId referenceId, Participants participants, String lastMessage, LocalDateTime currentMessageDate) {
         this.roomName = roomName;
         this.referenceId = referenceId;
         this.participants = participants;
         this.lastMessage = lastMessage;
+        this.currentMessageDate = currentMessageDate;
     }
 
     public static ChatRoom of(ChatRoomCreateRequestDto chatRoomCreateRequestDto, ObjectId senderId){
@@ -52,5 +57,6 @@ public class ChatRoom extends BaseTimeEntity {
 
     public void updateLastMessage(String message){
         this.lastMessage = message;
+        this.currentMessageDate = LocalDateTime.now();
     }
 }
