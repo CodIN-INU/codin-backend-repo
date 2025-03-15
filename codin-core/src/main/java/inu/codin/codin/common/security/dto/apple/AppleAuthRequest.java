@@ -8,7 +8,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class AppleAuthRequest {
     private final String identityToken;  // Apple ID Token (JWT)
-    private final String authorizationCode;  // Authorization Code (OAuth2 검증용)
     private final Map<String, Object> user;  // 최초 로그인 시 제공되는 사용자 정보
 
     public String getEmail() {

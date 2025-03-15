@@ -28,6 +28,7 @@ public class AppleAuthService extends AbstractAuthService implements Oauth2AuthS
     @Override
     public AuthResultStatus oauthLogin(OAuth2User oAuth2User, HttpServletResponse response) {
         // Apple에서는 email이 없을 수 있으므로, email이 없으면 고유 식별자(sub)를 사용.
+        log.info("AppleAuthService oauthLogin");
         Map<String, Object> attributes = oAuth2User.getAttributes();
         String email = (String) attributes.get("email");
         String sub = (String) attributes.get("sub");

@@ -1,32 +1,58 @@
 package inu.codin.codin.common.security.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codin.common.security.dto.apple.AppleAuthRequest;
 import inu.codin.codin.common.security.dto.apple.AppleLoginResponse;
 import inu.codin.codin.common.security.service.AppleOAuth2UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @RestController
-@RequestMapping("/auth/apple")
 @RequiredArgsConstructor
+@Slf4j
 public class AppleEventController {
 
-    private final AppleOAuth2UserService appleOAuth2UserService;
+    private final ObjectMapper objectMapper;
 
-//    @PostMapping("/login")
-//    public ResponseEntity<AppleLoginResponse> handleAppleLogin(@RequestBody AppleAuthRequest appleAuthRequest) {
-//        try {
-//            // AppleOAuth2UserService에 AppleAuthRequest를 직접 처리하는 메서드가 있다고 가정합니다.
-//            OAuth2User principalUser = appleOAuth2UserService.loadUser(appleAuthRequest);
-//            // principalUser.getName()는 Apple의 고유 식별자(sub)를 반환하도록 구현되어 있습니다.
-//            String accountId = principalUser.getName();
-//            return ResponseEntity.ok(new AppleLoginResponse(accountId, "User processed successfully"));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-//                    .body(new AppleLoginResponse(null, "Authentication failed: " + e.getMessage()));
-//        }
-//    }
+    @PostMapping("/login/oauth2/code/apple")
+    public ResponseEntity<?> appleCallback(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            // Apple OAuth2에서 전달된 인가 코드, id_token, user 데이터 가져오기
+            String authorizationCode = request.getParameter("code");
+            String idToken = request.getParameter("id_token");
+            String userJson = request.getParameter("user");  // 최초 로그인 시에만 제공됨
+
+            log.info("Apple OAuth Callback - code: {}, id_token: {}", authorizationCode, idToken);
+            log.info("Apple OAuth Callback - user 정보: {}", userJson);
+
+            if (userJson != null) {
+                // user 정보를 Base64 인코딩하여 쿠키로 저장 (보안상 HttpOnly 설정)
+                Cookie userCookie = new Cookie("apple_user", Base64.getEncoder().encodeToString(userJson.getBytes(StandardCharsets.UTF_8)));
+                userCookie.setHttpOnly(true);
+                userCookie.setPath("/");
+                userCookie.setMaxAge(60 * 5);  // 5분 유지
+                response.addCookie(userCookie);
+                log.info("Apple 최초 로그인 - user 정보 쿠키 저장 완료");
+            }
+
+            return ResponseEntity.ok("Apple 로그인 처리 중");
+
+        } catch (Exception e) {
+            log.error("Apple OAuth Callback 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Apple OAuth 처리 실패");
+        }
+    }
 }
