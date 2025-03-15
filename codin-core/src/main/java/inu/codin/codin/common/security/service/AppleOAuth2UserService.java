@@ -41,32 +41,45 @@ public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserReque
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        //AppleAuthRequest 생성 (id_token, authorization code, 사용자 정보))
+        Map<String, Object> additionalParams = userRequest.getAdditionalParameters();
+        log.info("추가 파라미터 전체: {}", additionalParams);
+
+        // AppleAuthRequest 생성 (id_token, 사용자 정보)
         AppleAuthRequest appleAuthRequest = extractAppleAuthRequest(userRequest);
-        log.info("추출된 AppleAuthRequest: identityToken={}, authorizationCode={}, user={}",
-                appleAuthRequest.getIdentityToken(), appleAuthRequest.getAuthorizationCode(), appleAuthRequest.getUser());
 
-
-        //Apple ID Token 검증 및 사용자 ID (sub) 추출
-        //OAuth2AuthenticationException에는 (String, Exception) 생성자가 없으므로, OAuth2Error를 생성하여 사용
-        String appleAccountId;
+        // Apple ID Token 검증 및 사용자 ID (sub) 추출
+        Map<String, Object> tokenClaims;
         try {
-            appleAccountId = getAppleAccountId(appleAuthRequest.getIdentityToken());
-            log.info("Apple id_token 검증 성공, accountId(sub): {}", appleAccountId);
+            tokenClaims = getAppleAccountId(appleAuthRequest.getIdentityToken());
+            log.info("Apple id_token 검증 성공, tokenClaims: {}", tokenClaims);
         } catch (Exception e) {
             OAuth2Error oauth2Error = new OAuth2Error("invalid_token", "Apple id_token 검증 실패", null);
             throw new OAuth2AuthenticationException(oauth2Error, e);
         }
 
+        // OAuth2User에 담을 속성 구성
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", tokenClaims.get("sub"));
+        log.info("appleAuthRequest : {}" , appleAuthRequest );
 
         String email = appleAuthRequest.getEmail();
+        attributes.put("email", tokenClaims.get("email"));
 
-        // Apple OAuth2 정보를 기반으로 `AppleOAuth2User` 객체 반환
-        Map<String, Object> attributes = new HashMap<>();
+        String name;
+
+        String tokenEmail = tokenClaims.get("email").toString();
+        // email에서 '@' 앞부분을 추출하여 name 설정
+        if (tokenEmail != null && tokenEmail.contains("@")) {
+            name = tokenEmail.substring(0, tokenEmail.indexOf("@"));
+        } else {
+            name = "Unknown"; // 이메일이 없을 경우 기본값 설정
+        }
+        attributes.put("name", name);  // 'name' 키로 이름 정보 전달 (후에 successHandler에서 사용)
+
+        log.info(" 로그인: email={}, name={}", email, name);
+
+
         log.info("AppleOAuth2User 생성, attributes: {}", attributes);
-        attributes.put("sub", appleAccountId);
-        attributes.put("email", email);
-
         return new AppleOAuth2User(attributes);
     }
 
@@ -74,24 +87,35 @@ public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserReque
      * AppleAuthRequest 생성 (OAuth2UserRequest에서 값 추출)
      */
     private AppleAuthRequest extractAppleAuthRequest(OAuth2UserRequest userRequest) {
-        String identityToken = userRequest.getAdditionalParameters().get("id_token").toString();
-        String authorizationCode = userRequest.getAdditionalParameters().get("code").toString();
-        Map<String, Object> user = userRequest.getAdditionalParameters().containsKey("user") ?
-                (Map<String, Object>) userRequest.getAdditionalParameters().get("user") : Map.of();
+        Map<String, Object> additionalParams = userRequest.getAdditionalParameters();
 
-        return new AppleAuthRequest(identityToken, authorizationCode, user);
+        // id_token과 code가 반드시 존재하는지 확인하고, 없으면 예외 처리 또는 기본값 할당
+        Object idTokenObj = additionalParams.get("id_token");
+        log.info("idTokenObj: {}", idTokenObj);
+        if (idTokenObj == null) {
+            throw new OAuth2AuthenticationException(new OAuth2Error("invalid_request", "id_token is missing", null));
+        }
+        String identityToken = idTokenObj.toString();
+        log.info("identityToken: {}", identityToken);
+
+        // 'user' 파라미터는 최초 로그인 시에만 존재할 수 있음
+        Map<String, Object> user = additionalParams.containsKey("user") && additionalParams.get("user") != null
+                ? (Map<String, Object>) additionalParams.get("user")
+                : Map.of();
+
+        return new AppleAuthRequest(identityToken, user);
     }
 
     /**
      * Apple ID Token 검증 및 사용자 계정 ID(sub) 추출
      */
-    public String getAppleAccountId(String identityToken)
+    public Map<String, Object> getAppleAccountId(String identityToken)
             throws JsonProcessingException, AuthenticationException, NoSuchAlgorithmException,
             InvalidKeySpecException {
         Map<String, String> headers = identityTokenValidator.parseHeaders(identityToken);
-        PublicKey publicKey = applePublicKeyGenerator.generatePublicKey(headers,
-                appleAuthClient.getAppleAuthPublicKey());
-
-        return identityTokenValidator.getTokenClaims(identityToken, publicKey).getSubject();
+        PublicKey publicKey = applePublicKeyGenerator.generatePublicKey(headers,appleAuthClient.getAppleAuthPublicKey());
+        log.info("applePublicKey: {}", publicKey);
+        Map<String, Object> tokenClaims = identityTokenValidator.getTokenClaims(identityToken, publicKey);
+        return tokenClaims;
     }
 }
