@@ -83,7 +83,7 @@ public class ChatRoomService {
         return chatRooms.stream()
                 .filter(chatRoom -> chatRoom.getParticipants().getInfo().keySet().stream()
                         .noneMatch(blockedUsersId::contains))
-                .sorted(Comparator.comparing(ChatRoom::getCurrentMessageDate,Comparator.reverseOrder()))
+                .sorted(Comparator.comparing(ChatRoom::getCurrentMessageDate,Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(chatRoom -> ChatRoomListResponseDto.of(chatRoom, userId)).toList();
 
     }
