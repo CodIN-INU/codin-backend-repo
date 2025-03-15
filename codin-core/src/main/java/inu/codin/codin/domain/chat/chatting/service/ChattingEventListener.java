@@ -84,7 +84,7 @@ public class ChattingEventListener {
     @EventListener
     public void handleChattingNotificationEvent(ChattingNotificationEvent event){
         event.getChatRoom().getParticipants().getInfo().values().stream()
-                .filter(participantInfo -> !participantInfo.getUserId().equals(event.getUserId()) && participantInfo.isNotificationsEnabled())
+                .filter(participantInfo -> !participantInfo.getUserId().equals(event.getUserId()) && participantInfo.isNotificationsEnabled() & !participantInfo.isConnected())
                 .peek(participantInfo -> notificationService.sendNotificationMessageByChat(participantInfo.getUserId(), event.getChatRoom().get_id()));
     }
 
