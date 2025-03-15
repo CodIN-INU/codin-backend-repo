@@ -39,6 +39,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         //메세지를 브로커로 라우팅
         registry.setApplicationDestinationPrefixes("/pub");
         //클라이언트에서 보낸 메세지를 받을 prefix, controller의 @MessageMapping과 이어짐
+        registry.setUserDestinationPrefix("/user");
+        //convertAndSendToUser 사용할 prefix
     }
 
     @Override

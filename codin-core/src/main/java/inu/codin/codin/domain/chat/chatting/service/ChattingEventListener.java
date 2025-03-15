@@ -10,6 +10,8 @@ import inu.codin.codin.domain.chat.chatting.dto.event.UpdateUnreadCountEvent;
 import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import inu.codin.codin.domain.notification.service.NotificationService;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.context.event.EventListener;
@@ -17,10 +19,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class ChattingEventListener {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChattingRepository chattingRepository;
+    private final UserRepository userRepository;
     private final SimpMessageSendingOperations template;
     private final NotificationService notificationService;
 
@@ -35,7 +35,7 @@ public class ChattingEventListener {
         채팅을 발신했을 경우,
         1. 상대방이 접속한 상태가 아니라면 상대방의 unread 값 +1
         2. 채팅방의 마지막 메세지 업데이트
-        3. /queue/chatroom/{userId} 를 통해 실시간으로 채팅방 목록 업데이트
+        3. /queue/chatroom/unread 를 통해 상대방의 채팅방 목록 실시간 업데이트
      */
     @Async
     @EventListener
@@ -51,29 +51,33 @@ public class ChattingEventListener {
     }
 
     private void updateUnread(ChattingArrivedEvent event, ChatRoom chatRoom) {
-        Map<String, Map<String, String>> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         ObjectId receiverId = null;
         for (Map.Entry<ObjectId, ParticipantInfo> entry : chatRoom.getParticipants().getInfo().entrySet()) {
             ParticipantInfo participantInfo = entry.getValue();
 
             if (!participantInfo.getUserId().equals(event.getChatting().getSenderId())) {
-                receiverId = participantInfo.getUserId();
                 if (!participantInfo.isConnected()) {
+                    receiverId = participantInfo.getUserId();
                     participantInfo.plusUnread();
-                    result.put(chatRoom.get_id().toString(), getLastMessageAndUnread(event, participantInfo));
+                    result = getLastMessageAndUnread(event, participantInfo);
                 }
             }
         }
         chatRoom.updateLastMessage(event.getChatting().getContent());
-        if (receiverId!=null)
-            template.convertAndSend("/queue/chatroom/unread/"+ receiverId, result);
+        if (receiverId!=null) { //받는 사람이 없다는 것은 채팅에 연결 중인 상태, 채팅방 업데이트할 필요 X
+            Optional<UserEntity> user = userRepository.findByUserId(receiverId);
+            if (user.isPresent())
+                template.convertAndSendToUser(user.get().getEmail(), "/queue/chatroom/unread", result);
+        }
     }
 
     private static Map<String, String> getLastMessageAndUnread(ChattingArrivedEvent event, ParticipantInfo participantInfo) {
-        Map<String, String> lastMessageAndUnread = new HashMap<>();
-        lastMessageAndUnread.put("lastMessage", event.getChatting().getContent());
-        lastMessageAndUnread.put("unread", String.valueOf(participantInfo.getUnreadMessage()));
-        return lastMessageAndUnread;
+        return Map.of(
+                "chatRoomId", event.getChatting().get_id().toString(),
+                "lastMessage", event.getChatting().getContent(),
+                "unread", String.valueOf(participantInfo.getUnreadMessage())
+        );
     }
 
     @Async
