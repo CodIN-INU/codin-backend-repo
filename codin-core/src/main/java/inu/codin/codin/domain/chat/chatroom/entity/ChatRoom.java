@@ -52,6 +52,7 @@ public class ChatRoom extends BaseTimeEntity {
                 .roomName(chatRoomCreateRequestDto.getRoomName())
                 .referenceId(new ObjectId(chatRoomCreateRequestDto.getReferenceId()))
                 .participants(participants)
+                .currentMessageDate(LocalDateTime.now())
                 .build();
     }
 
