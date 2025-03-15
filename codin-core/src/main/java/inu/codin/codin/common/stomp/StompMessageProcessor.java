@@ -30,19 +30,24 @@ public class StompMessageProcessor implements ChannelInterceptor {
             throw new MessageDeliveryException(HttpStatus.BAD_REQUEST.toString());
         }
 
-        switch (headerAccessor.getCommand()){
-            case CONNECT -> {
-                stompMessageService.connectSession(headerAccessor);
-            }
-            case SUBSCRIBE -> {
-                stompMessageService.enterToChatRoom(headerAccessor);
-            }
-            case UNSUBSCRIBE -> {
-                stompMessageService.exitToChatRoom(headerAccessor);
-            }
-            case DISCONNECT -> {
-                stompMessageService.exitToChatRoom(headerAccessor);
-                stompMessageService.disconnectSession(headerAccessor);
+        /*
+            채팅방 구독, 구독취소에 대한 destination만 처리
+         */
+        if (headerAccessor.getDestination()!=null && headerAccessor.getDestination().matches("/queue(/unread)?/[^/]+")) {
+            switch (headerAccessor.getCommand()) {
+                case CONNECT -> {
+                    stompMessageService.connectSession(headerAccessor);
+                }
+                case SUBSCRIBE -> {
+                    stompMessageService.enterToChatRoom(headerAccessor);
+                }
+                case UNSUBSCRIBE -> {
+                    stompMessageService.exitToChatRoom(headerAccessor);
+                }
+                case DISCONNECT -> {
+                    stompMessageService.exitToChatRoom(headerAccessor);
+                    stompMessageService.disconnectSession(headerAccessor);
+                }
             }
         }
     }
