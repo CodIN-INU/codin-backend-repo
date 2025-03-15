@@ -21,6 +21,9 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.util.Map;
 
+/***
+ * Apple에서 받은 code를 사용하여 Access Token을 요청
+ */
 @Component
 @Slf4j
 public class AppleOAuth2AccessTokenResponseClient implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
