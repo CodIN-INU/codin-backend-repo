@@ -67,4 +67,9 @@ public class ChattingController {
         return "chatImage";
     }
 
+    @GetMapping("/chat/room")
+    public String chatroomHtml(){
+        return "chatroom";
+    }
+
 }
