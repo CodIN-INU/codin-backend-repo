@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.chat.chatroom.service;
 
-import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
@@ -84,7 +83,7 @@ public class ChatRoomService {
         return chatRooms.stream()
                 .filter(chatRoom -> chatRoom.getParticipants().getInfo().keySet().stream()
                         .noneMatch(blockedUsersId::contains))
-                .sorted(Comparator.comparing(BaseTimeEntity::getUpdatedAt,Comparator.reverseOrder()))
+                .sorted(Comparator.comparing(ChatRoom::getCurrentMessageDate,Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(chatRoom -> ChatRoomListResponseDto.of(chatRoom, userId)).toList();
 
     }
