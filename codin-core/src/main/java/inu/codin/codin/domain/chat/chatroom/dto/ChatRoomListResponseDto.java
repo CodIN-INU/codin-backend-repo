@@ -47,7 +47,7 @@ public class ChatRoomListResponseDto {
                 .chatRoomId(chatRoom.get_id().toString())
                 .roomName(chatRoom.getRoomName())
                 .lastMessage(chatRoom.getLastMessage()==null ? null : chatRoom.getLastMessage())
-                .currentMessageDate(chatRoom.getUpdatedAt()==null ? null : chatRoom.getUpdatedAt())
+                .currentMessageDate(chatRoom.getCurrentMessageDate()==null ? null : chatRoom.getCurrentMessageDate())
                 .unread(chatRoom.getParticipants().getInfo().get(userId).getUnreadMessage())
                 .build();
     }
