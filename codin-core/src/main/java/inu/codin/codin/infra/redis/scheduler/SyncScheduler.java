@@ -3,6 +3,7 @@ package inu.codin.codin.infra.redis.scheduler;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.lecture.domain.review.entity.ReviewEntity;
 import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
+import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -19,14 +20,13 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
-import inu.codin.codin.infra.redis.service.RedisHitsService;
-import inu.codin.codin.infra.redis.service.RedisLikeService;
-import inu.codin.codin.infra.redis.service.RedisScrapService;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -49,13 +49,16 @@ public class SyncScheduler {
     private final ScrapRepository scrapRepository;
     private final HitsRepository hitsRepository;
     private final BestRepository bestRepository;
+    private final LectureRepository lectureRepository;
 
     private final RedisService redisService;
     private final RedisLikeService redisLikeService;
     private final RedisHitsService redisHitsService;
     private final RedisScrapService redisScrapService;
+    private final RedisReviewService redisReviewService;
     private final RedisHealthChecker redisHealthChecker;
 
+    @Async
     @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
     public void syncLikes() {
         if (!redisHealthChecker.isRedisAvailable()) {
@@ -68,72 +71,127 @@ public class SyncScheduler {
         syncEntityLikes("REPLY", replyCommentRepository);
         syncEntityLikes("REVIEW", reviewRepository);
         syncPostScraps();
-        synPostHits();
+        syncPostHits();
+        syncReviews();
         log.info(" 동기화 작업 완료");
     }
 
-    private <T> void syncEntityLikes(String entityType, MongoRepository<T, ObjectId> repository) {
-        Set<String> redisKeys = redisService.getKeys(entityType+ ":likes:*");
-        if (redisKeys == null || redisKeys.isEmpty()) {
-            return;
+    private void syncReviews() {
+        List<ReviewEntity> dbReviews = reviewRepository.findAllByDeletedAtIsNull();
+        Set<String> redisKeys = redisService.getKeys("review:lectures:*").stream()
+                .map(key -> key.replace("review:lectures:", ""))
+                .collect(Collectors.toSet());
+
+        //Map< lectureId, 해당되는 리뷰Entity 리스트 >
+        Map<String, List<ReviewEntity>> dbReviewMap = dbReviews.stream()
+                .collect(Collectors.groupingBy(review -> review.getLectureId().toString()));
+
+        // Redis에 없는 리뷰 복구
+        dbReviewMap.forEach((lectureId, reviews) -> {
+            if (!redisKeys.contains(lectureId)) {
+                // Redis에 강의 자체가 없으면 모든 리뷰 추가
+                reviews.forEach(review -> redisReviewService.addReview(
+                        lectureId, review.getStarRating(), review.getUserId()));
+            } else {
+                // Redis에 강의는 있지만 특정 유저 리뷰가 없는 경우 추가
+                Set<String> redisUsers = redisReviewService.getReviewUsers(lectureId);
+                reviews.stream()
+                        .filter(review -> !redisUsers.contains(review.getUserId().toString()))
+                        .forEach(review -> {
+                            log.info("[Redis] 리뷰 추가: UserID={}, LectureID={}", review.getUserId(), lectureId);
+                            redisReviewService.addReview(lectureId, review.getStarRating(), review.getUserId());
+                        });
+            }
+        });
+
+        // DB에 없는 리뷰 삭제
+        for (String lectureId : redisKeys) {
+            Set<String> redisUsers = redisReviewService.getReviewUsers(lectureId);
+            Set<String> dbUsers = dbReviewMap.getOrDefault(lectureId, List.of()).stream()
+                    .map(review -> review.getUserId().toString())
+                    .collect(Collectors.toSet());
+
+            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
+                    .forEach(userId -> {
+                        log.info("[Redis] 리뷰 삭제: UserID={}, LectureID={}", userId, lectureId);
+                        redisReviewService.removeReview(lectureId, userId);
+                    });
         }
+
+        // 강의 평점 업데이트
+        dbReviewMap.keySet().forEach(lectureId -> {
+            lectureRepository.findById(new ObjectId(lectureId)).ifPresent(lectureEntity -> {
+                lectureEntity.updateReviewRating(
+                        redisReviewService.getAveOfRating(lectureId),
+                        redisReviewService.getParticipants(lectureId),
+                        redisReviewService.getEmotionRating(lectureId)
+                );
+                lectureRepository.save(lectureEntity);
+            });
+        });
+    }
+
+    private <T> void syncEntityLikes(String entityType, MongoRepository<T, ObjectId> repository) {
+        Set<String> redisKeys = redisService.getKeys(entityType+ ":likes:*")
+                .stream().map(redisKey -> redisKey.replace(entityType+ ":likes:", ""))
+                .collect(Collectors.toSet());
+        if (redisKeys.isEmpty()) return;
+
         LikeType likeType = LikeType.valueOf(entityType);
 
-        for (String redisKey : redisKeys) {
-            String likeTypeId = redisKey.replace(entityType + ":likes:", "");
-            Set<String> likedUsers = redisLikeService.getLikedUsers(entityType, likeTypeId);
-            ObjectId entityId = new ObjectId(likeTypeId);
+        // 좋아요 대상 _id 와 좋아요 entity 리스트
+        List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndDeletedAtIsNull(likeType);
+        Map<String, List<LikeEntity>> dbLikeMap = dbLikes.stream()
+                .collect(Collectors.groupingBy(likeEntity -> likeEntity.getLikeTypeId().toString()));
 
-            // (좋아요 삭제) MongoDB에서 Redis에 없는 사용자 삭제
-            List<LikeEntity> dbLikes = likeRepository.findByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(likeType, entityId);
-            for (LikeEntity dbLike : dbLikes) {
-                if (!likedUsers.contains(dbLike.getUserId().toString())) {
-                    log.info("[MongoDB] 좋아요 삭제: UserID={}, EntityID={}", dbLike.getUserId(), entityId);
-                    likeRepository.delete(dbLike);
-                }
-            }
+        //DB에 있지만 Redis에 없는 좋아요 복구
+        dbLikeMap.forEach((entityId, likes) -> {
+            if (!redisKeys.contains(entityId))
+                likes.forEach(like -> redisLikeService.addLike(entityType, like.getLikeTypeId(), like.getUserId()));
+        });
 
-            // (좋아요 추가) Redis에는 있지만 MongoDB에 없는 사용자 추가
-            for (String id : likedUsers) {
-                ObjectId userId = new ObjectId(id);
-                if (!likeRepository.existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(likeType, entityId, userId)) {
-                    log.info("[MongoDB] 좋아요 추가: UserID={}, EntityID={}", userId, entityId);
-                    LikeEntity dbLike = LikeEntity.builder()
-                            .likeType(likeType)
-                            .likeTypeId(entityId)
-                            .userId(userId)
-                            .build();
-                    likeRepository.save(dbLike);
-                }
-            }
+        //Redis에 있지만 DB에 없는 좋아요 삭제
+        for (String likeTypeId : redisKeys) {
+            Set<String> redisUsers = redisLikeService.getLikedUsers(entityType, likeTypeId);
+            Set<String> dbUsers = dbLikeMap.getOrDefault(likeTypeId, List.of()).stream()
+                    .map(like -> like.getUserId().toString())
+                    .collect(Collectors.toSet());
 
-            // (count 업데이트) Redis 사용자 수로 엔티티의 likeCount 업데이트
-            int likeCount = likedUsers.size();
+            ObjectId entityTypeId = new ObjectId(likeTypeId);
+
+            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
+                    .forEach(userId -> {
+                        log.info("[Redis] 좋아요 삭제: UserID={}, LikeID={}", userId, likeTypeId);
+                        redisLikeService.removeLike(entityType, entityTypeId, new ObjectId(userId));
+                    });
+
+            // likeCount 업데이트
+            int likeCount = redisLikeService.getLikeCount(entityType, new ObjectId(likeTypeId));
             if (repository instanceof PostRepository postRepo) {
-                PostEntity post = postRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                PostEntity post = postRepo.findByIdAndNotDeleted(entityTypeId).orElse(null);
                 if (post != null && post.getLikeCount() != likeCount) {
-                    log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    log.info("PostEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityTypeId, likeCount);
                     post.updateLikeCount(likeCount);
                     postRepo.save(post);
                 }
             } else if (repository instanceof CommentRepository commentRepo) {
-                CommentEntity comment = commentRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                CommentEntity comment = commentRepo.findByIdAndNotDeleted(entityTypeId).orElse(null);
                 if (comment != null && comment.getLikeCount() != likeCount) {
-                    log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    log.info("CommentEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityTypeId, likeCount);
                     comment.updateLikeCount(likeCount);
                     commentRepo.save(comment);
                 }
             } else if (repository instanceof ReplyCommentRepository replyRepo) {
-                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(entityId).orElse(null);
+                ReplyCommentEntity reply = replyRepo.findByIdAndNotDeleted(entityTypeId).orElse(null);
                 if (reply != null && reply.getLikeCount() != likeCount) {
-                    log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    log.info("ReplyEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityTypeId, likeCount);
                     reply.updateLikeCount(likeCount);
                     replyRepo.save(reply);
                 }
             } else if (repository instanceof ReviewRepository reviewRepo) {
-                ReviewEntity review = reviewRepo.findBy_idAndDeletedAtIsNull(entityId).orElse(null);
+                ReviewEntity review = reviewRepo.findBy_idAndDeletedAtIsNull(entityTypeId).orElse(null);
                 if (review != null && review.getLikeCount() != likeCount) {
-                    log.info("ReviewEntity 좋아요 수 업데이트: EntityID={}, Count={}", likeTypeId, likeCount);
+                    log.info("ReviewEntity 좋아요 수 업데이트: EntityID={}, Count={}", entityTypeId, likeCount);
                     review.updateLikeCount(likeCount);
                     reviewRepo.save(review);
                 }
@@ -141,102 +199,93 @@ public class SyncScheduler {
         }
     }
 
+
     @Scheduled(fixedRate = 43200000)
     public void syncPostScraps() {
+        Set<String> redisKeys = redisService.getKeys("post:scraps:*")
+                .stream().map(redisKey -> redisKey.replace("post:scraps:", ""))
+                .collect(Collectors.toSet());
+        if (redisKeys.isEmpty()) return;
 
-        Set<String> redisKeys = redisService.getKeys("post:scraps:*");
-        if (redisKeys == null || redisKeys.isEmpty()) {
-            return;
-        }
+        //Post의 _id에 해당되는 Scrap Entity 리스트
+        List<ScrapEntity> dbScraps = scrapRepository.findAllByDeletedAtIsNull();
+        Map<String, List<ScrapEntity>> dbScrapMap = dbScraps.stream()
+                .collect(Collectors.groupingBy(scrapEntity -> scrapEntity.getPostId().toString()));
 
-        for (String redisKey : redisKeys) {
-            String postId = redisKey.replace("post:scraps:", "");
-            ObjectId id = new ObjectId(postId);
-            Set<String> redisScrappedUsers = redisScrapService.getScrapedUsers(id);
+        //DB에 있지만 Redis에 없는 Scrap 복구
+        dbScrapMap.forEach((postId, scraps) -> {
+            if (!redisKeys.contains(postId))
+                scraps.forEach(scrap -> redisScrapService.addScrap(new ObjectId(postId), scrap.getUserId()));
+        });
 
-            // MongoDB의 스크랩 데이터 가져오기
-            List<ScrapEntity> dbScraps = scrapRepository.findByPostIdAndDeletedAtIsNull(id);
-            Set<String> dbScrappedUsers = dbScraps.stream()
-                    .map(ScrapEntity::getUserId)
-                    .map(ObjectId::toString)
+        //DB에 없지만 Redis에 있는 Scrap 삭제
+        for (String postId : redisKeys){
+            Set<String> redisUsers = redisScrapService.getScrapedUsers(new ObjectId(postId));
+            Set<String> dbUsers = dbScrapMap.getOrDefault(postId, List.of()).stream()
+                    .map(scrap -> scrap.getUserId().toString())
                     .collect(Collectors.toSet());
 
-            // (스크랩 삭제) MongoDB에 있지만 Redis에 없는 사용자 삭제
-            for (ScrapEntity dbScrap : dbScraps) {
-                if (!redisScrappedUsers.contains(dbScrap.getUserId().toString())) {
-                    log.info("[MongoDB] 스크랩 삭제: UserID={}, PostID={}", dbScrap.getUserId(), id);
-                    scrapRepository.delete(dbScrap);
-                }
-            }
+            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
+                    .forEach(userId -> {
+                        log.info("[MongoDB] 스크랩 삭제: UserID={}, PostID={}", userId, postId);
+                        redisScrapService.removeScrap(new ObjectId(postId), new ObjectId(userId));
+                    });
 
-            // (스크랩 추가) Redis에 있지만 MongoDB에 없는 사용자 추가
-            for (String redisUser : redisScrappedUsers) {
-                if (!dbScrappedUsers.contains(redisUser)) {
-                    log.info("[MongoDB] 스크랩 추가: UserID={}, PostID={}", redisUser, id);
-                    ScrapEntity dbScrap = ScrapEntity.builder()
-                            .postId(id)
-                            .userId(new ObjectId(redisUser))
-                            .build();
-                    scrapRepository.save(dbScrap);
-                }
-            }
-
-            // Redis 사용자 수로 PostEntity의 scrapCount 업데이트
-            int redisScrapCount = redisScrappedUsers.size();
-            PostEntity post = postRepository.findByIdAndNotDeleted(id)
-                    .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-            if (post.getScrapCount() != redisScrapCount) {
-                log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", id, redisScrapCount);
-                post.updateScrapCount(redisScrapCount);
+            //scrap 개수 업데이트
+            int scarpCount = redisScrapService.getScrapCount(new ObjectId(postId));
+            PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                    .orElse(null);
+            if (post != null && post.getScrapCount() != scarpCount) {
+                log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, scarpCount);
+                post.updateScrapCount(scarpCount);
                 postRepository.save(post);
             }
         }
     }
 
     @Scheduled(fixedRate = 43200000)
-    public void synPostHits(){
-        Map<ObjectId, Set<String>> postHits = fetchAllPostHits(); //하나의 게시글에 조회한 user들
+    public void syncPostHits(){
+        Set<String> redisKeys = redisService.getKeys("post:hits:*")
+                .stream().map(redisKey -> redisKey.replace("post:hits:", ""))
+                .collect(Collectors.toSet());
+        if (redisKeys.isEmpty()) return;
 
-        //Redis 데이터로 DB 저장
-        postHits.forEach((postId, userIds) -> {
-            userIds.forEach(userId -> {
-                hitsRepository.findByPostIdAndUserId(postId, new ObjectId(userId))
-                        .orElseGet(() -> hitsRepository.save(
-                                HitsEntity.builder()
-                                        .postId(postId)
-                                        .userId(new ObjectId(userId))
-                                        .build()
-                        ));
-            });
+        // Post _id에 해당하는 Hits Entity 리스트
+        List<HitsEntity> dbHits = hitsRepository.findAll();
+        Map<String, List<HitsEntity>> dbHitsMap = dbHits.stream()
+                .collect(Collectors.groupingBy(hitsEntity -> hitsEntity.getPostId().toString()));
+
+        //DB에 있지만 redis에 없는 조회수 복구
+        dbHitsMap.forEach((postId, hits)-> {
+            if (!redisKeys.contains(postId))
+                hits.forEach(hit -> redisHitsService.addHits(new ObjectId(postId), hit.getUserId()));
         });
 
-        //DB 데이터로 Redis 저장
-        postHits.keySet().forEach(postId -> {
-            List<HitsEntity> dbHits = hitsRepository.findAllByPostId(postId);
+        //DB에 없지만 redis에 있는 조회수 삭제
+        for (String postId: redisKeys){
+            Set<String> redisUsers = redisHitsService.getHitsUser(new ObjectId(postId));
+            Set<String> dbUsers = dbHitsMap.getOrDefault(postId, List.of())
+                    .stream().map(hit -> hit.getUserId().toString())
+                    .collect(Collectors.toSet());
 
-            dbHits.forEach(hitsEntity -> {
-                if (redisHitsService.validateHits(postId, hitsEntity.getUserId())) {
-                    redisHitsService.addHits(postId, hitsEntity.getUserId());
-                }
-            });
-        });
+            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
+                    .forEach(userId -> {
+                        log.info("[Redis] 조회수 삭제 : UserId = {}, PostId = {}", userId, postId);
+                        redisHitsService.removeHits(new ObjectId(postId), userId);
+                    });
+
+            //조회수 count 업데이트
+            int hitCount = redisHitsService.getHitsCount(new ObjectId(postId));
+            PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                    .orElse(null);
+            if (post != null && post.getHitCount() != hitCount){
+                log.info("PostEntity 조회수 업데이트: PostID={}, Count={}", postId, hitCount);
+                post.updateHitCount(hitCount);
+                postRepository.save(post);
+            }
+        }
     }
 
-    public Map<ObjectId, Set<String>> fetchAllPostHits(){
-        Set<String> keys = redisService.getKeys("post:hits:*");
-        return keys.stream()
-                .collect(Collectors.toMap(
-                        key -> {
-                            String postId = key.replace("post:hits:", "");
-                            return new ObjectId(postId);
-                        },
-                        key -> {
-                            String postId = key.replace("post:hits:", "");
-                            return redisHitsService.getHitsUser(new ObjectId(postId));
-                        }
-                        )
-                );
-    }
     @Scheduled(fixedRate = 43200000) // 12시간 마다 실행
     public void getTop3BestPosts() {
         Map<String, Double> posts = redisService.getTopNPosts(3);

@@ -19,4 +19,6 @@ public interface ScrapRepository extends MongoRepository<ScrapEntity, ObjectId> 
     ScrapEntity findByPostIdAndUserId(ObjectId postId, ObjectId userId);
 
     Page<ScrapEntity> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
+
+    List<ScrapEntity> findAllByDeletedAtIsNull();
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,6 @@ public interface ReviewRepository extends MongoRepository<ReviewEntity, ObjectId
     Optional<ReviewEntity> findByLectureIdAndUserIdAndDeletedAtIsNull(ObjectId lectureId, ObjectId userId);
 
     Optional<ReviewEntity> findBy_idAndDeletedAtIsNull(ObjectId Id);
+
+    List<ReviewEntity> findAllByDeletedAtIsNull();
 }

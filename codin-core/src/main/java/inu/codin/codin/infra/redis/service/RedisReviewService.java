@@ -53,4 +53,15 @@ public class RedisReviewService {
         String redisKey = REVIEW_KEY + lectureId;
         return Objects.requireNonNull(redisTemplate.opsForZSet().rangeWithScores(redisKey, 0, -1)).size();
     }
+
+    public Set<String> getReviewUsers(String lectureId) {
+        String redisKey = REVIEW_KEY + lectureId;
+        return redisTemplate.opsForZSet().range(redisKey, 0, -1);
+    }
+
+    public void removeReview(String lectureId, String userId) {
+        String redisKey = REVIEW_KEY + lectureId;
+        redisTemplate.opsForZSet().remove(redisKey, userId);
+    }
+
 }

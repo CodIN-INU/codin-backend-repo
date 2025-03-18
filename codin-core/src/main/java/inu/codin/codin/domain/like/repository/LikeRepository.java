@@ -23,5 +23,7 @@ public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
 
     LikeEntity findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId id, ObjectId userId);
 
+    List<LikeEntity> findByLikeTypeAndDeletedAtIsNull(LikeType likeType);
+
     Page<LikeEntity> findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
 }
