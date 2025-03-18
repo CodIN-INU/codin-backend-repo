@@ -31,6 +31,7 @@ public class PostEntity extends BaseTimeEntity {
     private int commentCount = 0; // 댓글 + 대댓글 카운트
     private int likeCount = 0; // 좋아요 카운트 (redis)
     private int scrapCount = 0; // 스크랩 카운트 (redis)
+    private int hitCount = 0;
 
     private Integer reportCount = 0; // 신고 카운트
 
@@ -90,6 +91,8 @@ public class PostEntity extends BaseTimeEntity {
     public void updateReportCount(int reportCount) {
         this.reportCount=reportCount;
     }
+
+    public void updateHitCount(int hitCount) {this.hitCount = hitCount; }
 
 
 }

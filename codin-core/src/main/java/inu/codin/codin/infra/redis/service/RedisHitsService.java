@@ -41,4 +41,9 @@ public class RedisHitsService {
         String redisKey = HITS_KEY + postId.toString();
         return redisTemplate.opsForSet().members(redisKey);
     }
+
+    public void removeHits(ObjectId postId, String userId) {
+        String redisKey = HITS_KEY + postId.toString();
+        redisTemplate.opsForSet().remove(redisKey, userId);
+    }
 }
