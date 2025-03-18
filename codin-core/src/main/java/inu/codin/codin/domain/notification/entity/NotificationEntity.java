@@ -23,8 +23,7 @@ public class NotificationEntity extends BaseTimeEntity {
     @Id @NotBlank
     private ObjectId id;
 
-    @DBRef(lazy = true)
-    private UserEntity user;
+    private ObjectId userId;
 
     private ObjectId targetId;
 
@@ -43,8 +42,8 @@ public class NotificationEntity extends BaseTimeEntity {
     private String priority;
 
     @Builder
-    public NotificationEntity(UserEntity user, ObjectId targetId, String title, String message, String type, String priority) {
-        this.user = user;
+    public NotificationEntity(ObjectId userId, ObjectId targetId, String title, String message, String type, String priority) {
+        this.userId = userId;
         this.targetId = targetId;
         this.title = title;
         this.message = message;
