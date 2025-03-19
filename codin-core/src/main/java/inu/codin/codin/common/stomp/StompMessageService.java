@@ -69,7 +69,6 @@ public class StompMessageService {
         if (headerAccessor.getUser() != null) email = headerAccessor.getUser().getName();
         else log.error("헤더에서 유저를 찾을 수 없습니다. command : {}, sessionId : {}", headerAccessor.getCommand(), headerAccessor.getSessionId());
 
-        log.info(headerAccessor.toString());
         String chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
         if (chatroomId == null || !ObjectId.isValid(chatroomId)) {
             log.error("chatRoomId을 찾을 수 없습니다. command : {}, sessionId : {}, chatRoomId : {}",
