@@ -1,9 +1,6 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
-import inu.codin.codin.domain.chat.chatting.entity.Chatting;
-import inu.codin.codin.domain.chat.chatting.repository.ChattingRepository;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 
@@ -29,25 +26,23 @@ public class Participants {
         return true;
     }
 
-    public boolean enter(ObjectId memberId){
+    public void enter(ObjectId memberId){
         ParticipantInfo participantInfo;
         if ((participantInfo = info.get(memberId))==null) {
-            return false;
+            return;
         }
 
         participantInfo.connect();
         info.put(memberId, participantInfo);
-        return true;
     }
 
-    public boolean exit(ObjectId memberId) {
+    public void exit(ObjectId memberId) {
         ParticipantInfo participantInfo;
         if ((participantInfo = info.get(memberId))==null) {
-            return false;
+            return;
         }
 
         participantInfo.disconnect();
         info.put(memberId, participantInfo);
-        return true;
     }
 }
