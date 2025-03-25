@@ -1,14 +1,17 @@
 package inu.codin.codin.common.config;
 
+
 import inu.codin.codin.common.dto.PermitAllProperties;
 import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
+import inu.codin.codin.common.security.service.AppleOAuth2UserService;
 import inu.codin.codin.common.security.service.CustomOAuth2UserService;
-import inu.codin.codin.common.security.util.OAuth2LoginFailureHandler;
-import inu.codin.codin.common.security.util.OAuth2LoginSuccessHandler;
+import inu.codin.codin.common.security.util.*;
+import inu.codin.codin.common.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +27,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -33,6 +46,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -45,6 +59,10 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final PermitAllProperties permitAllProperties;
+
+    private final AppleOAuth2UserService appleOAuth2UserService;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    private final CustomOAuth2AccessTokenResponseClient customOAuth2AccessTokenResponseClient;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -70,9 +88,22 @@ public class SecurityConfig {
                 )
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2
+                                 // Apple 클라이언트에 대해 커스텀 토큰 응답 클라이언트 적용
+                                 .tokenEndpoint(token -> token
+                                         .accessTokenResponseClient(customOAuth2AccessTokenResponseClient)
+                                  )
+                                 .authorizationEndpoint(authorization -> authorization
+                                         //쿠키를 사용해 OAuth의 정보를 가져오고 저장
+                                         .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+                                         .authorizationRequestResolver(new CustomAuthorizationRequestResolver(clientRegistrationRepository))
+                                 )
+//                                .redirectionEndpoint(redirection -> redirection
+//                                        .baseUri("/callback/apple")  // apple 콜백 URI를 설정추가.
+//                                 )
                                 .userInfoEndpoint(userInfo -> userInfo
-                                        .userService(customOAuth2UserService)
+                                        .userService(delegatingOAuth2UserService())
                                 )
+
                                 .successHandler(oAuth2LoginSuccessHandler)
                                 .failureHandler(oAuth2LoginFailureHandler)
                 )
@@ -87,6 +118,30 @@ public class SecurityConfig {
                 .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
         return http.build();
     }
+
+
+    @Bean
+    public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
+        return new OAuth2AuthorizationRequestBasedOnCookieRepository();
+    }
+
+    private OAuth2UserService<OAuth2UserRequest, OAuth2User> delegatingOAuth2UserService() {
+        return userRequest -> {
+            String registrationId = userRequest.getClientRegistration().getRegistrationId();
+            log.info("OAuth2 registrationId: {}", registrationId);
+            if ("apple".equals(registrationId)) {
+                log.info("apple Login loadUser : {}", userRequest);
+                return appleOAuth2UserService.loadUser(userRequest);
+            } else if ("google".equals(registrationId)) {
+                log.info("google Login loadUser");
+                return customOAuth2UserService.loadUser(userRequest);
+            } else {
+                throw new OAuth2AuthenticationException(new OAuth2Error("unsupported_provider"),
+                        "지원되지 않는 공급자입니다: " + registrationId);
+            }
+        };
+    }
+
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
@@ -104,7 +159,10 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+        return new HttpSessionOAuth2AuthorizationRequestRepository();
+    }
     /**
      * CORS 설정
      */
@@ -116,14 +174,18 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:8080",
                 BASEURL,
-                "https://front-end-peach-two.vercel.app"
+                "https://front-end-peach-two.vercel.app",
+                "https://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
+                "http://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
+                "https://appleid.apple.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
                 "X-Requested-With",
-                "Accept"
+                "Accept",
+                "Cache-Control"
         ));
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
