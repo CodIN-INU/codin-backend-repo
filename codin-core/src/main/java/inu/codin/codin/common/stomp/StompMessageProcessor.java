@@ -11,6 +11,8 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -30,25 +32,15 @@ public class StompMessageProcessor implements ChannelInterceptor {
             throw new MessageDeliveryException(HttpStatus.BAD_REQUEST.toString());
         }
 
-        /*
-            채팅방 구독, 구독취소에 대한 destination만 처리
-         */
-        if (headerAccessor.getDestination()!=null && headerAccessor.getDestination().matches("/queue(/unread)?/[^/]+")) {
-            switch (headerAccessor.getCommand()) {
-                case CONNECT -> {
-                    stompMessageService.connectSession(headerAccessor);
-                }
-                case SUBSCRIBE -> {
+        switch (headerAccessor.getCommand()) {
+            case CONNECT -> stompMessageService.connectSession(headerAccessor);
+            case SUBSCRIBE -> {
+                if (Objects.requireNonNull(headerAccessor.getDestination()).matches("/queue(/unread)?/[^/]+"))
+                    //헤더에 chatRoomId가 필요한 destination
                     stompMessageService.enterToChatRoom(headerAccessor);
-                }
-                case UNSUBSCRIBE -> {
-                    stompMessageService.exitToChatRoom(headerAccessor);
-                }
-                case DISCONNECT -> {
-                    stompMessageService.exitToChatRoom(headerAccessor);
-                    stompMessageService.disconnectSession(headerAccessor);
-                }
             }
+            case UNSUBSCRIBE -> stompMessageService.exitToChatRoom(headerAccessor); //채팅방에서 끊긴 상태
+            case DISCONNECT -> stompMessageService.disconnectSession(headerAccessor);  //stomp 세션 끊기
         }
     }
 
