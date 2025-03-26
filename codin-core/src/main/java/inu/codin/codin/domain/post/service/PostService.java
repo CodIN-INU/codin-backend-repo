@@ -65,9 +65,6 @@ public class PostService {
     private final HitsService hitsService;
     private final RedisService redisService;
     private final BlockService blockService;
-    private final ReportRepository reportRepository;
-    private final CommentRepository commentRepository;
-    private final ReplyCommentRepository replyCommentRepository;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
@@ -233,6 +230,8 @@ public class PostService {
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
         if (hitsService.validateHits(post.get_id(), userId)) {
+            post.plusHitCount();
+            postRepository.save(post);
             hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
         }

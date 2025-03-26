@@ -1,6 +1,7 @@
 package inu.codin.codin.infra.redis.service;
 
 
+import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -26,7 +27,7 @@ public class RedisService {
      * 장애 복구를 대비한 보완 로직 추가
      */
     private final RedisTemplate<String, String> redisTemplate;
-    private final RedisHitsService redisHitsService;
+    private final HitsService hitsService;
 
 
     //post, comment, reply 구분
@@ -69,7 +70,7 @@ public class RedisService {
                     if (scoreComparison != 0) {
                         return scoreComparison;
                     }
-                    return Integer.compare(redisHitsService.getHitsCount(new ObjectId(e2.getKey())), redisHitsService.getHitsCount(new ObjectId(e1.getKey())));
+                    return Integer.compare(hitsService.getHitsCount(new ObjectId(e2.getKey())), hitsService.getHitsCount(new ObjectId(e1.getKey())));
                 })
                 .limit(N).collect(Collectors.toMap(
                         Map.Entry::getKey,

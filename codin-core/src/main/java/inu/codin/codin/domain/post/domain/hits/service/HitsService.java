@@ -1,26 +1,80 @@
 package inu.codin.codin.domain.post.domain.hits.service;
 
+import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
+import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
 import inu.codin.codin.infra.redis.service.RedisHitsService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+/**
+ * Look Aside
+ * - Cache miss -> DB 조회 및 Cache 업데이트
+ * Write Through
+ * - Cache 및 DB 동시 업데이트
+ */
 @Service
 @RequiredArgsConstructor
 public class HitsService {
 
     private final RedisHitsService redisHitsService;
+    private final HitsRepository hitsRepository;
 
+    /**
+     * 게시글 조회수 추가
+     * Cache 업데이트 후 DB 업데이트
+     * @param postId 게시글 _id
+     * @param userId 유저 _id
+     */
     public void addHits(ObjectId postId, ObjectId userId){
-        redisHitsService.addHits(postId,userId);
+        redisHitsService.addHits(postId, userId);
+        HitsEntity hitsEntity = HitsEntity.builder()
+                .postId(postId).userId(userId).build();
+        hitsRepository.save(hitsEntity);
     }
 
+    /**
+     * 게시글 조회 여부 판단
+     * object == null : Cache miss로 @Async로 Cache 복구 및 DB 조회
+     * @param postId 게시글 _id
+     * @param userId 유저 _id
+     * @return true : 게시글 조회 유 , false : 게시글 조회 무
+     */
     public boolean validateHits(ObjectId postId, ObjectId userId) {
-        return redisHitsService.validateHits(postId,userId);
+        Object object = redisHitsService.validateHits(postId, userId);
+        if (object == null) { //Cache miss
+            recoveryHits(postId);
+            return !hitsRepository.existsByPostIdAndUserId(postId, userId);
+        } else {
+            return object.equals(Boolean.FALSE);
+        }
     }
 
+    /**
+     * 게시글 조회수 반환
+     * null : Cache miss로 @Async로 Cache 복구 및 DB 조회
+     * @param postId 게시글 _id
+     * @return 게시글 조회수
+     */
     public int getHitsCount(ObjectId postId) {
-        return redisHitsService.getHitsCount(postId);
+        if (redisHitsService.getHitsCount(postId) == null) {
+            recoveryHits(postId);
+            return hitsRepository.countAllByPostId(postId);
+        }
+        else return (int) redisHitsService.getHitsCount(postId);
+    }
+
+    /**
+     * Cache miss로 인한 DB로부터 Cache 복구
+     * @param postId 게시글 _id
+     */
+    @Async
+    protected void recoveryHits(ObjectId postId) {
+        List<HitsEntity> hitsEntities= hitsRepository.findAllByPostId(postId);
+        hitsEntities.forEach(hitsEntity -> redisHitsService.addHits(postId, hitsEntity.getUserId()));
     }
 
 }
