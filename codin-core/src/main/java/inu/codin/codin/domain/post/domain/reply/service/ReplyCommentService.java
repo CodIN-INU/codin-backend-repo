@@ -68,22 +68,13 @@ public class ReplyCommentService {
 
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
         post.updateCommentCount(post.getCommentCount() + 1);
-        redisService.applyBestScore(1, post.get_id());
-        setAnonNumber(post, userId);
-        post.getAnonymous().getAnonNumber(userId.toString());
-
+        post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
+
+        redisService.applyBestScore(1, post.get_id());
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
-    }
-
-    private void setAnonNumber(PostEntity post, ObjectId userId) {
-        if (post.getUserId().equals(userId)){ //글쓴이
-            post.getAnonymous().getAnonNumber(userId.toString());
-        } else {
-            post.getAnonymous().setWriter(userId.toString());
-        }
     }
 
     // 대댓글 삭제 (Soft Delete)
@@ -94,15 +85,6 @@ public class ReplyCommentService {
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
-
-//        // 댓글 수 감소 (대댓글도 댓글 수에서 감소)
-//        CommentEntity comment = commentRepository.findByIdAndNotDeleted(reply.getCommentId())
-//                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
-//
-//        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-//                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-//        post.updateCommentCount(post.getCommentCount() - 1);
-//        postRepository.save(post);
 
         log.info("대댓글 성공적 삭제  replyId: {}", replyId);
     }

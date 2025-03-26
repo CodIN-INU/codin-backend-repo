@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.entity;
 
 import lombok.Getter;
+import org.bson.types.ObjectId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,14 @@ public class PostAnonymous {
         userAnonymousMap.put(userId, 0);
     }
 
+
+    public void setAnonNumber(PostEntity post, ObjectId userId) {
+        if (post.getUserId().equals(userId)){ //글쓴이
+            post.getAnonymous().setWriter(userId.toString());
+        } else {
+            post.getAnonymous().getAnonNumber(userId.toString());
+        }
+    }
 
 
 

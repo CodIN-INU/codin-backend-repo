@@ -5,14 +5,11 @@ import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Document(collection = "posts")
 @Getter
@@ -35,7 +32,7 @@ public class PostEntity extends BaseTimeEntity {
     private int hitCount = 0;
     private int reportCount = 0; // 신고 카운트
 
-    private PostAnonymous anonymous;
+    private PostAnonymous anonymous = new PostAnonymous();
 
     @Builder
     public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {

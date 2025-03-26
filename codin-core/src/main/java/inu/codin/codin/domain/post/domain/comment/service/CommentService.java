@@ -47,8 +47,6 @@ public class CommentService {
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
-        log.info("댓글 추가 요청. postId: {}, 사용자: {}, 내용: {}", id, SecurityUtils.getCurrentUserId(), requestDTO.getContent());
-
         ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
@@ -64,49 +62,25 @@ public class CommentService {
 
         // 댓글 수 증가
         post.updateCommentCount(post.getCommentCount() + 1);
-        redisService.applyBestScore(1, postId);
-        setAnonNumber(post, userId);
+        post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
-        log.info("댓글 추가완료 postId: {}.", postId);
+
+        redisService.applyBestScore(1, postId);
+        log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
 
     }
 
-    private void setAnonNumber(PostEntity post, ObjectId userId) {
-        if (post.getUserId().equals(userId)){ //글쓴이
-            post.getAnonymous().getAnonNumber(userId.toString());
-        } else {
-            post.getAnonymous().setWriter(userId.toString());
-        }
-    }
-
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String id) {
-        log.info("댓글 삭제 요청. commentId: {}", id);
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
         SecurityUtils.validateUser(comment.getUserId());
 
-//        // 댓글의 대댓글 조회
-//        List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
-//        // 대댓글 Soft Delete 처리
-//        replies.forEach(reply -> {
-//            if (reply.getDeletedAt()!=null) {
-//                reply.delete();
-//                replyCommentRepository.save(reply);
-//            }
-//        });
-
         // 댓글 Soft Delete 처리
         comment.delete();
         commentRepository.save(comment);
-
-//        // 댓글 수 감소 (댓글 + 대댓글 수만큼 감소)
-//        PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-//                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-//        post.updateCommentCount(post.getCommentCount() - (1 + replies.size()));
-//        postRepository.save(post);
 
         log.info("삭제된 commentId: {}", commentId);
     }
