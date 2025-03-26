@@ -5,30 +5,28 @@ import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.post.domain.best.BestEntity;
-import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.best.BestEntity;
+import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.dto.response.*;
-import inu.codin.codin.domain.report.dto.ReportInfo;
-import inu.codin.codin.domain.report.repository.ReportRepository;
-import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.PostPollDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -39,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -47,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -229,9 +225,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        if (hitsService.validateHits(post.get_id(), userId)) {
-            post.plusHitCount();
-            postRepository.save(post);
+        if (!hitsService.validateHits(post.get_id(), userId)) {
             hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
         }

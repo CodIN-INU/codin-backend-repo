@@ -8,13 +8,11 @@ import org.bson.types.ObjectId;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * Look Aside
- * - Cache miss -> DB 조회 및 Cache 업데이트
- * Write Through
- * - Cache 및 DB 동시 업데이트
+ * - Cache miss -> DB 조회 및 Cache 등록
+ * Write Back
+ * - SyncScheduler 동기화
  */
 @Service
 @RequiredArgsConstructor
@@ -30,7 +28,7 @@ public class HitsService {
      * @param userId 유저 _id
      */
     public void addHits(ObjectId postId, ObjectId userId){
-        redisHitsService.addHits(postId, userId);
+        redisHitsService.addHits(postId);
         HitsEntity hitsEntity = HitsEntity.builder()
                 .postId(postId).userId(userId).build();
         hitsRepository.save(hitsEntity);
@@ -38,19 +36,12 @@ public class HitsService {
 
     /**
      * 게시글 조회 여부 판단
-     * object == null : Cache miss로 @Async로 Cache 복구 및 DB 조회
      * @param postId 게시글 _id
      * @param userId 유저 _id
      * @return true : 게시글 조회 유 , false : 게시글 조회 무
      */
     public boolean validateHits(ObjectId postId, ObjectId userId) {
-        Object object = redisHitsService.validateHits(postId, userId);
-        if (object == null) { //Cache miss
-            recoveryHits(postId);
-            return !hitsRepository.existsByPostIdAndUserId(postId, userId);
-        } else {
-            return object.equals(Boolean.FALSE);
-        }
+        return hitsRepository.existsByPostIdAndUserId(postId, userId);
     }
 
     /**
@@ -60,11 +51,12 @@ public class HitsService {
      * @return 게시글 조회수
      */
     public int getHitsCount(ObjectId postId) {
-        if (redisHitsService.getHitsCount(postId) == null) {
+        Object hits = redisHitsService.getHitsCount(postId);
+        if (hits == null) {
             recoveryHits(postId);
             return hitsRepository.countAllByPostId(postId);
         }
-        else return (int) redisHitsService.getHitsCount(postId);
+        else return Integer.parseInt((String)hits);
     }
 
     /**
@@ -73,8 +65,8 @@ public class HitsService {
      */
     @Async
     protected void recoveryHits(ObjectId postId) {
-        List<HitsEntity> hitsEntities= hitsRepository.findAllByPostId(postId);
-        hitsEntities.forEach(hitsEntity -> redisHitsService.addHits(postId, hitsEntity.getUserId()));
+        int hits = hitsRepository.countAllByPostId(postId);
+        redisHitsService.recoveryHits(postId, hits);
     }
 
 }

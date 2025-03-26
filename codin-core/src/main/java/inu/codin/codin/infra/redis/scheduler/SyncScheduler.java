@@ -1,13 +1,11 @@
 package inu.codin.codin.infra.redis.scheduler;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.lecture.domain.review.entity.ReviewEntity;
 import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
 import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -25,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -243,6 +240,9 @@ public class SyncScheduler {
         }
     }
 
+    /**
+     * redis에서 업데이트 되는 조회수를 postEntity에 주기적으로 저장
+     */
     @Scheduled(fixedRate = 43200000)
     public void syncPostHits(){
         Set<String> redisKeys = redisService.getKeys("post:hits:*")
@@ -250,32 +250,10 @@ public class SyncScheduler {
                 .collect(Collectors.toSet());
         if (redisKeys.isEmpty()) return;
 
-        // Post _id에 해당하는 Hits Entity 리스트
-        List<HitsEntity> dbHits = hitsRepository.findAll();
-        Map<String, List<HitsEntity>> dbHitsMap = dbHits.stream()
-                .collect(Collectors.groupingBy(hitsEntity -> hitsEntity.getPostId().toString()));
-
-        //DB에 있지만 redis에 없는 조회수 복구
-        dbHitsMap.forEach((postId, hits)-> {
-            if (!redisKeys.contains(postId))
-                hits.forEach(hit -> redisHitsService.addHits(new ObjectId(postId), hit.getUserId()));
-        });
-
-        //DB에 없지만 redis에 있는 조회수 삭제
         for (String postId: redisKeys){
-            Set<String> redisUsers = redisHitsService.getHitsUser(new ObjectId(postId));
-            Set<String> dbUsers = dbHitsMap.getOrDefault(postId, List.of())
-                    .stream().map(hit -> hit.getUserId().toString())
-                    .collect(Collectors.toSet());
-
-            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
-                    .forEach(userId -> {
-                        log.info("[Redis] 조회수 삭제 : UserId = {}, PostId = {}", userId, postId);
-                        redisHitsService.removeHits(new ObjectId(postId), userId);
-                    });
-
             //조회수 count 업데이트
-            int hitCount = redisHitsService.getHitsCount(new ObjectId(postId));
+            Object object = redisHitsService.getHitsCount(new ObjectId(postId));
+            int hitCount = object != null? Integer.parseInt((String) object) : hitsRepository.countAllByPostId(new ObjectId(postId));
             PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                     .orElse(null);
             if (post != null && post.getHitCount() != hitCount){
