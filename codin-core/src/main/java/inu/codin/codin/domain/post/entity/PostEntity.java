@@ -86,7 +86,7 @@ public class PostEntity extends BaseTimeEntity {
         this.reportCount=reportCount;
     }
 
-    public void plusHitCount() {this.hitCount++;}
-
-
+    public void updateHitCount(int hitCount) {
+        this.hitCount = hitCount;
+    }
 }
