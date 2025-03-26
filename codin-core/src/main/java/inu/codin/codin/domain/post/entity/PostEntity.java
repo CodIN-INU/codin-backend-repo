@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Document(collection = "posts")
 @Getter
@@ -19,25 +20,25 @@ public class PostEntity extends BaseTimeEntity {
     @Id @NotBlank
     private ObjectId _id;
 
-    private ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
-    private String title;
+    private final ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
+    private final String title;
     private String content;
-    private List<String> postImageUrls = new ArrayList<>();
+    private List<String> postImageUrls;
     private boolean isAnonymous;
 
-    private PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
+    private final PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
 
     private int commentCount = 0; // 댓글 + 대댓글 카운트
-    private int likeCount = 0; // 좋아요 카운트 (redis)
-    private int scrapCount = 0; // 스크랩 카운트 (redis)
+    private int likeCount= 0; // 좋아요 카운트 (redis)
+    private int scrapCount= 0; // 스크랩 카운트 (redis)
     private int hitCount = 0;
+    private int reportCount = 0; // 신고 카운트
 
-    private Integer reportCount = 0; // 신고 카운트
+    private PostAnonymous anonymous;
 
     @Builder
-    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus,
-                      int commentCount, int likeCount, int scrapCount, Integer reportCount) {
+    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {
         this._id = _id;
         this.userId = userId;
         this.title = title;
@@ -46,10 +47,6 @@ public class PostEntity extends BaseTimeEntity {
         this.isAnonymous = isAnonymous;
         this.postCategory = postCategory;
         this.postStatus = postStatus;
-        this.commentCount = commentCount;
-        this.likeCount = likeCount;
-        this.scrapCount = scrapCount;
-        this.reportCount = (reportCount == null) ? 0 : reportCount;
     }
 
     public void updatePostContent(String content, List<String> postImageUrls) {

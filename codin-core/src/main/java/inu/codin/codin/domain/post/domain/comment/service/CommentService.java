@@ -18,7 +18,6 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisAnonService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,6 @@ public class CommentService {
     private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
-    private final RedisAnonService redisAnonService;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -76,9 +74,9 @@ public class CommentService {
 
     private void setAnonNumber(PostEntity post, ObjectId userId) {
         if (post.getUserId().equals(userId)){ //글쓴이
-            redisAnonService.setWriter(post.get_id().toString(), userId.toString());
+            post.getAnonymous().getAnonNumber(userId.toString());
         } else {
-            redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+            post.getAnonymous().setWriter(userId.toString());
         }
     }
 
@@ -117,7 +115,7 @@ public class CommentService {
     // 특정 게시물의 댓글 및 대댓글 조회
     public List<CommentResponseDTO> getCommentsByPostId(String id) {
         ObjectId postId = new ObjectId(id);
-        postRepository.findByIdAndNotDeleted(postId)
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         List<CommentEntity> comments = commentRepository.findByPostId(postId);
 
@@ -138,7 +136,7 @@ public class CommentService {
         return comments.stream()
                 .map(comment -> {
                     UserDto userDto = userMap.get(comment.getUserId());
-                    int anonNum = redisAnonService.getAnonNumber(postId.toString(), comment.getUserId().toString());
+                    int anonNum = post.getAnonymous().getAnonNumber(comment.getUserId().toString());
                     String nickname;
                     String userImageUrl;
 
@@ -152,7 +150,7 @@ public class CommentService {
                         userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
-                            replyCommentService.getRepliesByCommentId(comment.get_id()),
+                            replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()),
                             getUserInfoAboutPost(comment.get_id()));
                 })
