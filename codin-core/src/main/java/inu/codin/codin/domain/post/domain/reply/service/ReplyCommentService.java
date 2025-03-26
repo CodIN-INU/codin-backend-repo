@@ -13,12 +13,12 @@ import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDT
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.dto.response.UserDto;
+import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisAnonService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
@@ -46,7 +46,6 @@ public class ReplyCommentService {
     private final NotificationService notificationService;
     private final RedisService redisService;
     private final S3Service s3Service;
-    private final RedisAnonService redisAnonService;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -68,15 +67,12 @@ public class ReplyCommentService {
         replyCommentRepository.save(reply);
 
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
-        log.info("대댓글 추가전, commentCount: {}", post.getCommentCount());
         post.updateCommentCount(post.getCommentCount() + 1);
         redisService.applyBestScore(1, post.get_id());
         setAnonNumber(post, userId);
-        redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+        post.getAnonymous().getAnonNumber(userId.toString());
 
         postRepository.save(post);
-        log.info("대댓글 추가후, commentCount: {}", post.getCommentCount());
-
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
@@ -84,9 +80,9 @@ public class ReplyCommentService {
 
     private void setAnonNumber(PostEntity post, ObjectId userId) {
         if (post.getUserId().equals(userId)){ //글쓴이
-            redisAnonService.setWriter(post.get_id().toString(), userId.toString());
+            post.getAnonymous().getAnonNumber(userId.toString());
         } else {
-            redisAnonService.getAnonNumber(post.get_id().toString(), userId.toString());
+            post.getAnonymous().setWriter(userId.toString());
         }
     }
 
@@ -112,7 +108,7 @@ public class ReplyCommentService {
     }
 
     // 특정 댓글의 대댓글 조회
-    public List<CommentResponseDTO> getRepliesByCommentId(ObjectId commentId) {
+    public List<CommentResponseDTO> getRepliesByCommentId(PostAnonymous postAnonymous, ObjectId commentId) {
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
         String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
@@ -128,7 +124,7 @@ public class ReplyCommentService {
         return replies.stream()
                 .map(reply -> {
                     UserDto userDto = userMap.get(reply.getUserId());
-                    int anonNum = redisAnonService.getAnonNumber(commentRepository.findById(reply.getCommentId()).get().getPostId().toString(), reply.getUserId().toString());
+                    int anonNum = postAnonymous.getAnonNumber(reply.getUserId().toString());
                     String nickname;
                     String userImageUrl;
 
