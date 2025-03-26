@@ -24,6 +24,10 @@ public class PostAnonymous {
         }
     }
 
+    /**
+     * 글쓴이는 따로 관리하기 위해 0으로 설정
+     * @param userId
+     */
     public void setWriter(String userId){
         userAnonymousMap.put(userId, 0);
     }
