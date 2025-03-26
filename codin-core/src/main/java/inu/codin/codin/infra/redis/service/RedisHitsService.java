@@ -30,7 +30,7 @@ public class RedisHitsService {
             redisTemplate.opsForValue().increment(redisKey);
         else {
             redisTemplate.opsForValue().set(redisKey, String.valueOf(1));
-            redisTemplate.expire(redisKey, 7, TimeUnit.DAYS);
+            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         }
     }
 
