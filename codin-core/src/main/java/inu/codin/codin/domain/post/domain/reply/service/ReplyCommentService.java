@@ -67,7 +67,7 @@ public class ReplyCommentService {
         replyCommentRepository.save(reply);
 
         // 댓글 수 증가 (대댓글도 댓글 수에 포함)
-        post.updateCommentCount(post.getCommentCount() + 1);
+        post.plusCommentCount();
         post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
 
@@ -121,15 +121,15 @@ public class ReplyCommentService {
                     }
                     return CommentResponseDTO.replyOf(reply, nickname, userImageUrl, List.of(),
                             likeService.getLikeCount(LikeType.valueOf("REPLY"), reply.get_id()), // 대댓글 좋아요 수
-                            getUserInfoAboutPost(reply.get_id()));
+                            getUserInfoAboutReply(reply.get_id()));
                 }).toList();
     }
 
-    public CommentResponseDTO.UserInfo getUserInfoAboutPost(ObjectId replyId) {
+    public CommentResponseDTO.UserInfo getUserInfoAboutReply(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(likeService.isReplyLiked(replyId, userId))
+                .isLike(likeService.isLiked(LikeType.REPLY, replyId, userId))
                 .build();
     }
 
