@@ -16,6 +16,7 @@ import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -111,7 +112,8 @@ public class LikeService {
         } else return Integer.parseInt(String.valueOf(redisResult));
     }
 
-    private void recoveryLike(LikeType entityType, ObjectId entityId) {
+    @Async
+    protected void recoveryLike(LikeType entityType, ObjectId entityId) {
         int likeCount = likeRepository.countAllByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
         redisLikeService.recoveryLike(entityType, entityId, likeCount);
     }
