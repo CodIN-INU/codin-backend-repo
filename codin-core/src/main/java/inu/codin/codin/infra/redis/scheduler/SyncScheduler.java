@@ -9,13 +9,11 @@ import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
-import inu.codin.codin.infra.redis.service.RedisHitsService;
 import inu.codin.codin.infra.redis.service.RedisLikeService;
 import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
@@ -42,12 +40,10 @@ public class SyncScheduler {
     private final ReviewRepository reviewRepository;
 
     private final LikeRepository likeRepository;
-    private final HitsRepository hitsRepository;
     private final BestRepository bestRepository;
 
     private final RedisService redisService;
     private final RedisLikeService redisLikeService;
-    private final RedisHitsService redisHitsService;
     private final RedisHealthChecker redisHealthChecker;
 
     @Async
@@ -62,7 +58,6 @@ public class SyncScheduler {
         syncEntityLikes("COMMENT", commentRepository);
         syncEntityLikes("REPLY", replyCommentRepository);
         syncEntityLikes("REVIEW", reviewRepository);
-        syncPostHits();
         log.info(" 동기화 작업 완료");
     }
 
@@ -130,31 +125,6 @@ public class SyncScheduler {
                     review.updateLikeCount(likeCount);
                     reviewRepo.save(review);
                 }
-            }
-        }
-    }
-
-
-    /**
-     * redis에서 업데이트 되는 조회수를 postEntity에 주기적으로 저장
-     */
-    @Scheduled(fixedRate = 43200000)
-    public void syncPostHits(){
-        Set<String> redisKeys = redisService.getKeys("post:hits:*")
-                .stream().map(redisKey -> redisKey.replace("post:hits:", ""))
-                .collect(Collectors.toSet());
-        if (redisKeys.isEmpty()) return;
-
-        for (String postId: redisKeys){
-            //조회수 count 업데이트
-            Object object = redisHitsService.getHitsCount(new ObjectId(postId));
-            int hitCount = object != null? Integer.parseInt((String) object) : hitsRepository.countAllByPostId(new ObjectId(postId));
-            PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                    .orElse(null);
-            if (post != null && post.getHitCount() != hitCount){
-                log.info("PostEntity 조회수 업데이트: PostID={}, Count={}", postId, hitCount);
-                post.updateHitCount(hitCount);
-                postRepository.save(post);
             }
         }
     }
