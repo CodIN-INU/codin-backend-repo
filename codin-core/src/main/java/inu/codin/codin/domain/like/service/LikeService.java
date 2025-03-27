@@ -5,7 +5,6 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.like.exception.LikeCreateFailException;
 import inu.codin.codin.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
@@ -18,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,29 +34,35 @@ public class LikeService {
     private final RedisService redisService;
     private final RedisHealthChecker redisHealthChecker;
 
+
     public String toggleLike(LikeRequestDto likeRequestDto) {
         ObjectId likeId = new ObjectId(likeRequestDto.getId());
         ObjectId userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
 
         // 이미 좋아요를 눌렀으면 취소, 그렇지 않으면 추가
-        LikeEntity like = likeRepository.findByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeId, userId);
+        Optional<LikeEntity> like = likeRepository.findByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeId, userId);
+        return getResult(likeRequestDto, like, likeId, userId);
+    }
 
-        if (like != null && like.getDeletedAt() == null) { //좋아요가 존재
-            removeLike(like);
-            return "좋아요가 삭제되었습니다.";
-        } else if (like == null){
-            createLike(likeRequestDto.getLikeType(), likeId, userId);
-            return "좋아요가 추가되었습니다.";
+    private String getResult(LikeRequestDto likeRequestDto, Optional<LikeEntity> like, ObjectId likeId, ObjectId userId) {
+        if (like.isPresent()){
+            if (like.get().getDeletedAt() == null) {
+                removeLike(like.get());
+                return "좋아요가 삭제되었습니다.";
+            } else {
+                restoreLike(like.get()); //좋아요가 존재하는데 삭제된 상태
+                return "좋아요가 복구되었습니다";
+            }
         } else {
-            addLike(like); //좋아요가 존재하는데 삭제된 상태
-            return "좋아요가 복구되었습니다";
+            addLike(likeRequestDto.getLikeType(), likeId, userId);
+            return "좋아요가 추가되었습니다.";
         }
     }
 
-    public void createLike(LikeType likeType, ObjectId likeId, ObjectId userId){
+    public void addLike(LikeType likeType, ObjectId likeId, ObjectId userId){
         if (redisHealthChecker.isRedisAvailable()) {
-            redisLikeService.addLike(likeType.name(), likeId, userId);
+            redisLikeService.addLike(likeType.name(), likeId);
             log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
         }
 
@@ -70,30 +77,22 @@ public class LikeService {
         }
     }
 
-    public void addLike(LikeEntity like) {
-        LikeType likeType = like.getLikeType();
-        ObjectId likeId = like.getLikeTypeId();
-        ObjectId userId = like.getUserId();
-
+    public void restoreLike(LikeEntity like) {
         if (redisHealthChecker.isRedisAvailable()) {
-            redisLikeService.addLike(likeType.name(), likeId, userId);
-            log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
+            redisLikeService.addLike(like.getLikeType().name(), like.getLikeTypeId());
+            log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}", like.getLikeType(), like.getLikeTypeId());
         }
 
-        if (like.getDeletedAt() != null) { //삭제된 상태라면 다시 좋아요 만들기
-            like.recreatedAt();
-            like.restore();
-            likeRepository.save(like);
-            log.info("좋아요 복구 완료 - likeId: {}, userId: {}", like.get_id(), userId);
-        } else {
-            log.warn("좋아요 추가 실패 - 이미 좋아요가 눌려 있음 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
-            throw new LikeCreateFailException("이미 좋아요가 눌러진 상태입니다.");
-        }
+        like.recreatedAt();
+        like.restore();
+        likeRepository.save(like);
+        log.info("좋아요 복구 완료 - likeId: {}, userId: {}", like.get_id(), like.getUserId());
+
     }
 
     public void removeLike(LikeEntity like) {
         if (redisHealthChecker.isRedisAvailable()) {
-            redisLikeService.removeLike(like.getLikeType().name(), like.getLikeTypeId(), like.getUserId());
+            redisLikeService.removeLike(like.getLikeType().name(), like.getLikeTypeId());
             log.info("Redis에서 좋아요 삭제 - likeType: {}, likeId: {}, userId: {}", like.getLikeType(), like.getLikeTypeId(), like.getUserId());
         }
         like.delete();
@@ -102,28 +101,23 @@ public class LikeService {
     }
 
     public int getLikeCount(LikeType entityType, ObjectId entityId) {
+        Object redisResult = null;
         if (redisHealthChecker.isRedisAvailable()) {
-            return redisLikeService.getLikeCount(entityType.name(), entityId);
+            redisResult = redisLikeService.getLikeCount(entityType.name(), entityId);
         }
-        long count = likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
-        return (int) Math.max(0, count);
+        if (redisResult == null){
+            recoveryLike(entityType, entityId);
+            return likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
+        } else return Integer.parseInt(String.valueOf(redisResult));
     }
 
-    public boolean isPostLiked(ObjectId postId, ObjectId userId){
-        return redisLikeService.isLiked(LikeType.POST, postId, userId);
+    private void recoveryLike(LikeType entityType, ObjectId entityId) {
+        int likeCount = likeRepository.countAllByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
+        redisLikeService.recoveryLike(entityType, entityId, likeCount);
     }
 
-    public boolean isCommentLiked(ObjectId commentId, ObjectId userId){
-        return redisLikeService.isLiked(LikeType.COMMENT, commentId, userId);
-    }
-
-    public boolean isReplyLiked(ObjectId replyId, ObjectId userId) {
-        return redisLikeService.isLiked(LikeType.REPLY, replyId, userId);
-
-    }
-
-    public boolean isReviewLiked(ObjectId reviewId, ObjectId userId){
-        return redisLikeService.isLiked(LikeType.REVIEW, reviewId, userId);
+    public boolean isLiked(LikeType likeType, ObjectId likeTypeId, ObjectId userId){
+        return likeRepository.existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(likeType, likeTypeId, userId);
     }
 
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
