@@ -54,7 +54,7 @@ public class ReviewService {
         ReviewEntity newReview = ReviewEntity.of(createReviewRequestDto, lectureId, userId);
         reviewRepository.save(newReview);
         updateRating(lectureId);
-
+        log.info("새로운 강의 후기 저장 - lectureId : {} userId : {}", lectureId, userId);
     }
 
     /**
