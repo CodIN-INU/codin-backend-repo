@@ -28,8 +28,8 @@ public class RedisLikeService {
             redisTemplate.opsForValue().increment(redisKey);
         else {
             redisTemplate.opsForValue().set(redisKey, String.valueOf(1));
-            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         }
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
     }
 
     public void removeLike(String entityType, ObjectId entityId) {
@@ -40,6 +40,7 @@ public class RedisLikeService {
     public Object getLikeCount(String entityType, ObjectId entityId) {
         String redisKey = entityType + LIKE_KEY + entityId;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))){
+            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
             return redisTemplate.opsForValue().get(redisKey);
         } else return null;
 
@@ -47,6 +48,7 @@ public class RedisLikeService {
 
     public void recoveryLike(LikeType entityType, ObjectId entityId, int likeCount) {
         String redisKey = entityType + LIKE_KEY + entityId;
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         redisTemplate.opsForValue().set(redisKey, String.valueOf(likeCount));
     }
 }
