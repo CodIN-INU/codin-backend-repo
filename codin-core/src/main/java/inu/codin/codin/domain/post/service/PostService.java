@@ -290,21 +290,10 @@ public class PostService {
     }
 
     public List<PostDetailResponseDTO> getTop3BestPosts() {
-        Map<String, Double> posts = redisBestService.getTopNPosts(3);
+        Map<String, Double> posts = redisBestService.getBests();
         List<PostEntity> bestPosts = posts.entrySet().stream()
-                .map(post -> {
-                    BestEntity bestPost = bestRepository.findByPostId(new ObjectId(post.getKey()));
-                    PostEntity postEntity = postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
-                            .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."));
-                    if (bestPost == null) {
-                        bestRepository.save(BestEntity.builder()
-                                .postId(new ObjectId(post.getKey()))
-                                .createdAt(postEntity.getCreatedAt())
-                                .score(post.getValue().intValue())
-                                .build());
-                    }
-                    return postEntity;
-                }
+                .map(post -> postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
+                        .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."))
                 ).toList();
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
