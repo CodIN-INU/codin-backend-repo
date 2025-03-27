@@ -123,7 +123,7 @@ public class CommentService {
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
                             replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
-                            likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()),
+                            likeService.getLikeCount(LikeType.COMMENT, comment.get_id()),
                             getUserInfoAboutComment(comment.get_id()));
                 })
                 .toList();
