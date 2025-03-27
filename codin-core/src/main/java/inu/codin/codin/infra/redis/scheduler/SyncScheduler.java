@@ -2,23 +2,22 @@ package inu.codin.codin.infra.redis.scheduler;
 
 import inu.codin.codin.domain.lecture.domain.review.entity.ReviewEntity;
 import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
-import inu.codin.codin.domain.lecture.repository.LectureRepository;
+import inu.codin.codin.domain.like.entity.LikeEntity;
+import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.like.entity.LikeEntity;
-import inu.codin.codin.domain.like.repository.LikeRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.scrap.entity.ScrapEntity;
-import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
-import inu.codin.codin.infra.redis.service.*;
+import inu.codin.codin.infra.redis.service.RedisHitsService;
+import inu.codin.codin.infra.redis.service.RedisLikeService;
+import inu.codin.codin.infra.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -45,12 +44,10 @@ public class SyncScheduler {
     private final LikeRepository likeRepository;
     private final HitsRepository hitsRepository;
     private final BestRepository bestRepository;
-    private final LectureRepository lectureRepository;
 
     private final RedisService redisService;
     private final RedisLikeService redisLikeService;
     private final RedisHitsService redisHitsService;
-    private final RedisReviewService redisReviewService;
     private final RedisHealthChecker redisHealthChecker;
 
     @Async
@@ -66,63 +63,7 @@ public class SyncScheduler {
         syncEntityLikes("REPLY", replyCommentRepository);
         syncEntityLikes("REVIEW", reviewRepository);
         syncPostHits();
-        syncReviews();
         log.info(" 동기화 작업 완료");
-    }
-
-    private void syncReviews() {
-        List<ReviewEntity> dbReviews = reviewRepository.findAllByDeletedAtIsNull();
-        Set<String> redisKeys = redisService.getKeys("review:lectures:*").stream()
-                .map(key -> key.replace("review:lectures:", ""))
-                .collect(Collectors.toSet());
-
-        //Map< lectureId, 해당되는 리뷰Entity 리스트 >
-        Map<String, List<ReviewEntity>> dbReviewMap = dbReviews.stream()
-                .collect(Collectors.groupingBy(review -> review.getLectureId().toString()));
-
-        // Redis에 없는 리뷰 복구
-        dbReviewMap.forEach((lectureId, reviews) -> {
-            if (!redisKeys.contains(lectureId)) {
-                // Redis에 강의 자체가 없으면 모든 리뷰 추가
-                reviews.forEach(review -> redisReviewService.addReview(
-                        lectureId, review.getStarRating(), review.getUserId()));
-            } else {
-                // Redis에 강의는 있지만 특정 유저 리뷰가 없는 경우 추가
-                Set<String> redisUsers = redisReviewService.getReviewUsers(lectureId);
-                reviews.stream()
-                        .filter(review -> !redisUsers.contains(review.getUserId().toString()))
-                        .forEach(review -> {
-                            log.info("[Redis] 리뷰 추가: UserID={}, LectureID={}", review.getUserId(), lectureId);
-                            redisReviewService.addReview(lectureId, review.getStarRating(), review.getUserId());
-                        });
-            }
-        });
-
-        // DB에 없는 리뷰 삭제
-        for (String lectureId : redisKeys) {
-            Set<String> redisUsers = redisReviewService.getReviewUsers(lectureId);
-            Set<String> dbUsers = dbReviewMap.getOrDefault(lectureId, List.of()).stream()
-                    .map(review -> review.getUserId().toString())
-                    .collect(Collectors.toSet());
-
-            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
-                    .forEach(userId -> {
-                        log.info("[Redis] 리뷰 삭제: UserID={}, LectureID={}", userId, lectureId);
-                        redisReviewService.removeReview(lectureId, userId);
-                    });
-        }
-
-        // 강의 평점 업데이트
-        dbReviewMap.keySet().forEach(lectureId -> {
-            lectureRepository.findById(new ObjectId(lectureId)).ifPresent(lectureEntity -> {
-                lectureEntity.updateReviewRating(
-                        redisReviewService.getAveOfRating(lectureId),
-                        redisReviewService.getParticipants(lectureId),
-                        redisReviewService.getEmotionRating(lectureId)
-                );
-                lectureRepository.save(lectureEntity);
-            });
-        });
     }
 
     private <T> void syncEntityLikes(String entityType, MongoRepository<T, ObjectId> repository) {
