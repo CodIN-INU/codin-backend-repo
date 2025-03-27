@@ -1,7 +1,10 @@
 package inu.codin.codin.common.security.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.codin.common.response.ExceptionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -14,7 +17,10 @@ import java.io.PrintWriter;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
+    private final ObjectMapper objectMapper;
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -22,18 +28,18 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        String errorMessage = null;
-        if (exception instanceof OAuth2AuthenticationException) {
-            OAuth2Error error = ((OAuth2AuthenticationException) exception).getError();
-            errorMessage = error.getDescription();
-        }
-        if (errorMessage == null || errorMessage.isEmpty()) {
-            errorMessage = "인증 실패"; // 기본 오류 메시지
+        String errorMessage = "인증 실패.";
+        if (exception instanceof OAuth2AuthenticationException oauth2Ex) {
+            OAuth2Error error = oauth2Ex.getError();
+            if (error != null && error.getDescription() != null) {
+                errorMessage = error.getDescription();
+            }
         }
 
-        PrintWriter writer = response.getWriter();
-        writer.write("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
-        log.error("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
-        writer.flush();
+        ExceptionResponse errorResponse = new ExceptionResponse(errorMessage, HttpServletResponse.SC_UNAUTHORIZED);
+        String responseBody = objectMapper.writeValueAsString(errorResponse);
+
+        log.error("[OAuth2LoginFailureHandler] {}", responseBody);
+        response.getWriter().write(responseBody);
     }
 }
