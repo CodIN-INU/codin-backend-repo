@@ -12,7 +12,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.service.RedisLikeService;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -32,7 +32,7 @@ public class LikeService {
     private final ReviewRepository reviewRepository;
 
     private final RedisLikeService redisLikeService;
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
     private final RedisHealthChecker redisHealthChecker;
 
 
@@ -73,7 +73,7 @@ public class LikeService {
                 .userId(userId)
                 .build());
         if (likeType == LikeType.POST) {
-            redisService.applyBestScore(1, likeId);
+            redisBestService.applyBestScore(1, likeId);
             log.info("Redis에 Best Score 적용 - postId: {}", likeId);
         }
     }
