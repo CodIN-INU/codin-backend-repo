@@ -274,7 +274,7 @@ public class PostService {
 
     public UserInfo getUserInfoAboutPost(ObjectId userId, ObjectId postId){
         return UserInfo.builder()
-                .isLike(likeService.isPostLiked(postId, userId))
+                .isLike(likeService.isLiked(LikeType.POST, postId, userId))
                 .isScrap(scrapService.isPostScraped(postId, userId))
                 .build();
     }

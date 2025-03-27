@@ -15,7 +15,6 @@ import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisService;
@@ -36,7 +35,6 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final ReportRepository reportRepository;
 
     private final UserRepository userRepository;
     private final LikeService likeService;
@@ -61,7 +59,7 @@ public class CommentService {
         commentRepository.save(comment);
 
         // 댓글 수 증가
-        post.updateCommentCount(post.getCommentCount() + 1);
+        post.plusCommentCount();
         post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
 
@@ -126,7 +124,7 @@ public class CommentService {
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
                             replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
                             likeService.getLikeCount(LikeType.valueOf("COMMENT"), comment.get_id()),
-                            getUserInfoAboutPost(comment.get_id()));
+                            getUserInfoAboutComment(comment.get_id()));
                 })
                 .toList();
     }
@@ -145,10 +143,10 @@ public class CommentService {
 
     }
 
-    public UserInfo getUserInfoAboutPost(ObjectId commentId) {
+    public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.builder()
-                .isLike(likeService.isCommentLiked(commentId, userId))
+                .isLike(likeService.isLiked(LikeType.COMMENT, commentId, userId))
                 .build();
     }
 
