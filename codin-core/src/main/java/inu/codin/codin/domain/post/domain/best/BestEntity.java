@@ -22,18 +22,14 @@ public class BestEntity {
 
     private ObjectId postId;
 
-    private LocalDateTime createdAt;
-
-    @CreatedDate
-    private LocalDateTime selectedAt;
-
     private int score;
 
+    @CreatedDate
+    private LocalDateTime createdAt;
+
     @Builder
-    public BestEntity(ObjectId postId, LocalDateTime createdAt, LocalDateTime selectedAt, int score) {
+    public BestEntity(ObjectId postId, int score) {
         this.postId = postId;
-        this.createdAt = createdAt;
-        this.selectedAt = selectedAt;
         this.score = score;
     }
 }
