@@ -67,6 +67,7 @@ public class ScrapService {
     }
 
     private void restoreScrap(ScrapEntity scrap) {
+        scrap.recreatedAt();
         scrap.restore();
         scrapRepository.save(scrap);
         log.info("스크랩 복원 완료 - postId: {}, userId: {}", scrap.getPostId(), scrap.getUserId());
