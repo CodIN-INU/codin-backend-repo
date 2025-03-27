@@ -27,9 +27,6 @@ public class PostEntity extends BaseTimeEntity {
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
 
     private int commentCount = 0; // 댓글 + 대댓글 카운트
-    private int likeCount= 0; // 좋아요 카운트 (redis)
-    private int scrapCount= 0; // 스크랩 카운트 (redis)
-    private int hitCount = 0;
     private int reportCount = 0; // 신고 카운트
 
     private PostAnonymous anonymous = new PostAnonymous();
@@ -69,16 +66,8 @@ public class PostEntity extends BaseTimeEntity {
     }
 
     //댓글+대댓글 수 업데이트
-    public void updateCommentCount(int commentCount) {
-        this.commentCount=commentCount;
-    }
-    //좋아요 수 업데이트
-    public void updateLikeCount(int likeCount) {
-        this.likeCount=likeCount;
-    }
-    //스크랩 수 업데이트
-    public void updateScrapCount(int scrapCount) {
-        this.scrapCount=scrapCount;
+    public void plusCommentCount() {
+        this.commentCount++;
     }
 
     //신고 수 업데이트
@@ -86,7 +75,4 @@ public class PostEntity extends BaseTimeEntity {
         this.reportCount=reportCount;
     }
 
-    public void updateHitCount(int hitCount) {
-        this.hitCount = hitCount;
-    }
 }
