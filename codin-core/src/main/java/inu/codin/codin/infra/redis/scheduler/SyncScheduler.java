@@ -43,7 +43,6 @@ public class SyncScheduler {
     private final ReviewRepository reviewRepository;
 
     private final LikeRepository likeRepository;
-    private final ScrapRepository scrapRepository;
     private final HitsRepository hitsRepository;
     private final BestRepository bestRepository;
     private final LectureRepository lectureRepository;
@@ -51,7 +50,6 @@ public class SyncScheduler {
     private final RedisService redisService;
     private final RedisLikeService redisLikeService;
     private final RedisHitsService redisHitsService;
-    private final RedisScrapService redisScrapService;
     private final RedisReviewService redisReviewService;
     private final RedisHealthChecker redisHealthChecker;
 
@@ -67,7 +65,6 @@ public class SyncScheduler {
         syncEntityLikes("COMMENT", commentRepository);
         syncEntityLikes("REPLY", replyCommentRepository);
         syncEntityLikes("REVIEW", reviewRepository);
-        syncPostScraps();
         syncPostHits();
         syncReviews();
         log.info(" 동기화 작업 완료");
@@ -196,49 +193,6 @@ public class SyncScheduler {
         }
     }
 
-
-    @Scheduled(fixedRate = 43200000)
-    public void syncPostScraps() {
-        Set<String> redisKeys = redisService.getKeys("post:scraps:*")
-                .stream().map(redisKey -> redisKey.replace("post:scraps:", ""))
-                .collect(Collectors.toSet());
-        if (redisKeys.isEmpty()) return;
-
-        //Post의 _id에 해당되는 Scrap Entity 리스트
-        List<ScrapEntity> dbScraps = scrapRepository.findAllByDeletedAtIsNull();
-        Map<String, List<ScrapEntity>> dbScrapMap = dbScraps.stream()
-                .collect(Collectors.groupingBy(scrapEntity -> scrapEntity.getPostId().toString()));
-
-        //DB에 있지만 Redis에 없는 Scrap 복구
-        dbScrapMap.forEach((postId, scraps) -> {
-            if (!redisKeys.contains(postId))
-                scraps.forEach(scrap -> redisScrapService.addScrap(new ObjectId(postId), scrap.getUserId()));
-        });
-
-        //DB에 없지만 Redis에 있는 Scrap 삭제
-        for (String postId : redisKeys){
-            Set<String> redisUsers = redisScrapService.getScrapedUsers(new ObjectId(postId));
-            Set<String> dbUsers = dbScrapMap.getOrDefault(postId, List.of()).stream()
-                    .map(scrap -> scrap.getUserId().toString())
-                    .collect(Collectors.toSet());
-
-            redisUsers.stream().filter(userId -> !dbUsers.contains(userId))
-                    .forEach(userId -> {
-                        log.info("[MongoDB] 스크랩 삭제: UserID={}, PostID={}", userId, postId);
-                        redisScrapService.removeScrap(new ObjectId(postId), new ObjectId(userId));
-                    });
-
-            //scrap 개수 업데이트
-            int scarpCount = redisScrapService.getScrapCount(new ObjectId(postId));
-            PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                    .orElse(null);
-            if (post != null && post.getScrapCount() != scarpCount) {
-                log.info("PostEntity 스크랩 수 업데이트: PostID={}, Count={}", postId, scarpCount);
-                post.updateScrapCount(scarpCount);
-                postRepository.save(post);
-            }
-        }
-    }
 
     /**
      * redis에서 업데이트 되는 조회수를 postEntity에 주기적으로 저장
