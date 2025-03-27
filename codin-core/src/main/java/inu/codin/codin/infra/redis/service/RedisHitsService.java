@@ -30,8 +30,8 @@ public class RedisHitsService {
             redisTemplate.opsForValue().increment(redisKey);
         else {
             redisTemplate.opsForValue().set(redisKey, String.valueOf(1));
-            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         }
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
     }
 
     /**
@@ -41,8 +41,10 @@ public class RedisHitsService {
      */
     public Object getHitsCount(ObjectId postId){
         String redisKey = HITS_KEY + postId.toString();
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey)))
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))){
+            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
             return redisTemplate.opsForValue().get(redisKey);
+        }
         else return null;
     }
 
@@ -53,6 +55,7 @@ public class RedisHitsService {
      */
     public void recoveryHits(ObjectId postId, int hits){
         String redisKey = HITS_KEY + postId.toString();
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
         redisTemplate.opsForValue().set(redisKey, String.valueOf(hits));
     }
 }
