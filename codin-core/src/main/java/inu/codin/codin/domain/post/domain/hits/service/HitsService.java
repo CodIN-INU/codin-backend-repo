@@ -2,6 +2,7 @@ package inu.codin.codin.domain.post.domain.hits.service;
 
 import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
 import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
+import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.service.RedisHitsService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 public class HitsService {
 
     private final RedisHitsService redisHitsService;
+    private final RedisHealthChecker redisHealthChecker;
+
     private final HitsRepository hitsRepository;
 
     /**
@@ -28,7 +31,8 @@ public class HitsService {
      * @param userId 유저 _id
      */
     public void addHits(ObjectId postId, ObjectId userId){
-        redisHitsService.addHits(postId);
+        if (redisHealthChecker.isRedisAvailable())
+            redisHitsService.addHits(postId);
         HitsEntity hitsEntity = HitsEntity.builder()
                 .postId(postId).userId(userId).build();
         hitsRepository.save(hitsEntity);
@@ -51,7 +55,9 @@ public class HitsService {
      * @return 게시글 조회수
      */
     public int getHitsCount(ObjectId postId) {
-        Object hits = redisHitsService.getHitsCount(postId);
+        Object hits = null;
+        if (redisHealthChecker.isRedisAvailable())
+            hits = redisHitsService.getHitsCount(postId);
         if (hits == null) {
             recoveryHits(postId);
             return hitsRepository.countAllByPostId(postId);
