@@ -17,7 +17,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class CommentService {
     private final LikeService likeService;
     private final ReplyCommentService replyCommentService;
     private final NotificationService notificationService;
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
     private final S3Service s3Service;
 
     // 댓글 추가
@@ -63,7 +63,7 @@ public class CommentService {
         post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
 
-        redisService.applyBestScore(1, postId);
+        redisBestService.applyBestScore(1, postId);
         log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
 

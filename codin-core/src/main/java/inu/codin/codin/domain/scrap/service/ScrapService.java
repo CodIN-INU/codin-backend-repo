@@ -5,7 +5,7 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -20,7 +20,7 @@ public class ScrapService {
     private final ScrapRepository scrapRepository;
     private final PostRepository postRepository;
 
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
 
     /**
      * 하나의 모듈로 스크랩 추가, 삭제 toggle 동작
@@ -79,7 +79,7 @@ public class ScrapService {
                 .postId(postId)
                 .userId(userId)
                 .build());
-        redisService.applyBestScore(2, postId); //Best 게시글에 적용
+        redisBestService.applyBestScore(2, postId); //Best 게시글에 적용
         log.info("스크랩 추가 완료 - postId: {}, userId: {}", postId, userId);
         log.info("Redis에 Best Score 적용 - postId: {}", postId);
 

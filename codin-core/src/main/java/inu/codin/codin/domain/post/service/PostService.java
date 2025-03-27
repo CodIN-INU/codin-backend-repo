@@ -30,7 +30,7 @@ import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +59,7 @@ public class PostService {
     private final LikeService likeService;
     private final ScrapService scrapService;
     private final HitsService hitsService;
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
     private final BlockService blockService;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
@@ -290,8 +290,7 @@ public class PostService {
     }
 
     public List<PostDetailResponseDTO> getTop3BestPosts() {
-
-        Map<String, Double> posts = redisService.getTopNPosts(3);
+        Map<String, Double> posts = redisBestService.getTopNPosts(3);
         List<PostEntity> bestPosts = posts.entrySet().stream()
                 .map(post -> {
                     BestEntity bestPost = bestRepository.findByPostId(new ObjectId(post.getKey()));

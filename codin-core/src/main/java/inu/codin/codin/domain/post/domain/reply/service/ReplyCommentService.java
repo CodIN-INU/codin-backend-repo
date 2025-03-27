@@ -19,7 +19,7 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class ReplyCommentService {
 
     private final LikeService likeService;
     private final NotificationService notificationService;
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
     private final S3Service s3Service;
 
     // 대댓글 추가
@@ -71,7 +71,7 @@ public class ReplyCommentService {
         post.getAnonymous().setAnonNumber(post, userId);
         postRepository.save(post);
 
-        redisService.applyBestScore(1, post.get_id());
+        redisBestService.applyBestScore(1, post.get_id());
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
