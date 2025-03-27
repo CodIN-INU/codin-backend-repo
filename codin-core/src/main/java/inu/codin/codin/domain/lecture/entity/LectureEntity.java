@@ -23,10 +23,10 @@ public class LectureEntity {
     private List<String> semester;
 
     private double starRating;
-    private long participants;
+    private int participants;
     private Emotion emotion;
 
-    public void updateReviewRating(double starRating, long participants, Emotion emotion){
+    public void updateReviewRating(double starRating, int participants, Emotion emotion){
         this.starRating = starRating;
         this.participants = participants;
         this.emotion = emotion;
