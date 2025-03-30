@@ -7,38 +7,55 @@ import org.bson.types.ObjectId;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RedisHitsService {
     /**
-     * Redis 기반 Hits 관리 Service
+     * Redis 기반 Hits(조회수) 관리 Service
      */
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String HITS_KEY = "post:hits:";
 
-    //Hits
-    public void addHits(ObjectId postId, ObjectId userId){
+    /**
+     * 조회수 추가 (post:hits:{postId} - 조회수)
+     * @param postId 게시글 _id
+     */
+    public void addHits(ObjectId postId){
         String redisKey = HITS_KEY + postId.toString();
-        redisTemplate.opsForSet().add(redisKey, userId.toString());
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey)))
+            redisTemplate.opsForValue().increment(redisKey);
+        else {
+            redisTemplate.opsForValue().set(redisKey, String.valueOf(1));
+        }
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
     }
 
-    public boolean validateHits(ObjectId postId, ObjectId userId){
+    /**
+     * 게시글 조회수 반환
+     * @param postId 게시글 _id
+     * @return int : 게시글 조회수
+     */
+    public Object getHitsCount(ObjectId postId){
         String redisKey = HITS_KEY + postId.toString();
-        return Boolean.FALSE.equals(redisTemplate.opsForSet().isMember(redisKey, userId.toString())); //없어야 유효성 검증 통과
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))){
+            redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
+            return redisTemplate.opsForValue().get(redisKey);
+        }
+        else return null;
     }
 
-    public int getHitsCount(ObjectId postId){
+    /**
+     * hits Collection 기반으로 Cache 복구
+     * @param postId 게시글 _id
+     * @param hits 해당 게시글의 조회수
+     */
+    public void recoveryHits(ObjectId postId, int hits){
         String redisKey = HITS_KEY + postId.toString();
-        Long hitsCount = redisTemplate.opsForSet().size(redisKey);
-        return hitsCount != null ? hitsCount.intValue() : 0;
-    }
-
-    public Set<String> getHitsUser(ObjectId postId) {
-        String redisKey = HITS_KEY + postId.toString();
-        return redisTemplate.opsForSet().members(redisKey);
+        redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(redisKey, String.valueOf(hits));
     }
 }

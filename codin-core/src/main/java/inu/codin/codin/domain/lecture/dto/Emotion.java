@@ -17,4 +17,14 @@ public class Emotion {
         this.best = best;
     }
 
+    public Emotion changeToPercentage(){
+        double total = hard + ok + best;
+        if (total > 0) {
+            this.hard = (hard / total) * 100;
+            this.ok = (ok / total) * 100;
+            this.best = (best / total) * 100;
+        }
+        return this;
+    }
+
 }
