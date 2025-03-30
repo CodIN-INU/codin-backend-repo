@@ -155,8 +155,8 @@ public class RedisBestService {
             Double min = minTuple.getScore();
             Long totalSize = redisTemplate.opsForZSet().size(BEST_KEY);
 
-            //최소 점수가 없거나, 최소 점수보다 같거나 큰 값이거나, 총 베스트 게시글 개수가 3개 미만 이면 포함
-            if (min == null || score >= min || totalSize < 3)
+            //최소 점수보다 같거나 큰 값이거나, 총 베스트 게시글 개수가 3개 미만 이면 포함
+            if (score >= min || totalSize < 3)
                 redisTemplate.opsForZSet().add(BEST_KEY, postId, score);
 
             totalSize = redisTemplate.opsForZSet().size(BEST_KEY);
@@ -168,9 +168,8 @@ public class RedisBestService {
 
             Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, - 1);
             members.forEach(member -> saveBests(member.getValue(), member.getScore().intValue()));
-        }
-
-
+        } else
+            redisTemplate.opsForZSet().add(BEST_KEY, postId, score);
     }
 
     /**
