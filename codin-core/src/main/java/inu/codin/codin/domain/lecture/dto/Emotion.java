@@ -10,6 +10,13 @@ public class Emotion {
     private double ok;
     private double best;
 
+
+    public Emotion() {
+        this.hard = 0;
+        this.ok = 0;
+        this.best = 0;
+    }
+
     @Builder
     public Emotion(double hard, double ok, double best) {
         this.hard = hard;
