@@ -24,7 +24,7 @@ public class LectureEntity {
 
     private double starRating;
     private int participants;
-    private Emotion emotion;
+    private Emotion emotion = new Emotion();
 
     public void updateReviewRating(double starRating, int participants, Emotion emotion){
         this.starRating = starRating;
