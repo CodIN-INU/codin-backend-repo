@@ -5,41 +5,38 @@ import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.post.domain.best.BestEntity;
-import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.best.BestEntity;
+import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.dto.response.*;
-import inu.codin.codin.domain.report.dto.ReportInfo;
-import inu.codin.codin.domain.report.repository.ReportRepository;
-import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
+import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
+import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.PostPollDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisService;
+import inu.codin.codin.infra.redis.service.RedisBestService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -47,7 +44,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,11 +59,8 @@ public class PostService {
     private final LikeService likeService;
     private final ScrapService scrapService;
     private final HitsService hitsService;
-    private final RedisService redisService;
+    private final RedisBestService redisBestService;
     private final BlockService blockService;
-    private final ReportRepository reportRepository;
-    private final CommentRepository commentRepository;
-    private final ReplyCommentRepository replyCommentRepository;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
@@ -232,7 +225,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        if (hitsService.validateHits(post.get_id(), userId)) {
+        if (!hitsService.validateHits(post.get_id(), userId)) {
             hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
         }
@@ -281,7 +274,7 @@ public class PostService {
 
     public UserInfo getUserInfoAboutPost(ObjectId userId, ObjectId postId){
         return UserInfo.builder()
-                .isLike(likeService.isPostLiked(postId, userId))
+                .isLike(likeService.isLiked(LikeType.POST, postId, userId))
                 .isScrap(scrapService.isPostScraped(postId, userId))
                 .build();
     }
@@ -297,22 +290,10 @@ public class PostService {
     }
 
     public List<PostDetailResponseDTO> getTop3BestPosts() {
-
-        Map<String, Double> posts = redisService.getTopNPosts(3);
+        Map<String, Double> posts = redisBestService.getBests();
         List<PostEntity> bestPosts = posts.entrySet().stream()
-                .map(post -> {
-                    BestEntity bestPost = bestRepository.findByPostId(new ObjectId(post.getKey()));
-                    PostEntity postEntity = postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
-                            .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."));
-                    if (bestPost == null) {
-                        bestRepository.save(BestEntity.builder()
-                                .postId(new ObjectId(post.getKey()))
-                                .createdAt(postEntity.getCreatedAt())
-                                .score(post.getValue().intValue())
-                                .build());
-                    }
-                    return postEntity;
-                }
+                .map(post -> postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
+                        .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."))
                 ).toList();
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
