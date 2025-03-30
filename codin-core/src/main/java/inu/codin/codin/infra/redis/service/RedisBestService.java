@@ -84,25 +84,27 @@ public class RedisBestService {
      */
     public Map<String, Double> getBests(){
         if (redisHealthChecker.isRedisAvailable()){
-            Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, - 1);
-            if (members!=null && !members.isEmpty())
-                return members.stream()
-                        .sorted((e1, e2) -> {
-                            //1. 점수 기준 내림차순
-                            int scoreComparison = Double.compare(Double.parseDouble(String.valueOf(e2.getScore())), Double.parseDouble(String.valueOf(e1.getScore())));
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(BEST_KEY))){
+                Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, - 1);
+                if (members!=null && !members.isEmpty())
+                    return members.stream()
+                            .sorted((e1, e2) -> {
+                                //1. 점수 기준 내림차순
+                                int scoreComparison = Double.compare(Double.parseDouble(String.valueOf(e2.getScore())), Double.parseDouble(String.valueOf(e1.getScore())));
 
-                            // 2. 점수가 동일하면 조회수 기준 내림차순 정렬
-                            return scoreComparison != 0 ? scoreComparison :
-                                    Integer.compare(hitsService.getHitsCount(new ObjectId(e2.getValue())),
-                                            hitsService.getHitsCount(new ObjectId(e1.getValue())));
-                        }).collect(Collectors.toMap(
-                                ZSetOperations.TypedTuple::getValue,
-                                ZSetOperations.TypedTuple::getScore,
-                                (existing, replacement) -> existing,
-                                LinkedHashMap::new
-                        ));
+                                // 2. 점수가 동일하면 조회수 기준 내림차순 정렬
+                                return scoreComparison != 0 ? scoreComparison :
+                                        Integer.compare(hitsService.getHitsCount(new ObjectId(e2.getValue())),
+                                                hitsService.getHitsCount(new ObjectId(e1.getValue())));
+                            }).collect(Collectors.toMap(
+                                    ZSetOperations.TypedTuple::getValue,
+                                    ZSetOperations.TypedTuple::getScore,
+                                    (existing, replacement) -> existing,
+                                    LinkedHashMap::new
+                            ));
+            } else log.warn("[getBests] Best 게시글이 없습니다.");
         }
-        return null;
+        return new HashMap<>();
     }
     /**
      * Cache에 저장된 24시간 데이터 중 해당 게시글의 score가 존재하면 점수 반영
