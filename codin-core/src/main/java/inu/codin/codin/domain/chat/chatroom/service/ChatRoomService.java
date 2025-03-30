@@ -31,7 +31,6 @@ public class ChatRoomService {
     private final UserRepository userRepository;
 
     private final BlockService blockService;
-    private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
 
 
@@ -68,6 +67,11 @@ public class ChatRoomService {
         Optional<ChatRoom> existedChatroom = chatRoomRepository.findByReferenceIdAndParticipantsContaining(new ObjectId(chatRoomCreateRequestDto.getReferenceId()),
                 senderId, new ObjectId(chatRoomCreateRequestDto.getReceiverId()));
         if (existedChatroom.isPresent()){
+            ParticipantInfo participantInfo= existedChatroom.get().getParticipants().getInfo().get(senderId);
+            if (participantInfo.isLeaved()){
+                participantInfo.remain();
+                chatRoomRepository.save(existedChatroom.get());
+            }
             throw new ChatRoomExistedException("해당 reference에서 시작된 채팅방이 존재합니다.", 403, existedChatroom.get().get_id());
         }
     }

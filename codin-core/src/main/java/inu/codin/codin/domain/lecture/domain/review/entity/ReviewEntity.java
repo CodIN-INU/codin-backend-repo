@@ -18,17 +18,15 @@ public class ReviewEntity extends BaseTimeEntity {
     private ObjectId userId;
     private String content;
     private double starRating;
-    private int likeCount;
     private String semester;
 
     @Builder
-    public ReviewEntity(ObjectId _id, ObjectId lectureId, ObjectId userId, String content, double starRating, int likeCount, String semester) {
+    public ReviewEntity(ObjectId _id, ObjectId lectureId, ObjectId userId, String content, double starRating, String semester) {
         this._id = _id;
         this.lectureId = lectureId;
         this.userId = userId;
         this.content = content;
         this.starRating = starRating;
-        this.likeCount = likeCount;
         this.semester = semester;
     }
 
@@ -39,11 +37,6 @@ public class ReviewEntity extends BaseTimeEntity {
                 .lectureId(lectureId)
                 .userId(userId)
                 .semester(createReviewRequestDto.getSemester())
-                .likeCount(0)
                 .build();
-    }
-
-    public void updateLikeCount(int likeCount) {
-        this.likeCount = likeCount;
     }
 }
