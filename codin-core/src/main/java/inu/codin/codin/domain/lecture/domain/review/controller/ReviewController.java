@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class ReviewController {
     @PostMapping("/{lectureId}")
     public ResponseEntity<SingleResponse<?>> createReview(@PathVariable("lectureId") String lectureId,
                                                           @RequestBody @Valid CreateReviewRequestDto createReviewRequestDto){
-        reviewService.createReview(lectureId, createReviewRequestDto);
+        reviewService.createReview(new ObjectId(lectureId), createReviewRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "수강 후기 작성 완료", null));
     }

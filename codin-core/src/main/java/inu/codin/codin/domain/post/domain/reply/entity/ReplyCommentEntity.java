@@ -20,25 +20,17 @@ public class ReplyCommentEntity extends BaseTimeEntity {
 
     private boolean anonymous;
 
-    private int likeCount = 0; // 좋아요 카운트
-
     @Builder
-    public ReplyCommentEntity(ObjectId _id, ObjectId commentId, ObjectId userId, boolean anonymous, String content, int likeCount) {
+    public ReplyCommentEntity(ObjectId _id, ObjectId commentId, ObjectId userId, boolean anonymous, String content) {
         this._id = _id;
         this.commentId = commentId;
         this.userId = userId;
         this.content = content;
         this.anonymous = anonymous;
-        this.likeCount = likeCount;
     }
 
     public void updateReply(String content) {
         this.content = content;
-    }
-
-    //좋아요 수 업데이트
-    public void updateLikeCount(int likeCount) {
-        this.likeCount=likeCount;
     }
 
 }
