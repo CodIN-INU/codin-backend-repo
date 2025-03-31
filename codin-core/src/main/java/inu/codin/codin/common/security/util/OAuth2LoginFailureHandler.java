@@ -2,6 +2,8 @@ package inu.codin.codin.common.security.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codin.common.response.ExceptionResponse;
+import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,21 +12,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final JwtService jwtService;
 
     @Value("${server.domain}")
     private String BASEURL;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
+
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
@@ -47,11 +51,18 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         String responseBody = objectMapper.writeValueAsString(errorResponse);
 
         log.error("[OAuth2LoginFailureHandler] {}", responseBody);
+
+        removeAllToken(request, response);
         response.getWriter().write(responseBody);
         if (errorCode == null)
-            getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login?");
+            getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
         else
             getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login?error="+errorCode);
 
+    }
+
+    private void removeAllToken(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
+        jwtService.deleteToken(response);
     }
 }
