@@ -52,7 +52,7 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
 
         log.error("[OAuth2LoginFailureHandler] {}", responseBody);
 
-        removeAllToken(request, response);
+//        removeAllToken(request, response);
 
         getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login" + (errorCode != null ? "?error=" + errorCode : ""));
     }
