@@ -66,7 +66,7 @@ public class ReviewService {
                 .orElseThrow(() -> new NotFoundException("강의 정보를 찾을 수 없습니다."));
         double starRating = reviewRepository.getAvgRatingByLectureId(lectureId);
         Emotion emotion = reviewRepository.getEmotionsCountByRanges(lectureId).changeToPercentage();
-        int participants = reviewRepository.countAllByLectureIdAndDeletedAtIsNotNull(lectureId);
+        int participants = reviewRepository.countByLectureId(lectureId);
         lectureEntity.updateReviewRating(starRating, participants, emotion);
         lectureRepository.save(lectureEntity);
     }
