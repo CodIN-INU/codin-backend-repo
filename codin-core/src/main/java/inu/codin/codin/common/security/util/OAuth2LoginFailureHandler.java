@@ -53,12 +53,14 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         log.error("[OAuth2LoginFailureHandler] {}", responseBody);
 
         removeAllToken(request, response);
+
         response.getWriter().write(responseBody);
         if (errorCode == null)
             getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
         else {
             getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login?error=" + errorCode);
-            getRedirectStrategy().sendRedirect(request, response, "https://accounts.google.com/Logout");
+            String logoutUrl = "https://accounts.google.com/Logout";
+            response.sendRedirect(logoutUrl);
         }
     }
 
