@@ -123,9 +123,11 @@ public class JwtService {
         // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
         // SecurityContext에 Authentication 객체가 없는 경우는 없다.
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        redisStorageService.deleteRefreshToken(authentication.getName());
-        deleteCookie(response);
-        log.info("[deleteToken] Refresh Token 삭제 완료");
+        if (authentication != null && authentication.getName()!=null){
+            redisStorageService.deleteRefreshToken(authentication.getName());
+            deleteCookie(response);
+            log.info("[deleteToken] Refresh Token 삭제 완료");
+        }
     }
 
     private void deleteCookie(HttpServletResponse response) {
