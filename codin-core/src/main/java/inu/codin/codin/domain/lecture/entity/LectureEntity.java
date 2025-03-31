@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.lecture.entity;
 
 import inu.codin.codin.common.dto.Department;
+import inu.codin.codin.domain.lecture.dto.Emotion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,14 @@ public class LectureEntity {
     private Department department; //OTHERS : 교양
     private int grade; //0 : 전학년
     private List<String> semester;
+
+    private double starRating;
+    private int participants;
+    private Emotion emotion = new Emotion();
+
+    public void updateReviewRating(double starRating, int participants, Emotion emotion){
+        this.starRating = starRating;
+        this.participants = participants;
+        this.emotion = emotion;
+    }
 }

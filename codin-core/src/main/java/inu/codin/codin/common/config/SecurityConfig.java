@@ -64,6 +64,8 @@ public class SecurityConfig {
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final CustomOAuth2AccessTokenResponseClient customOAuth2AccessTokenResponseClient;
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Value("${server.domain}")
     private String BASEURL;
 
@@ -85,6 +87,10 @@ public class SecurityConfig {
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
                                 .anyRequest().hasRole("USER")
+                )
+                //Security 내부 인증 실패 처리 => access_token 없는 경우
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 //oauth2 로그인 설정 추가
                 .oauth2Login(oauth2 -> oauth2

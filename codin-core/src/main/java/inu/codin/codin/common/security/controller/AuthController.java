@@ -29,14 +29,28 @@ public class AuthController {
 
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/oauth2/authorization/google");
+        response.sendRedirect("/api/oauth2/authorization/google");
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
+    }
+
+    @GetMapping("/dev/google")
+    public ResponseEntity<SingleResponse<?>> devGoogleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/dev/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }
 
     @GetMapping("/apple")
     public ResponseEntity<SingleResponse<?>> appleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/oauth2/authorization/apple");
+        response.sendRedirect("/api/oauth2/authorization/apple");
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "apple OAuth2 Login Redirect",null));
+    }
+
+    @GetMapping("/dev/apple")
+    public ResponseEntity<SingleResponse<?>> devAppleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/dev/oauth2/authorization/apple");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "apple OAuth2 Login Redirect",null));
     }

@@ -20,8 +20,6 @@ public class CommentEntity extends BaseTimeEntity {
 
     private boolean anonymous;
 
-    private int likeCount = 0;  // 좋아요 수 (Redis에서 관리)
-
     @Builder
     public CommentEntity(ObjectId _id, ObjectId postId, ObjectId userId, String content, Boolean anonymous) {
         this._id = _id;
@@ -35,10 +33,6 @@ public class CommentEntity extends BaseTimeEntity {
         this.content = content;
     }
 
-    //좋아요 수 업데이트
-    public void updateLikeCount(int likeCount) {
-        this.likeCount=likeCount;
-    }
 
 
 }

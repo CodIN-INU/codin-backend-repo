@@ -8,15 +8,16 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScrapRepository extends MongoRepository<ScrapEntity, ObjectId> {
 
-    List<ScrapEntity> findByPostIdAndDeletedAtIsNull(ObjectId postId);
+    boolean existsByPostIdAndUserId(ObjectId postId, ObjectId userId);
 
-    long countByPostIdAndDeletedAtIsNull(ObjectId postId);
+    int countByPostIdAndDeletedAtIsNull(ObjectId postId);
 
-    ScrapEntity findByPostIdAndUserId(ObjectId postId, ObjectId userId);
+    Optional<ScrapEntity> findByPostIdAndUserId(ObjectId postId, ObjectId userId);
 
     Page<ScrapEntity> findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
 }
