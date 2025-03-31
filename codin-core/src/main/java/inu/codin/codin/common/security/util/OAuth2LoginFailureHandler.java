@@ -6,10 +6,10 @@ import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -27,12 +27,12 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final JwtService jwtService;
+    private final HttpSession httpSession;
 
     @Value("${server.domain}")
     private String BASEURL;
     public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
-
-
+    private final String OAUTH2_ACCESS_TOKEN = "oauth2_access_token";
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -56,7 +56,7 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         log.error("[OAuth2LoginFailureHandler] {}", responseBody);
 
         // 🔹 Access Token 가져오기 (요청 파라미터에서 추출)
-        String accessToken = request.getParameter("access_token");
+        String accessToken = (String) httpSession.getAttribute(OAUTH2_ACCESS_TOKEN);
 
         if (accessToken != null && !accessToken.isEmpty()) {
             String revokeUrl = "https://accounts.google.com/o/oauth2/revoke?token=" + accessToken;
@@ -70,7 +70,7 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
             log.warn("[OAuth2LoginFailureHandler] No access token found in request.");
         }
 
-//        removeAllToken(request, response);
+        removeAllToken(request, response);
 
         if (errorCode == null)
             getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
