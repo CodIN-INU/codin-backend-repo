@@ -56,13 +56,13 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         response.getWriter().write(responseBody);
         if (errorCode == null)
             getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
-        else
-            getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login?error="+errorCode);
-
+        else {
+            getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login?error=" + errorCode);
+            getRedirectStrategy().sendRedirect(request, response, "https://accounts.google.com/Logout");
+        }
     }
 
     private void removeAllToken(HttpServletRequest request, HttpServletResponse response) {
-        request.getSession().invalidate();
         CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
         jwtService.deleteToken(response);
     }
