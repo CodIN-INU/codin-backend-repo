@@ -33,6 +33,8 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
     private String BASEURL;
     public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
     private final String OAUTH2_ACCESS_TOKEN = "oauth2_access_token";
+
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
