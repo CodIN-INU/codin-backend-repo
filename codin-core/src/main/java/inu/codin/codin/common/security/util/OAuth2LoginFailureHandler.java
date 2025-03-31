@@ -62,6 +62,7 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
     }
 
     private void removeAllToken(HttpServletRequest request, HttpServletResponse response) {
+        request.getSession().invalidate();
         CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
         jwtService.deleteToken(response);
     }
