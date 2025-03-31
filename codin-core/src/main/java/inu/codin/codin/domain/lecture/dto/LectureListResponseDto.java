@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -26,7 +25,7 @@ public class LectureListResponseDto {
     private double starRating;
 
     @Schema(description = "수강 후기 작성자 수", example = "10")
-    private long participants;
+    private int participants;
 
     @Schema(description = "해당 강의가 열린 학기들", example = "23-1, 24-1, 25-1")
     private List<String> semesters;
@@ -35,7 +34,7 @@ public class LectureListResponseDto {
     private int grade;
 
     @Builder
-    public LectureListResponseDto(String _id, String lectureNm, String professor, double starRating, long participants, List<String> semesters, int grade) {
+    public LectureListResponseDto(String _id, String lectureNm, String professor, double starRating, int participants, List<String> semesters, int grade) {
         this._id = _id;
         this.lectureNm = lectureNm;
         this.professor = professor;
@@ -45,13 +44,13 @@ public class LectureListResponseDto {
         this.grade = grade;
     }
 
-    public static LectureListResponseDto of(LectureEntity lectureEntity, double starRating, long participants){
+    public static LectureListResponseDto of(LectureEntity lectureEntity){
         return LectureListResponseDto.builder()
                 ._id(lectureEntity.get_id().toString())
                 .lectureNm(lectureEntity.getLectureNm())
                 .professor(lectureEntity.getProfessor())
-                .starRating(starRating)
-                .participants(participants)
+                .starRating(lectureEntity.getStarRating())
+                .participants(lectureEntity.getParticipants())
                 .semesters(lectureEntity.getSemester())
                 .grade(lectureEntity.getGrade())
                 .build();

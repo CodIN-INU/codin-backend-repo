@@ -13,6 +13,7 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostService;
@@ -362,6 +363,8 @@ public class ReportService {
 
     public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
         List<CommentResponseDTO> comments = commentService.getCommentsByPostId(postId);
+        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         return comments.stream()
                 .map(comment -> {
@@ -371,7 +374,7 @@ public class ReportService {
                     log.info("🔸 댓글 ID: {}, 신고 여부: {}", comment.get_id(), isCommentReported);
 
                     // 대댓글 리스트 변환 (신고 여부 반영)
-                    List<ReportedCommentDetailResponseDTO> reportedReplies = getReportedRepliesByCommentId(comment.get_id(), reportedEntityId);
+                    List<ReportedCommentDetailResponseDTO> reportedReplies = getReportedRepliesByCommentId(post.getAnonymous(), comment.get_id(), reportedEntityId);
 
                     // `CommentResponseDTO`에서 `ReportedCommentResponseDTO`로 변환하여 신고 여부 추가
                     return ReportedCommentDetailResponseDTO.from(comment.repliesFrom(reportedReplies), isCommentReported);
@@ -379,9 +382,9 @@ public class ReportService {
                 .toList();
     }
 
-    public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(String id, String reportedEntityId) {
+    public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(PostAnonymous postAnonymous, String id, String reportedEntityId) {
         ObjectId commentId = new ObjectId(id);
-        List<CommentResponseDTO> replies = replyCommentService.getRepliesByCommentId(commentId);
+        List<CommentResponseDTO> replies = replyCommentService.getRepliesByCommentId(postAnonymous, commentId);
 
         return replies.stream()
                 .map(reply -> {

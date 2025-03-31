@@ -6,7 +6,6 @@ import inu.codin.codin.domain.lecture.dto.*;
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
 import inu.codin.codin.domain.lecture.exception.WrongInputException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
-import inu.codin.codin.infra.redis.service.RedisReviewService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -24,18 +23,28 @@ import java.util.List;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
-    private final RedisReviewService redisReviewService;
+
     private final MongoTemplate mongoTemplate;
 
+    /**
+     * 강의의 상세 별점 반환
+     * @param lectureId 강의 _id
+     * @return LectureDetailResponseDto
+     */
     public LectureDetailResponseDto getLectureDetails(String lectureId) {
         LectureEntity lectureEntity = lectureRepository.findById(new ObjectId(lectureId))
                 .orElseThrow(() -> new NotFoundException("강의 정보를 찾을 수 없습니다."));
-        double ave = redisReviewService.getAveOfRating(lectureId);
-        Emotion emotion = redisReviewService.getEmotionRating(lectureId);
-        long participants = redisReviewService.getParticipants(lectureId);
-        return LectureDetailResponseDto.of(lectureEntity, ave, emotion, participants);
+        return LectureDetailResponseDto.of(lectureEntity);
     }
 
+    /**
+     * 여러 옵션을 선택하여 강의 리스트 반환
+     * @param department Department (COMPUTER_SCI, INFO_COMM, EMBEDDED, OTHERS)
+     * @param keyword 검색할 키워드 (선택)
+     * @param option 교수명, 강의명 중 내림차순 선택
+     * @param page 페이지 번호
+     * @return LecturePageResponse
+     */
     public LecturePageResponse sortListOfLectures(Department department, String keyword, Option option, int page) {
         if (department.equals(Department.EMBEDDED) || department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.OTHERS)) {
             PageRequest pageRequest = PageRequest.of(page, 20, option==Option.LEC? Sort.by("lectureNm"):Sort.by("professor"));
@@ -49,6 +58,13 @@ public class LectureService {
         } else throw new WrongInputException("학과명을 잘못 입력하였습니다. department: " + department.getDescription());
     }
 
+    /**
+     * 강의 후기를 작성할 강의 목록 검색
+     * @param department Department (COMPUTER_SCI, INFO_COMM, EMBEDDED, OTHERS)
+     * @param grade 학년 (1,2,3,4)
+     * @param semester 수강 학기 (23-1, 23-2,,, 현재 학기)
+     * @return List<LectureSearchListResponseDto> 검색 결과 리스트 반환
+     */
     public List<LectureSearchListResponseDto> searchLecturesToReview(Department department, Integer grade, String semester) {
         List<LectureEntity> lectures = findLectures(department, grade, semester);
         if (semester != null) return lectures.stream()
@@ -61,16 +77,20 @@ public class LectureService {
                     .toList();
     }
 
+    /**
+     * 페이지로 반환된 LectureEntity -> Dto 변환
+     */
     private LecturePageResponse getLecturePageResponse(Page<LectureEntity> lecturePage) {
         return LecturePageResponse.of(lecturePage.stream()
-                        .map(lecture -> LectureListResponseDto.of(lecture,
-                                redisReviewService.getAveOfRating(lecture.get_id().toString()),
-                                redisReviewService.getParticipants(lecture.get_id().toString())))
+                        .map(LectureListResponseDto::of)
                         .toList(),
                 lecturePage.getTotalPages() - 1,
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }
 
+    /**
+     * 강의 검색 시 선택된 옵션에 따라 검색 진행
+     */
     public List<LectureEntity> findLectures(Department department, Integer grade, String semester) {
         Query query = new Query();
 

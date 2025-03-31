@@ -12,14 +12,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -54,9 +52,9 @@ public class StompMessageService {
 
     public void exitToChatRoom(StompHeaderAccessor headerAccessor) {
         Result result = getResult(headerAccessor);
+        if (result == null) throw new NotFoundException("[exitToChatRoom] UNSUBSCRIBE 실패");
         result.chatroom().getParticipants().exit(result.user().get_id());
         chatRoomRepository.save(result.chatroom());
-        sessionStore.remove(headerAccessor.getSessionId());
         log.info("[STOMP UNSUBSCRIBE] session : {}, chatRoomId : {} ", headerAccessor.getSessionId(), result.chatroom().get_id().toString());
     }
 
@@ -67,41 +65,26 @@ public class StompMessageService {
     }
 
     private Result getResult(StompHeaderAccessor headerAccessor) {
-        String email;
-        if (headerAccessor.getUser() != null) {
-            email = headerAccessor.getUser().getName();
-        } else {
-            log.error("헤더에서 유저를 찾을 수 없습니다. command : {}, sessionId : {}", headerAccessor.getCommand(), headerAccessor.getSessionId());
-            throw new UsernameNotFoundException("헤더에서 유저를 찾을 수 없습니다.");
-        }
-        log.info(headerAccessor.toString());
-        String chatroomId;
-        if (Objects.equals(headerAccessor.getCommand(), StompCommand.DISCONNECT)){ //UNSCRIBE 하지 않은 상태에서 DISCONNECT라면 UNSCRIBE도 같이
-            if (sessionStore.containsKey(headerAccessor.getSessionId())) {
-                chatroomId = sessionStore.get(headerAccessor.getSessionId());
-                sessionStore.remove(headerAccessor.getSessionId());
-            } else return null;
+        String email = null;
+        if (headerAccessor.getUser() != null) email = headerAccessor.getUser().getName();
+        else log.error("헤더에서 유저를 찾을 수 없습니다. command : {}, sessionId : {}", headerAccessor.getCommand(), headerAccessor.getSessionId());
 
-        }
-        else chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
+        String chatroomId = headerAccessor.getFirstNativeHeader("chatRoomId");
         if (chatroomId == null || !ObjectId.isValid(chatroomId)) {
             log.error("chatRoomId을 찾을 수 없습니다. command : {}, sessionId : {}, chatRoomId : {}",
                     headerAccessor.getCommand(), headerAccessor.getSessionId(), chatroomId);
-            throw new NotFoundException("chatRoomId을 찾을 수 없습니다. chatroomId : " + chatroomId);
+            return null;
+        } else {
+            Optional<ChatRoom> chatroom = chatRoomRepository.findById(new ObjectId(chatroomId));
+            if (chatroom.isEmpty()) log.error("채팅방을 찾을 수 없습니다. command : {}, sessionId : {}, chatroomId : {}",
+                    headerAccessor.getCommand(), headerAccessor.getSessionId(), chatroomId);
+            Optional<UserEntity> user = userRepository.findByEmailAndStatusAll(email);
+            if (user.isEmpty()) log.error("유저를 찾을 수 없습니다. command : {}, sessionId : {}, email : {}",
+                                headerAccessor.getCommand(), headerAccessor.getSessionId(), email);
+            if (chatroom.isPresent() && user.isPresent())
+                return new Result(chatroom.get(), user.get());
         }
-        ChatRoom chatroom = chatRoomRepository.findById(new ObjectId(chatroomId))
-                .orElseThrow(() -> {
-                    log.error("채팅방을 찾을 수 없습니다. command : {}, sessionId : {}, chatroomId : {}",
-                            headerAccessor.getCommand(), headerAccessor.getSessionId(), chatroomId);
-                    return new NotFoundException("채팅방을 찾을 수 없습니다.");
-                });
-        UserEntity user = userRepository.findByEmailAndStatusAll(email)
-                .orElseThrow(() -> {
-                    log.error("유저를 찾을 수 없습니다. command : {}, sessionId : {}, email : {}",
-                            headerAccessor.getCommand(), headerAccessor.getSessionId(), email);
-                    return new NotFoundException("유저를 찾을 수 없습니다.");
-                });
-        return new Result(chatroom, user);
+        return null;
     }
 
 

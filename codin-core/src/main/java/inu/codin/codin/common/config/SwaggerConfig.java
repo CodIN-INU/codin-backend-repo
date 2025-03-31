@@ -46,7 +46,7 @@ public class SwaggerConfig {
                 .security(List.of(securityRequirement))
                 .components(new Components().addSecuritySchemes("cookieAuth", securityScheme))
                 .servers(List.of(
-                        new Server().url("http://localhost:8082").description("Local Server"), // Local Server
+                        new Server().url("http://localhost:8080").description("Local Server"), // Local Server
                         new Server().url(BASEURL+"/api").description("Production Server"), // Production Server
                         new Server().url(BASEURL+"/dev").description("Release Server")
                 ));

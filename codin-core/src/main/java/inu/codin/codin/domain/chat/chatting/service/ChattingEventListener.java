@@ -74,7 +74,7 @@ public class ChattingEventListener {
 
     private static Map<String, String> getLastMessageAndUnread(ChattingArrivedEvent event, ParticipantInfo participantInfo) {
         return Map.of(
-                "chatRoomId", event.getChatting().get_id().toString(),
+                "chatRoomId", event.getChatting().getChatRoomId().toString(),
                 "lastMessage", event.getChatting().getContent(),
                 "unread", String.valueOf(participantInfo.getUnreadMessage())
         );

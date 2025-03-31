@@ -2,23 +2,19 @@ package inu.codin.codin.infra.redis.scheduler;
 
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.exception.RedisUnavailableException;
-import inu.codin.codin.infra.redis.service.RedisLikeService;
-import inu.codin.codin.infra.redis.service.RedisScrapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.Duration;
+import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RedisRecoverSyncScheduler {
 
     private final RedisHealthChecker redisHealthChecker;
-    private final RedisLikeService redisLikeService;
-    private final RedisScrapService redisScrapService;
 
     private Instant lastRecoveryTime = Instant.MIN; // 마지막 복구 시간
 
@@ -29,9 +25,6 @@ public class RedisRecoverSyncScheduler {
     public void monitorRedisAndRecover() {
         try {
             redisHealthChecker.checkRedisStatus(); // Redis 상태 확인
-            if (shouldRecoverRedis()) {
-                recoverRedisData(); // Redis 복구
-            }
         } catch (RedisUnavailableException e) {
             log.warn("Redis 장애 감지: {}. MongoDB 우회 처리 중...", e.getMessage());
         }
@@ -56,8 +49,6 @@ public class RedisRecoverSyncScheduler {
         }
         try {
             log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 복구 작업 시작...");
-            redisLikeService.recoverRedisFromDB();
-            redisScrapService.recoverRedisFromDB();
             lastRecoveryTime = Instant.now();
             log.info("[Redis 복구 작업] MongoDB 데이터를 Redis 데이터 복구 완료.");
         } catch (Exception e) {
