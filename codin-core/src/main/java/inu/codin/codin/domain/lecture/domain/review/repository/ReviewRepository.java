@@ -32,7 +32,7 @@ public interface ReviewRepository extends MongoRepository<ReviewEntity, ObjectId
     })
     Emotion getEmotionsCountByRanges(ObjectId lectureId);
 
-    int countAllByLectureIdAndDeletedAtIsNotNull(ObjectId lectureId);
+    int countByLectureId(ObjectId lectureId);
 
     Page<ReviewEntity> getAvgRatingByLectureId(ObjectId lectureId, PageRequest pageRequest);
 
