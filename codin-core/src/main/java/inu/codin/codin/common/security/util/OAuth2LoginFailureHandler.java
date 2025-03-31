@@ -9,11 +9,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
@@ -21,6 +23,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final JwtService jwtService;
@@ -52,15 +55,27 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
 
         log.error("[OAuth2LoginFailureHandler] {}", responseBody);
 
-        removeAllToken(request, response);
+        // 🔹 Access Token 가져오기 (요청 파라미터에서 추출)
+        String accessToken = request.getParameter("access_token");
 
-        response.getWriter().write(responseBody);
+        if (accessToken != null && !accessToken.isEmpty()) {
+            String revokeUrl = "https://accounts.google.com/o/oauth2/revoke?token=" + accessToken;
+            try {
+                restTemplate.getForObject(revokeUrl, String.class);
+                log.info("[OAuth2LoginFailureHandler] Google Access Token revoked successfully.");
+            } catch (Exception e) {
+                log.error("[OAuth2LoginFailureHandler] Failed to revoke Google Access Token: {}", e.getMessage());
+            }
+        } else {
+            log.warn("[OAuth2LoginFailureHandler] No access token found in request.");
+        }
+
+//        removeAllToken(request, response);
+
         if (errorCode == null)
             getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
         else {
             getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login?error=" + errorCode);
-            String logoutUrl = "https://accounts.google.com/Logout";
-            response.sendRedirect(logoutUrl);
         }
     }
 
