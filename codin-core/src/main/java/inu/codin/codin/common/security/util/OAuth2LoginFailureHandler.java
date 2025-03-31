@@ -1,20 +1,35 @@
 package inu.codin.codin.common.security.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.codin.common.response.ExceptionResponse;
+import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @Component
 @Slf4j
-public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
+@RequiredArgsConstructor
+public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final JwtService jwtService;
+
+    @Value("${server.domain}")
+    private String BASEURL;
+    public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
+
+
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -22,18 +37,35 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        String errorMessage = null;
-        if (exception instanceof OAuth2AuthenticationException) {
-            OAuth2Error error = ((OAuth2AuthenticationException) exception).getError();
-            errorMessage = error.getDescription();
-        }
-        if (errorMessage == null || errorMessage.isEmpty()) {
-            errorMessage = "인증 실패"; // 기본 오류 메시지
+        String errorMessage = "인증 실패.";
+        String errorCode = null;
+        if (exception instanceof OAuth2AuthenticationException oauth2Ex) {
+            OAuth2Error error = oauth2Ex.getError();
+            if (error != null && error.getDescription() != null) {
+                errorMessage = error.getDescription();
+                errorCode = error.getErrorCode();
+            }
         }
 
-        PrintWriter writer = response.getWriter();
-        writer.write("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
-        log.error("{\"code\":401, \"message\":\"" + errorMessage + "\"}");
-        writer.flush();
+        ExceptionResponse errorResponse = new ExceptionResponse(errorMessage, HttpServletResponse.SC_UNAUTHORIZED);
+        String responseBody = objectMapper.writeValueAsString(errorResponse);
+
+        log.error("[OAuth2LoginFailureHandler] {}", responseBody);
+
+        removeAllToken(request, response);
+
+        response.getWriter().write(responseBody);
+        if (errorCode == null)
+            getRedirectStrategy().sendRedirect(request, response, BASEURL+"/login");
+        else {
+            getRedirectStrategy().sendRedirect(request, response, BASEURL + "/login?error=" + errorCode);
+            String logoutUrl = "https://accounts.google.com/Logout";
+            response.sendRedirect(logoutUrl);
+        }
+    }
+
+    private void removeAllToken(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
+        jwtService.deleteToken(response);
     }
 }
