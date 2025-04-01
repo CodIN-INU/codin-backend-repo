@@ -294,8 +294,12 @@ public class PostService {
         Map<String, Double> posts = redisBestService.getBests();
         List<PostEntity> bestPosts = posts.entrySet().stream()
                 .map(post -> postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
-                        .orElseThrow(() -> new NotFoundException("해당 게시글을 찾을 수 없습니다."))
-                ).toList();
+                        .orElseGet(() -> {
+                            redisBestService.deleteBest(post.getKey());
+                            return null;
+                        }))
+                .filter(Objects::nonNull) // null 값 제거
+                .toList();
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
     }
