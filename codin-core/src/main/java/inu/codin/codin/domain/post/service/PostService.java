@@ -168,7 +168,7 @@ public class PostService {
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
-        UserInfo userInfo = getUserInfoAboutPost(userId, post.get_id());
+        UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
 
         // 투표 게시물 처리
         if (post.getPostCategory() == PostCategory.POLL) {
@@ -272,10 +272,11 @@ public class PostService {
         }
     }
 
-    public UserInfo getUserInfoAboutPost(ObjectId userId, ObjectId postId){
+    public UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
         return UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.POST, postId, userId))
-                .isScrap(scrapService.isPostScraped(postId, userId))
+                .isLike(likeService.isLiked(LikeType.POST, postId, currentUserId))
+                .isScrap(scrapService.isPostScraped(postId, currentUserId))
+                .isMine(postUserId.equals(currentUserId))
                 .build();
     }
 
