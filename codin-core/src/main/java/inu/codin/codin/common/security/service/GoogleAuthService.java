@@ -8,8 +8,8 @@ import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -23,8 +23,8 @@ import java.util.Optional;
 public class GoogleAuthService extends AbstractAuthService implements Oauth2AuthService {
 
 
-    public GoogleAuthService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService, HttpServletRequest request) {
-        super(userRepository, s3Service, jwtService, userDetailsService, request);
+    public GoogleAuthService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService) {
+        super(userRepository, s3Service, jwtService, userDetailsService);
     }
 
     @Override
