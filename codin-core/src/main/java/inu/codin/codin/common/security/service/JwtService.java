@@ -94,28 +94,17 @@ public class JwtService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
-        String domain = "localhost";
-//        if (!request.getHeader("Origin").split("//")[1].startsWith("localhost")){
-//            domain = BASERURL.split("//")[1];
-//        }
-
         Cookie jwtCookie = new Cookie("access_token", newToken.getAccessToken());
         jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
-        jwtCookie.setSecure(false);    // HTTPS 환경에서만 전송
         jwtCookie.setPath("/");       // 모든 요청에 포함
         jwtCookie.setMaxAge(60 * 60); // 1시간 유지
-        jwtCookie.setDomain(domain);
-//        jwtCookie.setAttribute("SameSite", "None");
         response.addCookie(jwtCookie);
 
 
         Cookie refreshCookie = new Cookie("refresh_token", newToken.getRefreshToken());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
-        refreshCookie.setDomain(domain);
-//        refreshCookie.setAttribute("SameSite", "None");
         response.addCookie(refreshCookie);
 
         log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
