@@ -215,6 +215,10 @@ public class SecurityConfig {
     // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**"
     };
 
     // Manager 권한 URL
