@@ -38,4 +38,6 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
             +
             "{ 'title': { $regex: ?0, $options: 'i' }, 'userId': { $nin: ?1 }  } ] }")
     Page<PostEntity> findAllByKeywordAndDeletedAtIsNull(String keyword, List<ObjectId> blockedUsersId, PageRequest pageRequest);
+
+    boolean existsBy_idAndDeletedAtIsNull(ObjectId id);
 }
