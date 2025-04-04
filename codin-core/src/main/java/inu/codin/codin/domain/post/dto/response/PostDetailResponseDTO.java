@@ -3,7 +3,6 @@ package inu.codin.codin.domain.post.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.report.dto.ReportInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -91,11 +90,13 @@ public class PostDetailResponseDTO {
     public static class UserInfo {
         private final boolean isLike;
         private final boolean isScrap;
+        private final boolean isMine;
 
         @Builder
-        public UserInfo(boolean isLike, boolean isScrap) {
+        public UserInfo(boolean isLike, boolean isScrap, boolean isMine) {
             this.isLike = isLike;
             this.isScrap = isScrap;
+            this.isMine = isMine;
         }
     }
 

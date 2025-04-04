@@ -4,6 +4,7 @@ package inu.codin.codin.infra.redis.service;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
+import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,11 @@ public class RedisBestService {
 
     private final HitsService hitsService;
     private final BestRepository bestRepository;
+    private final PostRepository postRepository;
     private final String BEST_KEY = "post:top3";
 
     /**
-     * best 게시글을 반환하는 순간으로부터 24시간 동안의 가장 score가 높은 게시글 N개를 반환
+     * 이전 1시간 동안의 가장 score가 높은 게시글 N개를 반환, DB 조회가 안된다면 삭제
      * @param N 순위
      * @return N개의 Key : postId, Value : score 의 score 기준 내림차순 Map
      */
@@ -54,6 +56,11 @@ public class RedisBestService {
                     for (ZSetOperations.TypedTuple<String> member : members) {
                         String postId = member.getValue();
                         Double score = member.getScore();
+                        if (!postRepository.existsBy_idAndDeletedAtIsNull(new ObjectId(postId))){
+                            redisTemplate.opsForZSet().remove(redisKey, postId);
+                            deleteBest(postId);
+                            break;
+                        }
                         result.put(postId, score);
                     }
                 }
@@ -140,7 +147,7 @@ public class RedisBestService {
 
     /**
      * 게시글에 점수가 반영 될 때마다 베스트 게시글을 관리하는 ZSet에서 업데이트
-     * 베스트 게시글에서 최소 점수보다 같거나 크거나, 최소 점수가 없거나, 베스트 게시글이 3개 이하거나 할 때 베스트 게시글에 포함
+     * 베스트 게시글에서 최소 점수보다 같거나 크거나, 베스트 게시글이 3개 이하거나 할 때 베스트 게시글에 포함
      *
      * 만약 포함 후 3개 초과라면
      * 새로 적용된 게시글의 점수와 최소 점수와 같으면 조회수로 판단
@@ -208,5 +215,15 @@ public class RedisBestService {
             redisTemplate.opsForZSet().removeRange(BEST_KEY, 0 ,-1);
         }
         posts.forEach((key, value) -> redisTemplate.opsForZSet().add(BEST_KEY, key, value));
+    }
+
+    /**
+     * 만약 post:top3에 포함된 게시글이 삭제되었다면 삭제
+     * @param postId
+     */
+    public void deleteBest(String postId){
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(BEST_KEY))){
+            redisTemplate.opsForZSet().remove(BEST_KEY, postId);
+        }
     }
 }
