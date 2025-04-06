@@ -36,8 +36,6 @@ public class UserEntity extends BaseTimeEntity {
 
     private String college;
 
-    private Boolean undergraduate;
-
     private UserRole role;
 
     private UserStatus status;
@@ -56,7 +54,6 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
         this.department = department;
         this.college = college;
-        this.undergraduate = undergraduate;
         this.role = role;
         this.status = status;
     }
@@ -77,7 +74,6 @@ public class UserEntity extends BaseTimeEntity {
                 .password(userPortalLoginResponseDto.getPassword())
                 .department(userPortalLoginResponseDto.getDepartment())
                 .college(userPortalLoginResponseDto.getCollege())
-                .undergraduate(userPortalLoginResponseDto.getUndergraduate())
                 .nickname("")
                 .profileImageUrl("")
                 .role(UserRole.USER)
