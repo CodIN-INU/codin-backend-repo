@@ -3,8 +3,11 @@ package inu.codin.codin.domain.post.entity;
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,18 +15,24 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @Document(collection = "posts")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class PostEntity extends BaseTimeEntity {
-    @Id @NotBlank
+    @Id @NotNull
     private ObjectId _id;
 
-    private final ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
-    private final String title;
+    @NotNull
+    private ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
+    @NotBlank
+    private String title;
+    @NotBlank
     private String content;
     private List<String> postImageUrls;
     private boolean isAnonymous;
 
-    private final PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
+    @NotNull
+    private PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
+    @NotNull
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
 
     private int commentCount = 0; // 댓글 + 대댓글 카운트

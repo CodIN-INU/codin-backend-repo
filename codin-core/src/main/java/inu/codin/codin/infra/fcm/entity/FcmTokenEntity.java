@@ -3,8 +3,11 @@ package inu.codin.codin.infra.fcm.entity;
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.infra.fcm.exception.FcmDuplicatedTokenException;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,12 +15,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @Document(collection = "fcmToken")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class FcmTokenEntity extends BaseTimeEntity {
 
-    @Id
+    @Id @NotNull
     private ObjectId _id;
 
+    @NotNull
     private ObjectId userId;
 
     private List<String> fcmTokenList;
