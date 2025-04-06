@@ -2,9 +2,11 @@ package inu.codin.codin.domain.report.entity;
 
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,27 +14,34 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "reports")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReportEntity extends BaseTimeEntity {
     @Id
-    @NotBlank
+    @NotNull
     private ObjectId _id;
 
+    @NotNull
     //신고한 유저
     private ObjectId reportingUserId;
 
+    @NotNull
     //신고당한 유저
     private ObjectId reportedUserId;
 
+    @NotNull
     //신고 대상 타입 ( 유저, 게시물, 댓글, 대댓글)
     private ReportTargetType reportTargetType;
 
+    @NotNull
     //신고 대상 ID ( 유저, 게시물, 댓글, 대댓글)
     private ObjectId reportTargetId;
 
+    @NotNull
     //신고 유형 ( 게시글 부적절, 스팸 ,,.)
     private ReportType reportType;
 
+    @NotNull
     //신고 처리 상태 Pending <-> Reloved
     private ReportStatus reportStatus;
 

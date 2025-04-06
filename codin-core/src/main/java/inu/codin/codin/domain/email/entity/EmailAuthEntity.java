@@ -2,8 +2,11 @@ package inu.codin.codin.domain.email.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,9 +15,10 @@ import java.time.LocalDateTime;
 
 @Document(collection = "auth-emails")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailAuthEntity extends BaseTimeEntity {
 
-    @Id @NotBlank
+    @Id @NotNull
     private ObjectId _id;
 
     @NotBlank
