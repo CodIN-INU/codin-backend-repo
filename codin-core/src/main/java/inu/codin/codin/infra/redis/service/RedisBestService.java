@@ -53,18 +53,20 @@ public class RedisBestService {
         Map<String, Double> result = new HashMap<>();
         for (int i = 0; i < 24; i++) {
             String redisKey = now.minusHours(i).format(formatter);
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
-                Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().reverseRangeWithScores(redisKey, 0, -1);
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) { //해당 시각의 key가 존재한다면
+                Set<ZSetOperations.TypedTuple<String>> members = redisTemplate.opsForZSet().reverseRangeWithScores(redisKey, 0, -1); //value 반환
                 if (members != null) {
                     for (ZSetOperations.TypedTuple<String> member : members) {
                         String postId = member.getValue();
                         Double score = member.getScore();
+                        //post가 삭제되었는지 확인하고, 삭제되었다면 지우기
                         if (!postRepository.existsBy_idAndDeletedAtIsNull(new ObjectId(postId))){
                             redisTemplate.opsForZSet().remove(redisKey, postId);
                             deleteBest(postId);
-                            break;
+                            continue;
                         }
-                        result.put(postId, score);
+                        if (score >= 4)
+                            result.put(postId, score);
                     }
                 }
             }
@@ -144,12 +146,12 @@ public class RedisBestService {
             redisKey = now.format(formatter);
             redisTemplate.expire(redisKey, 1, TimeUnit.DAYS); //하루가 지나면 필요없는 데이터
             redisTemplate.opsForZSet().add(redisKey, postId.toString(), score);
-            updateBests(redisKey, postId.toString());
         }
     }
 
     /**
      * 게시글에 점수가 반영 될 때마다 베스트 게시글을 관리하는 ZSet에서 업데이트
+     * 4점 미만이라면 Best 게시글로 취급하지 않음
      * 베스트 게시글에서 최소 점수보다 같거나 크거나, 베스트 게시글이 3개 이하거나 할 때 베스트 게시글에 포함
      *
      * 만약 포함 후 3개 초과라면
@@ -158,12 +160,13 @@ public class RedisBestService {
      */
     private void updateBests(String redisKey, String postId){
         Double score = redisTemplate.opsForZSet().score(redisKey, postId);
-        Set<ZSetOperations.TypedTuple<String>> minEntry = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, 0);
+        if (score < 4) return; //총 점수가 4점 미만이면 Best 게시글로 취급하지 않음
 
+        Set<ZSetOperations.TypedTuple<String>> minEntry = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, 0);
         if (minEntry!=null && !minEntry.isEmpty()){
             ZSetOperations.TypedTuple<String> minTuple = minEntry.iterator().next(); //최소 score의 Tuple
-            Double min = minTuple.getScore();
-            Long totalSize = redisTemplate.opsForZSet().size(BEST_KEY);
+            Double min = minTuple.getScore(); //Best 게시글 중 최소 score
+            Long totalSize = redisTemplate.opsForZSet().size(BEST_KEY); //현재 Best 게시글 개수
 
             //최소 점수보다 같거나 큰 값이거나, 총 베스트 게시글 개수가 3개 미만 이면 포함
             if (score >= min || totalSize < 3)
@@ -197,7 +200,7 @@ public class RedisBestService {
     }
 
     /**
-     * 만약 bestEntity에 없다면 저장
+     * 만약 bestEntity에 없다면 저장, 있는데 score가 변경되었다면 업데이트
      */
     public void saveBests(String postId, int score) {
         Optional<BestEntity> existedPost = bestRepository.findByPostId(new ObjectId(postId));
@@ -206,7 +209,7 @@ public class RedisBestService {
                     .postId(new ObjectId(postId))
                     .score(score)
                     .build());
-        } else {
+        } else { //
             if (existedPost.get().getScore() != score){
                 existedPost.get().updateScore(score);
                 bestRepository.save(existedPost.get());
