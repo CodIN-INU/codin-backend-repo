@@ -200,12 +200,17 @@ public class RedisBestService {
      * 만약 bestEntity에 없다면 저장
      */
     public void saveBests(String postId, int score) {
-        boolean existedPost = bestRepository.existsByPostId(new ObjectId(postId));
-        if (!existedPost) {
+        Optional<BestEntity> existedPost = bestRepository.findByPostId(new ObjectId(postId));
+        if (existedPost.isEmpty()) {
             bestRepository.save(BestEntity.builder()
                     .postId(new ObjectId(postId))
                     .score(score)
                     .build());
+        } else {
+            if (existedPost.get().getScore() != score){
+                existedPost.get().updateScore(score);
+                bestRepository.save(existedPost.get());
+            }
         }
     }
 
