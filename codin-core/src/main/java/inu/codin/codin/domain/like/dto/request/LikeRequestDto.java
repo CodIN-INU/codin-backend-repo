@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.like.dto;
+package inu.codin.codin.domain.like.dto.request;
 
 import inu.codin.codin.domain.like.entity.LikeType;
 import io.swagger.v3.oas.annotations.media.Schema;

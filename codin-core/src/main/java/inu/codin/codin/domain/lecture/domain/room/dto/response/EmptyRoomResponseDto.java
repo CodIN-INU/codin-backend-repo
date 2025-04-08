@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.lecture.domain.room.dto;
+package inu.codin.codin.domain.lecture.domain.room.dto.response;
 
 import inu.codin.codin.domain.lecture.domain.room.entity.LectureRoomEntity;
 import io.swagger.v3.oas.annotations.media.Schema;

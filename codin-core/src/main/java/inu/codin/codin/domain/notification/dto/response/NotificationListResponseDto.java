@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.notification.dto;
+package inu.codin.codin.domain.notification.dto.response;
 
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import jakarta.validation.constraints.NotBlank;
