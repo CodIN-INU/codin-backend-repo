@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.email.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
-import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
+import inu.codin.codin.domain.email.dto.request.JoinEmailCheckRequestDto;
+import inu.codin.codin.domain.email.dto.request.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.service.EmailAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

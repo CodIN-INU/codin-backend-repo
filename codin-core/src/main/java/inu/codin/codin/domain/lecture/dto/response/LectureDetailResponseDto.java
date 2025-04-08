@@ -1,5 +1,6 @@
-package inu.codin.codin.domain.lecture.dto;
+package inu.codin.codin.domain.lecture.dto.response;
 
+import inu.codin.codin.domain.lecture.dto.Emotion;
 import inu.codin.codin.domain.lecture.entity.LectureEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

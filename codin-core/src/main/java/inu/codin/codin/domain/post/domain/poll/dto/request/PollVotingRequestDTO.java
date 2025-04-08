@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.poll.dto;
+package inu.codin.codin.domain.post.domain.poll.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

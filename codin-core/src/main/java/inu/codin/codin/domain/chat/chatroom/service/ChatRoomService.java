@@ -3,8 +3,8 @@ package inu.codin.codin.domain.chat.chatroom.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
-import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
+import inu.codin.codin.domain.chat.chatroom.dto.request.ChatRoomCreateRequestDto;
+import inu.codin.codin.domain.chat.chatroom.dto.response.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.dto.event.ChatRoomNotificationEvent;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
@@ -12,7 +12,6 @@ import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailExceptio
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomExistedException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
-import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
