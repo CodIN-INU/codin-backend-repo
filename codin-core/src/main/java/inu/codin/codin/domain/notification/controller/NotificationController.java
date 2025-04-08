@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.notification;
+package inu.codin.codin.domain.notification.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;

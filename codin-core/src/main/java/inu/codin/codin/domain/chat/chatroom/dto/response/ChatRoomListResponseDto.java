@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.chat.chatroom.dto;
+package inu.codin.codin.domain.chat.chatroom.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
