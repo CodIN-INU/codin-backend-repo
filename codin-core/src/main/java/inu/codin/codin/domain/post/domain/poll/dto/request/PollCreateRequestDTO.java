@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.poll.dto;
+package inu.codin.codin.domain.post.domain.poll.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.entity.PostCategory;

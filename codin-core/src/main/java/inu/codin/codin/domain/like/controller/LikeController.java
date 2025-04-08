@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.like.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.like.dto.LikeRequestDto;
+import inu.codin.codin.domain.like.dto.request.LikeRequestDto;
 import inu.codin.codin.domain.like.service.LikeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
