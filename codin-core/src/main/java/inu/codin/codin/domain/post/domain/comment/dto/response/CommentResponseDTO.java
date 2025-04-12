@@ -2,7 +2,7 @@ package inu.codin.codin.domain.post.domain.comment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.report.dto.response.ReportedCommentDetailResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

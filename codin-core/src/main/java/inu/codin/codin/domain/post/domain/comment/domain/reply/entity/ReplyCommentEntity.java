@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.reply.entity;
+package inu.codin.codin.domain.post.domain.comment.domain.reply.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
