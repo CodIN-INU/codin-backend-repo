@@ -37,7 +37,6 @@ public class ChattingEventListener {
         2. 채팅방의 마지막 메세지 업데이트
         3. /queue/chatroom/unread 를 통해 상대방의 채팅방 목록 실시간 업데이트
      */
-    @Async
     @EventListener
     public void handleChattingArrivedEvent(ChattingArrivedEvent event){
         Chatting chatting = event.getChatting();

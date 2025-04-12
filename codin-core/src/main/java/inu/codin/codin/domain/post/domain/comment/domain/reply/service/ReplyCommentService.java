@@ -1,17 +1,18 @@
-package inu.codin.codin.domain.post.domain.reply.service;
+package inu.codin.codin.domain.post.domain.comment.domain.reply.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.dto.event.ReplyNotificationEvent;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.dto.request.ReplyUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,6 +48,7 @@ public class ReplyCommentService {
     private final NotificationService notificationService;
     private final RedisBestService redisBestService;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
@@ -74,7 +77,8 @@ public class ReplyCommentService {
         redisBestService.applyBestScore(1, post.get_id());
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
-        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
+        if (!userId.equals(post.getUserId()))
+            eventPublisher.publishEvent(new ReplyNotificationEvent(this, post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent()));
     }
 
     // 대댓글 삭제 (Soft Delete)
