@@ -1,7 +1,7 @@
-package inu.codin.codin.domain.post.domain.reply.repository;
+package inu.codin.codin.domain.post.domain.comment.domain.reply.repository;
 
 
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.entity.ReplyCommentEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
