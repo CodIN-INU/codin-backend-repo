@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class EmailAuthEntity extends BaseTimeEntity {
     @Id @NotBlank
     private ObjectId _id;
 
+    @Indexed
     @NotBlank
     private String email;
 
@@ -31,8 +33,9 @@ public class EmailAuthEntity extends BaseTimeEntity {
         this.authNum = authNum;
     }
 
-    public void changeAuthNum(String authNum) {
-        this.authNum = authNum;
+    public void renewAuthNum(String newAuthNum) {
+        this.authNum = newAuthNum;
+        this.setUpdatedAt();
     }
 
     public void verifyEmail() {
@@ -40,13 +43,16 @@ public class EmailAuthEntity extends BaseTimeEntity {
     }
 
     public void unVerifyEmail(){
-        this.isVerified=false;
+        this.isVerified = false;
     }
 
     /**
-     * 10분 이상이면 만료됌
+     * 10분의 만료 시간을 가짐
+     * @return 인증 번호가 만료되었는지 여부 false면 만료되지 않음, true면 만료됨
      */
     public boolean isExpired() {
-        return getUpdatedAt().plusMinutes(10).isBefore(LocalDateTime.now());
+        return getUpdatedAt()
+                .plusMinutes(10)
+                .isBefore(LocalDateTime.now());
     }
 }
