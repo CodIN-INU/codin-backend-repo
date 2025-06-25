@@ -29,10 +29,8 @@ class JoinEmailAuthServiceTest {
 
     @Mock
     EmailAuthRepository emailAuthRepository;
-
     @Mock
     EmailTemplateService emailTemplateService;
-
     @Mock
     AuthNumberGenerator authNumberGenerator;
 
@@ -40,18 +38,21 @@ class JoinEmailAuthServiceTest {
     private JoinEmailCheckRequestDto checkRequestDto;
     private EmailAuthEntity mockEmailAuth;
 
+    private final String testMail = "test@inu.ac.kr";
+    private final String testAuthNum = "AUTH123";
+
     @BeforeEach
     void setUp() {
         sendRequestDto = JoinEmailSendRequestDto.builder()
-                .email("test@inu.ac.kr")
+                .email(testMail)
                 .build();
         checkRequestDto = JoinEmailCheckRequestDto.builder()
-                .email("test@inu.ac.kr")
-                .authNum("AUTH123")
+                .email(testMail)
+                .authNum(testAuthNum)
                 .build();
         mockEmailAuth = EmailAuthEntity.builder()
-                .email("test@inu.ac.kr")
-                .authNum("AUTH123")
+                .email(testMail)
+                .authNum(testAuthNum)
                 .build();
 
         // BaseTimeEntity의 기본 생성 객체가 없기 때문에 null pointer 에러 발생
@@ -62,7 +63,7 @@ class JoinEmailAuthServiceTest {
     @DisplayName("회원가입 인증 이메일 전송 - 성공 (신규 사용자)")
     void sendJoinAuthEmail_성공_신규사용자() {
         // given
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.empty());
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.empty());
         when(authNumberGenerator.generate()).thenReturn("NEWAUTH");
 
         // when
@@ -73,11 +74,11 @@ class JoinEmailAuthServiceTest {
         verify(emailAuthRepository).save(emailAuthCaptor.capture());
         
         EmailAuthEntity savedAuth = emailAuthCaptor.getValue();
-        assertEquals("test@inu.ac.kr", savedAuth.getEmail());
+        assertEquals(testMail, savedAuth.getEmail());
         assertEquals("NEWAUTH", savedAuth.getAuthNum());
 
         verify(emailTemplateService).sendTemplateEmail(
-                eq("test@inu.ac.kr"),
+                eq(testMail),
                 eq("[CODIN] 회원가입 인증번호입니다."),
                 eq("auth-email"),
                 eq("NEWAUTH")
@@ -89,11 +90,11 @@ class JoinEmailAuthServiceTest {
     void sendJoinAuthEmail_성공_기존인증정보갱신() {
         // given
         EmailAuthEntity existingAuth = EmailAuthEntity.builder()
-                .email("test@inu.ac.kr")
+                .email(testMail)
                 .authNum("OLDAUTH")
                 .build();
         
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.of(existingAuth));
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.of(existingAuth));
         when(authNumberGenerator.generate()).thenReturn("NEWAUTH");
 
         // when
@@ -104,7 +105,7 @@ class JoinEmailAuthServiceTest {
         assertEquals("NEWAUTH", existingAuth.getAuthNum());
 
         verify(emailTemplateService).sendTemplateEmail(
-                eq("test@inu.ac.kr"),
+                eq(testMail),
                 eq("[CODIN] 회원가입 인증번호입니다."),
                 eq("auth-email"),
                 eq("NEWAUTH")
@@ -115,7 +116,7 @@ class JoinEmailAuthServiceTest {
     @DisplayName("회원가입 이메일 인증 확인 - 성공")
     void checkJoinAuthEmail_성공() {
         // given
-        when(emailAuthRepository.findByEmailAndAuthNum("test@inu.ac.kr", "AUTH123"))
+        when(emailAuthRepository.findByEmailAndAuthNum(testMail, testAuthNum))
                 .thenReturn(Optional.of(mockEmailAuth));
 
         // when
@@ -130,7 +131,7 @@ class JoinEmailAuthServiceTest {
     @DisplayName("회원가입 이메일 인증 확인 - 실패 (인증번호 불일치)")
     void checkJoinAuthEmail_실패_인증번호불일치() {
         // given
-        when(emailAuthRepository.findByEmailAndAuthNum("test@inu.ac.kr", "AUTH123"))
+        when(emailAuthRepository.findByEmailAndAuthNum(testMail, testAuthNum))
                 .thenReturn(Optional.empty());
 
         // when & then
@@ -138,7 +139,7 @@ class JoinEmailAuthServiceTest {
                 () -> joinEmailAuthService.checkJoinAuthEmail(checkRequestDto));
         
         assertEquals("인증번호가 일치하지 않습니다.", exception.getMessage());
-        assertEquals("test@inu.ac.kr", exception.getEmail());
+        assertEquals(testMail, exception.getEmail());
         
         verify(emailAuthRepository, never()).save(any());
     }
@@ -150,7 +151,7 @@ class JoinEmailAuthServiceTest {
         EmailAuthEntity expiredAuth = spy(mockEmailAuth);
         when(expiredAuth.isExpired()).thenReturn(true);
         
-        when(emailAuthRepository.findByEmailAndAuthNum("test@inu.ac.kr", "AUTH123"))
+        when(emailAuthRepository.findByEmailAndAuthNum(testMail, testAuthNum))
                 .thenReturn(Optional.of(expiredAuth));
 
         // when & then
@@ -158,7 +159,7 @@ class JoinEmailAuthServiceTest {
                 () -> joinEmailAuthService.checkJoinAuthEmail(checkRequestDto));
         
         assertEquals("인증번호가 만료되었습니다.", exception.getMessage());
-        assertEquals("test@inu.ac.kr", exception.getEmail());
+        assertEquals(testMail, exception.getEmail());
         
         verify(emailAuthRepository, never()).save(any());
     }
@@ -167,7 +168,7 @@ class JoinEmailAuthServiceTest {
     @DisplayName("인증번호 생성기 호출 확인")
     void authNumberGenerator_호출확인() {
         // given
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.empty());
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.empty());
         when(authNumberGenerator.generate()).thenReturn("GENERATED");
 
         // when
