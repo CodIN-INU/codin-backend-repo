@@ -3,6 +3,7 @@ package inu.codin.codin.domain.email.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
+import inu.codin.codin.domain.email.exception.EmailPasswordResetFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
 import inu.codin.codin.domain.email.util.AuthNumberGenerator;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -65,11 +66,8 @@ public class PasswordResetEmailService {
             emailAuth.unVerifyEmail();
             return emailAuth;
         } else {
-            // 새 인증 정보 생성
-            return EmailAuthEntity.builder()
-                    .email(email)
-                    .authNum(authNumberGenerator.generate())
-                    .build();
+            log.error("[getOrCreatePasswordResetAuth] 등록되지 않은 사용자에 대한 비밀번호 초기화 요청, email: {}", email);
+            throw new EmailPasswordResetFailException("등록되지 않은 사용자 이메일입니다.");
         }
     }
 }
