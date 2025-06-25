@@ -36,7 +36,7 @@ class EmailTemplateServiceTest {
     private final String testSubject = "테스트 제목";
     private final String testTemplate = "test-template";
     private final String testAuthNum = "AUTH123";
-    private final String testHtmlContent = "<html><body>인증번호: AUTH123</body></html>";
+    private final String testHtmlContent = "<html><body>인증번호: " + testAuthNum + "</body></html>";
 
     @BeforeEach
     void setUp() {
