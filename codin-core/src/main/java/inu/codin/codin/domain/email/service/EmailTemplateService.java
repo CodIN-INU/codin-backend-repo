@@ -1,9 +1,11 @@
 package inu.codin.codin.domain.email.service;
 
+import inu.codin.codin.domain.email.exception.EmailTemplateFailException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -51,10 +53,10 @@ public class EmailTemplateService {
             log.info("[sendTemplateEmail] 이메일 전송 성공, email: {}, template: {}", email, templateName);
         } catch (MessagingException e) {
             log.error("[sendTemplateEmail] 이메일 전송 실패 (MessagingException), email: {}, template: {}", email, templateName, e);
-            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
-        } catch (RuntimeException e) {
-            log.error("[sendTemplateEmail] 이메일 전송 실패 (RuntimeException), email: {}, template: {}", email, templateName, e);
-            throw new RuntimeException("이메일 전송 중 알 수 없는 오류가 발생했습니다.", e);
+            throw new EmailTemplateFailException("이메일 전송에 실패했습니다.");
+        } catch (MailException e) {
+            log.error("[sendTemplateEmail] 이메일 전송 실패 (MailException), email: {}, template: {}", email, templateName, e);
+            throw new EmailTemplateFailException("이메일 전송 중 알 수 없는 오류가 발생했습니다.");
         }
     }
 }
