@@ -44,7 +44,6 @@ public class PasswordResetEmailService {
         EmailAuthEntity emailAuthEntity = getOrCreatePasswordResetAuth(email);
         emailAuthRepository.save(emailAuthEntity);
         
-        // 트랜잭션 완료 후 비동기 이메일 전송
         emailTemplateService.sendTemplateEmail(
                 email,
                 PASSWORD_EMAIL_SUBJECT,
