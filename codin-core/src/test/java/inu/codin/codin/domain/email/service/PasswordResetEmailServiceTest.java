@@ -3,6 +3,7 @@ package inu.codin.codin.domain.email.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
+import inu.codin.codin.domain.email.exception.EmailPasswordResetFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;
 import inu.codin.codin.domain.email.util.AuthNumberGenerator;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,13 +31,10 @@ class PasswordResetEmailServiceTest {
 
     @Mock
     EmailAuthRepository emailAuthRepository;
-    
     @Mock
     EmailTemplateService emailTemplateService;
-    
     @Mock
     UserRepository userRepository;
-    
     @Mock
     AuthNumberGenerator authNumberGenerator;
 
@@ -45,67 +42,58 @@ class PasswordResetEmailServiceTest {
     private UserEntity mockUser;
     private EmailAuthEntity existingEmailAuth;
 
+    private final String testMail = "test@inu.ac.kr";
+    private final String testAuthNum = "AUTH123";
+
     @BeforeEach
     void setUp() {
         mockUser = mock(UserEntity.class);
         requestDto = JoinEmailSendRequestDto.builder()
-                .email("test@inu.ac.kr")
+                .email(testMail)
                 .build();
         existingEmailAuth = EmailAuthEntity.builder()
-                .email("test@inu.ac.kr")
-                .authNum("OLDAUTH1")
+                .email(testMail)
+                .authNum(testAuthNum)
                 .build();
     }
 
     @Test
-    @DisplayName("비밀번호 재설정 이메일 전송 - 성공 (신규 사용자)")
+    @DisplayName("비밀번호 재설정 이메일 전송 - 실패 (등록되지 않은 사용자)")
     void sendPasswordResetEmail_성공_신규사용자() {
         // given
-        when(userRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.of(mockUser));
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.empty());
-        when(authNumberGenerator.generate()).thenReturn("NEWAUTH1");
+        when(userRepository.findByEmail(testMail)).thenReturn(Optional.of(mockUser));
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.empty());
 
-        // when
-        passwordResetEmailService.sendPasswordResetEmail(requestDto);
+        // when & then
+        EmailPasswordResetFailException exception = assertThrows(EmailPasswordResetFailException.class,
+                () -> passwordResetEmailService.sendPasswordResetEmail(requestDto));
 
-        // then
-        ArgumentCaptor<EmailAuthEntity> emailAuthCaptor = ArgumentCaptor.forClass(EmailAuthEntity.class);
-        verify(emailAuthRepository).save(emailAuthCaptor.capture());
-        
-        EmailAuthEntity savedAuth = emailAuthCaptor.getValue();
-        assertEquals("test@inu.ac.kr", savedAuth.getEmail());
-        assertEquals("NEWAUTH1", savedAuth.getAuthNum());
-        assertFalse(savedAuth.isVerified());
-
-        verify(emailTemplateService).sendTemplateEmail(
-                eq("test@inu.ac.kr"),
-                eq("[CODIN] 비밀번호 재설정 링크입니다."),
-                eq("password-email"),
-                eq("NEWAUTH1")
-        );
+        verify(emailAuthRepository, never()).save(any());
+        verify(emailTemplateService, never()).sendTemplateEmail(anyString(), anyString(), anyString(), anyString());
+        verify(authNumberGenerator, never()).generate();
     }
 
     @Test
     @DisplayName("비밀번호 재설정 이메일 전송 - 성공 (기존 인증 정보 갱신)")
     void sendPasswordResetEmail_성공_기존인증정보갱신() {
         // given
-        when(userRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.of(mockUser));
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.of(existingEmailAuth));
-        when(authNumberGenerator.generate()).thenReturn("NEWAUTH2");
+        when(userRepository.findByEmail(testMail)).thenReturn(Optional.of(mockUser));
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.of(existingEmailAuth));
+        when(authNumberGenerator.generate()).thenReturn("NEWAUTH");
 
         // when
         passwordResetEmailService.sendPasswordResetEmail(requestDto);
 
         // then
         verify(emailAuthRepository).save(existingEmailAuth);
-        assertEquals("NEWAUTH2", existingEmailAuth.getAuthNum());
+        assertEquals("NEWAUTH", existingEmailAuth.getAuthNum());
         assertFalse(existingEmailAuth.isVerified()); // 인증 상태 초기화 확인
 
         verify(emailTemplateService).sendTemplateEmail(
-                eq("test@inu.ac.kr"),
+                eq(testMail),
                 eq("[CODIN] 비밀번호 재설정 링크입니다."),
                 eq("password-email"),
-                eq("NEWAUTH2")
+                eq("NEWAUTH")
         );
     }
 
@@ -113,7 +101,7 @@ class PasswordResetEmailServiceTest {
     @DisplayName("비밀번호 재설정 이메일 전송 - 실패 (존재하지 않는 사용자)")
     void sendPasswordResetEmail_실패_존재하지않는사용자() {
         // given
-        when(userRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(testMail)).thenReturn(Optional.empty());
 
         // when & then
         NotFoundException exception = assertThrows(NotFoundException.class, 
@@ -129,9 +117,9 @@ class PasswordResetEmailServiceTest {
     @DisplayName("비밀번호 재설정 이메일 전송 - 인증번호 생성기 호출 확인")
     void sendPasswordResetEmail_인증번호생성기호출확인() {
         // given
-        when(userRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.of(mockUser));
-        when(emailAuthRepository.findByEmail("test@inu.ac.kr")).thenReturn(Optional.empty());
-        when(authNumberGenerator.generate()).thenReturn("GENERATED");
+        when(userRepository.findByEmail(testMail)).thenReturn(Optional.of(mockUser));
+        when(emailAuthRepository.findByEmail(testMail)).thenReturn(Optional.of(existingEmailAuth));
+        when(authNumberGenerator.generate()).thenReturn(testAuthNum);
 
         // when
         passwordResetEmailService.sendPasswordResetEmail(requestDto);
