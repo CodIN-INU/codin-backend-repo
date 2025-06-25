@@ -39,8 +39,12 @@ public class JoinEmailAuthService {
         EmailAuthEntity emailAuthEntity = getOrCreateEmailAuth(email);
         emailAuthRepository.save(emailAuthEntity);
         
-        // 트랜잭션 완료 후 비동기 이메일 전송
-        emailTemplateService.sendTemplateEmail(email, AUTH_EMAIL_SUBJECT, AUTH_EMAIL_TEMPLATE, emailAuthEntity.getAuthNum());
+        emailTemplateService.sendTemplateEmail(
+                email,
+                AUTH_EMAIL_SUBJECT,
+                AUTH_EMAIL_TEMPLATE,
+                emailAuthEntity.getAuthNum()
+        );
     }
     
     /**
@@ -77,6 +81,7 @@ public class JoinEmailAuthService {
             // 기존 인증번호 갱신
             EmailAuthEntity emailAuth = existingAuth.get();
             emailAuth.renewAuthNum(authNumberGenerator.generate());
+            emailAuth.unVerifyEmail();
             return emailAuth;
         } else {
             // 새 인증 정보 생성
