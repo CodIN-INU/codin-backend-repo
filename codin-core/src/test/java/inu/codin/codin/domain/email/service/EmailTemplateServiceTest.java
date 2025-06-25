@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.email.service;
 
+import inu.codin.codin.domain.email.exception.EmailTemplateFailException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +46,7 @@ class EmailTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿 이메일 전송 - 성공")
-    void sendTemplateEmail_성공() throws Exception {
+    void sendTemplateEmail_성공() {
         // given
         when(templateEngine.process(eq(testTemplate), any(Context.class)))
                 .thenReturn(testHtmlContent);
@@ -61,7 +62,7 @@ class EmailTemplateServiceTest {
 
     @Test
     @DisplayName("템플릿 이메일 전송 - 템플릿 엔진 컨텍스트 확인")
-    void sendTemplateEmail_템플릿엔진컨텍스트확인() throws Exception {
+    void sendTemplateEmail_템플릿엔진컨텍스트확인() {
         // given
         ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
         when(templateEngine.process(eq(testTemplate), contextCaptor.capture()))
@@ -80,10 +81,10 @@ class EmailTemplateServiceTest {
     @DisplayName("템플릿 이메일 전송 - MimeMessage 생성 실패")
     void sendTemplateEmail_MimeMessage생성실패() {
         // given
-        when(javaMailSender.createMimeMessage()).thenThrow(new RuntimeException("MimeMessage 생성 실패"));
+        when(javaMailSender.createMimeMessage()).thenThrow(new EmailTemplateFailException("MimeMessage 생성 실패"));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> emailTemplateService.sendTemplateEmail(testEmail, testSubject, testTemplate, testAuthNum));
         
         assertEquals("MimeMessage 생성 실패", exception.getMessage());
@@ -95,37 +96,35 @@ class EmailTemplateServiceTest {
     void sendTemplateEmail_템플릿처리실패() {
         // given
         when(templateEngine.process(eq(testTemplate), any(Context.class)))
-                .thenThrow(new RuntimeException("템플릿 처리 실패"));
+                .thenThrow(new EmailTemplateFailException("템플릿 처리 실패"));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> emailTemplateService.sendTemplateEmail(testEmail, testSubject, testTemplate, testAuthNum));
         
-        assertTrue(exception.getMessage().contains("이메일 전송에 실패했습니다.") || 
-                   exception.getMessage().contains("템플릿 처리 실패"));
+        assertTrue(exception.getMessage().contains("템플릿 처리 실패"));
         verify(javaMailSender, never()).send(any(MimeMessage.class));
     }
 
     @Test
     @DisplayName("템플릿 이메일 전송 - 이메일 전송 실패")
-    void sendTemplateEmail_이메일전송실패() throws Exception {
+    void sendTemplateEmail_이메일전송실패() {
         // given
         when(templateEngine.process(eq(testTemplate), any(Context.class)))
                 .thenReturn(testHtmlContent);
-        doThrow(new RuntimeException("이메일 전송 실패"))
+        doThrow(new EmailTemplateFailException("이메일 전송 실패"))
                 .when(javaMailSender).send(mimeMessage);
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> emailTemplateService.sendTemplateEmail(testEmail, testSubject, testTemplate, testAuthNum));
         
-        assertTrue(exception.getMessage().contains("이메일 전송에 실패했습니다.") || 
-                   exception.getMessage().contains("이메일 전송 실패"));
+        assertTrue(exception.getMessage().contains("이메일 전송 실패"));
     }
 
     @Test
     @DisplayName("템플릿 이메일 전송 - 파라미터 검증")
-    void sendTemplateEmail_파라미터검증() throws Exception {
+    void sendTemplateEmail_파라미터검증() {
         // given
         when(templateEngine.process(anyString(), any(Context.class)))
                 .thenReturn(testHtmlContent);
