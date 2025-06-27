@@ -1,11 +1,9 @@
 package inu.codin.codin.domain.chat.exception;
 
 import inu.codin.codin.common.exception.GlobalErrorCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@Getter
 @RequiredArgsConstructor
 public enum ChattingErrorCode implements GlobalErrorCode {
 
@@ -18,11 +16,11 @@ public enum ChattingErrorCode implements GlobalErrorCode {
 
     @Override
     public HttpStatus httpStatus() {
-        return null;
+        return httpStatus;
     }
 
     @Override
     public String message() {
-        return null;
+        return message;
     }
 }
