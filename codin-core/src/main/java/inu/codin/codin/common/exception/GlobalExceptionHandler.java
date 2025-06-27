@@ -2,9 +2,7 @@ package inu.codin.codin.common.exception;
 
 import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
-import inu.codin.codin.domain.chat.exception.ChatRoomException;
-import inu.codin.codin.domain.chat.exception.ChatRoomExistedException;
+import inu.codin.codin.domain.chat.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.http.HttpStatus;
@@ -35,10 +33,17 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ExceptionResponse> handleChatRoomException(ChatRoomException e) {
         ChatRoomErrorCode code = e.getErrorCode();
         String message = code.message();
-        if (e instanceof ChatRoomExistedException existedException) //클라이언트 측에서 받아야 하는 chatroomId를 포함해서 전달
+        if (e instanceof ChatRoomExistedException existedException) //client 측에서 303 상태 코드 확인 후 message의 chatRoomId로 리다이렉션
             message = message + "/" + existedException.getChatRoomId();
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(message, code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(ChattingException.class)
+    protected ResponseEntity<ExceptionResponse> handleChattingException(ChattingException e) {
+        ChattingErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
     }
 
     @ExceptionHandler(NotFoundException.class)
