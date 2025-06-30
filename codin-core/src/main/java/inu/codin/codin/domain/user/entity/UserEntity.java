@@ -12,8 +12,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Document(collection = "users")
 @Getter
@@ -46,12 +44,10 @@ public class UserEntity extends BaseTimeEntity {
 
     private LocalDateTime totalSuspensionEndDate; //정지 게시물이 늘어날수록 정지 종료일이 중첩
 
-    private List<ObjectId> blockedUsers = new ArrayList<>();
-
     private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
-    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status, List<ObjectId> blockedUsers) {
+    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status) {
         this.email = email;
         this.password = password;
         this.studentId = studentId;
@@ -63,7 +59,6 @@ public class UserEntity extends BaseTimeEntity {
         this.undergraduate = undergraduate;
         this.role = role;
         this.status = status;
-        this.blockedUsers = (blockedUsers != null) ? blockedUsers : new ArrayList<>(); // ✅ 기본값 설정
     }
 
     public void updateNickname(String nickname) {
@@ -87,7 +82,6 @@ public class UserEntity extends BaseTimeEntity {
                 .profileImageUrl("")
                 .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
-                .blockedUsers(new ArrayList<>())
                 .build();
     }
 
