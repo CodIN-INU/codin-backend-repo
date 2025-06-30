@@ -1,9 +1,11 @@
 package inu.codin.codin.domain.info.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.domain.info.dto.request.PartnerCreateRequestDto;
 import inu.codin.codin.domain.info.dto.response.PartnerDetailsResponseDto;
 import inu.codin.codin.domain.info.dto.response.PartnerListResponseDto;
 import inu.codin.codin.domain.info.entity.Partner;
+import inu.codin.codin.domain.info.exception.InfoErrorCode;
+import inu.codin.codin.domain.info.exception.InfoException;
 import inu.codin.codin.domain.info.repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -26,7 +28,13 @@ public class PartnerService {
 
     public PartnerDetailsResponseDto getPartnerDetails(String partnerId) {
         Partner partner = partnerRepository.findById(new ObjectId(partnerId))
-                .orElseThrow(() -> new NotFoundException("제휴업체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new InfoException(InfoErrorCode.PARTNER_NOT_FOUND));
         return PartnerDetailsResponseDto.from(partner);
+    }
+
+    public void createPartner(PartnerCreateRequestDto partnerCreateRequestDto) {
+        // todo 이미지 업로드, url 받기
+        Partner partner = Partner.of(partnerCreateRequestDto);
+        partnerRepository.save(partner);
     }
 }
