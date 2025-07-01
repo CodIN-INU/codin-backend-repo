@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,10 +49,10 @@ public class PartnerController {
     @Operation(
             summary = "[ADMIN, MANAGER] Partner 추가"
     )
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPartner(@RequestPart("partnerInfo") @Valid PartnerCreateRequestDto partnerCreateRequestDto,
-                                           @RequestPart("mainImage") MultipartFile mainImage,
-                                           @RequestPart("subImages")List<MultipartFile> subImages ) {
+                                           @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
+                                           @RequestPart(value = "subImages", required = false) List<MultipartFile> subImages ) {
         partnerService.createPartner(partnerCreateRequestDto, mainImage, subImages);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "Partner 생성 완료", null));
