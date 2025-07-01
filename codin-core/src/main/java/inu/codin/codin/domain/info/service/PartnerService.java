@@ -26,10 +26,10 @@ public class PartnerService {
     private final S3Service s3Service;
 
     public List<PartnerListResponseDto> getPartnerList() {
-        List<Partner> partners = partnerRepository.findAll();
-        return partners.stream()
-                .map(PartnerListResponseDto::from)
-                .toList();
+        return partnerRepository.findAll()
+                        .stream()
+                        .map(PartnerListResponseDto::from)
+                        .toList();
     }
 
     public PartnerDetailsResponseDto getPartnerDetails(String partnerId) {
@@ -52,7 +52,6 @@ public class PartnerService {
         return new PartnerImg(main, subs);
     }
 
-    @Transactional
     public void deletePartner(String partnerId) {
         partnerRepository.deleteById(new ObjectId(partnerId));
     }
