@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,9 @@ public class PartnerService {
     }
 
     private PartnerImg getPartnerImg(MultipartFile mainImage, List<MultipartFile> subImages) {
-        String main = s3Service.handleImageUpload(List.of(mainImage)).get(0);
+        String main = Optional.ofNullable(mainImage)
+                .map(img -> s3Service.handleImageUpload(List.of(img)).get(0))
+                .orElse(null);
         List<String> subs = s3Service.handleImageUpload(subImages);
         return new PartnerImg(main, subs);
     }

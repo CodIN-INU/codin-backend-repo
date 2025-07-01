@@ -108,6 +108,23 @@ class PartnerServiceTest {
     }
 
     @Test
+    @DisplayName("이미지 없이 제휴업체 생성 성공")
+    void 이미지_없이_제휴업체_생성_성공(){
+        //given
+        PartnerCreateRequestDto requestDto = mock(PartnerCreateRequestDto.class);
+
+        //when
+        partnerService.createPartner(requestDto, null, null);
+
+        //then
+        ArgumentCaptor<Partner> captor = ArgumentCaptor.forClass(Partner.class);
+        verify(partnerRepository, times(1)).save(captor.capture());
+
+        Partner savedPartner = captor.getValue();
+        assertNotNull(savedPartner);
+    }
+
+    @Test
     @DisplayName("제휴업체 삭제")
     void 제휴업체_삭제() {
         //given
