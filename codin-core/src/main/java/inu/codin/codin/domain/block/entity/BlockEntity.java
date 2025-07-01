@@ -46,11 +46,8 @@ public class BlockEntity extends BaseTimeEntity {
         return this;
     }
 
-    public BlockEntity removeBockedUser(ObjectId blockedUser) {
-        if (this.blockedUsers.contains(blockedUser)) {
-            this.blockedUsers.remove(blockedUser);
-            return this;
-        }
-        throw new NotFoundException("차단 목록에 없는 유저입니다.");
+    public BlockEntity removeBlockedUser(ObjectId blockedUser) {
+        this.blockedUsers.remove(blockedUser);
+        return this;
     }
 }
