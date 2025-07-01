@@ -44,14 +44,14 @@ public class Partner {
         this.img = img;
     }
 
-    public static Partner of(PartnerCreateRequestDto partnerCreateRequestDto){
+    public static Partner of(PartnerCreateRequestDto partnerCreateRequestDto, PartnerImg partnerImg){
         return Partner.builder()
                 .name(partnerCreateRequestDto.getName())
                 .tags(partnerCreateRequestDto.getTags())
                 .benefits(partnerCreateRequestDto.getBenefits())
                 .startDate(partnerCreateRequestDto.getStartDate())
                 .endDate(partnerCreateRequestDto.getEndDate())
-                .img(partnerCreateRequestDto.getImg())
+                .img(partnerImg)
                 .build();
     }
 }

@@ -5,12 +5,14 @@ import inu.codin.codin.domain.info.entity.PartnerImg;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
+@Builder
 public class PartnerCreateRequestDto {
 
     @NotBlank
@@ -30,8 +32,4 @@ public class PartnerCreateRequestDto {
 
     @Schema(description = "제휴 종료 날짜", example = "2026-03-01")
     private LocalDate endDate;
-
-    @Schema(description = "제휴업체 가게 이미지")
-    private PartnerImg img;
-
 }
