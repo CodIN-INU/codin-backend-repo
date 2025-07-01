@@ -6,7 +6,7 @@ import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.SelfBlockedException;
 import inu.codin.codin.domain.block.repository.BlockRepository;
-import inu.codin.codin.domain.user.validator.UserValidator;
+import inu.codin.codin.domain.user.service.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
