@@ -36,8 +36,8 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ExceptionResponse> handleChatRoomException(ChatRoomException e) {
         ChatRoomErrorCode code = e.getErrorCode();
         String message = code.message();
-        if (e instanceof ChatRoomExistedException existedException) //client 측에서 303 상태 코드 확인 후 message의 chatRoomId로 리다이렉션
-            message = message + "/" + existedException.getChatRoomId();
+//        if (e instanceof ChatRoomExistedException existedException) //client 측에서 303 상태 코드 확인 후 message의 chatRoomId로 리다이렉션
+//            message = message + "/" + existedException.getChatRoomId();
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(message, code.httpStatus().value()));
     }
