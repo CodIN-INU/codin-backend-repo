@@ -24,17 +24,17 @@ public enum Department {
     @JsonCreator
     public static Department fromDescription(String description) {
         for (Department department : Department.values()) {
-            if (department.getDescription().equals(description)) {
+            if (department.name().equals(description) || department.getDescription().equals(description)) {
                 return department;
             }
         }
+
         log.warn("정보대 내의 학과가 아닙니다. description : " + description);
         return OTHERS;
     }
 
     @JsonValue
-    public String getDescription(){
-        return description;
+    public String toValue(){
+        return this.name();
     }
-
 }
