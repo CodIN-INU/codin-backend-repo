@@ -56,7 +56,7 @@ public class BlockService {
 
         blockRepository.save(blockRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("차단 정보가 존재하지 않습니다."))
-                .removeBockedUser(blockedId));
+                .removeBlockedUser(blockedId));
     }
 
     /**
