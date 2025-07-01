@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.validator;
+package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserValidator {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * User 존재 여부 검증
