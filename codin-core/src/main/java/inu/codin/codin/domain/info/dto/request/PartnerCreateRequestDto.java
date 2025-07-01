@@ -32,4 +32,7 @@ public class PartnerCreateRequestDto {
 
     @Schema(description = "제휴 종료 날짜", example = "2026-03-01")
     private LocalDate endDate;
+
+    @Schema(description = "제휴업체 가게 위치", example = "인천 연수구 송도동 3-2")
+    private String location;
 }
