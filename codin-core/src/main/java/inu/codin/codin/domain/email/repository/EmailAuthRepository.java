@@ -9,11 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface EmailAuthRepository extends MongoRepository<EmailAuthEntity, ObjectId> {
-
     Optional<EmailAuthEntity> findByEmail(String email);
-
     Optional<EmailAuthEntity> findByEmailAndAuthNum(String email, String authNum);
-
-    Optional<EmailAuthEntity> findByAuthNum(String authNum);
-
 }
