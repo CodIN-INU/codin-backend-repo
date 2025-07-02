@@ -1,10 +1,10 @@
 package inu.codin.codin.domain.info.service;
 
+import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.info.dto.request.OfficeMemberCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.dto.request.OfficeUpdateRequestDto;
 import inu.codin.codin.domain.info.dto.response.OfficeDetailsResponseDto;
 import inu.codin.codin.domain.info.entity.Office;
-import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.info.entity.OfficeMember;
 import inu.codin.codin.domain.info.repository.InfoRepository;
 import lombok.RequiredArgsConstructor;

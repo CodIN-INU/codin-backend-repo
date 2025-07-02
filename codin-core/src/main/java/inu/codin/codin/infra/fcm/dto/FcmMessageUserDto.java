@@ -1,6 +1,5 @@
 package inu.codin.codin.infra.fcm.dto;
 
-import inu.codin.codin.domain.user.entity.UserEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.bson.types.ObjectId;
