@@ -7,8 +7,6 @@ import inu.codin.codin.common.security.dto.apple.AppleOAuth2User;
 import inu.codin.codin.common.security.feign.AppleAuthClient;
 import inu.codin.codin.common.security.jwt.IdentityTokenValidator;
 import inu.codin.codin.common.security.util.ApplePublicKeyGenerator;
-import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
@@ -24,8 +22,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor

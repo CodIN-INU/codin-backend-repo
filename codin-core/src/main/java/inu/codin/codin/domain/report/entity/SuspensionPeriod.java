@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.report.entity;
 
 import lombok.Getter;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @Getter
 public enum SuspensionPeriod {
