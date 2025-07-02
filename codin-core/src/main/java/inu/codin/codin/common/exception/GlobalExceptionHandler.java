@@ -2,8 +2,10 @@ package inu.codin.codin.common.exception;
 
 import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomExistedException;
-import inu.codin.codin.domain.chat.exception.*;
+import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
+import inu.codin.codin.domain.chat.exception.ChatRoomException;
+import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
+import inu.codin.codin.domain.chat.exception.ChattingException;
 import inu.codin.codin.domain.info.exception.InfoErrorCode;
 import inu.codin.codin.domain.info.exception.InfoException;
 import lombok.extern.slf4j.Slf4j;

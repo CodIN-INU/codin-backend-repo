@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.block.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.block.exception.AlreadyBlockedException;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,16 +1,11 @@
 package inu.codin.codin.domain.report.dto.response;
 
-import inu.codin.codin.domain.report.entity.ReportEntity;
-import inu.codin.codin.domain.report.entity.ReportStatus;
-import inu.codin.codin.domain.report.entity.ReportTargetType;
-import inu.codin.codin.domain.report.entity.ReportType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 import java.util.stream.Collectors;
