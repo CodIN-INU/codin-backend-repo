@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.user.repository;
 
-import inu.codin.codin.domain.report.entity.ReportEntity;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;

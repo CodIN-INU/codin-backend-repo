@@ -1,16 +1,26 @@
-package inu.codin.codin.common.security.service.oauth2;
+package inu.codin.codin.common.security.service;
 
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
+import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.exception.UserCreateFailException;
+import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j

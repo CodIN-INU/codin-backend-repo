@@ -1,7 +1,9 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
