@@ -38,15 +38,11 @@ public class BlockEntity extends BaseTimeEntity {
     }
 
     public BlockEntity addBlockedUser(ObjectId blockedUser) {
-        if (this.blockedUsers.contains(blockedUser)) {
-            throw new AlreadyBlockedException("이미 차단한 유저입니다.");
-        }
         this.blockedUsers.add(blockedUser);
         return this;
     }
 
-    public BlockEntity removeBlockedUser(ObjectId blockedUser) {
+    public void removeBlockedUser(ObjectId blockedUser) {
         this.blockedUsers.remove(blockedUser);
-        return this;
     }
 }
