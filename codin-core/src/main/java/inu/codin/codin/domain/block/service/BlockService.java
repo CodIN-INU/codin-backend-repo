@@ -1,19 +1,22 @@
 package inu.codin.codin.domain.block.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
+import inu.codin.codin.domain.block.exception.BlockErrorCode;
+import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.block.exception.SelfBlockedException;
 import inu.codin.codin.domain.block.repository.BlockRepository;
 import inu.codin.codin.domain.user.service.UserValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BlockService {
     private final BlockRepository blockRepository;
@@ -29,14 +32,22 @@ public class BlockService {
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
-            throw new SelfBlockedException("자신을 차단할 수 없습니다.");
+            log.error("");
+            throw new BlockException(BlockErrorCode.SELF_BLOCKED);
         }
-        userValidator.validateUserExists(userId, "차단하는 사용자를 찾을 수 없습니다.");
-        userValidator.validateUserExists(blockedId, "차단할 사용자를 찾을 수 없습니다.");
+        userValidator.validateUserExists(userId, () -> new BlockException(BlockErrorCode.BLOCKING_USER_NOT_FOUND));
+        userValidator.validateUserExists(blockedId, () -> new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND));
 
-        blockRepository.save(blockRepository.findByUserId(userId)
-                .orElseGet(() -> BlockEntity.ofNew(userId))
-                .addBlockedUser(blockedId));
+        blockRepository.findByUserId(userId)
+                .ifPresentOrElse(blockEntity -> {
+                    if (BlockValidator.validateBlockedUserExists(blockEntity, blockedId)) {
+                        throw new BlockException(BlockErrorCode.ALREADY_BLOCKED);
+                    }
+                    blockEntity.addBlockedUser(blockedId);
+                    blockRepository.save(blockEntity);
+                }, () -> blockRepository.save(BlockEntity.ofNew(userId)
+                        .addBlockedUser(blockedId))
+                );
     }
 
     /**
@@ -49,14 +60,21 @@ public class BlockService {
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
-            throw new SelfBlockedException("자신을 차단 해제할 수 없습니다.");
+            throw new BlockException(BlockErrorCode.SELF_UNBLOCKED);
         }
-        userValidator.validateUserExists(userId, "차단 해제하는 사용자를 찾을 수 없습니다.");
-        userValidator.validateUserExists(blockedId, "차단 해제할 사용자를 찾을 수 없습니다.");
+        userValidator.validateUserExists(userId, () -> new BlockException(BlockErrorCode.BLOCKING_USER_NOT_FOUND));
+        userValidator.validateUserExists(blockedId, () -> new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND));
 
-        blockRepository.save(blockRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("차단 정보가 존재하지 않습니다."))
-                .removeBlockedUser(blockedId));
+        blockRepository.findByUserId(userId)
+                .ifPresentOrElse(blockEntity -> {
+                    if (!BlockValidator.validateBlockedUserExists(blockEntity, blockedId)) {
+                        throw new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND);
+                    }
+                    blockEntity.removeBlockedUser(blockedId);
+                    blockRepository.save(blockEntity);
+                }, () -> {
+                    throw new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND);
+                });
     }
 
     /**
