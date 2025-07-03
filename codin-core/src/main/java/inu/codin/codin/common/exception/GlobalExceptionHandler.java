@@ -2,6 +2,8 @@ package inu.codin.codin.common.exception;
 
 import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.domain.block.exception.BlockErrorCode;
+import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
 import inu.codin.codin.domain.chat.exception.ChatRoomException;
 import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
@@ -30,6 +32,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GlobalException.class)
     protected ResponseEntity<ExceptionResponse> handleGlobalException(GlobalException e) {
         GlobalErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(BlockException.class)
+    protected ResponseEntity<ExceptionResponse> handleBlockException(BlockException e) {
+        BlockErrorCode code = e.getErrorCode();
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
     }
