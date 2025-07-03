@@ -1,14 +1,12 @@
 package inu.codin.codin.infra.fcm.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.infra.fcm.exception.FcmDuplicatedTokenException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;

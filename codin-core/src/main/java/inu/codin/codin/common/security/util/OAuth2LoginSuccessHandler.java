@@ -1,6 +1,5 @@
 package inu.codin.codin.common.security.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codin.common.security.enums.AuthResultStatus;
 import inu.codin.codin.common.security.service.AppleAuthService;
 import inu.codin.codin.common.security.service.GoogleAuthService;

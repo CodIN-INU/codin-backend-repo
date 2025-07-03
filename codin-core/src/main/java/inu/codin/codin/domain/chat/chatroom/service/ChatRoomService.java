@@ -12,7 +12,6 @@ import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomCreateFailExceptio
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomExistedException;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
-import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

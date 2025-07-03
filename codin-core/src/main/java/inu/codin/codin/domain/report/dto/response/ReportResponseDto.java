@@ -1,17 +1,15 @@
 package inu.codin.codin.domain.report.dto.response;
 
-import inu.codin.codin.domain.report.entity.*;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
+import inu.codin.codin.domain.report.entity.ReportEntity;
+import inu.codin.codin.domain.report.entity.ReportEntity.ReportActionEntity;
+import inu.codin.codin.domain.report.entity.ReportStatus;
 import inu.codin.codin.domain.report.entity.ReportTargetType;
 import inu.codin.codin.domain.report.entity.ReportType;
-import inu.codin.codin.domain.report.entity.ReportStatus;
-import inu.codin.codin.domain.report.entity.ReportEntity.ReportActionEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.Document;
 
 @Getter
 @Builder
