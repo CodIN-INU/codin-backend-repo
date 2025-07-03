@@ -5,7 +5,6 @@ import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
-import inu.codin.codin.domain.block.exception.SelfBlockedException;
 import inu.codin.codin.domain.block.repository.BlockRepository;
 import inu.codin.codin.domain.user.service.UserValidator;
 import lombok.RequiredArgsConstructor;
