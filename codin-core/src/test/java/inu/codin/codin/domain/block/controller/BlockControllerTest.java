@@ -1,9 +1,8 @@
 package inu.codin.codin.domain.block.controller;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.block.exception.AlreadyBlockedException;
-import inu.codin.codin.domain.block.exception.SelfBlockedException;
+import inu.codin.codin.domain.block.exception.BlockErrorCode;
+import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.block.service.BlockService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -58,13 +57,14 @@ class BlockControllerTest {
     @DisplayName("사용자 차단 실패 - 자기 자신 차단")
     void blockUser_실패_자기자신차단() {
         //given
-        doThrow(new SelfBlockedException("자신을 차단할 수 없습니다."))
+        doThrow(new BlockException(BlockErrorCode.SELF_BLOCKED))
                 .when(blockService).blockUser(anyString());
 
         //when & then
         assertThatThrownBy(() -> blockController.blockUser(testUserId))
-                .isInstanceOf(SelfBlockedException.class)
-                .hasMessage("자신을 차단할 수 없습니다.");
+                .isInstanceOf(BlockException.class)
+                .hasMessage(BlockErrorCode.SELF_BLOCKED.message())
+                .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.SELF_BLOCKED);
 
         verify(blockService).blockUser(testUserId);
     }
@@ -73,13 +73,14 @@ class BlockControllerTest {
     @DisplayName("사용자 차단 실패 - 이미 차단된 사용자")
     void blockUser_실패_이미차단된사용자() {
         //given
-        doThrow(new AlreadyBlockedException("이미 차단한 유저입니다."))
+        doThrow(new BlockException(BlockErrorCode.ALREADY_BLOCKED))
                 .when(blockService).blockUser(anyString());
 
         //when & then
         assertThatThrownBy(() -> blockController.blockUser(blockedUserId))
-                .isInstanceOf(AlreadyBlockedException.class)
-                .hasMessage("이미 차단한 유저입니다.");
+                .isInstanceOf(BlockException.class)
+                .hasMessage(BlockErrorCode.ALREADY_BLOCKED.message())
+                .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.ALREADY_BLOCKED);
 
         verify(blockService).blockUser(blockedUserId);
     }
@@ -88,13 +89,14 @@ class BlockControllerTest {
     @DisplayName("사용자 차단 실패 - 차단할 사용자를 찾을 수 없음")
     void blockUser_실패_사용자없음() {
         //given
-        doThrow(new NotFoundException("차단할 사용자를 찾을 수 없습니다."))
+        doThrow(new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND))
                 .when(blockService).blockUser(anyString());
 
         //when & then
         assertThatThrownBy(() -> blockController.blockUser(blockedUserId))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("차단할 사용자를 찾을 수 없습니다.");
+                .isInstanceOf(BlockException.class)
+                .hasMessage(BlockErrorCode.BLOCKED_USER_NOT_FOUND.message())
+                .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKED_USER_NOT_FOUND);
 
         verify(blockService).blockUser(blockedUserId);
     }
@@ -124,13 +126,14 @@ class BlockControllerTest {
     @DisplayName("사용자 차단 해제 실패 - 자기 자신 차단 해제")
     void unblockUser_실패_자기자신차단해제() {
         //given
-        doThrow(new SelfBlockedException("자신을 차단 해제할 수 없습니다."))
+        doThrow(new BlockException(BlockErrorCode.SELF_UNBLOCKED))
                 .when(blockService).unblockUser(anyString());
 
         //when & then
         assertThatThrownBy(() -> blockController.unblockUser(testUserId))
-                .isInstanceOf(SelfBlockedException.class)
-                .hasMessage("자신을 차단 해제할 수 없습니다.");
+                .isInstanceOf(BlockException.class)
+                .hasMessage(BlockErrorCode.SELF_UNBLOCKED.message())
+                .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.SELF_UNBLOCKED);
 
         verify(blockService).unblockUser(testUserId);
     }
@@ -139,13 +142,14 @@ class BlockControllerTest {
     @DisplayName("사용자 차단 해제 실패 - 차단 정보 없음")
     void unblockUser_실패_차단정보없음() {
         //given
-        doThrow(new NotFoundException("차단 정보가 존재하지 않습니다."))
+        doThrow(new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND))
                 .when(blockService).unblockUser(anyString());
 
         //when & then
         assertThatThrownBy(() -> blockController.unblockUser(blockedUserId))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("차단 정보가 존재하지 않습니다.");
+                .isInstanceOf(BlockException.class)
+                .hasMessage(BlockErrorCode.BLOCKED_USER_NOT_FOUND.message())
+                .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKED_USER_NOT_FOUND);
 
         verify(blockService).unblockUser(blockedUserId);
     }
