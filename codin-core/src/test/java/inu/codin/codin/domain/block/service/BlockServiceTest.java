@@ -1,10 +1,10 @@
 package inu.codin.codin.domain.block.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
-import inu.codin.codin.domain.block.exception.SelfBlockedException;
+import inu.codin.codin.domain.block.exception.BlockErrorCode;
+import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.block.repository.BlockRepository;
 import inu.codin.codin.domain.user.service.UserValidator;
 import org.bson.types.ObjectId;
@@ -53,8 +53,8 @@ class BlockServiceTest {
             blockService.blockUser(blockedUserId.toString());
 
             //then
-            verify(userValidator).validateUserExists(testUserId, "차단하는 사용자를 찾을 수 없습니다.");
-            verify(userValidator).validateUserExists(blockedUserId, "차단할 사용자를 찾을 수 없습니다.");
+            verify(userValidator).validateUserExists(eq(testUserId), any());
+            verify(userValidator).validateUserExists(eq(blockedUserId), any());
             verify(blockRepository).save(any(BlockEntity.class));
         }
     }
@@ -86,8 +86,9 @@ class BlockServiceTest {
 
             //when & then
             assertThatThrownBy(() -> blockService.blockUser(testUserId.toString()))
-                    .isInstanceOf(SelfBlockedException.class)
-                    .hasMessage("자신을 차단할 수 없습니다.");
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.SELF_BLOCKED.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.SELF_BLOCKED);
         }
     }
 
@@ -98,14 +99,15 @@ class BlockServiceTest {
             //given
             mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 
-            doNothing().when(userValidator).validateUserExists(eq(testUserId), eq("차단하는 사용자를 찾을 수 없습니다."));
-            doThrow(new NotFoundException("차단할 사용자를 찾을 수 없습니다."))
-                    .when(userValidator).validateUserExists(any(ObjectId.class), eq("차단할 사용자를 찾을 수 없습니다."));
+            doNothing().when(userValidator).validateUserExists(eq(testUserId), any());
+            doThrow(new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND))
+                    .when(userValidator).validateUserExists(eq(blockedUserId), any());
 
             //when & then
             assertThatThrownBy(() -> blockService.blockUser(blockedUserId.toString()))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessage("차단할 사용자를 찾을 수 없습니다.");
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.BLOCKED_USER_NOT_FOUND.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKED_USER_NOT_FOUND);
         }
     }
 
@@ -116,13 +118,14 @@ class BlockServiceTest {
             //given
             mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 
-            doThrow(new NotFoundException("차단하는 사용자를 찾을 수 없습니다."))
-                    .when(userValidator).validateUserExists(eq(testUserId), eq("차단하는 사용자를 찾을 수 없습니다."));
+            doThrow(new BlockException(BlockErrorCode.BLOCKING_USER_NOT_FOUND))
+                    .when(userValidator).validateUserExists(eq(testUserId), any());
 
             //when & then
             assertThatThrownBy(() -> blockService.blockUser(blockedUserId.toString()))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessage("차단하는 사용자를 찾을 수 없습니다.");
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.BLOCKING_USER_NOT_FOUND.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKING_USER_NOT_FOUND);
         }
     }
 
@@ -142,8 +145,8 @@ class BlockServiceTest {
             blockService.unblockUser(blockedUserId.toString());
 
             //then
-            verify(userValidator).validateUserExists(testUserId, "차단 해제하는 사용자를 찾을 수 없습니다.");
-            verify(userValidator).validateUserExists(blockedUserId, "차단 해제할 사용자를 찾을 수 없습니다.");
+            verify(userValidator).validateUserExists(eq(testUserId), any());
+            verify(userValidator).validateUserExists(eq(blockedUserId), any());
             verify(blockRepository).save(any(BlockEntity.class));
         }
     }
@@ -157,8 +160,9 @@ class BlockServiceTest {
 
             //when & then
             assertThatThrownBy(() -> blockService.unblockUser(testUserId.toString()))
-                    .isInstanceOf(SelfBlockedException.class)
-                    .hasMessage("자신을 차단 해제할 수 없습니다.");
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.SELF_UNBLOCKED.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.SELF_UNBLOCKED);
         }
     }
 
@@ -173,8 +177,61 @@ class BlockServiceTest {
 
             //when & then
             assertThatThrownBy(() -> blockService.unblockUser(blockedUserId.toString()))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessage("차단 정보가 존재하지 않습니다.");
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.BLOCKED_USER_NOT_FOUND.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKED_USER_NOT_FOUND);
+        }
+    }
+
+    @Test
+    @DisplayName("유저 차단 실패 - 이미 차단된 사용자")
+    void blockUser_실패_이미차단된사용자() {
+        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+            //given
+            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+
+            BlockEntity existingBlock = BlockEntity.ofNew(testUserId);
+            existingBlock.addBlockedUser(blockedUserId); // 이미 차단된 상태
+            when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.of(existingBlock));
+
+            //when & then
+            assertThatThrownBy(() -> blockService.blockUser(blockedUserId.toString()))
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.ALREADY_BLOCKED.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.ALREADY_BLOCKED);
+
+            // userValidator 호출 검증
+            verify(userValidator).validateUserExists(eq(testUserId), any());
+            verify(userValidator).validateUserExists(eq(blockedUserId), any());
+            // save가 호출되지 않았는지 검증
+            verify(blockRepository, never()).save(any(BlockEntity.class));
+        }
+    }
+
+    @Test
+    @DisplayName("유저 차단해제 실패 - 차단되지 않은 사용자")
+    void unblockUser_실패_차단되지않은사용자() {
+        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+            //given
+            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+
+            // 다른 사용자는 차단되어 있지만, 요청한 사용자는 차단되지 않은 상태
+            ObjectId otherBlockedUserId = ObjectIdUtil.toObjectId("507f1f77bcf86cd799439011");
+            BlockEntity existingBlock = BlockEntity.ofNew(testUserId);
+            existingBlock.addBlockedUser(otherBlockedUserId); // 다른 사용자만 차단됨
+            when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.of(existingBlock));
+
+            //when & then
+            assertThatThrownBy(() -> blockService.unblockUser(blockedUserId.toString()))
+                    .isInstanceOf(BlockException.class)
+                    .hasMessage(BlockErrorCode.BLOCKED_USER_NOT_FOUND.message())
+                    .hasFieldOrPropertyWithValue("errorCode", BlockErrorCode.BLOCKED_USER_NOT_FOUND);
+
+            // userValidator 호출 검증
+            verify(userValidator).validateUserExists(eq(testUserId), any());
+            verify(userValidator).validateUserExists(eq(blockedUserId), any());
+            // save가 호출되지 않았는지 검증
+            verify(blockRepository, never()).save(any(BlockEntity.class));
         }
     }
 
