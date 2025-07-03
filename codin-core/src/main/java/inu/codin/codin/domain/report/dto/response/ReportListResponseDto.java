@@ -1,18 +1,11 @@
 package inu.codin.codin.domain.report.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.entity.PostCategory;
-import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.report.dto.ReportInfo;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-import java.util.List;@Getter
+@Getter
 
 public class ReportListResponseDto extends PostDetailResponseDTO {
 

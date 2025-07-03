@@ -1,16 +1,14 @@
 package inu.codin.codin.domain.report.repository;
 
-import inu.codin.codin.domain.chat.chatting.entity.Chatting;
 import inu.codin.codin.domain.report.entity.ReportEntity;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
+
 import java.util.List;
 
 @Repository
