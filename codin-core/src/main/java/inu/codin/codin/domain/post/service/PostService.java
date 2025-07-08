@@ -147,34 +147,35 @@ public class PostService {
     // 게시물 리스트 가져오기
     public List<PostPageItemResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
-                .map(post -> {
-                    UserProfile userProfile = resolveUserProfile(post);
-                    int likeCount = getLikeCount(post);
-                    int scrapCount = getScrapCount(post);
-                    int hitsCount = getHitsCount(post);
-                    int commentCount = post.getCommentCount();
-                    ObjectId userId = SecurityUtils.getCurrentUserId();
-                    UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
-                    PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
-                    if (post.getPostCategory() == PostCategory.POLL) {
-                        PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
-                        return PostPageItemResponseDTO.of(postDTO, pollInfo);
-                    } else {
-                        return PostPageItemResponseDTO.of(postDTO, null);
-                    }
-                })
+                .map(this::toPageItemDTO)
                 .toList();
     }
 
     // 게시물 상세 조회
-    public Object getPostWithDetail(String postId) {
+    public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
-
         ObjectId userId = SecurityUtils.getCurrentUserId();
         increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+        return toPageItemDTO(post);
+    }
 
-        return createPostDetailResponse(post);
+    // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
+    private PostPageItemResponseDTO toPageItemDTO(PostEntity post) {
+        UserProfile userProfile = resolveUserProfile(post);
+        int likeCount = getLikeCount(post);
+        int scrapCount = getScrapCount(post);
+        int hitsCount = getHitsCount(post);
+        int commentCount = post.getCommentCount();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
+        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        if (post.getPostCategory() == PostCategory.POLL) {
+            PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
+            return PostPageItemResponseDTO.of(postDTO, pollInfo);
+        } else {
+            return PostPageItemResponseDTO.of(postDTO, null);
+        }
     }
 
     public void softDeletePost(String postId) {
@@ -215,35 +216,6 @@ public class PostService {
     public PostPageResponse getBestPosts(int pageNumber) {
         Page<PostEntity> page = getBestPostsInternal(pageNumber); // [BestService] - 베스트 게시물 페이지 조회 위임
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
-    }
-
-    public Optional<Object> getPostDetailById(ObjectId postId) {
-        return postRepository.findById(postId)
-                .map(this::createPostDetailResponse);
-    }
-
-    // Post 정보를 처리하여 DTO를 생성하는 공통 메소드
-    private Object createPostDetailResponse(PostEntity post) {
-        // 1. 닉네임/이미지 결정
-        UserProfile userProfile = resolveUserProfile(post);
-
-        // 2. 부가 정보 조회
-        int likeCount = getLikeCount(post);
-        int scrapCount = getScrapCount(post);
-        int hitsCount = getHitsCount(post);
-        int commentCount = post.getCommentCount();
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
-
-        // 3. 투표 게시글 분기
-        if (post.getPostCategory() == PostCategory.POLL) {
-            PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
-            log.info("게시글-투표 상세정보 생성 성공. PostId: {}", post.get_id());
-            PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
-            return PostPollDetailResponseDTO.of(postDTO, pollInfo);
-        }
-        // 4. 일반 게시물 처리
-        return PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
     }
 
     // [유저 프로필] - 닉네임/이미지 결정
