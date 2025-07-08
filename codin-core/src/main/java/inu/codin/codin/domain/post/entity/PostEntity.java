@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "posts")
@@ -37,7 +38,7 @@ public class PostEntity extends BaseTimeEntity {
         this.userId = userId;
         this.title = title;
         this.content = content;
-        this.postImageUrls = postImageUrls;
+        this.postImageUrls = postImageUrls != null ? new ArrayList<>(postImageUrls) : new ArrayList<>();
         this.isAnonymous = isAnonymous;
         this.postCategory = postCategory;
         this.postStatus = postStatus;
@@ -45,7 +46,7 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostContent(String content, List<String> postImageUrls) {
         this.content = content;
-        this.postImageUrls = postImageUrls;
+        this.postImageUrls = postImageUrls != null ? new ArrayList<>(postImageUrls) : new ArrayList<>();
     }
 
     public void updatePostAnonymous(boolean isAnonymous) {
