@@ -1,31 +1,23 @@
 package inu.codin.codin.domain.post.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 
 @Getter
-public class PostPollDetailResponseDTO extends PostDetailResponseDTO {
-
+public class PostPollDetailResponseDTO {
+    private final PostDetailResponseDTO post;
     private final PollInfoResponseDTO poll;
 
     @Builder
-    private PostPollDetailResponseDTO(PostDetailResponseDTO baseDTO, PollInfoResponseDTO poll) {
-        super(baseDTO.getUserId(), baseDTO.get_id(), baseDTO.getTitle(), baseDTO.getContent(), baseDTO.getNickname(),
-                baseDTO.getPostCategory(), baseDTO.getUserImageUrl(), baseDTO.getPostImageUrl(), baseDTO.isAnonymous(), baseDTO.getLikeCount(),
-                baseDTO.getScrapCount(), baseDTO.getHits(), baseDTO.getCreatedAt(), baseDTO.getCommentCount(), baseDTO.getUserInfo());
+    public PostPollDetailResponseDTO(PostDetailResponseDTO post, PollInfoResponseDTO poll) {
+        this.post = post;
         this.poll = poll;
     }
 
-    public static PostPollDetailResponseDTO of(PostDetailResponseDTO base, PollInfoResponseDTO poll) {
+    public static PostPollDetailResponseDTO of(PostDetailResponseDTO post, PollInfoResponseDTO poll) {
         return PostPollDetailResponseDTO.builder()
-                .baseDTO(base)
+                .post(post)
                 .poll(poll)
                 .build();
     }
