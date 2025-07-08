@@ -65,10 +65,11 @@ public class PostDetailResponseDTO {
     private final LocalDateTime createdAt;
 
     @Schema(description = "해당 게시글에 대한 유저 반응 여부")
-    private final UserInfo userInfo;
+    private final UserInfoResponseDTO userInfo;
 
-    public PostDetailResponseDTO(String userId, String _id, String title, String content, String nickname , PostCategory postCategory, String userImageUrl, List < String > postImageUrls,
-                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfo userInfo){
+    @Builder
+    private PostDetailResponseDTO(String userId, String _id, String title, String content, String nickname , PostCategory postCategory, String userImageUrl, List<String> postImageUrl,
+                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfoResponseDTO userInfo){
         this.userId = userId;
         this._id = _id;
         this.title = title;
@@ -76,7 +77,7 @@ public class PostDetailResponseDTO {
         this.nickname = nickname;
         this.postCategory = postCategory;
         this.userImageUrl = userImageUrl;
-        this.postImageUrl = postImageUrls;
+        this.postImageUrl = postImageUrl;
         this.isAnonymous = isAnonymous;
         this.likeCount = likeCount;
         this.scrapCount = scrapCount;
@@ -86,37 +87,24 @@ public class PostDetailResponseDTO {
         this.userInfo = userInfo;
     }
 
-    @Getter
-    public static class UserInfo {
-        private final boolean isLike;
-        private final boolean isScrap;
-        private final boolean isMine;
-
-        @Builder
-        public UserInfo(boolean isLike, boolean isScrap, boolean isMine) {
-            this.isLike = isLike;
-            this.isScrap = isScrap;
-            this.isMine = isMine;
-        }
-    }
-
-    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount ,UserInfo userInfo) {
-        return new PostDetailResponseDTO(
-                post.getUserId().toString(),
-                post.get_id().toString(),
-                post.getTitle(),
-                post.getContent(),
-                nickname,
-                post.getPostCategory(),
-                userImageUrl,
-                post.getPostImageUrls(),
-                post.isAnonymous(),
-                likeCount,
-                scrapCount,
-                hitsCount,
-                post.getCreatedAt(),
-                commentCount,
-                userInfo);
+    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount ,UserInfoResponseDTO userInfo) {
+        return PostDetailResponseDTO.builder()
+                .userId(post.getUserId().toString())
+                ._id(post.get_id().toString())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .nickname(nickname)
+                .postCategory(post.getPostCategory())
+                .userImageUrl(userImageUrl)
+                .postImageUrl(post.getPostImageUrls())
+                .isAnonymous(post.isAnonymous())
+                .likeCount(likeCount)
+                .scrapCount(scrapCount)
+                .hits(hitsCount)
+                .createdAt(post.getCreatedAt())
+                .commentCount(commentCount)
+                .userInfo(userInfo)
+                .build();
     }
 
 

@@ -18,10 +18,7 @@ import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO.UserInfo;
-import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.post.dto.response.PostPollDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.*;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
@@ -222,11 +219,11 @@ public class PostService {
         int hitsCount = getHitsCount(post);
         int commentCount = post.getCommentCount();
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
+        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
 
         // 3. 투표 게시글 분기
         if (post.getPostCategory() == PostCategory.POLL) {
-            PostPollDetailResponseDTO.PollInfo pollInfo = getPollInfo(post, userId);
+            PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
             log.info("게시글-투표 상세정보 생성 성공. PostId: {}", post.get_id());
             return PostPollDetailResponseDTO.of(
                     PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo),
@@ -258,13 +255,12 @@ public class PostService {
         return new UserProfile(nickname, userImageUrl);
     }
 
-
-    public UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
-        return UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.POST, postId, currentUserId))
-                .isScrap(scrapService.isPostScraped(postId, currentUserId))
-                .isMine(postUserId.equals(currentUserId))
-                .build();
+    public UserInfoResponseDTO getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
+        return UserInfoResponseDTO.of(
+                likeService.isLiked(LikeType.POST, postId, currentUserId),
+                scrapService.isPostScraped(postId, currentUserId),
+                postUserId.equals(currentUserId)
+        );
     }
 
        // ===================== 도메인별 부가 기능/서브 로직 (분리 예정) =====================
@@ -355,7 +351,7 @@ public class PostService {
     }
 
     // [투표] - 투표 게시글 PollInfo 생성
-    private PostPollDetailResponseDTO.PollInfo getPollInfo(PostEntity post, ObjectId userId) {
+    private PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
         PollEntity poll = pollRepository.findByPostId(post.get_id())
                 .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
         long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
@@ -364,7 +360,7 @@ public class PostService {
                 .orElse(Collections.emptyList());
         boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
         boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
-        return PostPollDetailResponseDTO.PollInfo.of(
+        return PollInfoResponseDTO.of(
                 poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
                 poll.getPollVotesCounts(), userVotes, totalParticipants, hasUserVoted, pollFinished);
     }
