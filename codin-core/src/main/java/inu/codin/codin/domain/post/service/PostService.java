@@ -133,7 +133,6 @@ public class PostService {
 
     // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
-
         // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
 
@@ -146,14 +145,29 @@ public class PostService {
     }
 
     // 게시물 리스트 가져오기
-    public List<PostDetailResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
+    public List<PostPageItemResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
-                .map(this::createPostDetailResponse)
+                .map(post -> {
+                    UserProfile userProfile = resolveUserProfile(post);
+                    int likeCount = getLikeCount(post);
+                    int scrapCount = getScrapCount(post);
+                    int hitsCount = getHitsCount(post);
+                    int commentCount = post.getCommentCount();
+                    ObjectId userId = SecurityUtils.getCurrentUserId();
+                    UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
+                    PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+                    if (post.getPostCategory() == PostCategory.POLL) {
+                        PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
+                        return PostPageItemResponseDTO.of(postDTO, pollInfo);
+                    } else {
+                        return PostPageItemResponseDTO.of(postDTO, null);
+                    }
+                })
                 .toList();
     }
 
     // 게시물 상세 조회
-    public PostDetailResponseDTO getPostWithDetail(String postId) {
+    public Object getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
@@ -192,7 +206,7 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public List<PostDetailResponseDTO> getTop3BestPosts() {
+    public List<PostPageItemResponseDTO> getTop3BestPosts() {
         List<PostEntity> bestPosts = getTop3BestPostsInternal(); // [BestService] - 베스트 게시물 조회 위임
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
@@ -203,13 +217,13 @@ public class PostService {
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    public Optional<PostDetailResponseDTO> getPostDetailById(ObjectId postId) {
+    public Optional<Object> getPostDetailById(ObjectId postId) {
         return postRepository.findById(postId)
                 .map(this::createPostDetailResponse);
     }
 
     // Post 정보를 처리하여 DTO를 생성하는 공통 메소드
-    private PostDetailResponseDTO createPostDetailResponse(PostEntity post) {
+    private Object createPostDetailResponse(PostEntity post) {
         // 1. 닉네임/이미지 결정
         UserProfile userProfile = resolveUserProfile(post);
 
@@ -225,10 +239,8 @@ public class PostService {
         if (post.getPostCategory() == PostCategory.POLL) {
             PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
             log.info("게시글-투표 상세정보 생성 성공. PostId: {}", post.get_id());
-            return PostPollDetailResponseDTO.of(
-                    PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo),
-                    pollInfo
-            );
+            PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+            return PostPollDetailResponseDTO.of(postDTO, pollInfo);
         }
         // 4. 일반 게시물 처리
         return PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);

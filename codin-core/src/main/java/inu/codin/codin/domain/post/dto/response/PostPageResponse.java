@@ -11,18 +11,18 @@ import java.util.List;
 @Getter
 public class PostPageResponse {
 
-    private List<PostDetailResponseDTO> contents = new ArrayList<>();
+    private List<PostPageItemResponseDTO> contents = new ArrayList<>();
     private long lastPage;
     private long nextPage;
 
     @Builder
-    private PostPageResponse(List<PostDetailResponseDTO> contents, long lastPage, long nextPage) {
+    private PostPageResponse(List<PostPageItemResponseDTO> contents, long lastPage, long nextPage) {
         this.contents = contents;
         this.lastPage = lastPage;
         this.nextPage = nextPage;
     }
 
-    public static PostPageResponse of(List<PostDetailResponseDTO> postPaging, long totalElements, long nextPage) {
+    public static PostPageResponse of(List<PostPageItemResponseDTO> postPaging, long totalElements, long nextPage) {
         return PostPageResponse.builder()
                 .contents(postPaging)
                 .lastPage(totalElements)
