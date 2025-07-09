@@ -15,6 +15,7 @@ import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.dto.request.*;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
+import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -164,8 +165,9 @@ class PostServiceTest {
         List<PostEntity> posts = new ArrayList<>();
         Page<PostEntity> page = new PageImpl<>(posts);
         given(postRepository.getPostsByCategoryWithBlockedUsers(anyString(), anyList(), any())).willReturn(page);
-        PostPageResponse response = postService.getAllPosts(PostCategory.COMMUNICATION, 0);
+        var response = postService.getAllPosts(PostCategory.COMMUNICATION, 0);
         assertThat(response).isNotNull();
+        assertThat(response.getContents()).isInstanceOf(List.class);
     }
 
     @Test
@@ -183,15 +185,16 @@ class PostServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.of(UserEntity.builder().nickname("닉네임").profileImageUrl("url").build()));
 
         // When
-        PostDetailResponseDTO response = postService.getPostWithDetail(postId);
+        PostPageItemResponseDTO response = postService.getPostWithDetail(postId);
 
         // Then
         assertThat(response).isNotNull();
+        assertThat(response.getPost()).isNotNull();
     }
 
     @Test
     void softDeletePost_success() {
-        // Given
+        // Given-
         String postId = new ObjectId().toString();
         PostEntity post = createPostEntity();
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
@@ -231,16 +234,17 @@ class PostServiceTest {
     @Test
     void getTop3BestPosts_success() {
         given(redisBestService.getBests()).willReturn(new HashMap<>());
-        List<PostDetailResponseDTO> result = postService.getTop3BestPosts();
+        var result = postService.getTop3BestPosts();
         assertThat(result).isNotNull();
+        assertThat(result).isInstanceOf(List.class);
     }
 
     @Test
     void getBestPosts_success() {
-        Page<BestEntity> bests = new PageImpl<>(new ArrayList<>());
-        given(bestRepository.findAll(any(PageRequest.class))).willReturn(bests);
-        PostPageResponse response = postService.getBestPosts(0);
-        assertThat(response).isNotNull();
+        given(bestRepository.findAll(any(PageRequest.class))).willReturn(new PageImpl<>(new ArrayList<>()));
+        var result = postService.getBestPosts(0);
+        assertThat(result).isNotNull();
+        assertThat(result.getContents()).isInstanceOf(List.class);
     }
 
     // --- 리플렉션 기반 DTO 생성 유틸리티 ---
