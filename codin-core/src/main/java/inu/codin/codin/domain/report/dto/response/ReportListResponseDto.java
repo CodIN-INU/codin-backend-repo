@@ -6,24 +6,19 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-
-public class ReportListResponseDto extends PostDetailResponseDTO {
-
+public class ReportListResponseDto {
+    private final PostDetailResponseDTO post;
     private final ReportInfo reportInfo;
 
     @Builder
-    public ReportListResponseDto(PostDetailResponseDTO baseDTO, ReportInfo reportInfo) {
-        super(baseDTO.getUserId(), baseDTO.get_id(), baseDTO.getTitle(), baseDTO.getContent(), baseDTO.getNickname(),
-                baseDTO.getPostCategory(), baseDTO.getUserImageUrl(), baseDTO.getPostImageUrl(), baseDTO.isAnonymous(),
-                baseDTO.getLikeCount(), baseDTO.getScrapCount(), baseDTO.getHits(), baseDTO.getCreatedAt(),
-                baseDTO.getCommentCount(), baseDTO.getUserInfo());
+    public ReportListResponseDto(PostDetailResponseDTO post, ReportInfo reportInfo) {
+        this.post = post;
         this.reportInfo = reportInfo;
     }
 
-
-    public static ReportListResponseDto  from(PostDetailResponseDTO base, ReportInfo reportInfo) {
+    public static ReportListResponseDto from(PostDetailResponseDTO post, ReportInfo reportInfo) {
         return ReportListResponseDto.builder()
-                .baseDTO(base)
+                .post(post)
                 .reportInfo(reportInfo)
                 .build();
     }
