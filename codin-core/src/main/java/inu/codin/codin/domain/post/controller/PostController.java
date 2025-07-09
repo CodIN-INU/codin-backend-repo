@@ -8,6 +8,7 @@ import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,21 +42,21 @@ public class PostController {
             description = "JSON 형식의 게시물 데이터(postContent)와 이미지 파일(postImages) 업로드"
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>>  createPost(
+    public ResponseEntity<SingleResponse<Void>>  createPost(
             @RequestPart("postContent") @Valid PostCreateRequestDTO postCreateRequestDTO,
             @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
 
         // postImages가 null이면 빈 리스트로 처리
         if (postImages == null) postImages = List.of();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(201, "게시물이 작성되었습니다.", postService.createPost(postCreateRequestDTO, postImages)));
+                .body(new SingleResponse<>(201, "게시물이 작성되었습니다.", null));
     }
 
     @Operation(
             summary = "게시물 내용 수정 및 이미지 수정&추가"
     )
     @PatchMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>>  updatePostContent(
+    public ResponseEntity<SingleResponse<Void>>  updatePostContent(
             @PathVariable String postId,
             @RequestPart("postContent") @Valid PostContentUpdateRequestDTO requestDTO,
             @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
@@ -69,7 +70,7 @@ public class PostController {
             summary = "상태 수정"
     )
     @PatchMapping("/{postId}/status")
-    public ResponseEntity<SingleResponse<?>> updatePostStatus(
+    public ResponseEntity<SingleResponse<Void>> updatePostStatus(
             @PathVariable String postId,
             @RequestBody PostStatusUpdateRequestDTO requestDTO) {
         postService.updatePostStatus(postId, requestDTO);
@@ -80,7 +81,7 @@ public class PostController {
 
     @Operation(summary = "게시물 익명 설정 수정")
     @PatchMapping("/{postId}/anonymous")
-    public ResponseEntity<SingleResponse<?>> updatePostAnonymous(
+    public ResponseEntity<SingleResponse<Void>> updatePostAnonymous(
             @PathVariable String postId,
             @RequestBody @Valid PostAnonymousUpdateRequestDTO requestDTO) {
         postService.updatePostAnonymous(postId, requestDTO);
@@ -103,8 +104,8 @@ public class PostController {
 
     @Operation(summary = "해당 게시물 상세 조회 (댓글 조회는 Comment에서 따로 조회)")
     @GetMapping("/{postId}")
-    public ResponseEntity<SingleResponse<PostDetailResponseDTO>> getPostWithDetail(@PathVariable String postId) {
-        PostDetailResponseDTO post = postService.getPostWithDetail(postId);
+    public ResponseEntity<SingleResponse<PostPageItemResponseDTO>> getPostWithDetail(@PathVariable String postId) {
+        PostPageItemResponseDTO post = postService.getPostWithDetail(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물 상세 조회 성공", post));
     }
@@ -112,7 +113,7 @@ public class PostController {
 
     @Operation(summary = "게시물 이미지 삭제")
     @DeleteMapping("/{postId}/images")
-    public ResponseEntity<SingleResponse<?>> deletePostImage(
+    public ResponseEntity<SingleResponse<Void>> deletePostImage(
             @PathVariable String postId,
             @RequestParam String imageUrl) {
 
@@ -123,7 +124,7 @@ public class PostController {
 
     @Operation(summary = "게시물 삭제 (Soft Delete)")
     @DeleteMapping("/{postId}")
-    public ResponseEntity<SingleResponse<?>> softDeletePost(@PathVariable String postId) {
+    public ResponseEntity<SingleResponse<Void>> softDeletePost(@PathVariable String postId) {
         postService.softDeletePost(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "게시물이 삭제되었습니다.", null));
@@ -133,7 +134,7 @@ public class PostController {
             summary = "검색 엔진"
     )
     @GetMapping("/search")
-    public ResponseEntity<SingleResponse<?>> searchPosts(@RequestParam("keyword") @Size(min = 2) String keyword,
+    public ResponseEntity<SingleResponse<PostPageResponse>> searchPosts(@RequestParam("keyword") @Size(min = 2) String keyword,
                                                          @RequestParam("pageNumber") @NotNull int pageNumber){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "'"+keyword+"'"+"으로 검색된 게시글 반환 완료", postService.searchPosts(keyword, pageNumber)));
@@ -141,14 +142,14 @@ public class PostController {
 
     @Operation(summary = "Top 3 베스트 게시글 가져오기")
     @GetMapping("/top3")
-    public ResponseEntity<ListResponse<?>> getTop3BestPosts(){
+    public ResponseEntity<ListResponse<PostPageItemResponseDTO>> getTop3BestPosts(){
         return ResponseEntity.ok()
                 .body(new ListResponse<>(200, "Top3 베스트 게시글 반환 완료", postService.getTop3BestPosts()));
     }
 
     @Operation(summary = "Top3로 선정된 게시글들 모두 가져오기")
     @GetMapping("/best")
-    public ResponseEntity<SingleResponse<?>> getBestPosts(@RequestParam("pageNumber") int pageNumber){
+    public ResponseEntity<SingleResponse<PostPageResponse>> getBestPosts(@RequestParam("pageNumber") int pageNumber){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "Top3로 선정된 게시글들 모두 반환 완료", postService.getBestPosts(pageNumber)));
     }
