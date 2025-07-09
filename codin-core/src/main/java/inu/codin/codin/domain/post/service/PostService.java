@@ -58,10 +58,11 @@ public class PostService {
     private final HitsService hitsService;
     private final RedisBestService redisBestService;
     private final BlockService blockService;
+    private final SeperatedPostService seperatedPostService;
 
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -95,7 +96,7 @@ public class PostService {
                 .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
         validateUserAndPost(post);
 
-        List<String> imageUrls = handleImageUpload(postImages);
+        List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
 
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
@@ -151,12 +152,12 @@ public class PostService {
                 .toList();
     }
 
-    // 게시물 상세 조회 (기존코드)
+    // 게시물 상세 조회
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+        seperatedPostService.increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
         return toPageItemDTO(post);
     }
 
@@ -165,27 +166,9 @@ public class PostService {
         return postRepository.findByIdAndNotDeleted(postId)
                 .map(post -> {
                     ObjectId userId = SecurityUtils.getCurrentUserId();
-                    increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+                    seperatedPostService.increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
                     return toPageItemDTO(post);
                 });
-    }
-
-    // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
-    private PostPageItemResponseDTO toPageItemDTO(PostEntity post) {
-        UserProfile userProfile = resolveUserProfile(post);
-        int likeCount = getLikeCount(post);
-        int scrapCount = getScrapCount(post);
-        int hitsCount = getHitsCount(post);
-        int commentCount = post.getCommentCount();
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
-        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
-        if (post.getPostCategory() == PostCategory.POLL) {
-            PollInfoResponseDTO pollInfo = getPollInfo(post, userId);
-            return PostPageItemResponseDTO.of(postDTO, pollInfo);
-        } else {
-            return PostPageItemResponseDTO.of(postDTO, null);
-        }
     }
 
     public void softDeletePost(String postId) {
@@ -204,7 +187,7 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         validateUserAndPost(post);
 
-        deletePostImageInternal(post, imageUrl);
+        seperatedPostService.deletePostImageInternal(post, imageUrl);
     }
 
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
@@ -218,14 +201,33 @@ public class PostService {
     }
 
     public List<PostPageItemResponseDTO> getTop3BestPosts() {
-        List<PostEntity> bestPosts = getTop3BestPostsInternal(); // [BestService] - 베스트 게시물 조회 위임
+        List<PostEntity> bestPosts = seperatedPostService.getTop3BestPostsInternal(); // [BestService] - 베스트 게시물 조회 위임
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
     }
 
     public PostPageResponse getBestPosts(int pageNumber) {
-        Page<PostEntity> page = getBestPostsInternal(pageNumber); // [BestService] - 베스트 게시물 페이지 조회 위임
+        Page<PostEntity> page = seperatedPostService.getBestPostsInternal(pageNumber); // [BestService] - 베스트 게시물 페이지 조회 위임
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
+    }
+
+
+    // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
+    private PostPageItemResponseDTO toPageItemDTO(PostEntity post) {
+        UserProfile userProfile = resolveUserProfile(post);
+        int likeCount = seperatedPostService.getLikeCount(post);
+        int scrapCount = seperatedPostService.getScrapCount(post);
+        int hitsCount = seperatedPostService.getHitsCount(post);
+        int commentCount = post.getCommentCount();
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
+        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        if (post.getPostCategory() == PostCategory.POLL) {
+            PollInfoResponseDTO pollInfo = seperatedPostService.getPollInfo(post, userId);
+            return PostPageItemResponseDTO.of(postDTO, pollInfo);
+        } else {
+            return PostPageItemResponseDTO.of(postDTO, null);
+        }
     }
 
     // [유저 프로필] - 닉네임/이미지 결정
@@ -249,6 +251,7 @@ public class PostService {
         return new UserProfile(nickname, userImageUrl);
     }
 
+    // [유저 프로필] - 게시물에 대한 유저정보 추출
     public UserInfoResponseDTO getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
         return UserInfoResponseDTO.of(
                 likeService.isLiked(LikeType.POST, postId, currentUserId),
@@ -257,109 +260,7 @@ public class PostService {
         );
     }
 
-       // ===================== 도메인별 부가 기능/서브 로직 (분리 예정) =====================
-
-    // [ImageService] - 이미지 업로드 처리
-    private List<String> handleImageUpload(List<MultipartFile> postImages) {
-        return s3Service.handleImageUpload(postImages);
-    }
-
-    // [ImageService] - 게시글 이미지 삭제 처리
-    private void deletePostImageInternal(PostEntity post, String imageUrl) {
-        if (!post.getPostImageUrls().contains(imageUrl)) {
-            log.error("게시물에 이미지 없음. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl);
-            throw new NotFoundException("이미지가 게시물에 존재하지 않습니다.");
-        }
-        try {
-            s3Service.deleteFile(imageUrl);
-            post.removePostImage(imageUrl);
-            postRepository.save(post);
-            log.info("이미지 삭제 성공. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl);
-        } catch (Exception e) {
-            log.error("이미지 삭제 중 오류 발생. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl, e);
-            throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
-        }
-    }
-
-    // [HitsService] - 조회수 증가 처리
-    private void increaseHitsIfNeeded(PostEntity post, ObjectId userId) {
-        if (!hitsService.validateHits(post.get_id(), userId)) {
-            hitsService.addHits(post.get_id(), userId);
-            log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
-        }
-    }
-
-    // [BestService] - Top 3 베스트 게시물 조회
-    private List<PostEntity> getTop3BestPostsInternal() {
-        Map<String, Double> posts = redisBestService.getBests();
-        return posts.entrySet().stream()
-                .map(post -> postRepository.findByIdAndNotDeleted(new ObjectId(post.getKey()))
-                        .orElseGet(() -> {
-                            redisBestService.deleteBest(post.getKey());
-                            return null;
-                        }))
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    // [BestService] - 베스트 게시물 페이지 조회
-    private Page<PostEntity> getBestPostsInternal(int pageNumber) {
-        PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<BestEntity> bests = bestRepository.findAll(pageRequest);
-        return bests.map(bestEntity -> postRepository.findByIdAndNotDeleted(bestEntity.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.")));
-    }
-
-    // [BestService] - 베스트 점수 적용 처리
-    private void applyBestScoreIfNeeded(PostEntity post) {
-        redisBestService.applyBestScore(1, post.get_id());
-        log.info("베스트 점수 적용. PostId: {}", post.get_id());
-    }
-
-    // [CommentService/ReplyCommentService] - 댓글 수 증가
-    private void increaseCommentCount(PostEntity post) {
-        post.plusCommentCount();
-        postRepository.save(post);
-        log.info("댓글 수 증가. PostId: {}, 현재: {}", post.get_id(), post.getCommentCount());
-    }
-
-    // [PollService] - 투표 관련 처리 (예시)
-    private void processPollIfNeeded(PostEntity post) {
-        // 투표 게시글일 경우 PollService와 협력하여 투표 생성/집계 등 처리
-        // 예시: pollService.createPoll(...)
-    }
-
-    // [좋아요] - 게시글 좋아요 수 조회
-    private int getLikeCount(PostEntity post) {
-        return likeService.getLikeCount(LikeType.POST, post.get_id());
-    }
-
-    // [스크랩] - 게시글 스크랩 수 조회
-    private int getScrapCount(PostEntity post) {
-        return scrapService.getScrapCount(post.get_id());
-    }
-
-    // [조회수] - 게시글 조회수 조회
-    private int getHitsCount(PostEntity post) {
-        return hitsService.getHitsCount(post.get_id());
-    }
-
-    // [투표] - 투표 게시글 PollInfo 생성
-    private PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
-        PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
-        long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
-        List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
-                .map(PollVoteEntity::getSelectedOptions)
-                .orElse(Collections.emptyList());
-        boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
-        boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
-        return PollInfoResponseDTO.of(
-                poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
-                poll.getPollVotesCounts(), userVotes, totalParticipants, hasUserVoted, pollFinished);
-    }
-
-    // [내부 클래스] - 유저 프로필 정보
+        // [내부 클래스] - 유저 프로필 정보
     private static class UserProfile {
         final String nickname;
         final String userImageUrl;
@@ -368,5 +269,8 @@ public class PostService {
             this.userImageUrl = userImageUrl;
         }
     }
+
+       // ===================== 도메인별 부가 기능/서브 로직 (임시 분리 - SeperatedPostService) =====================
+
 }
 
