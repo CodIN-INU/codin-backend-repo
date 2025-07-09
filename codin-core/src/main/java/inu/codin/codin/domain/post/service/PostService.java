@@ -151,13 +151,23 @@ public class PostService {
                 .toList();
     }
 
-    // 게시물 상세 조회
+    // 게시물 상세 조회 (기존코드)
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         ObjectId userId = SecurityUtils.getCurrentUserId();
         increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
         return toPageItemDTO(post);
+    }
+
+    // ReportService 등에서 사용할 수 있도록 ObjectId로 단건 상세 조회 (Optional)
+    public Optional<PostPageItemResponseDTO> getPostDetailById(ObjectId postId) {
+        return postRepository.findByIdAndNotDeleted(postId)
+                .map(post -> {
+                    ObjectId userId = SecurityUtils.getCurrentUserId();
+                    increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+                    return toPageItemDTO(post);
+                });
     }
 
     // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)

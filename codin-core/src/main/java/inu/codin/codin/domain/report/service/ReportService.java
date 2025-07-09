@@ -40,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -322,17 +323,17 @@ public class ReportService {
         ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
 
         return switch (reportInfo.getEntityType()) {
-            case POST -> postService.getPostDetailById(entityId) // ✅ PostService 활용
-                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo));
+            case POST -> postService.getPostDetailById(entityId)
+                    .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo));
 
             case COMMENT -> commentRepository.findById(entityId)
                     .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                            .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo)));
+                            .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo)));
 
             case REPLY -> replyCommentRepository.findById(entityId)
                     .flatMap(reply -> commentRepository.findById(reply.getCommentId())
                             .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo))));
+                                    .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo))));
 
             default -> Optional.empty();
         };
@@ -348,11 +349,10 @@ public class ReportService {
             throw new NotFoundException("해당 신고 대상이 존재하지 않습니다. 신고 ID: " + reportedEntityId);
         }
         PostDetailResponseDTO postDetailResponse = postService.getPostDetailById(entityId)
+                .map(PostPageItemResponseDTO::getPost)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         boolean isReported = entityId.equals(reportTargetId);
-
-
-        return ReportedPostDetailResponseDTO.from(isReported, postDetailResponse);
+        return ReportedPostDetailResponseDTO.from(postDetailResponse, isReported);
     }
 
 
