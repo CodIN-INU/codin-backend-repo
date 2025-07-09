@@ -1,7 +1,7 @@
-package inu.codin.codinticketingapi.common.auth.filter;
+package inu.codin.codinticketingapi.common.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codinticketingapi.common.auth.exception.SecurityException;
+import inu.codin.codinticketingapi.common.security.exception.SecurityException;
 import inu.codin.codinticketingapi.common.response.ExceptionResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

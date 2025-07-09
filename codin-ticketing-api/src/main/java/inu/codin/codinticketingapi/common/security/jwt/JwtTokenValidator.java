@@ -1,7 +1,7 @@
-package inu.codin.codinticketingapi.common.auth.jwt;
+package inu.codin.codinticketingapi.common.security.jwt;
 
-import inu.codin.codinticketingapi.common.auth.exception.SecurityErrorCode;
-import inu.codin.codinticketingapi.common.auth.exception.SecurityException;
+import inu.codin.codinticketingapi.common.security.exception.SecurityErrorCode;
+import inu.codin.codinticketingapi.common.security.exception.SecurityException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

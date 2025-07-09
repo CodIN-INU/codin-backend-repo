@@ -1,8 +1,8 @@
-package inu.codin.codinticketingapi.common.auth.util;
+package inu.codin.codinticketingapi.common.security.util;
 
-import inu.codin.codinticketingapi.common.auth.exception.SecurityErrorCode;
-import inu.codin.codinticketingapi.common.auth.exception.SecurityException;
-import inu.codin.codinticketingapi.common.auth.jwt.TokenUserDetails;
+import inu.codin.codinticketingapi.common.security.exception.SecurityErrorCode;
+import inu.codin.codinticketingapi.common.security.exception.SecurityException;
+import inu.codin.codinticketingapi.common.security.jwt.TokenUserDetails;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * SecurityContext 관련 유틸리티 (토큰 검증 전용)
  */
-public class SecurityUtils {
+public class SecurityUtil {
 
     /**
      * 현재 인증된 사용자의 이메일 ID 반환

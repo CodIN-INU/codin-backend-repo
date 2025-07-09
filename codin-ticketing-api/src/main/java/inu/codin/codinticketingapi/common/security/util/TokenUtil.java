@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.common.auth.util;
+package inu.codin.codinticketingapi.common.security.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
  * 토큰 추출 및 파싱 유틸리티
  */
 @Slf4j
-public class TokenUtils {
+public class TokenUtil {
 
     /**
      * 쿠키 또는 Authorization 헤더에서 Access Token 추출

@@ -1,9 +1,9 @@
 package inu.codin.codinticketingapi.common.config;
 
-import inu.codin.codinticketingapi.common.auth.exception.CustomAccessDeniedHandler;
-import inu.codin.codinticketingapi.common.auth.filter.SecurityExceptionHandlerFilter;
-import inu.codin.codinticketingapi.common.auth.filter.TokenValidationFilter;
-import inu.codin.codinticketingapi.common.auth.jwt.JwtTokenValidator;
+import inu.codin.codinticketingapi.common.security.exception.CustomAccessDeniedHandler;
+import inu.codin.codinticketingapi.common.security.filter.SecurityExceptionHandlerFilter;
+import inu.codin.codinticketingapi.common.security.filter.TokenValidationFilter;
+import inu.codin.codinticketingapi.common.security.jwt.JwtTokenValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

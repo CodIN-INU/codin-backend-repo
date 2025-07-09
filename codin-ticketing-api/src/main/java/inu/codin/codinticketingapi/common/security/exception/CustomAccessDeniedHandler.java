@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.common.auth.exception;
+package inu.codin.codinticketingapi.common.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codinticketingapi.common.response.ExceptionResponse;

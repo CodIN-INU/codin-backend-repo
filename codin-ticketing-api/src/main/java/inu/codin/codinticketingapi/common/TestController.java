@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.common.auth.test;
+package inu.codin.codinticketingapi.common;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

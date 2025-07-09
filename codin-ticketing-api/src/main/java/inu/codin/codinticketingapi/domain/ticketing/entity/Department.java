@@ -1,13 +1,16 @@
-package inu.codin.codinticketingapi.domain.user;
+package inu.codin.codinticketingapi.domain.ticketing.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @RequiredArgsConstructor
+@Slf4j
 public enum Department {
+
     IT_COLLEGE("정보기술대학"),
     COMPUTER_SCI("컴퓨터공학부"),
     COMPUTER_SCI_NIGHT("컴퓨터공학부(야)"),
@@ -25,6 +28,8 @@ public enum Department {
                 return department;
             }
         }
+
+        log.warn("정보대 내의 학과가 아닙니다. description : " + description);
         return OTHERS;
     }
 

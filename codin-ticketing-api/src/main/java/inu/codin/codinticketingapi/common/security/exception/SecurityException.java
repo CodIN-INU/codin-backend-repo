@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.common.auth.exception;
+package inu.codin.codinticketingapi.common.security.exception;
 
 import inu.codin.codinticketingapi.common.exception.GlobalException;
 import lombok.Getter;

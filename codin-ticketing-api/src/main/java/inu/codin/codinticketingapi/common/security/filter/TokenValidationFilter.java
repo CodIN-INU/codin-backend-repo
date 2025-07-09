@@ -1,8 +1,8 @@
-package inu.codin.codinticketingapi.common.auth.filter;
+package inu.codin.codinticketingapi.common.security.filter;
 
-import inu.codin.codinticketingapi.common.auth.jwt.JwtTokenValidator;
-import inu.codin.codinticketingapi.common.auth.jwt.TokenUserDetails;
-import inu.codin.codinticketingapi.common.auth.util.TokenUtils;
+import inu.codin.codinticketingapi.common.security.jwt.JwtTokenValidator;
+import inu.codin.codinticketingapi.common.security.jwt.TokenUserDetails;
+import inu.codin.codinticketingapi.common.security.util.TokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +25,7 @@ public class TokenValidationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = TokenUtils.extractToken(request);
+        String accessToken = TokenUtil.extractToken(request);
 
         if (accessToken != null && jwtTokenValidator.validateAccessToken(accessToken)) {
             log.info("[TokenValidationFilter] Access Token이 있고 유효한 경우");
