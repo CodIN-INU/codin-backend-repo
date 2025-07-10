@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.entity;
 
-import inu.codin.codinticketingapi.common.BaseTimeEntity;
+import inu.codin.codinticketingapi.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,33 +13,35 @@ import lombok.*;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TicketingParticipation extends BaseTimeEntity {
+public class TicketingParticipation extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 어느 이벤트에 참여했는지
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "event_id", nullable = false, foreignKey = @ForeignKey(name = "fk_participation_event"))
     private TicketingEvent event;
 
-    // 누가 참여했는지
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "profile_id")
+    @JoinColumn(name = "profile_id", nullable = false, foreignKey = @ForeignKey(name = "fk_participation_profile"))
     private TicketingProfile profile;
 
-    // 경품 수령 여부
+    /** 경품 수령 여부 */
     @Column(name = "confirmed", nullable = false)
     private boolean confirmed = false;
 
-    // 서명 이미지 URL
+    @Column(name = "ticket_number", nullable = false)
+    private Integer ticketNumber;
+
+    /** 서명 이미지 URL */
     @Column(name = "signature_img_url")
     private String signatureImgUrl;
 
     @Builder
-    public TicketingParticipation(TicketingEvent event, TicketingProfile profile) {
+    public TicketingParticipation(TicketingEvent event, TicketingProfile profile, Integer ticketNumber) {
         this.event = event;
         this.profile = profile;
+        this.ticketNumber = ticketNumber;
     }
 
     /** 경품 수령 처리 */

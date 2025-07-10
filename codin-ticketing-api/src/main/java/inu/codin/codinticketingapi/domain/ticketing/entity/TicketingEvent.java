@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.entity;
 
-import inu.codin.codinticketingapi.common.BaseTimeEntity;
+import inu.codin.codinticketingapi.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TicketingEvent extends BaseTimeEntity {
+public class TicketingEvent extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
