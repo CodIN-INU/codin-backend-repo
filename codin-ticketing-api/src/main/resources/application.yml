@@ -2,7 +2,7 @@ spring:
   application:
     name: codin-ticketing-api
   config:
-    import: optional:file:./.env.local[.properties]
+    import: optional:file:./.env[.properties]
   jwt:
     secret: ${SPRING_JWT_SECRET}
 
