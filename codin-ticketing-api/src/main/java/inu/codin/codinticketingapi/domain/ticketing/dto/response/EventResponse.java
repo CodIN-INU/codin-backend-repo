@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class EventResponse {
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     @NotBlank
-    private String eventId;
+    private Long eventId;
 
     @Schema(description = "이벤트 제목", example = "컴퓨터 공학부 중간고사 간식나눔")
     @NotBlank
@@ -34,7 +34,7 @@ public class EventResponse {
 
     public static EventResponse of(TicketingEvent event) {
         return EventResponse.builder()
-                .eventId(event.get_id().toHexString())
+                .eventId(event.getId())
                 .eventTitle(event.getTitle())
                 .eventDate(event.getEventTime())
                 .locationInfo(event.getLocationInfo())

@@ -4,12 +4,13 @@ import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingEvent;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
-import inu.codin.codinticketingapi.common.util.ObjectIdUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EventWriteService {
 
     private final EventRepository eventRepository;
@@ -28,8 +29,8 @@ public class EventWriteService {
         // 3. 수정된 내용 중에서 Redis에 캐싱된 내용 Validation
     }
 
-    public void deleteEvent(String eventId) {
-        TicketingEvent event = eventRepository.findByIdAndNotDeleted(ObjectIdUtil.toObjectId(eventId))
+    public void deleteEvent(Long eventId) {
+        TicketingEvent event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
         event.delete();
         eventRepository.save(event);

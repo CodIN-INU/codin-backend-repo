@@ -32,7 +32,7 @@ public class EventController {
     }
 
     // 티켓팅 이벤트 상세 사항
-    @GetMapping("/{eventId}}")
+    @GetMapping("/{eventId}")
     public ResponseEntity<SingleResponse<?>> getEventDetail(
             @PathVariable String eventId
     ) {
@@ -47,11 +47,10 @@ public class EventController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @GetMapping("/management")
     public ResponseEntity<SingleResponse<?>> getEventListByManager(
-            @RequestParam @Valid Campus campus,
             @RequestParam("page") @NotNull int pageNumber
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 게시물 리스트 반환 성공",
-                eventReadService.getEventListByManager(campus, pageNumber)));
+                eventReadService.getEventListByManager(pageNumber)));
     }
 
     // todo: 티켓팅 이벤트 비밀번호 탐색

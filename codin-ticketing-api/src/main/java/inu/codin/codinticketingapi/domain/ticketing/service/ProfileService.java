@@ -8,11 +8,12 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
@@ -20,17 +21,18 @@ public class ProfileService {
     public UserTicketingProfileResponse getUserTicketingProfile() {
         String username = SecurityUtil.getUsername();
         // todo: username을 통해서 메인 API 서버에서 userId 추출
-        ObjectId userId = null;
+        String userId = null;
 
         return UserTicketingProfileResponse.of(
-                profileRepository.getTicketingProfileByUserId(userId)
+                profileRepository.findByUserId(userId)
                     .orElseThrow(() -> new TicketingException(TicketingErrorCode.PROFILE_NOT_FOUND)));
     }
 
+    @Transactional
     public void createUserTicketingProfile(TicketingUserProfileRequest requestDto) {
         String username = SecurityUtil.getUsername();
         // todo: username을 통해서 메인 API 서버에서 userId 추출
-        ObjectId userId = null;
+        String userId = null;
         profileRepository.save(TicketingProfile.builder()
                 .userId(userId)
                 .department(requestDto.getDepartment())

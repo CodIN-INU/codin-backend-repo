@@ -17,8 +17,8 @@ CodIN Ticketing API는 인천대학교 정보기술대학의 다양한 이벤트
 
 ## 🏗️ 기술 스택
 
-- **Backend**: Spring Boot 3.x, Spring Security, Spring Data MongoDB
-- **Database**: MongoDB
+- **Backend**: Spring Boot 3.x, Spring Security, Spring Data JPA
+- **Database**: MySQL 8.0
 - **Cache**: Redis
 - **Documentation**: Swagger/OpenAPI 3
 - **Build Tool**: Gradle
@@ -45,7 +45,7 @@ src/main/java/inu/codin/codinticketingapi/
         └── service/         # 비즈니스 로직
 ```
 
-## 데이터 모델
+## 📊 데이터 모델
 
 ### 주요 엔티티
 
@@ -55,7 +55,14 @@ src/main/java/inu/codin/codinticketingapi/
 - **Campus**: 캠퍼스 구분 (송도캠퍼스, 미추홀캠퍼스)
 - **Department**: 학과 정보 (컴퓨터공학부, 정보통신공학과 등)
 
-## 시작하기
+## 🚀 시작하기
+
+### 전제 조건
+
+- Java 17 이상
+- Docker & Docker Compose
+- MySQL 8.0
+- Redis
 
 ### 로컬 개발 환경 설정
 
@@ -65,17 +72,25 @@ git clone [repository-url]
 cd codin-ticketing-api
 ```
 
-2. **Docker 컨테이너 실행**
+2. **환경 변수 설정**
 ```bash
+# .env.local 파일을 복사하고 필요한 값들을 수정
+cp .env.local.example .env.local
+```
+
+3. **Docker 컨테이너 실행**
+```bash
+# MySQL과 Redis 컨테이너 실행
 docker-compose up -d
 ```
 
-3. **애플리케이션 실행**
+4. **의존성 설치 및 애플리케이션 실행**
 ```bash
+./gradlew build
 ./gradlew bootRun
 ```
 
-4. **API 문서 확인**
+5. **API 문서 확인**
 ```
 http://localhost:8080/swagger-ui.html
 ```
@@ -115,7 +130,84 @@ POST   /ticketing/user-profile              # 수령자 정보 등록
 GET    /ticketing/excel/{eventId}           # 참여자 정보 엑셀 다운로드 (관리자)
 ```
 
-## 빌드 및 배포
+## 🔒 인증 및 권한
+
+- **JWT 토큰** 기반 인증
+- **역할 기반 접근 제어**:
+  - `USER`: 일반 사용자 - 이벤트 조회, 티켓팅 참여
+  - `MANAGER`: 관리자 - 이벤트 관리, 수령 확인
+  - `ADMIN`: 최고 관리자 - 모든 권한
+
+## 🏫 캠퍼스 및 학과 지원
+
+### 캠퍼스
+- 송도캠퍼스 (`SONGDO_CAMPUS`)
+- 미추홀캠퍼스 (`MICHUHOL_CAMPUS`)
+
+### 학과
+- 정보기술대학 (`IT_COLLEGE`)
+- 컴퓨터공학부 (`COMPUTER_SCI`)
+- 컴퓨터공학부(야) (`COMPUTER_SCI_NIGHT`)
+- 정보통신공학과 (`INFO_COMM`)
+- 임베디드시스템공학과 (`EMBEDDED`)
+- 교직원 (`STAFF`)
+- 타과대 (`OTHERS`)
+
+## 📝 응답 형식
+
+```json
+{
+  "code": 200,
+  "message": "성공 메시지",
+  "data": {
+    // 응답 데이터
+  }
+}
+```
+
+## 🗄️ 데이터베이스 설정
+
+### MySQL 설정
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ticketing
+    username: codin
+    password: codinpassword
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+```
+
+### 환경 변수
+
+```bash
+# MySQL
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=ticketing
+MYSQL_USER=codin
+MYSQL_PASSWORD=codinpassword
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=1234
+```
+
+## 🧪 테스트
+
+```bash
+# 전체 테스트 실행
+./gradlew test
+
+# 특정 테스트 클래스 실행
+./gradlew test --tests TicketingServiceTest
+```
+
+## 📦 빌드 및 배포
 
 ```bash
 # JAR 파일 빌드
@@ -127,6 +219,59 @@ docker build -t codin-ticketing-api .
 # Docker 컨테이너 실행
 docker run -p 8080:8080 codin-ticketing-api
 ```
+
+## 🔧 설정
+
+### application.yml 주요 설정
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ticketing
+    username: codin
+    password: codinpassword
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+```
+
+## 📋 개발 상태
+
+### ✅ 완료된 기능
+- 이벤트 목록 조회
+- 이벤트 상세 조회
+- 사용자 프로필 관리
+- 기본 인증/인가 시스템
+- MySQL 데이터베이스 연동
+
+### 🚧 개발 예정 기능
+- 실시간 티켓팅 참여 시스템
+- 전자 서명 처리
+- 엑셀 다운로드
+- 이벤트 생성/수정/삭제
+- 관리자 수령 확인 시스템
+
+## 🤝 기여하기
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 라이선스
+
+이 프로젝트는 [MIT License](LICENSE) 하에 배포됩니다.
+
+## 📞 문의
+
+- 프로젝트 관리자: [이메일 주소]
+- 이슈 리포트: [GitHub Issues URL]
 
 ---
 

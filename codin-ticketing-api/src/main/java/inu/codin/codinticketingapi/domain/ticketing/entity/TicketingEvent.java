@@ -1,48 +1,83 @@
 package inu.codin.codinticketingapi.domain.ticketing.entity;
 
 import inu.codin.codinticketingapi.common.BaseTimeEntity;
-import lombok.Builder;
-import lombok.Getter;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Document(collection = "ticketing-events")
+@Entity
+@Table(
+        name = "ticketing_event",
+        indexes = {
+                @Index(name = "idx_user_id",           columnList = "user_id"),
+                @Index(name = "idx_campus",            columnList = "campus"),
+                @Index(name = "idx_event_time",        columnList = "event_time"),
+                @Index(name = "idx_campus_deleted_created", columnList = "campus, deleted_at, created_at")
+        }
+)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class TicketingEvent extends BaseTimeEntity {
-    //todo: campus, deletedAt, createdAt 으로 복합인덱스 설정
 
-    @MongoId
-    private ObjectId _id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Indexed
-    private final ObjectId userId;
-    @Indexed
+    /** MongoDB 유저 ObjectId 문자열 */
+    @Column(name = "user_id", nullable = false, length = 24)
+    private String userId;
+
+    /** 이벤트를 진행하는 캠퍼스 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "campus", nullable = false)
     private Campus campus;
-    @Indexed
+
+    /** 이벤트 시작 시간 */
+    @Column(name = "event_time", nullable = false)
     private LocalDateTime eventTime;
 
-    private List<String> eventImageUrls;
+    /** 이제 단일 이미지 URL */
+    @Column(name = "event_image_url")
+    private String eventImageUrl;
+
+    /** 이벤트 제목 */
+    @Column(name = "title", nullable = false)
     private String title;
+
+    /** 이벤트 위치 (정보대 학생회실) */
+    @Column(name = "location_info")
     private String locationInfo;
+
+    /** 제공 수량 (햄버거 100개) */
+    @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    /** 이벤트 대상자 (정보대 학생) */
+    @Column(name = "target")
     private String target;
+
+    /** 이벤트 설명 (싸이버거 제공) */
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    /** 문의 번호 */
+    @Column(name = "inquiry_number")
     private String inquiryNumber;
+
+    /** 홍보글 링크 */
+    @Column(name = "promotion_link")
     private String promotionLink;
 
-    private final String eventPassword;
+    /** 이벤트 수령확인 관리자 비밀번호 */
+    @Column(name = "event_password", nullable = false)
+    private String eventPassword;
 
     @Builder
-    public TicketingEvent(ObjectId userId, Campus campus, LocalDateTime eventTime, List<String> eventImageUrls, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink, String eventPassword) {
+    public TicketingEvent(String userId, Campus campus, LocalDateTime eventTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink, String eventPassword) {
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
-        this.eventImageUrls = eventImageUrls;
+        this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
         this.quantity = quantity;

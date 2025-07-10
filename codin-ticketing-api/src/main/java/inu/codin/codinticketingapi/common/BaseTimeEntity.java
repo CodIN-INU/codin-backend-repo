@@ -1,32 +1,33 @@
 package inu.codin.codinticketingapi.common;
 
+import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Getter
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseTimeEntity {
 
     @CreatedDate
-    @Field("created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @CreatedBy
+    @Column(name = "created_user", nullable = false, length = 24)
     private String createdUser;
 
     @LastModifiedDate
-    @Field("updated_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @LastModifiedBy
+    @Column(name = "updated_user", nullable = false, length = 24)
     private String updatedUser;
 
-    @Field("deleted_at")
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     public void delete() {

@@ -1,18 +1,31 @@
-version: "3"
+version: "3.8"
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper
-    container_name: codin-zookeeper
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: wurstmeister/kafka
-    container_name: codin-kafka
-    ports:
-      - "9092:9092"
+  mysql:
+    image: mysql:8.0
+    container_name: codin-mysql
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ticketing}
+      MYSQL_USER: ${MYSQL_USER:-codin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-codinpassword}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: codin-ticketing-redis
+    ports:
+      - "${REDIS_PORT:-6380}:6380"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-1234}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:

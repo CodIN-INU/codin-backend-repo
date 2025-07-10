@@ -2,12 +2,12 @@ package inu.codin.codinticketingapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication
 @EnableMethodSecurity
-@EnableMongoAuditing
+@EnableJpaAuditing
 public class CodinTicketingApiApplication {
 
     public static void main(String[] args) {
