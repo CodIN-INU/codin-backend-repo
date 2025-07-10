@@ -31,7 +31,7 @@ public class EventReadService {
     }
 
     public EventPageResponse getEventListByManager(int pageNumber) {
-        String username = SecurityUtil.getUsername();
+        String username = SecurityUtil.getEmail();
         String userId = null;
         // todo: User 검증 로직
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());

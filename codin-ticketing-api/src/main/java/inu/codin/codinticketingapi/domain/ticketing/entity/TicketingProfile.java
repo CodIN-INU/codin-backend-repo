@@ -38,4 +38,9 @@ public class TicketingProfile {
         this.department = department;
         this.studentId = studentId;
     }
+
+    public void updateProfile(Department department, String studentId) {
+        this.department = department;
+        this.studentId = studentId;
+    }
 }

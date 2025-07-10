@@ -2,7 +2,7 @@ spring:
   application:
     name: codin-ticketing-api
   config:
-    import: optional:file:./.env[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
   jwt:
     secret: ${SPRING_JWT_SECRET}
 
@@ -38,14 +38,34 @@ spring:
       password: ${REDIS_PASSWORD:1234}
       database: ${REDIS_DATABASE:0}
 
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:ticketing-api-group}
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: inu.codin.codinticketingapi.domain.user.dto
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 server:
-  domain: "https://codin.inu.ac.kr"
+  domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
-  port: 8081
+  port: ${SERVER_PORT}
+
+springdoc:
+  override-with-generic-response: false
 
 logging:
   level:
     root: info
-    sql: debug
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    sql: info
+    org.hibernate.SQL: info
+    org.hibernate.type.descriptor.sql.BasicBinder: info
+    org:
+      apache.kafka: INFO
+      springframework.kafka: INFO

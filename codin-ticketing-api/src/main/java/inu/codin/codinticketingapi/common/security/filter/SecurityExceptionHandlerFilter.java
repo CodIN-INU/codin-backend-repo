@@ -45,10 +45,7 @@ public class SecurityExceptionHandlerFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                e.getSecurityErrorCode().httpStatus().value(),
-                e.getSecurityErrorCode().message()
-        );
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getSecurityErrorCode().message(), e.getSecurityErrorCode().httpStatus().value());
 
         String jsonResponse = objectMapper.writeValueAsString(exceptionResponse);
         response.getWriter().write(jsonResponse);

@@ -24,6 +24,7 @@ public class JwtTokenValidator {
 
     @PostConstruct
     protected void init() {
+        log.info("[JwtTokenValidator] Set JWT Secret : {}", secret);
         SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 

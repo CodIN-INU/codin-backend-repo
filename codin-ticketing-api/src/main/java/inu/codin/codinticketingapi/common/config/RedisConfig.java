@@ -20,6 +20,7 @@ import java.time.Duration;
 @EnableConfigurationProperties(RedisProperties.class)
 @RequiredArgsConstructor
 public class RedisConfig {
+
     private final RedisProperties redisProperties;
 
     @Bean

@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.common.response;
 
 public class ExceptionResponse extends CommonResponse{
-    public ExceptionResponse(int code, String message) {
+    public ExceptionResponse(String message, int code) {
         super(false, code, message);
     }
 }
