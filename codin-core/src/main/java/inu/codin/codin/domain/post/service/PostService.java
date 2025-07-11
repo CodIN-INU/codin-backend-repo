@@ -7,14 +7,8 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.best.BestEntity;
-import inu.codin.codin.domain.post.domain.best.BestRepository;
-import inu.codin.codin.domain.post.domain.hits.service.HitsService;
-import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
-import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
-import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
-import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
-import inu.codin.codin.domain.post.dto.UserProfile;
+import inu.codin.codin.domain.post.dto.UserDto;
+import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
@@ -28,9 +22,7 @@ import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisBestService;
 import inu.codin.codin.infra.s3.S3Service;
-import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -40,7 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -233,14 +224,14 @@ public class PostService {
 
     // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
     private PostPageItemResponseDTO toPageItemDTO(PostEntity post) {
-        UserProfile userProfile = resolveUserProfile(post);
+        UserDto userDto = resolveUserProfile(post);
         int likeCount = seperatedPostService.getLikeCount(post);
         int scrapCount = seperatedPostService.getScrapCount(post);
         int hitsCount = seperatedPostService.getHitsCount(post);
         int commentCount = post.getCommentCount();
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
-        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
+        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userDto, likeCount, scrapCount, hitsCount, commentCount, userInfo);
         if (post.getPostCategory() == PostCategory.POLL) {
             PollInfoResponseDTO pollInfo = seperatedPostService.getPollInfo(post, userId);
             return PostPageItemResponseDTO.of(postDTO, pollInfo);
@@ -250,44 +241,20 @@ public class PostService {
     }
 
     // [유저 프로필] - 닉네임/이미지 결정
-    private UserProfile resolveUserProfile(PostEntity post) {
+    private UserDto resolveUserProfile(PostEntity post) {
         UserEntity user = userRepository.findById(post.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        String nickname;
-        String userImageUrl;
-        if (user.getDeletedAt() == null) {
-            if (post.isAnonymous()) {
-                nickname = "익명";
-                userImageUrl = s3Service.getDefaultProfileImageUrl();
-            } else {
-                nickname = user.getNickname();
-                userImageUrl = user.getProfileImageUrl();
-            }
-        } else {
-            nickname = user.getNickname();
-            userImageUrl = user.getProfileImageUrl();
-        }
-        return new UserProfile(nickname, userImageUrl);
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+        return UserDto.ofPost(post, user, s3Service.getDefaultProfileImageUrl());
     }
 
     // [유저 프로필] - 게시물에 대한 유저정보 추출
-    public UserInfoResponseDTO getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
-        return UserInfoResponseDTO.of(
+    public UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
+        return UserInfo.of(
                 likeService.isLiked(LikeType.POST, postId, currentUserId),
                 scrapService.isPostScraped(postId, currentUserId),
                 postUserId.equals(currentUserId)
         );
     }
-
-//        // [내부 클래스] - 유저 프로필 정보
-//    private static class UserProfile {
-//        final String nickname;
-//        final String userImageUrl;
-//        UserProfile(String nickname, String userImageUrl) {
-//            this.nickname = nickname;
-//            this.userImageUrl = userImageUrl;
-//        }
-//    }
 
        // ===================== 도메인별 부가 기능/서브 로직 (임시 분리 - SeperatedPostService) =====================
 
