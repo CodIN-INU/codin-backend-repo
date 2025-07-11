@@ -21,28 +21,43 @@ public class EventController {
     private final EventReadService eventReadService;
     private final EventWriteService eventWriteService;
 
-    // 티켓팅 이벤트 목록 조회 (송도캠, 미추홀캠)
+    /** 티켓팅 이벤트 목록 조회 (송도캠, 미추홀캠) */
     @GetMapping
     public ResponseEntity<SingleResponse<?>> getEventList(
             @RequestParam @Valid Campus campus,
             @RequestParam("page") @NotNull int pageNumber
     ) {
-        return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 게시물 리스트 반환 성공",
+        return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 게시물 리스트 조회 성공",
                 eventReadService.getEventList(campus, pageNumber)));
     }
 
-    // 티켓팅 이벤트 상세 사항
+    /** 티켓팅 이벤트 상세 정보 조회 */
     @GetMapping("/{eventId}")
     public ResponseEntity<SingleResponse<?>> getEventDetail(
             @PathVariable String eventId
     ) {
-        return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 상세정보 반환 성공",
+        return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 상세 정보 조회 성공",
                 eventReadService.getEventDetail(eventId)));
     }
 
-    // todo: 마이페이지 티켓팅 참여 전체 이력
-    // todo: 마이페이지 티켓팅 참여 완료 이력
-    // todo: 마이페이지 티켓팅 참여 취소 이력
+    /** 유저 마이페이지 티켓팅 참여 전체 이력 조회 */
+    @GetMapping("/user")
+    public ResponseEntity<SingleResponse<?>> getUserEventList(
+            @RequestParam("page") @NotNull int pageNumber
+    ) {
+        return ResponseEntity.ok(new SingleResponse<>(200, "유저 티켓팅 참여 전체 이력 조회",
+                eventReadService.getUserEventList(pageNumber)));
+    }
+
+    /** 유저 마이페이지 티켓팅 참여 완료, 취소 이력 조회 */
+    @GetMapping("/user")
+    public ResponseEntity<SingleResponse<?>> getUserEventList(
+            @RequestParam("page") @NotNull int pageNumber,
+            @RequestParam("cancled") boolean canceled
+    ) {
+        return ResponseEntity.ok(new SingleResponse<>(200, "유저 티켓팅 참여 전체 이력 조회",
+                eventReadService.getUserEventListByCanceled(pageNumber, canceled)));
+    }
 
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @GetMapping("/management")
