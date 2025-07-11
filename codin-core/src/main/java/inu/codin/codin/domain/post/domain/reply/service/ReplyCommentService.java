@@ -7,14 +7,20 @@ import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
+import inu.codin.codin.domain.post.domain.comment.exception.CommentErrorCode;
+import inu.codin.codin.domain.post.domain.comment.exception.CommentException;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.reply.exception.ReplyException;
+import inu.codin.codin.domain.post.domain.reply.exception.ReplyErrorCode;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
@@ -56,10 +62,10 @@ public class ReplyCommentService {
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -79,7 +85,7 @@ public class ReplyCommentService {
 
         ObjectId replyId = new ObjectId(id);
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
-                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ReplyException(ReplyErrorCode.REPLY_NOT_FOUND));
 
         reply.updateReply(requestDTO.getContent());
         replyCommentRepository.save(reply);
@@ -91,16 +97,16 @@ public class ReplyCommentService {
     // 대댓글 삭제 (Soft Delete)
     public void softDeleteReply(String replyId) {
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(new ObjectId(replyId))
-                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ReplyException(ReplyErrorCode.REPLY_NOT_FOUND));
         SecurityUtils.validateUser(reply.getUserId());
 
         ObjectId commentId = reply.getCommentId();
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
         // 대댓글 삭제
         reply.delete();

@@ -11,6 +11,8 @@ import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDT
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
+import inu.codin.codin.domain.post.domain.comment.exception.CommentException;
+import inu.codin.codin.domain.post.domain.comment.exception.CommentErrorCode;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
@@ -57,7 +59,7 @@ public class CommentService {
 
         ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -76,12 +78,12 @@ public class CommentService {
     public void softDeleteComment(String id) {
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
         SecurityUtils.validateUser(comment.getUserId());
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
 
         // 댓글 Soft Delete 처리
         comment.delete();
@@ -129,7 +131,7 @@ public class CommentService {
 
     private PostEntity findPostById(ObjectId postId) {
         return postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
     }
     /**
      * 댓글 작성자들의 사용자 정보 맵 생성
@@ -181,7 +183,7 @@ public class CommentService {
 
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
-                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 
         //본인 댓글만 수정 가능
         ObjectId userId = SecurityUtils.getCurrentUserId();

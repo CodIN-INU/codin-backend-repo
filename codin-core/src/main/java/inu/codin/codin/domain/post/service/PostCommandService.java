@@ -13,6 +13,8 @@ import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.exception.PostException;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserRole;
@@ -60,7 +62,7 @@ public class PostCommandService {
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
         log.info("게시물 수정 시작. PostId: {}", postId);
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         validateUserAndPost(post);
         List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
         post.updatePostContent(requestDTO.getContent(), imageUrls);
@@ -73,7 +75,7 @@ public class PostCommandService {
      */
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         validateUserAndPost(post);
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
@@ -85,7 +87,7 @@ public class PostCommandService {
      */
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         validateUserAndPost(post);
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
@@ -99,7 +101,7 @@ public class PostCommandService {
      */
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없음. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         validateUserAndPost(post);
         post.delete();
         log.info("게시물 안전 삭제. PostId: {}", postId);
@@ -111,7 +113,7 @@ public class PostCommandService {
      */
     public void deletePostImage(String postId, String imageUrl) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         validateUserAndPost(post);
         postInteractionService.deletePostImageInternal(post, imageUrl);
     }

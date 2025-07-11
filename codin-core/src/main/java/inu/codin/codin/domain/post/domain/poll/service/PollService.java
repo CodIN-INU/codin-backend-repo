@@ -1,14 +1,12 @@
 package inu.codin.codin.domain.post.domain.poll.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
-import inu.codin.codin.domain.post.domain.poll.exception.PollDuplicateVoteException;
-import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
-import inu.codin.codin.domain.post.domain.poll.exception.PollTimeFailException;
+import inu.codin.codin.domain.post.domain.poll.exception.PollException;
+import inu.codin.codin.domain.post.domain.poll.exception.PollErrorCode;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
@@ -68,37 +66,37 @@ public class PollService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> {
                     log.warn("투표 실패 - 게시글 없음 - postId: {}", postId);
-                    return new NotFoundException("해당 게시물을 찾을 수 없습니다.");
+                    return new PollException(PollErrorCode.POST_NOT_FOUND);
                 });
 
         PollEntity poll = pollRepository.findByPostId(post.get_id())
                 .orElseThrow(() -> {
                     log.warn("투표 실패 - 투표 데이터 없음 - postId: {}", postId);
-                    return new NotFoundException("투표 데이터가 존재하지 않습니다.");
+                    return new PollException(PollErrorCode.POLL_NOT_FOUND);
                 });
 
         if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
             log.warn("투표 실패 - 투표 종료됨 - pollId: {}", poll.get_id());
-            throw new PollTimeFailException("이미 종료된 투표입니다.");
+            throw new PollException(PollErrorCode.POLL_FINISHED);
         }
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
         boolean hasAlreadyVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
         if (hasAlreadyVoted) {
             log.warn("투표 실패 - 중복 투표 - pollId: {}, userId: {}", poll.get_id(), userId);
-            throw new PollDuplicateVoteException("이미 투표하셨습니다.");
+            throw new PollException(PollErrorCode.POLL_DUPLICATED);
         }
 
         List<Integer> selectedOptions = pollRequestDTO.getSelectedOptions();
         if (!poll.isMultipleChoice() && selectedOptions.size() > 1) {
             log.warn("투표 실패 - 복수 선택 허용 안됨 - pollId: {}, userId: {}", poll.get_id(), userId);
-            throw new PollOptionChoiceException("복수 선택이 허용되지 않은 투표입니다.");
+            throw new PollException(PollErrorCode.MULTIPLE_CHOICE_NOT_ALLOWED);
         }
 
         for (Integer index : selectedOptions) {
             if (index < 0 || index >= poll.getPollOptions().size()) {
                 log.warn("투표 실패 - 잘못된 선택지 - pollId: {}, optionIndex: {}", poll.get_id(), index);
-                throw new PollOptionChoiceException("잘못된 선택지입니다.");
+                throw new PollException(PollErrorCode.INVALID_OPTION);
             }
         }
 
@@ -124,25 +122,25 @@ public class PollService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> {
                     log.warn("투표 취소 실패 - 게시글 없음 - postId: {}", postId);
-                    return new NotFoundException("해당 게시물을 찾을 수 없습니다.");
+                    return new PollException(PollErrorCode.POST_NOT_FOUND);
                 });
 
         PollEntity poll = pollRepository.findByPostId(post.get_id())
                 .orElseThrow(() -> {
                     log.warn("투표 취소 실패 - 투표 데이터 없음 - postId: {}", postId);
-                    return new NotFoundException("투표 데이터가 존재하지 않습니다.");
+                    return new PollException(PollErrorCode.POLL_NOT_FOUND);
                 });
 
         if (LocalDateTime.now().isAfter(poll.getPollEndTime())) {
             log.warn("투표 취소 실패 - 투표 종료됨 - pollId: {}", poll.get_id());
-            throw new PollTimeFailException("이미 종료된 투표입니다.");
+            throw new PollException(PollErrorCode.POLL_FINISHED);
         }
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
         PollVoteEntity pollVote = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
                 .orElseThrow(() -> {
                     log.warn("투표 취소 실패 - 유저 투표 내역 없음 - pollId: {}, userId: {}", poll.get_id(), userId);
-                    return new NotFoundException("유저의 투표 내역이 존재하지 않습니다.");
+                    return new PollException(PollErrorCode.POLL_NOT_FOUND);
                 });
 
         for (Integer index : pollVote.getSelectedOptions()) {
@@ -156,7 +154,7 @@ public class PollService {
 
     public PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
         PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PollException(PollErrorCode.POLL_NOT_FOUND));
         long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
         List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
                 .map(PollVoteEntity::getSelectedOptions)
