@@ -4,6 +4,8 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.service.PollService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.dto.UserInfo;
@@ -11,10 +13,15 @@ import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.domain.user.service.UserService;
+import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -32,10 +39,16 @@ import java.util.Optional;
 public class PostQueryService
 {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
+
     private final PollService pollService;
     private final BlockService blockService;
-    private final SeperatedPostService seperatedPostService;
-
+    private final PostInteractionService postInteractionService;
+    private final BestPostService bestPostService;
+    private final ScrapService scrapService;
+    private final LikeService likeService;
+    private final S3Service s3Service;
+    private final HitsService hitsService;
     /**
      * 카테고리별 삭제되지 않은 게시물 목록 조회
      * @return PostPageResponse (불변 리스트)
@@ -64,7 +77,7 @@ public class PostQueryService
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        seperatedPostService.increaseHitsIfNeeded(post, userId);
+        postInteractionService.increaseHits(post, userId);
         return toPageItemDTO(post);
     }
 
@@ -75,7 +88,7 @@ public class PostQueryService
         return postRepository.findByIdAndNotDeleted(postId)
                 .map(post -> {
                     ObjectId userId = SecurityUtils.getCurrentUserId();
-                    seperatedPostService.increaseHitsIfNeeded(post, userId);
+                    postInteractionService.increaseHits(post, userId);
                     return toPageItemDTO(post);
                 });
     }
@@ -95,7 +108,7 @@ public class PostQueryService
      * Top 3 베스트 게시물 조회 (불변 리스트)
      */
     public List<PostPageItemResponseDTO> getTop3BestPosts() {
-        List<PostEntity> bestPosts = seperatedPostService.getTop3BestPostsInternal();
+        List<PostEntity> bestPosts = bestPostService.getTop3BestPostsInternal();
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
     }
@@ -104,7 +117,7 @@ public class PostQueryService
      * 베스트 게시물 페이지 조회
      */
     public PostPageResponse getBestPosts(int pageNumber) {
-        Page<PostEntity> page = seperatedPostService.getBestPostsInternal(pageNumber);
+        Page<PostEntity> page = bestPostService.getBestPostsInternal(pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
@@ -113,9 +126,9 @@ public class PostQueryService
     // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
     private PostPageItemResponseDTO toPageItemDTO(PostEntity post) {
         UserDto userDto = resolveUserProfile(post);
-        int likeCount = seperatedPostService.getLikeCount(post);
-        int scrapCount = seperatedPostService.getScrapCount(post);
-        int hitsCount = seperatedPostService.getHitsCount(post);
+        int likeCount = getLikeCount(post);
+        int scrapCount = getScrapCount(post);
+        int hitsCount = getHitsCount(post);
         int commentCount = post.getCommentCount();
         ObjectId userId = SecurityUtils.getCurrentUserId();
         UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
@@ -143,6 +156,32 @@ public class PostQueryService
                 postUserId.equals(currentUserId)
         );
     }
+
+
+    /**
+     * 유저의 익명 번호 조회
+     */
+    public Integer getUserAnonymousNumber(PostAnonymous postAnonymous, ObjectId userId) {
+        return postAnonymous.getAnonNumber(userId);
+    }
+
+
+    // [likeService] - 게시글 좋아요 수 조회
+    public int getLikeCount(PostEntity post) {
+        return likeService.getLikeCount(LikeType.POST, post.get_id());
+    }
+
+    // [ScrapService] - 게시글 스크랩 수 조회
+    public int getScrapCount(PostEntity post) {
+        return scrapService.getScrapCount(post.get_id());
+    }
+
+    // [HitsService] - 게시글 조회수 조회
+    public int getHitsCount(PostEntity post) {
+        return hitsService.getHitsCount(post.get_id());
+    }
+
+
 
 
 }

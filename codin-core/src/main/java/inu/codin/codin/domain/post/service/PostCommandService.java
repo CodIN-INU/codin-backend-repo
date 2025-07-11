@@ -31,7 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostCommandService {
     private final PostRepository postRepository;
-    private final SeperatedPostService seperatedPostService;
+    private final PostInteractionService postInteractionService;
 
     /**
      * 게시글 생성
@@ -40,7 +40,7 @@ public class PostCommandService {
      */
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
-        List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
+        List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
@@ -62,7 +62,7 @@ public class PostCommandService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
         validateUserAndPost(post);
-        List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
+        List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
         log.info("게시물 수정 성공. PostId: {}", postId);
@@ -113,7 +113,7 @@ public class PostCommandService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
         validateUserAndPost(post);
-        seperatedPostService.deletePostImageInternal(post, imageUrl);
+        postInteractionService.deletePostImageInternal(post, imageUrl);
     }
 
     /**
@@ -167,12 +167,6 @@ public class PostCommandService {
         log.info("익명 번호 할당. PostId: {}, UserId: {}", post.get_id(), userId);
     }
 
-    /**
-     * 유저의 익명 번호 조회
-     */
-    public Integer getUserAnonymousNumber(PostAnonymous postAnonymous, ObjectId userId) {
-        return postAnonymous.getAnonNumber(userId);
-    }
 
     private void validateUserAndPost(PostEntity post) {
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&

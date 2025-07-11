@@ -16,8 +16,8 @@ import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.report.repository.ReportRepository;
+import inu.codin.codin.domain.post.service.PostCommandService;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisBestService;
@@ -44,7 +44,8 @@ public class ReplyCommentService {
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final UserRepository userRepository;
-    private final PostService postService;
+    private final PostCommandService postCommandService;
+    private final PostQueryService postQueryService;
 
     private final LikeService likeService;
     private final NotificationService notificationService;
@@ -66,7 +67,7 @@ public class ReplyCommentService {
         ReplyCommentEntity reply = ReplyCommentEntity.create(commentId, userId, requestDTO);
         replyCommentRepository.save(reply);
 
-        postService.handleCommentCreation(post, userId);
+        postCommandService.handleCommentCreation(post, userId);
         redisBestService.applyBestScore(1, post.get_id());
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
@@ -105,7 +106,7 @@ public class ReplyCommentService {
         reply.delete();
         replyCommentRepository.save(reply);
 
-        postService.decreaseCommentCount(post);
+        postCommandService.decreaseCommentCount(post);
         redisBestService.applyBestScore(-1, postId);
 
         log.info("대댓글 성공적 삭제  replyId: {}", replyId);
@@ -162,7 +163,7 @@ public class ReplyCommentService {
 
         ObjectId userId = reply.getUserId();
         UserEntity user = userMap.get(userId);
-        int anonNum = postService.getUserAnonymousNumber(postAnonymous, reply.getUserId());
+        int anonNum = postQueryService.getUserAnonymousNumber(postAnonymous, reply.getUserId());
 
         UserDto replyUserDto = UserDto.ofReply(reply, user, anonNum, defaultImageUrl);
 

@@ -21,6 +21,8 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostCommandService;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.post.service.SeperatedPostService;
 import inu.codin.codin.domain.scrap.service.ScrapService;
@@ -47,7 +49,8 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
     @InjectMocks
-    private PostService postService;
+    private PostCommandService postCommandService;
+    private PostQueryService postQueryService;
     @Mock private PostRepository postRepository;
     @Mock private BestRepository bestRepository;
     @Mock private UserRepository userRepository;
@@ -88,7 +91,7 @@ class PostServiceTest {
         });
         // When
         // Then
-        assertThatCode(() -> postService.createPost(dto, images)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.createPost(dto, images)).doesNotThrowAnyException();
     }
 
     @Test
@@ -100,7 +103,7 @@ class PostServiceTest {
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.USER);
         given(seperatedPostService.handleImageUpload(any())).willReturn(new ArrayList<>());
         // When & Then
-        assertThatThrownBy(() -> postService.createPost(dto, images)).isInstanceOf(JwtException.class);
+        assertThatThrownBy(() -> postCommandService.createPost(dto, images)).isInstanceOf(JwtException.class);
     }
 
     @Test
@@ -115,7 +118,7 @@ class PostServiceTest {
         given(seperatedPostService.handleImageUpload(any())).willReturn(new ArrayList<>());
         given(postRepository.save(any())).willReturn(post);
         // When/Then
-        assertThatCode(() -> postService.updatePostContent(postId, dto, images)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.updatePostContent(postId, dto, images)).doesNotThrowAnyException();
     }
 
     @Test
@@ -126,7 +129,7 @@ class PostServiceTest {
         List<MultipartFile> images = List.of();
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.empty());
         // When/Then
-        assertThatThrownBy(() -> postService.updatePostContent(postId, dto, images))
+        assertThatThrownBy(() -> postCommandService.updatePostContent(postId, dto, images))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -140,7 +143,7 @@ class PostServiceTest {
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         // When/Then
-        assertThatCode(() -> postService.updatePostAnonymous(postId, dto)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.updatePostAnonymous(postId, dto)).doesNotThrowAnyException();
     }
 
     @Test
@@ -153,7 +156,7 @@ class PostServiceTest {
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         // When/Then
-        assertThatCode(() -> postService.updatePostStatus(postId, dto)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.updatePostStatus(postId, dto)).doesNotThrowAnyException();
     }
 
     @Test
@@ -162,7 +165,7 @@ class PostServiceTest {
         List<PostEntity> posts = new ArrayList<>();
         Page<PostEntity> page = new PageImpl<>(posts);
         given(postRepository.getPostsByCategoryWithBlockedUsers(anyString(), anyList(), any())).willReturn(page);
-        var response = postService.getAllPosts(PostCategory.COMMUNICATION, 0);
+        var response = postQueryService.getAllPosts(PostCategory.COMMUNICATION, 0);
         assertThat(response).isNotNull();
         assertThat(response.getContents()).isInstanceOf(List.class);
     }
@@ -181,7 +184,7 @@ class PostServiceTest {
         given(seperatedPostService.getHitsCount(any())).willReturn(0);
         given(userRepository.findById(any())).willReturn(Optional.of(UserEntity.builder().nickname("닉네임").profileImageUrl("url").build()));
         // When
-        PostPageItemResponseDTO response = postService.getPostWithDetail(postId);
+        PostPageItemResponseDTO response = postQueryService.getPostWithDetail(postId);
         // Then
         assertThat(response).isNotNull();
         assertThat(response.getPost()).isNotNull();
@@ -196,7 +199,7 @@ class PostServiceTest {
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         // When/Then
-        assertThatCode(() -> postService.softDeletePost(postId)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.softDeletePost(postId)).doesNotThrowAnyException();
     }
 
     @Test
@@ -211,7 +214,7 @@ class PostServiceTest {
         doNothing().when(seperatedPostService).deletePostImageInternal(any(), any());
 
         // When/Then
-        assertThatCode(() -> postService.deletePostImage(postId, imageUrl)).doesNotThrowAnyException();
+        assertThatCode(() -> postCommandService.deletePostImage(postId, imageUrl)).doesNotThrowAnyException();
     }
 
     @Test
@@ -220,14 +223,14 @@ class PostServiceTest {
         List<PostEntity> posts = new ArrayList<>();
         Page<PostEntity> page = new PageImpl<>(posts);
         given(postRepository.findAllByKeywordAndDeletedAtIsNull(anyString(), anyList(), any())).willReturn(page);
-        PostPageResponse response = postService.searchPosts("테스트", 0);
+        PostPageResponse response = postQueryService.searchPosts("테스트", 0);
         assertThat(response).isNotNull();
     }
 
     @Test
     void getTop3BestPosts_success() {
         given(seperatedPostService.getTop3BestPostsInternal()).willReturn(new ArrayList<>());
-        var result = postService.getTop3BestPosts();
+        var result = postQueryService.getTop3BestPosts();
         assertThat(result).isNotNull();
         assertThat(result).isInstanceOf(List.class);
     }
@@ -235,7 +238,7 @@ class PostServiceTest {
     @Test
     void getBestPosts_success() {
         given(seperatedPostService.getBestPostsInternal(anyInt())).willReturn(new PageImpl<>(new ArrayList<>()));
-        var result = postService.getBestPosts(0);
+        var result = postQueryService.getBestPosts(0);
         assertThat(result).isNotNull();
         assertThat(result.getContents()).isInstanceOf(List.class);
     }

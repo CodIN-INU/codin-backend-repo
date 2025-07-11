@@ -25,8 +25,7 @@ public class PostInteractionService {
     private final S3Service s3Service;
     private final PostRepository postRepository;
     private final HitsService hitsService;
-    private final ScrapService scrapService;
-    private final LikeService likeService;
+
 
     // [ImageService] - 이미지 업로드 처리
     public List<String> handleImageUpload(List<MultipartFile> postImages) {
@@ -50,25 +49,8 @@ public class PostInteractionService {
         }
     }
 
-
-    // [likeService] - 게시글 좋아요 수 조회
-    public int getLikeCount(PostEntity post) {
-        return likeService.getLikeCount(LikeType.POST, post.get_id());
-    }
-
-    // [ScrapService] - 게시글 스크랩 수 조회
-    public int getScrapCount(PostEntity post) {
-        return scrapService.getScrapCount(post.get_id());
-    }
-
-    // [HitsService] - 게시글 조회수 조회
-    public int getHitsCount(PostEntity post) {
-        return hitsService.getHitsCount(post.get_id());
-    }
-
-
     // [HitsService] - 조회수 증가 처리
-    public void increaseHitsIfNeeded(PostEntity post, ObjectId userId) {
+    public void increaseHits(PostEntity post, ObjectId userId) {
         if (!hitsService.validateHits(post.get_id(), userId)) {
             hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
