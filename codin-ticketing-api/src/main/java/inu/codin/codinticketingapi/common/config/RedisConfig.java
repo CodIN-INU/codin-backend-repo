@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.common.config;
 
 import inu.codin.codinticketingapi.common.redis.RedisProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(RedisProperties.class)
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+        log.info("Creating RedisConnectionFactory, port: {}, host: {}, password: {}, database: {}", redisProperties.getPort(), redisProperties.getHost(), redisProperties.getPassword(), redisProperties.getDatabase());
+
         RedisStandaloneConfiguration redisStandAloneConfiguration = new RedisStandaloneConfiguration();
         redisStandAloneConfiguration.setPort(redisProperties.getPort());
         redisStandAloneConfiguration.setHostName(redisProperties.getHost());
