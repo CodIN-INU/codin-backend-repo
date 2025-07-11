@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceExcepti
 import inu.codin.codin.domain.post.domain.poll.exception.PollTimeFailException;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
+import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
@@ -150,5 +152,19 @@ public class PollService {
         pollRepository.save(poll);
         pollVoteRepository.delete(pollVote);
         log.info("투표 취소 완료 - pollId: {}, userId: {}", poll.get_id(), userId);
+    }
+
+    public PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
+        PollEntity poll = pollRepository.findByPostId(post.get_id())
+                .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
+        long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
+        List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
+                .map(PollVoteEntity::getSelectedOptions)
+                .orElse(Collections.emptyList());
+        boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
+        boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
+        return PollInfoResponseDTO.of(
+                poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
+                poll.getPollVotesCounts(), userVotes, totalParticipants, hasUserVoted, pollFinished);
     }
 }
