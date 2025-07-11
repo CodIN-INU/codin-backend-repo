@@ -9,6 +9,8 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
+import inu.codin.codin.domain.post.exception.PostException;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -36,7 +38,7 @@ public class PostInteractionService {
     public void deletePostImageInternal(PostEntity post, String imageUrl) {
         if (!post.getPostImageUrls().contains(imageUrl)) {
             log.error("게시물에 이미지 없음. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl);
-            throw new NotFoundException("이미지가 게시물에 존재하지 않습니다.");
+            throw new PostException(PostErrorCode.POST_NOT_FOUND);
         }
         try {
             s3Service.deleteFile(imageUrl);

@@ -16,6 +16,8 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.exception.PostException;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -75,7 +77,7 @@ public class PostQueryService
      */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
         ObjectId userId = SecurityUtils.getCurrentUserId();
         postInteractionService.increaseHits(post, userId);
         return toPageItemDTO(post);
@@ -144,7 +146,7 @@ public class PostQueryService
     // [유저 프로필] - 닉네임/이미지 결정
     private UserDto resolveUserProfile(PostEntity post) {
         UserEntity user = userRepository.findById(post.getUserId())
-                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PostException(PostErrorCode.USER_NOT_FOUND));
         return UserDto.ofPost(post, user, s3Service.getDefaultProfileImageUrl());
     }
 

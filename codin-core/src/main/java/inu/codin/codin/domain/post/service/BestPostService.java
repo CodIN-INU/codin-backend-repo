@@ -5,6 +5,8 @@ import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.exception.PostException;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
 import inu.codin.codin.infra.redis.service.RedisBestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,7 @@ public class BestPostService {
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<BestEntity> bests = bestRepository.findAll(pageRequest);
         return bests.map(bestEntity -> postRepository.findByIdAndNotDeleted(bestEntity.getPostId())
-                .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다.")));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND)));
     }
 
     // [BestService] - 베스트 점수 적용 처리

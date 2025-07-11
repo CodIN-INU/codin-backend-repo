@@ -2,7 +2,8 @@ package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
-import inu.codin.codin.domain.post.exception.StateUpdateException;
+import inu.codin.codin.domain.post.schedular.exception.SchedulerErrorCode;
+import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,14 +66,14 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostAnonymous(boolean isAnonymous) {
         if (this.isAnonymous == isAnonymous) {
-            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new SchedulerException(SchedulerErrorCode.DUPLICATE_ANONYMOUS_STATE);
         }
         this.isAnonymous = isAnonymous;
     }
 
     public void updatePostStatus(PostStatus postStatus) {
         if (this.postStatus == postStatus) {
-            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new SchedulerException(SchedulerErrorCode.DUPLICATE_POST_STATUS);
         }
         this.postStatus = postStatus;
     }
