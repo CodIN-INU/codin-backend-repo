@@ -30,6 +30,11 @@ public class TicketingParticipation extends BaseEntity {
     @Column(name = "confirmed", nullable = false)
     private boolean confirmed = false;
 
+    /** 취소 여부 */
+    @Column(name = "canceled", nullable = false)
+    private boolean canceled = false;
+
+    /** 교환권 번호 */
     @Column(name = "ticket_number", nullable = false)
     private Integer ticketNumber;
 
@@ -38,10 +43,13 @@ public class TicketingParticipation extends BaseEntity {
     private String signatureImgUrl;
 
     @Builder
-    public TicketingParticipation(TicketingEvent event, TicketingProfile profile, Integer ticketNumber) {
+    public TicketingParticipation(TicketingEvent event, TicketingProfile profile, boolean confirmed, boolean canceled, Integer ticketNumber, String signatureImgUrl) {
         this.event = event;
         this.profile = profile;
+        this.confirmed = confirmed;
+        this.canceled = canceled;
         this.ticketNumber = ticketNumber;
+        this.signatureImgUrl = signatureImgUrl;
     }
 
     /** 경품 수령 처리 */

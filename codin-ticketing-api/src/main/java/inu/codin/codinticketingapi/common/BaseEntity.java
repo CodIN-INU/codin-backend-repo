@@ -19,7 +19,7 @@ public abstract class BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @CreatedBy
+//    @CreatedBy
     @Column(name = "created_user", nullable = false, length = 24)
     private String createdUser;
 
@@ -27,7 +27,7 @@ public abstract class BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @LastModifiedBy
+//    @LastModifiedBy
     @Column(name = "updated_user", nullable = false, length = 24)
     private String updatedUser;
 

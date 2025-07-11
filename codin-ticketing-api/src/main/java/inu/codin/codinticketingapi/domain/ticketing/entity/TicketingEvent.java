@@ -36,6 +36,10 @@ public class TicketingEvent extends BaseEntity {
     @Column(name = "event_time", nullable = false)
     private LocalDateTime eventTime;
 
+    /** 이벤트 종료 시간 */
+    @Column(name = "event_end_time", nullable = false)
+    private LocalDateTime eventEndTime;
+
     /** 이제 단일 이미지 URL */
     @Column(name = "event_image_url")
     private String eventImageUrl;

@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.entity;
 
+import inu.codin.codinticketingapi.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import lombok.*;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TicketingProfile {
+public class TicketingProfile extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
