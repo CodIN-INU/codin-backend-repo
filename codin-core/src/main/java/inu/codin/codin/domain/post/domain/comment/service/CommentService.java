@@ -16,6 +16,8 @@ import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostCommandService;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -44,7 +46,10 @@ public class CommentService {
     private final ReplyCommentService replyCommentService;
     private final NotificationService notificationService;
     private final RedisBestService redisBestService;
-    private final PostService postService;
+    private final PostCommandService postCommandService;
+    private final PostQueryService postQueryService;
+
+
     private final S3Service s3Service;
 
     // 댓글 추가
@@ -59,7 +64,7 @@ public class CommentService {
         CommentEntity comment = CommentEntity.create(postId, userId, requestDTO);
         commentRepository.save(comment);
 
-        postService.handleCommentCreation(post, userId);
+        postCommandService.handleCommentCreation(post, userId);
         redisBestService.applyBestScore(1, postId);
 
         log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
@@ -82,7 +87,7 @@ public class CommentService {
         comment.delete();
         commentRepository.save(comment);
 
-        postService.decreaseCommentCount(post);
+        postCommandService.decreaseCommentCount(post);
         redisBestService.applyBestScore(-1, postId);
 
         log.info("삭제된 commentId: {}", commentId);
@@ -155,7 +160,7 @@ public class CommentService {
             Map<ObjectId, UserEntity> userMap,
             String defaultImageUrl) {
 
-        int anonNum = postService.getUserAnonymousNumber(postAnonymous, comment.getUserId());
+        int anonNum = postQueryService.getUserAnonymousNumber(postAnonymous, comment.getUserId());
 
         UserEntity user = userMap.get(comment.getUserId());
 

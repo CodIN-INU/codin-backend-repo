@@ -13,6 +13,7 @@ import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.report.dto.ReportInfo;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
@@ -47,7 +48,7 @@ import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 @Slf4j
 public class ReportService {
 
-    private final PostService postService;
+    private final PostQueryService postQueryService;
     private final CommentService commentService;
     private final ReplyCommentService replyCommentService;
 
@@ -323,16 +324,16 @@ public class ReportService {
         ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
 
         return switch (reportInfo.getEntityType()) {
-            case POST -> postService.getPostDetailById(entityId)
+            case POST -> postQueryService.getPostDetailById(entityId)
                     .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo));
 
             case COMMENT -> commentRepository.findById(entityId)
-                    .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
+                    .flatMap(comment -> postQueryService.getPostDetailById(comment.getPostId())
                             .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo)));
 
             case REPLY -> replyCommentRepository.findById(entityId)
                     .flatMap(reply -> commentRepository.findById(reply.getCommentId())
-                            .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
+                            .flatMap(comment -> postQueryService.getPostDetailById(comment.getPostId())
                                     .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo))));
 
             default -> Optional.empty();
@@ -348,7 +349,7 @@ public class ReportService {
         if (!existsInReportDB) {
             throw new NotFoundException("해당 신고 대상이 존재하지 않습니다. 신고 ID: " + reportedEntityId);
         }
-        PostDetailResponseDTO postDetailResponse = postService.getPostDetailById(entityId)
+        PostDetailResponseDTO postDetailResponse = postQueryService.getPostDetailById(entityId)
                 .map(PostPageItemResponseDTO::getPost)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         boolean isReported = entityId.equals(reportTargetId);
