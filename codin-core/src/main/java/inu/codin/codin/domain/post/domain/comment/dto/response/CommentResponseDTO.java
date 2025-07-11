@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.domain.comment.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.report.dto.response.ReportedCommentDetailResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -71,13 +72,13 @@ public class CommentResponseDTO {
         this.userInfo = userInfo;
     }
 
-    public static CommentResponseDTO commentOf(CommentEntity commentEntity, String nickname, String userImageUrl, List<CommentResponseDTO> repliesByCommentId, int like, UserInfo userInfoAboutPost){
+    public static CommentResponseDTO commentOf(CommentEntity commentEntity, UserDto commentUserDto, List<CommentResponseDTO> repliesByCommentId, int like, UserInfo userInfoAboutPost){
         return CommentResponseDTO.builder()
                 ._id(commentEntity.get_id().toString())
                 .userId(commentEntity.getUserId().toString())
                 .content(commentEntity.getContent())
-                .nickname(nickname)
-                .userImageUrl(userImageUrl)
+                .nickname(commentUserDto.getNickname())
+                .userImageUrl(commentUserDto.getImageUrl())
                 .anonymous(commentEntity.isAnonymous())
                 .replies(repliesByCommentId)
                 .likeCount(like)
@@ -87,15 +88,15 @@ public class CommentResponseDTO {
                 .build();
     }
 
-    public static CommentResponseDTO replyOf(ReplyCommentEntity replyCommentEntity, String nickname, String userImageUrl, List<CommentResponseDTO> repliesByCommentId, int like, UserInfo userInfoAboutPost){
+    public static CommentResponseDTO replyOf(ReplyCommentEntity replyCommentEntity, UserDto userDto, int like, UserInfo userInfoAboutPost){
         return CommentResponseDTO.builder()
                 ._id(replyCommentEntity.get_id().toString())
                 .userId(replyCommentEntity.getUserId().toString())
                 .content(replyCommentEntity.getContent())
-                .nickname(nickname)
-                .userImageUrl(userImageUrl)
+                .nickname(userDto.getNickname())
+                .userImageUrl(userDto.getImageUrl())
                 .anonymous(replyCommentEntity.isAnonymous())
-                .replies(repliesByCommentId)
+                .replies(List.of())
                 .likeCount(like)
                 .isDeleted(replyCommentEntity.getDeletedAt() != null)
                 .createdAt(replyCommentEntity.getCreatedAt())

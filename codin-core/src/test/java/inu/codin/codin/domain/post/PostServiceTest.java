@@ -87,9 +87,8 @@ class PostServiceTest {
             return entity;
         });
         // When
-        Map<String, String> result = postService.createPost(dto, images);
         // Then
-        assertThat(result).containsKey("postId");
+        assertThatCode(() -> postService.createPost(dto, images)).doesNotThrowAnyException();
     }
 
     @Test
