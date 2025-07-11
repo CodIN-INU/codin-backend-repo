@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @Entity
 @Table(
@@ -77,10 +78,11 @@ public class TicketingEvent extends BaseEntity {
     private String eventPassword;
 
     @Builder
-    public TicketingEvent(String userId, Campus campus, LocalDateTime eventTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink, String eventPassword) {
+    public TicketingEvent(String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink) {
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
+        this.eventEndTime = eventEndTime;
         this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
@@ -89,6 +91,11 @@ public class TicketingEvent extends BaseEntity {
         this.description = description;
         this.inquiryNumber = inquiryNumber;
         this.promotionLink = promotionLink;
-        this.eventPassword = eventPassword;
+        this.eventPassword = generateEventPassword();
+    }
+
+    /** 이벤트 비밀번호 생성 (무작위 4자리 숫자) */
+    private String generateEventPassword() {
+        return String.format("%04d", new Random().nextInt(10000));
     }
 }
