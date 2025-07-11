@@ -22,7 +22,7 @@ public class ReplyCommentController {
 
     @Operation(summary = "대댓글 추가")
     @PostMapping("/{commentId}")
-    public ResponseEntity<SingleResponse<?>> addReply(@PathVariable String commentId,
+    public ResponseEntity<SingleResponse<Void>> addReply(@PathVariable String commentId,
                                                       @RequestBody @Valid ReplyCreateRequestDTO requestDTO) {
         replyCommentService.addReply(commentId, requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -32,7 +32,7 @@ public class ReplyCommentController {
 
     @Operation(summary = "대댓글 삭제")
     @DeleteMapping("/{replyId}")
-    public ResponseEntity<SingleResponse<?>> softDeleteReply(@PathVariable String replyId) {
+    public ResponseEntity<SingleResponse<Void>> softDeleteReply(@PathVariable String replyId) {
         replyCommentService.softDeleteReply(replyId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "대댓글이 삭제되었습니다.", null));
@@ -40,7 +40,7 @@ public class ReplyCommentController {
 
     @Operation(summary = "대댓글 수정")
     @PatchMapping("/{replyId}")
-    public ResponseEntity<SingleResponse<?>> updateReply(@PathVariable String replyId, @RequestBody @Valid ReplyUpdateRequestDTO requestDTO){
+    public ResponseEntity<SingleResponse<Void>> updateReply(@PathVariable String replyId, @RequestBody @Valid ReplyUpdateRequestDTO requestDTO){
         replyCommentService.updateReply(replyId, requestDTO);
         return ResponseEntity.status(HttpStatus.OK).
                 body(new SingleResponse<>(200, "대댓글이 수정되었습니다.", null));
