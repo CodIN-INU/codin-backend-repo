@@ -12,7 +12,6 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
