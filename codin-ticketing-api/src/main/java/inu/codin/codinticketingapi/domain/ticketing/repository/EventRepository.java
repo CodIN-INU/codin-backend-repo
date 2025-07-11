@@ -18,11 +18,12 @@ public interface EventRepository extends JpaRepository<TicketingEvent, Long> {
     Page<TicketingEvent> findByCampus(@Param("campus") Campus campus, Pageable pageable);
 
     @Query("SELECT e FROM TicketingEvent e WHERE e.id = :eventId AND e.deletedAt IS NULL")
-    Optional<TicketingEvent> findById(@Param("eventId") String eventId);
+    Optional<TicketingEvent> findById(@Param("eventId") Long eventId);
 
     @Query("SELECT e FROM TicketingEvent e WHERE e.deletedAt IS NULL")
     Page<TicketingEvent> findAll(Pageable pageable);
 
-    @Query("SELECT e FROM TicketingEvent  e WHERE e.deletedAt IS NULL AND e.userId = :userId")
-    Page<TicketingEvent> findByUserId(@Param("userId") String userId, Pageable pageable);
+    @Query("SELECT e FROM TicketingEvent e WHERE e.deletedAt IS NULL AND e.userId = :userId")
+    Page<TicketingEvent> findByCreatedUserId(@Param("userId") String userId, Pageable pageable);
+
 }

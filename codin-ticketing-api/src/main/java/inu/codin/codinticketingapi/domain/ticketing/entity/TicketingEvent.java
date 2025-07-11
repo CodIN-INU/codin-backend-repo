@@ -1,10 +1,11 @@
 package inu.codin.codinticketingapi.domain.ticketing.entity;
 
-import inu.codin.codinticketingapi.common.BaseTimeEntity;
+import inu.codin.codinticketingapi.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @Entity
 @Table(
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TicketingEvent extends BaseTimeEntity {
+public class TicketingEvent extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,6 +36,10 @@ public class TicketingEvent extends BaseTimeEntity {
     /** 이벤트 시작 시간 */
     @Column(name = "event_time", nullable = false)
     private LocalDateTime eventTime;
+
+    /** 이벤트 종료 시간 */
+    @Column(name = "event_end_time", nullable = false)
+    private LocalDateTime eventEndTime;
 
     /** 이제 단일 이미지 URL */
     @Column(name = "event_image_url")
@@ -73,10 +78,11 @@ public class TicketingEvent extends BaseTimeEntity {
     private String eventPassword;
 
     @Builder
-    public TicketingEvent(String userId, Campus campus, LocalDateTime eventTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink, String eventPassword) {
+    public TicketingEvent(String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink) {
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
+        this.eventEndTime = eventEndTime;
         this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
@@ -85,6 +91,11 @@ public class TicketingEvent extends BaseTimeEntity {
         this.description = description;
         this.inquiryNumber = inquiryNumber;
         this.promotionLink = promotionLink;
-        this.eventPassword = eventPassword;
+        this.eventPassword = generateEventPassword();
+    }
+
+    /** 이벤트 비밀번호 생성 (무작위 4자리 숫자) */
+    private String generateEventPassword() {
+        return String.format("%04d", new Random().nextInt(10000));
     }
 }

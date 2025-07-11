@@ -1,15 +1,13 @@
-package inu.codin.codinticketingapi.domain.ticketing.exception;
+package inu.codin.codinticketingapi.domain.user.exception;
 
 import inu.codin.codinticketingapi.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
-public enum TicketingErrorCode implements GlobalErrorCode {
+public enum UserErrorCode implements GlobalErrorCode {
 
-    EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다."),
-    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "수령자 정보가 존재하지 않습니다."),
-    ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "옳바르지 않은 정보입니다.");
+    USER_VALIDATION_FAILED(HttpStatus.NOT_FOUND, "User 정보를 가져올 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

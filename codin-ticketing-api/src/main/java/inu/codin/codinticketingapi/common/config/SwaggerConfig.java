@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.List;
 
 @Configuration
-@EnableWebMvc
 @RequiredArgsConstructor
 public class SwaggerConfig {
 
@@ -56,7 +55,7 @@ public class SwaggerConfig {
                         .addSecuritySchemes("bearerAuth", bearerAuth)
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local Server"),
+                        new Server().url("http://localhost:8081").description("Local Server"),
                         new Server().url(BASE_DOMAIN_URL + "/api").description("Production Server"),
                         new Server().url(BASE_DOMAIN_URL + "/dev").description("Development Server")
                 ));

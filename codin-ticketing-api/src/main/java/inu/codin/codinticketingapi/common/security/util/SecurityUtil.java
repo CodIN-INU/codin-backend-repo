@@ -15,7 +15,7 @@ public class SecurityUtil {
     /**
      * 현재 인증된 사용자의 이메일 ID 반환
      */
-    public static String getUsername() {
+    public static String getEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof TokenUserDetails userDetails)) {
@@ -42,7 +42,7 @@ public class SecurityUtil {
      * 현재 사용자와 주어진 사용자 ID가 같은지 검증
      */
     public static void validateUser(String username) {
-        String currentUsername = getUsername();
+        String currentUsername = getEmail();
         if (!currentUsername.equals(username)) {
             throw new SecurityException(SecurityErrorCode.ACCESS_DENIED);
         }
