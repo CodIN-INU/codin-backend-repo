@@ -27,7 +27,7 @@ public class CommentController {
 
     @Operation(summary = "댓글 추가")
     @PostMapping("/{postId}")
-    public ResponseEntity<SingleResponse<?>> addComment(@PathVariable String postId,
+    public ResponseEntity<SingleResponse<Void>> addComment(@PathVariable String postId,
                                              @RequestBody @Valid CommentCreateRequestDTO requestDTO) {
         commentService.addComment(postId, requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -45,7 +45,7 @@ public class CommentController {
 
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<SingleResponse<?>> softDeleteComment(@PathVariable String commentId) {
+    public ResponseEntity<SingleResponse<Void>> softDeleteComment(@PathVariable String commentId) {
         commentService.softDeleteComment(commentId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "댓글이 삭제되었습니다.", null));
@@ -53,7 +53,7 @@ public class CommentController {
 
     @Operation(summary = "댓글 수정")
     @PatchMapping("/{commentId}")
-    public ResponseEntity<SingleResponse<?>> updateComment(@PathVariable String commentId, @RequestBody @Valid CommentUpdateRequestDTO requestDTO){
+    public ResponseEntity<SingleResponse<Void>> updateComment(@PathVariable String commentId, @RequestBody @Valid CommentUpdateRequestDTO requestDTO){
         commentService.updateComment(commentId, requestDTO);
         return ResponseEntity.status(HttpStatus.OK).
                 body(new SingleResponse<>(200, "댓글 수정되었습니다.", null));
