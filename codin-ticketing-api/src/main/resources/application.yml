@@ -57,6 +57,7 @@ server:
   forward-headers-strategy: framework
   port: ${SERVER_PORT}
 
+# Swagger SpringDoc Configuration
 springdoc:
   override-with-generic-response: false
 
