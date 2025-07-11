@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.exception.StateUpdateException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -44,6 +45,19 @@ public class PostEntity extends BaseTimeEntity {
         this.postStatus = postStatus;
     }
 
+    public static PostEntity create(ObjectId userId, PostCreateRequestDTO dto, List<String> imageUrls) {
+        return new PostEntity(
+                new ObjectId(),
+                userId,
+                dto.getPostCategory(),
+                dto.getTitle(),
+                dto.getContent(),
+                imageUrls != null ? new ArrayList<>(imageUrls) : new ArrayList<>(),
+                dto.isAnonymous(),
+                PostStatus.ACTIVE
+        );
+    }
+
     public void updatePostContent(String content, List<String> postImageUrls) {
         this.content = content;
         this.postImageUrls = postImageUrls != null ? new ArrayList<>(postImageUrls) : new ArrayList<>();
@@ -73,12 +87,19 @@ public class PostEntity extends BaseTimeEntity {
 
     //댓글+대댓글 수 감소
     public void minusCommentCount() {
-        this.commentCount--;
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
     }
 
     //신고 수 업데이트
     public void updateReportCount(int reportCount) {
         this.reportCount=reportCount;
+    }
+
+    //작성자 확인 로직
+    public boolean isWriter(ObjectId userId) {
+        return this.userId.equals(userId);
     }
 
 }

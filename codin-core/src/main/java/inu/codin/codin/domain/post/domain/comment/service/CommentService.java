@@ -13,8 +13,10 @@ import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.UserDto;
+import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisBestService;
@@ -42,29 +44,24 @@ public class CommentService {
     private final ReplyCommentService replyCommentService;
     private final NotificationService notificationService;
     private final RedisBestService redisBestService;
+    private final PostService postService;
     private final S3Service s3Service;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
+
         ObjectId postId = new ObjectId(id);
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        CommentEntity comment = CommentEntity.builder()
-                .postId(postId)
-                .userId(userId)
-                .anonymous(requestDTO.isAnonymous())
-                .content(requestDTO.getContent())
-                .build();
 
-        post.plusCommentCount();
-        post.getAnonymous().setAnonNumber(post, userId);
-
+        CommentEntity comment = CommentEntity.create(postId, userId, requestDTO);
         commentRepository.save(comment);
-        postRepository.save(post);
 
+        postService.handleCommentCreation(post, userId);
         redisBestService.applyBestScore(1, postId);
+
         log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
 
@@ -81,14 +78,12 @@ public class CommentService {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-        post.minusCommentCount();
-        postRepository.save(post);
-
-        redisBestService.applyBestScore(-1, postId);
-
         // 댓글 Soft Delete 처리
         comment.delete();
         commentRepository.save(comment);
+
+        postService.decreaseCommentCount(post);
+        redisBestService.applyBestScore(-1, postId);
 
         log.info("삭제된 commentId: {}", commentId);
     }
@@ -114,7 +109,7 @@ public class CommentService {
 
         // 4. 댓글 DTO 변환
         return comments.stream()
-                .map(comment -> buildCommentResponseDTO(post, comment, userMap, defaultImageUrl))
+                .map(comment -> buildCommentResponseDTO(post.getAnonymous(), comment, userMap, defaultImageUrl))
                 .collect(Collectors.toList());
     }
 
@@ -155,12 +150,12 @@ public class CommentService {
      * 댓글 응답 DTO 생성
      */
     private CommentResponseDTO buildCommentResponseDTO(
-            PostEntity post,
+            PostAnonymous postAnonymous,
             CommentEntity comment,
             Map<ObjectId, UserEntity> userMap,
             String defaultImageUrl) {
 
-        int anonNum = post.getAnonymous().getAnonNumber(comment.getUserId().toString());
+        int anonNum = postService.getUserAnonymousNumber(postAnonymous, comment.getUserId());
 
         UserEntity user = userMap.get(comment.getUserId());
 
@@ -169,9 +164,8 @@ public class CommentService {
 
         return CommentResponseDTO.commentOf(
                 comment,
-                commentUserDto.getNickname(),
-                commentUserDto.getImageUrl(),
-                replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
+                commentUserDto,
+                replyCommentService.getRepliesByCommentId(postAnonymous, comment.get_id()),
                 likeService.getLikeCount(LikeType.COMMENT, comment.get_id()),
                 getUserInfoAboutComment(comment.get_id())
         );

@@ -16,6 +16,7 @@ import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -43,7 +44,7 @@ public class ReplyCommentService {
     private final PostRepository postRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final UserRepository userRepository;
-    private final ReportRepository reportRepository;
+    private final PostService postService;
 
     private final LikeService likeService;
     private final NotificationService notificationService;
@@ -61,23 +62,29 @@ public class ReplyCommentService {
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
-        ReplyCommentEntity reply = ReplyCommentEntity.builder()
-                .commentId(commentId)
-                .userId(userId)
-                .content(requestDTO.getContent())
-                .anonymous(requestDTO.isAnonymous())
-                .build();
 
-        post.plusCommentCount();
-        post.getAnonymous().setAnonNumber(post, userId);
-
+        ReplyCommentEntity reply = ReplyCommentEntity.create(commentId, userId, requestDTO);
         replyCommentRepository.save(reply);
-        postRepository.save(post);
 
+        postService.handleCommentCreation(post, userId);
         redisBestService.applyBestScore(1, post.get_id());
+
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
+    }
+
+    public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
+
+        ObjectId replyId = new ObjectId(id);
+        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
+                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+
+        reply.updateReply(requestDTO.getContent());
+        replyCommentRepository.save(reply);
+
+        log.info("대댓글 수정 완료 - replyId: {}", replyId);
+
     }
 
     // 대댓글 삭제 (Soft Delete)
@@ -94,15 +101,12 @@ public class ReplyCommentService {
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
-
-        post.minusCommentCount();
-        postRepository.save(post);
-
-        redisBestService.applyBestScore(-1, postId);
-
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
+
+        postService.decreaseCommentCount(post);
+        redisBestService.applyBestScore(-1, postId);
 
         log.info("대댓글 성공적 삭제  replyId: {}", replyId);
     }
@@ -158,15 +162,13 @@ public class ReplyCommentService {
 
         ObjectId userId = reply.getUserId();
         UserEntity user = userMap.get(userId);
-        int anonNum = postAnonymous.getAnonNumber(userId.toString());
+        int anonNum = postService.getUserAnonymousNumber(postAnonymous, reply.getUserId());
 
         UserDto replyUserDto = UserDto.ofReply(reply, user, anonNum, defaultImageUrl);
 
         return CommentResponseDTO.replyOf(
                 reply,
-                replyUserDto.getNickname(),
-                replyUserDto.getImageUrl(),
-                List.of(), // 대댓글의 대댓글은 없음
+                replyUserDto,
                 likeService.getLikeCount(LikeType.REPLY, reply.get_id()),
                 getUserInfoAboutReply(reply.get_id())
         );
@@ -180,17 +182,6 @@ public class ReplyCommentService {
     }
 
 
-    public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
 
-        ObjectId replyId = new ObjectId(id);
-        ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(replyId)
-                .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
-
-        reply.updateReply(requestDTO.getContent());
-        replyCommentRepository.save(reply);
-
-        log.info("대댓글 수정 완료 - replyId: {}", replyId);
-
-    }
 
 }

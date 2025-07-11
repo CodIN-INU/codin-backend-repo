@@ -100,13 +100,6 @@ public class SeperatedPostService {
         log.info("베스트 점수 적용. PostId: {}", post.get_id());
     }
 
-    // [CommentService/ReplyCommentService] - 댓글 수 증가
-    public void increaseCommentCount(PostEntity post) {
-        post.plusCommentCount();
-        postRepository.save(post);
-        log.info("댓글 수 증가. PostId: {}, 현재: {}", post.get_id(), post.getCommentCount());
-    }
-
     // [PollService] - 투표 관련 처리 (예시)
     public void processPollIfNeeded(PostEntity post) {
         // 투표 게시글일 경우 PollService와 협력하여 투표 생성/집계 등 처리
