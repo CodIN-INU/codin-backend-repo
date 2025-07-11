@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.post.domain.comment.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
@@ -20,7 +19,6 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.redis.service.RedisBestService;
