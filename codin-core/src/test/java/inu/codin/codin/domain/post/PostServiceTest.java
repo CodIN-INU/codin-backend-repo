@@ -4,34 +4,17 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.best.BestEntity;
-import inu.codin.codin.domain.post.domain.best.BestRepository;
-import inu.codin.codin.domain.post.domain.hits.service.HitsService;
-import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
-import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
-import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
-import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.dto.request.*;
-import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostCommandService;
-import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.domain.post.service.PostService;
-import inu.codin.codin.domain.post.service.SeperatedPostService;
-import inu.codin.codin.domain.scrap.service.ScrapService;
+import inu.codin.codin.domain.post.service.*;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.redis.service.RedisBestService;
-import inu.codin.codin.infra.s3.S3Service;
-import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,17 +33,19 @@ import static org.mockito.BDDMockito.*;
 class PostServiceTest {
     @InjectMocks
     private PostCommandService postCommandService;
+
+    @InjectMocks
     private PostQueryService postQueryService;
+
+    @InjectMocks
+    private PostInteractionService postInteractionService;
+
+    @InjectMocks
+    private BestPostService bestpostService;
+
     @Mock private PostRepository postRepository;
-    @Mock private BestRepository bestRepository;
     @Mock private UserRepository userRepository;
-    @Mock private S3Service s3Service;
-    @Mock private LikeService likeService;
-    @Mock private ScrapService scrapService;
-    @Mock private HitsService hitsService;
-    @Mock private RedisBestService redisBestService;
     @Mock private BlockService blockService;
-    @Mock private SeperatedPostService seperatedPostService;
     private static AutoCloseable securityUtilsMock;
 
     @BeforeEach
@@ -81,7 +66,7 @@ class PostServiceTest {
         ObjectId userId = new ObjectId();
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.USER);
-        given(seperatedPostService.handleImageUpload(any())).willReturn(new ArrayList<>());
+        given(postInteractionService.handleImageUpload(any())).willReturn(new ArrayList<>());
         given(postRepository.save(any())).willAnswer(inv -> {
             PostEntity entity = inv.getArgument(0);
             java.lang.reflect.Field idField = entity.getClass().getDeclaredField("_id");
@@ -101,7 +86,7 @@ class PostServiceTest {
         List<MultipartFile> images = new ArrayList<>();
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.USER);
-        given(seperatedPostService.handleImageUpload(any())).willReturn(new ArrayList<>());
+        given(postInteractionService.handleImageUpload(any())).willReturn(new ArrayList<>());
         // When & Then
         assertThatThrownBy(() -> postCommandService.createPost(dto, images)).isInstanceOf(JwtException.class);
     }
@@ -115,7 +100,7 @@ class PostServiceTest {
         PostEntity post = createPostEntity();
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
-        given(seperatedPostService.handleImageUpload(any())).willReturn(new ArrayList<>());
+        given(postInteractionService.handleImageUpload(any())).willReturn(new ArrayList<>());
         given(postRepository.save(any())).willReturn(post);
         // When/Then
         assertThatCode(() -> postCommandService.updatePostContent(postId, dto, images)).doesNotThrowAnyException();
@@ -178,10 +163,10 @@ class PostServiceTest {
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
-        doNothing().when(seperatedPostService).increaseHitsIfNeeded(any(), any());
-        given(seperatedPostService.getLikeCount(any())).willReturn(0);
-        given(seperatedPostService.getScrapCount(any())).willReturn(0);
-        given(seperatedPostService.getHitsCount(any())).willReturn(0);
+        doNothing().when(postInteractionService).increaseHits(any(), any());
+        given(postQueryService.getLikeCount(any())).willReturn(0);
+        given(postQueryService.getScrapCount(any())).willReturn(0);
+        given(postQueryService.getHitsCount(any())).willReturn(0);
         given(userRepository.findById(any())).willReturn(Optional.of(UserEntity.builder().nickname("닉네임").profileImageUrl("url").build()));
         // When
         PostPageItemResponseDTO response = postQueryService.getPostWithDetail(postId);
@@ -211,7 +196,7 @@ class PostServiceTest {
         PostEntity post = PostEntity.builder()._id(new ObjectId()).userId(new ObjectId()).postCategory(PostCategory.COMMUNICATION).postImageUrls(imageList).build();
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
-        doNothing().when(seperatedPostService).deletePostImageInternal(any(), any());
+        doNothing().when(postInteractionService).deletePostImageInternal(any(), any());
 
         // When/Then
         assertThatCode(() -> postCommandService.deletePostImage(postId, imageUrl)).doesNotThrowAnyException();
@@ -229,7 +214,7 @@ class PostServiceTest {
 
     @Test
     void getTop3BestPosts_success() {
-        given(seperatedPostService.getTop3BestPostsInternal()).willReturn(new ArrayList<>());
+        given(bestpostService.getTop3BestPostsInternal()).willReturn(new ArrayList<>());
         var result = postQueryService.getTop3BestPosts();
         assertThat(result).isNotNull();
         assertThat(result).isInstanceOf(List.class);
@@ -237,7 +222,7 @@ class PostServiceTest {
 
     @Test
     void getBestPosts_success() {
-        given(seperatedPostService.getBestPostsInternal(anyInt())).willReturn(new PageImpl<>(new ArrayList<>()));
+        given(bestpostService.getBestPostsInternal(anyInt())).willReturn(new PageImpl<>(new ArrayList<>()));
         var result = postQueryService.getBestPosts(0);
         assertThat(result).isNotNull();
         assertThat(result.getContents()).isInstanceOf(List.class);
