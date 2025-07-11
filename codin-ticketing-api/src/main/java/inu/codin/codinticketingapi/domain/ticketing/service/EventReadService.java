@@ -31,7 +31,7 @@ public class EventReadService {
         return EventPageResponse.of(eventRepository.findByCampus(campus, pageable));
     }
 
-    public EventDetailResponse getEventDetail(String eventId) {
+    public EventDetailResponse getEventDetail(Long eventId) {
         return EventDetailResponse.of(eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND)));
     }
@@ -52,5 +52,11 @@ public class EventReadService {
         String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationReadService.getUserEventHistoryByCanceled(userId, pageable, canceled));
+    }
+
+    public String getEventPassword(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND))
+                .getEventPassword();
     }
 }
