@@ -28,7 +28,6 @@ public class ProfileController {
     public SingleResponse<?> registerUserTicketingInfo(
             @RequestBody TicketingUserProfileRequest ticketingUserProfileRequest
     ) {
-        profileService.createUserTicketingProfile(ticketingUserProfileRequest);
-        return new SingleResponse<>(200, "티켓팅 수령자 정보 입력 성공", null);
+        return new SingleResponse<>(200, "티켓팅 수령자 정보 입력 성공", profileService.createUserTicketingProfile(ticketingUserProfileRequest));
     }
 }

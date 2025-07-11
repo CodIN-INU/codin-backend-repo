@@ -37,14 +37,14 @@ public class ProfileService {
      * - 기존에 수령 정보가 존재하면 수정합니다
      */
     @Transactional
-    public void createUserTicketingProfile(TicketingUserProfileRequest requestDto) {
+    public UserTicketingProfileResponse createUserTicketingProfile(TicketingUserProfileRequest requestDto) {
         UserReply userReply = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail());
 
-        TicketingProfile profile = profileRepository.findByUserId(userReply.userId())
+        return UserTicketingProfileResponse.of(profileRepository.findByUserId(userReply.userId())
                 .map(existingProfile -> {
                     existingProfile.updateProfile(requestDto.getDepartment(), requestDto.getStudentId());
                     return existingProfile;
                 })
-                .orElseGet(() -> profileRepository.save(TicketingUserProfileRequest.toEntity(requestDto, userReply.userId(), userReply.username())));
+                .orElseGet(() -> profileRepository.save(TicketingUserProfileRequest.toEntity(requestDto, userReply.userId(), userReply.username()))));
     }
 }
