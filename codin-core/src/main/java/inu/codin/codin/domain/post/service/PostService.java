@@ -7,6 +7,7 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.poll.service.PollService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
@@ -45,6 +46,7 @@ public class PostService {
     private final LikeService likeService;
     private final ScrapService scrapService;
     private final S3Service s3Service;
+    private final PollService pollService;
 
     /**
      * 게시글 생성
@@ -269,7 +271,7 @@ public class PostService {
         UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
         PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userDto, likeCount, scrapCount, hitsCount, commentCount, userInfo);
         if (post.getPostCategory() == PostCategory.POLL) {
-            PollInfoResponseDTO pollInfo = seperatedPostService.getPollInfo(post, userId);
+            PollInfoResponseDTO pollInfo = pollService.getPollInfo(post, userId);
             return PostPageItemResponseDTO.of(postDTO, pollInfo);
         } else {
             return PostPageItemResponseDTO.of(postDTO, null);

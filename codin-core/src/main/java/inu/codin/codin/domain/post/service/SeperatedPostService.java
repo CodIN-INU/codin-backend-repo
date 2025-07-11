@@ -65,13 +65,6 @@ public class SeperatedPostService {
         }
     }
 
-    // [HitsService] - 조회수 증가 처리
-    public void increaseHitsIfNeeded(PostEntity post, ObjectId userId) {
-        if (!hitsService.validateHits(post.get_id(), userId)) {
-            hitsService.addHits(post.get_id(), userId);
-            log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
-        }
-    }
 
     // [BestService] - Top 3 베스트 게시물 조회
     public List<PostEntity> getTop3BestPostsInternal() {
@@ -100,11 +93,7 @@ public class SeperatedPostService {
         log.info("베스트 점수 적용. PostId: {}", post.get_id());
     }
 
-    // [PollService] - 투표 관련 처리 (예시)
-    public void processPollIfNeeded(PostEntity post) {
-        // 투표 게시글일 경우 PollService와 협력하여 투표 생성/집계 등 처리
-        // 예시: pollService.createPoll(...)
-    }
+
 
     // [likeService] - 게시글 좋아요 수 조회
     public int getLikeCount(PostEntity post) {
@@ -121,18 +110,13 @@ public class SeperatedPostService {
         return hitsService.getHitsCount(post.get_id());
     }
 
-    // [PollService] - 투표 게시글 PollInfo 생성
-    public PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
-        PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));
-        long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
-        List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
-                .map(PollVoteEntity::getSelectedOptions)
-                .orElse(Collections.emptyList());
-        boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
-        boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
-        return PollInfoResponseDTO.of(
-                poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
-                poll.getPollVotesCounts(), userVotes, totalParticipants, hasUserVoted, pollFinished);
+
+    // [HitsService] - 조회수 증가 처리
+    public void increaseHitsIfNeeded(PostEntity post, ObjectId userId) {
+        if (!hitsService.validateHits(post.get_id(), userId)) {
+            hitsService.addHits(post.get_id(), userId);
+            log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
+        }
     }
+
 }
