@@ -48,6 +48,7 @@ public class PostController {
 
         // postImages가 null이면 빈 리스트로 처리
         if (postImages == null) postImages = List.of();
+        postService.createPost(postCreateRequestDTO, postImages);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "게시물이 작성되었습니다.", null));
     }
