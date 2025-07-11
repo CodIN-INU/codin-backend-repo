@@ -1,7 +1,8 @@
 package inu.codin.codin.domain.post.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.domain.post.dto.UserProfile;
+import inu.codin.codin.domain.post.dto.UserDto;
+import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -66,11 +67,11 @@ public class PostDetailResponseDTO {
     private final LocalDateTime createdAt;
 
     @Schema(description = "해당 게시글에 대한 유저 반응 여부")
-    private final UserInfoResponseDTO userInfo;
+    private final UserInfo userInfo;
 
     @Builder
     private PostDetailResponseDTO(String userId, String _id, String title, String content, String nickname , PostCategory postCategory, String userImageUrl, List<String> postImageUrl,
-                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfoResponseDTO userInfo){
+                                 boolean isAnonymous, int likeCount, int scrapCount, int hits, LocalDateTime createdAt, int commentCount, UserInfo userInfo){
         this.userId = userId;
         this._id = _id;
         this.title = title;
@@ -88,7 +89,7 @@ public class PostDetailResponseDTO {
         this.userInfo = userInfo;
     }
 
-    public static PostDetailResponseDTO of(PostEntity post, UserProfile userProfile, int likeCount, int scrapCount, int hitsCount, int commentCount , UserInfoResponseDTO userInfo) {
+    public static PostDetailResponseDTO of(PostEntity post, UserDto userProfile, int likeCount, int scrapCount, int hitsCount, int commentCount , UserInfo userInfo) {
         return PostDetailResponseDTO.builder()
                 .userId(post.getUserId().toString())
                 ._id(post.get_id().toString())
