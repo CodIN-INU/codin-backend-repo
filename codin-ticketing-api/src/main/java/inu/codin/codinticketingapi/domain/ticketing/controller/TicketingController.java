@@ -1,12 +1,9 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import inu.codin.codinticketingapi.common.response.SingleResponse;
-import inu.codin.codinticketingapi.domain.ticketing.dto.request.TicketingUserProfileRequest;
-import inu.codin.codinticketingapi.domain.ticketing.service.ProfileService;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,8 +17,7 @@ public class TicketingController {
     // todo: 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)
     @PostMapping("/events/{eventId}/join")
     public SingleResponse<?> joinTicketingEvent(
-            @PathVariable Long eventId,
-            @RequestParam String userId
+            @PathVariable Long eventId
     ) {
         // 실제 구현 필요
         // SecurityContextHolder를 통해 유저 데이터 가져옴 (SecurityUtil)
