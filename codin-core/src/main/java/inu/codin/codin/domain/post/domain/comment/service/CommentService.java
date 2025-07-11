@@ -12,7 +12,7 @@ import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDT
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
-import inu.codin.codin.domain.post.dto.response.UserDto;
+import inu.codin.codin.domain.post.dto.UserProfile;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -93,7 +93,7 @@ public class CommentService {
 
         String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
-        Map<ObjectId, UserDto> userMap = userRepository.findAllById(
+        Map<ObjectId, UserProfile> userMap = userRepository.findAllById(
                         comments.stream()
                                 .map(CommentEntity::getUserId)
                                 .distinct()
@@ -101,25 +101,25 @@ public class CommentService {
                 ).stream()
                 .collect(Collectors.toMap(
                         UserEntity::get_id,
-                        user -> new UserDto(user.getNickname(), user.getProfileImageUrl(), user.getDeletedAt() != null)
+                        user -> new UserProfile(user.getNickname(), user.getProfileImageUrl(), user.getDeletedAt() != null)
                 ));
 
 
         return comments.stream()
                 .map(comment -> {
-                    UserDto userDto = userMap.get(comment.getUserId());
+                    UserProfile userProfile = userMap.get(comment.getUserId());
                     int anonNum = post.getAnonymous().getAnonNumber(comment.getUserId().toString());
                     String nickname;
                     String userImageUrl;
 
-                    if (userDto.isDeleted()){
-                        nickname = userMap.get(comment.getUserId()).nickname();
-                        userImageUrl = userMap.get(comment.getUserId()).imageUrl();
+                    if (userProfile.isDeleted()){
+                        nickname = userMap.get(comment.getUserId()).getNickname();
+                        userImageUrl = userMap.get(comment.getUserId()).getImageUrl();
                     } else {
                         nickname = comment.isAnonymous()?
                                 anonNum==0? "글쓴이" : "익명" + anonNum
-                                : userMap.get(comment.getUserId()).nickname();
-                        userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).imageUrl();
+                                : userMap.get(comment.getUserId()).getNickname();
+                        userImageUrl = comment.isAnonymous()? defaultImageUrl: userMap.get(comment.getUserId()).getImageUrl();
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
                             replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),

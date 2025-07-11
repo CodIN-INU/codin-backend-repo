@@ -113,22 +113,22 @@ public class SeperatedPostService {
         // 예시: pollService.createPoll(...)
     }
 
-    // [좋아요] - 게시글 좋아요 수 조회
+    // [likeService] - 게시글 좋아요 수 조회
     public int getLikeCount(PostEntity post) {
         return likeService.getLikeCount(LikeType.POST, post.get_id());
     }
 
-    // [스크랩] - 게시글 스크랩 수 조회
+    // [ScrapService] - 게시글 스크랩 수 조회
     public int getScrapCount(PostEntity post) {
         return scrapService.getScrapCount(post.get_id());
     }
 
-    // [조회수] - 게시글 조회수 조회
+    // [HitsService] - 게시글 조회수 조회
     public int getHitsCount(PostEntity post) {
         return hitsService.getHitsCount(post.get_id());
     }
 
-    // [투표] - 투표 게시글 PollInfo 생성
+    // [PollService] - 투표 게시글 PollInfo 생성
     public PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
         PollEntity poll = pollRepository.findByPostId(post.get_id())
                 .orElseThrow(() -> new NotFoundException("투표 정보를 찾을 수 없습니다."));

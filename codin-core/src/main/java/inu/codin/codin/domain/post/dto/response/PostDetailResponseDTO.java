@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import inu.codin.codin.domain.post.dto.UserProfile;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -87,15 +88,15 @@ public class PostDetailResponseDTO {
         this.userInfo = userInfo;
     }
 
-    public static PostDetailResponseDTO of(PostEntity post, String nickname, String userImageUrl, int likeCount, int scrapCount, int hitsCount, int commentCount ,UserInfoResponseDTO userInfo) {
+    public static PostDetailResponseDTO of(PostEntity post, UserProfile userProfile, int likeCount, int scrapCount, int hitsCount, int commentCount , UserInfoResponseDTO userInfo) {
         return PostDetailResponseDTO.builder()
                 .userId(post.getUserId().toString())
                 ._id(post.get_id().toString())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .nickname(nickname)
+                .nickname(userProfile.getNickname())
                 .postCategory(post.getPostCategory())
-                .userImageUrl(userImageUrl)
+                .userImageUrl(userProfile.getImageUrl())
                 .postImageUrl(post.getPostImageUrls())
                 .isAnonymous(post.isAnonymous())
                 .likeCount(likeCount)
