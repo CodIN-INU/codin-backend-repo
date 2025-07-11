@@ -14,6 +14,7 @@ import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
+import inu.codin.codin.domain.post.dto.UserProfile;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
@@ -47,19 +48,19 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final BestRepository bestRepository;
     private final UserRepository userRepository;
-    private final PollRepository pollRepository;
-    private final PollVoteRepository pollVoteRepository;
-
-    private final S3Service s3Service;
-    private final LikeService likeService;
-    private final ScrapService scrapService;
-    private final HitsService hitsService;
-    private final RedisBestService redisBestService;
     private final BlockService blockService;
     private final SeperatedPostService seperatedPostService;
+    private final LikeService likeService;
+    private final ScrapService scrapService;
+    private final S3Service s3Service;
 
+    /**
+     * 게시글 생성
+     * @param postCreateRequestDTO 게시글 생성 요청 DTO
+     * @param postImages 이미지 파일 리스트
+     * @return 생성된 게시글의 postId를 담은 Map (불변)
+     */
     public Map<String, String> createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
         List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
@@ -75,11 +76,9 @@ public class PostService {
                 .userId(userId)
                 .title(postCreateRequestDTO.getTitle())
                 .content(postCreateRequestDTO.getContent())
-                //이미지 Url List 저장
                 .postImageUrls(imageUrls)
                 .isAnonymous(postCreateRequestDTO.isAnonymous())
                 .postCategory(postCreateRequestDTO.getPostCategory())
-                //Default Status = Active
                 .postStatus(PostStatus.ACTIVE)
                 .build();
         postRepository.save(postEntity);
@@ -89,35 +88,39 @@ public class PostService {
         return response;
     }
 
+    /**
+     * 게시글 내용 및 이미지 수정
+     */
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
         log.info("게시물 수정 시작. PostId: {}", postId);
-
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
         validateUserAndPost(post);
-
         List<String> imageUrls = seperatedPostService.handleImageUpload(postImages);
-
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
         log.info("게시물 수정 성공. PostId: {}", postId);
     }
 
+    /**
+     * 게시글 익명 설정 수정
+     */
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
         validateUserAndPost(post);
-
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
         log.info("게시물 익명 수정 성공. PostId: {}", postId);
     }
 
+    /**
+     * 게시글 상태 수정
+     */
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(()->new NotFoundException("해당 게시물 없음"));
+                .orElseThrow(() -> new NotFoundException("해당 게시물 없음. id=" + postId));
         validateUserAndPost(post);
-
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
         log.info("게시물 상태 수정 성공. PostId: {}, Status: {}", postId, requestDTO.getPostStatus());
@@ -132,82 +135,98 @@ public class PostService {
         SecurityUtils.validateUser(post.getUserId());
     }
 
-    // 모든 글 반환 ::  게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
+    /**
+     * 카테고리별 삭제되지 않은 게시물 목록 조회
+     * @return PostPageResponse (불변 리스트)
+     */
     public PostPageResponse getAllPosts(PostCategory postCategory, int pageNumber) {
-        // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
-
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page;
-        page = postRepository.getPostsByCategoryWithBlockedUsers(postCategory.toString(), blockedUsersId ,pageRequest);
-
+        Page<PostEntity> page = postRepository.getPostsByCategoryWithBlockedUsers(postCategory.toString(), blockedUsersId, pageRequest);
         log.info("모든 글 반환 성공 Category: {}, Page: {}", postCategory, pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
-    // 게시물 리스트 가져오기
+    /**
+     * 게시물 리스트 DTO 변환 (불변 리스트)
+     */
     public List<PostPageItemResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
         return posts.stream()
                 .map(this::toPageItemDTO)
                 .toList();
     }
 
-    // 게시물 상세 조회
+    /**
+     * 게시물 상세 조회
+     */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        seperatedPostService.increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+        seperatedPostService.increaseHitsIfNeeded(post, userId);
         return toPageItemDTO(post);
     }
 
-    // ReportService 등에서 사용할 수 있도록 ObjectId로 단건 상세 조회 (Optional)
+    /**
+     * Optional로 게시물 상세 조회 (null-safe)
+     * 사용 예시: getPostDetailById(id).ifPresent(dto -> ...)
+     */
     public Optional<PostPageItemResponseDTO> getPostDetailById(ObjectId postId) {
         return postRepository.findByIdAndNotDeleted(postId)
                 .map(post -> {
                     ObjectId userId = SecurityUtils.getCurrentUserId();
-                    seperatedPostService.increaseHitsIfNeeded(post, userId); // [HitsService] - 조회수 증가 위임
+                    seperatedPostService.increaseHitsIfNeeded(post, userId);
                     return toPageItemDTO(post);
                 });
     }
 
+    /**
+     * 게시물 소프트 삭제
+     */
     public void softDeletePost(String postId) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(()-> new NotFoundException("게시물을 찾을 수 없음."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없음. id=" + postId));
         validateUserAndPost(post);
-
         post.delete();
-
         log.info("게시물 안전 삭제. PostId: {}", postId);
         postRepository.save(post);
     }
 
+    /**
+     * 게시물 이미지 삭제
+     */
     public void deletePostImage(String postId, String imageUrl) {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다. id=" + postId));
         validateUserAndPost(post);
-
         seperatedPostService.deletePostImageInternal(post, imageUrl);
     }
 
+    /**
+     * 키워드 기반 게시물 검색
+     */
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
-        // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
-
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, blockedUsersId, pageRequest);
         log.info("키워드 기반 게시물 검색: {}, Page: {}", keyword, pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
+    /**
+     * Top 3 베스트 게시물 조회 (불변 리스트)
+     */
     public List<PostPageItemResponseDTO> getTop3BestPosts() {
-        List<PostEntity> bestPosts = seperatedPostService.getTop3BestPostsInternal(); // [BestService] - 베스트 게시물 조회 위임
+        List<PostEntity> bestPosts = seperatedPostService.getTop3BestPostsInternal();
         log.info("Top 3 베스트 게시물 반환.");
         return getPostListResponseDtos(bestPosts);
     }
 
+    /**
+     * 베스트 게시물 페이지 조회
+     */
     public PostPageResponse getBestPosts(int pageNumber) {
-        Page<PostEntity> page = seperatedPostService.getBestPostsInternal(pageNumber); // [BestService] - 베스트 게시물 페이지 조회 위임
+        Page<PostEntity> page = seperatedPostService.getBestPostsInternal(pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
@@ -221,7 +240,7 @@ public class PostService {
         int commentCount = post.getCommentCount();
         ObjectId userId = SecurityUtils.getCurrentUserId();
         UserInfoResponseDTO userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
-        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile.nickname, userProfile.userImageUrl, likeCount, scrapCount, hitsCount, commentCount, userInfo);
+        PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userProfile, likeCount, scrapCount, hitsCount, commentCount, userInfo);
         if (post.getPostCategory() == PostCategory.POLL) {
             PollInfoResponseDTO pollInfo = seperatedPostService.getPollInfo(post, userId);
             return PostPageItemResponseDTO.of(postDTO, pollInfo);
@@ -260,15 +279,15 @@ public class PostService {
         );
     }
 
-        // [내부 클래스] - 유저 프로필 정보
-    private static class UserProfile {
-        final String nickname;
-        final String userImageUrl;
-        UserProfile(String nickname, String userImageUrl) {
-            this.nickname = nickname;
-            this.userImageUrl = userImageUrl;
-        }
-    }
+//        // [내부 클래스] - 유저 프로필 정보
+//    private static class UserProfile {
+//        final String nickname;
+//        final String userImageUrl;
+//        UserProfile(String nickname, String userImageUrl) {
+//            this.nickname = nickname;
+//            this.userImageUrl = userImageUrl;
+//        }
+//    }
 
        // ===================== 도메인별 부가 기능/서브 로직 (임시 분리 - SeperatedPostService) =====================
 
