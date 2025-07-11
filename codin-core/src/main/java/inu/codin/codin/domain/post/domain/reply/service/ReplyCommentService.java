@@ -12,7 +12,7 @@ import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDT
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.dto.UserProfile;
+import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -27,8 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +55,7 @@ public class ReplyCommentService {
         ObjectId commentId = new ObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+
         PostEntity post = postRepository.findByIdAndNotDeleted(comment.getPostId())
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
@@ -64,11 +68,10 @@ public class ReplyCommentService {
                 .anonymous(requestDTO.isAnonymous())
                 .build();
 
-        replyCommentRepository.save(reply);
-
-        // 댓글 수 증가 (대댓글도 댓글 수에 포함)
         post.plusCommentCount();
         post.getAnonymous().setAnonNumber(post, userId);
+
+        replyCommentRepository.save(reply);
         postRepository.save(post);
 
         redisBestService.applyBestScore(1, post.get_id());
@@ -82,6 +85,21 @@ public class ReplyCommentService {
         ReplyCommentEntity reply = replyCommentRepository.findByIdAndNotDeleted(new ObjectId(replyId))
                 .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
         SecurityUtils.validateUser(reply.getUserId());
+
+        ObjectId commentId = reply.getCommentId();
+        CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
+                .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+
+        ObjectId postId = comment.getPostId();
+        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
+                .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
+
+
+        post.minusCommentCount();
+        postRepository.save(post);
+
+        redisBestService.applyBestScore(-1, postId);
+
         // 대댓글 삭제
         reply.delete();
         replyCommentRepository.save(reply);
@@ -89,47 +107,75 @@ public class ReplyCommentService {
         log.info("대댓글 성공적 삭제  replyId: {}", replyId);
     }
 
-    // 특정 댓글의 대댓글 조회
+    /**
+     * 특정 댓글의 대댓글 조회
+     */
     public List<CommentResponseDTO> getRepliesByCommentId(PostAnonymous postAnonymous, ObjectId commentId) {
+        // 1. 대댓글 목록 조회
         List<ReplyCommentEntity> replies = replyCommentRepository.findByCommentId(commentId);
+        if (replies.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 사용자 정보 맵 생성
+        Map<ObjectId, UserEntity> userMap = createUserMapFromReplies(replies);
         String defaultImageUrl = s3Service.getDefaultProfileImageUrl();
 
-        Map<ObjectId, UserProfile> userMap = userRepository.findAllById(
-                replies.stream()
-                        .map(ReplyCommentEntity::getUserId).distinct().toList()
-        ).stream()
-            .collect(Collectors.toMap(
-                    UserEntity::get_id,
-                    user -> new UserProfile(user.getNickname(), user.getProfileImageUrl(), user.getDeletedAt() != null)
-            ));
-
+        // 3. 대댓글 DTO 변환
         return replies.stream()
-                .map(reply -> {
-                    UserProfile userProfile = userMap.get(reply.getUserId());
-                    int anonNum = postAnonymous.getAnonNumber(reply.getUserId().toString());
-                    String nickname;
-                    String userImageUrl;
+                .map(reply -> buildReplyResponseDTO(reply, postAnonymous, userMap, defaultImageUrl))
+                .toList();
+    }
 
-                    if (userProfile.isDeleted()){
-                        nickname = userMap.get(reply.getUserId()).getNickname();
-                        userImageUrl = userMap.get(reply.getUserId()).getImageUrl();
-                    } else {
-                        nickname = reply.isAnonymous()?
-                                anonNum==0? "글쓴이" : "익명"+anonNum
-                                        : userMap.get(reply.getUserId()).getNickname();
-                        userImageUrl = reply.isAnonymous()? defaultImageUrl: userMap.get(reply.getUserId()).getImageUrl();
-                    }
-                    return CommentResponseDTO.replyOf(reply, nickname, userImageUrl, List.of(),
-                            likeService.getLikeCount(LikeType.REPLY, reply.get_id()), // 대댓글 좋아요 수
-                            getUserInfoAboutReply(reply.get_id()));
-                }).toList();
+    /**
+     * 대댓글 작성자들의 사용자 정보 맵 생성
+     */
+    private Map<ObjectId, UserEntity> createUserMapFromReplies(List<ReplyCommentEntity> replies) {
+        List<ObjectId> userIdsInOrder = replies.stream()
+                .map(ReplyCommentEntity::getUserId)
+                .toList();
+
+        List<ObjectId> distinctIds = userIdsInOrder.stream()
+                .distinct()
+                .toList();
+
+        return userRepository.findAllById(distinctIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        UserEntity::get_id,
+                        user -> user
+                ));
+    }
+
+    /**
+     * 대댓글 응답 DTO 생성
+     */
+    private CommentResponseDTO buildReplyResponseDTO(
+            ReplyCommentEntity reply,
+            PostAnonymous postAnonymous,
+            Map<ObjectId, UserEntity> userMap,
+            String defaultImageUrl) {
+
+        ObjectId userId = reply.getUserId();
+        UserEntity user = userMap.get(userId);
+        int anonNum = postAnonymous.getAnonNumber(userId.toString());
+
+        UserDto replyUserDto = UserDto.ofReply(reply, user, anonNum, defaultImageUrl);
+
+        return CommentResponseDTO.replyOf(
+                reply,
+                replyUserDto.getNickname(),
+                replyUserDto.getImageUrl(),
+                List.of(), // 대댓글의 대댓글은 없음
+                likeService.getLikeCount(LikeType.REPLY, reply.get_id()),
+                getUserInfoAboutReply(reply.get_id())
+        );
     }
 
     public CommentResponseDTO.UserInfo getUserInfoAboutReply(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.REPLY, replyId, userId))
+                .isLike(likeService.isLiked(LikeType.COMMENT, replyId, userId))
                 .build();
     }
 

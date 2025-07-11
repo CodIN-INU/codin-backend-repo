@@ -66,9 +66,14 @@ public class PostEntity extends BaseTimeEntity {
         this.postImageUrls.remove(imageUrl);
     }
 
-    //댓글+대댓글 수 업데이트
+    //댓글+대댓글 수 증가
     public void plusCommentCount() {
         this.commentCount++;
+    }
+
+    //댓글+대댓글 수 감소
+    public void minusCommentCount() {
+        this.commentCount--;
     }
 
     //신고 수 업데이트
