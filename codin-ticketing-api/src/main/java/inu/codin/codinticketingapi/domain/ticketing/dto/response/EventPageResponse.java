@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
-import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingEvent;
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +27,7 @@ public class EventPageResponse {
         return new EventPageResponse(eventList, lastPage, nextPage);
     }
 
-    public static EventPageResponse of(Page<TicketingEvent> page) {
+    public static EventPageResponse of(Page<Event> page) {
         List<EventResponse> eventList = page.getContent().stream()
                 .map(EventResponse::of)
                 .toList();

@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingEvent;
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -32,7 +32,7 @@ public class EventResponse {
     @Schema(description = "이벤트 수량", example = "100")
     private int quantity;
 
-    public static EventResponse of(TicketingEvent event) {
+    public static EventResponse of(Event event) {
         return EventResponse.builder()
                 .eventId(event.getId())
                 .eventTitle(event.getTitle())

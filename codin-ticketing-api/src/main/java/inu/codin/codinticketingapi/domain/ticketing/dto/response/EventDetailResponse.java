@@ -1,14 +1,13 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingEvent;
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +19,10 @@ public class EventDetailResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00:00")
     private LocalDateTime eventTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 마감 시간", example = "2025-07-02 16:00:00")
+    private LocalDateTime eventEndTime;
 
     @Schema(description = "이벤트 이미지 Url")
     private String eventImageUrls;
@@ -39,10 +42,11 @@ public class EventDetailResponse {
     @Schema(description = "이벤트 부가 설명")
     private String description;
 
-    public static EventDetailResponse of(TicketingEvent event) {
+    public static EventDetailResponse of(Event event) {
         return EventDetailResponse.builder()
                 .eventId(event.getId())
                 .eventTime(event.getEventTime())
+                .eventEndTime(event.getEventEndTime())
                 .eventImageUrls(event.getEventImageUrl())
                 .eventTitle(event.getTitle())
                 .locationInfo(event.getLocationInfo())

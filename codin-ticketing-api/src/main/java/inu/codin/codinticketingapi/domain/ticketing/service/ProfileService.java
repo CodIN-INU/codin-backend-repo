@@ -1,9 +1,8 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
-import inu.codin.codinticketingapi.common.security.util.SecurityUtil;
+import inu.codin.codinticketingapi.security.util.SecurityUtil;
 import inu.codin.codinticketingapi.domain.ticketing.dto.request.TicketingUserProfileRequest;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.UserTicketingProfileResponse;
-import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingProfile;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ProfileRepository;

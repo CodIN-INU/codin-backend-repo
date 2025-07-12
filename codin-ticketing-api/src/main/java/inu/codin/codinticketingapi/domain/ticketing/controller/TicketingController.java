@@ -14,6 +14,9 @@ public class TicketingController {
 
     private final TicketingService ticketingService;
 
+    // todo: 사용자 티켓팅 잔여수량 (SSE, WebSocket..)
+    // todo: 사용자 티켓팅 취소
+
     // todo: 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)
     @PostMapping("/events/{eventId}/join")
     public SingleResponse<?> joinTicketingEvent(
@@ -45,10 +48,4 @@ public class TicketingController {
         // SecurityContextHolder를 통해 유저 데이터 가져옴 (SecurityUtil)
         return new SingleResponse<>(200, "서명 이미지 저장 및 처리 성공", null);
     }
-
-    // todo: 1. 수령자 관리에서 서명보기 기능
-    // todo: 2. 관리자가 수동으로 수령완료 변경 기능
-    // todo: 3. 사용자 티켓팅 잔여수량
-    // todo: 4. 관리자 티켓팅 잔여수량, 수령대기
-    // todo: 5. 사용자 티켓팅 취소
 }

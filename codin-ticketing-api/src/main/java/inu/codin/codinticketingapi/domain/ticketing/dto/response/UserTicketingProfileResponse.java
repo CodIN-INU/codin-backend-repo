@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
-import inu.codin.codinticketingapi.domain.ticketing.entity.TicketingProfile;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Profile;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,11 +20,11 @@ public class UserTicketingProfileResponse {
     @Schema(description = "학번", example = "202501111")
     private String studentId;
 
-    public static UserTicketingProfileResponse of(TicketingProfile ticketingProfile) {
+    public static UserTicketingProfileResponse of(Profile profile) {
         return UserTicketingProfileResponse.builder()
-                .department(ticketingProfile.getDepartment().toValue())
-                .name(ticketingProfile.getName())
-                .studentId(ticketingProfile.getStudentId())
+                .department(profile.getDepartment().toValue())
+                .name(profile.getName())
+                .studentId(profile.getStudentId())
                 .build();
     }
 }
