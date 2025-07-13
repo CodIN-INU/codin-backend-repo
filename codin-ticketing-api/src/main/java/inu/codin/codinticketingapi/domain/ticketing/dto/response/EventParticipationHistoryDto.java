@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,5 +15,5 @@ public class EventParticipationHistoryDto {
     private String locationInfo;
     private LocalDateTime eventTime;
     private LocalDateTime eventEndTime;
-    private boolean confirmed;
+    private ParticipationStatus status;
 }

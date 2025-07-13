@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.ticketing.repository;
 
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +21,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             e.locationInfo,
             e.eventTime,
             e.eventEndTime,
-            p.confirmed
+            p.status
         )
         FROM Participation p
         JOIN p.event e
@@ -38,18 +39,18 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             e.locationInfo,
             e.eventTime,
             e.eventEndTime,
-            p.confirmed
+            p.status
         )
         FROM Participation p
         JOIN p.event e
         WHERE p.profile.userId = :userId
           AND e.deletedAt IS NULL
-          AND p.canceled = :canceled
+          AND p.status = :status
         ORDER BY p.createdAt DESC
         """)
     Page<EventParticipationHistoryDto> findHistoryByUserIdAndCanceled(
             @Param("userId") String userId,
-            @Param("canceled") boolean canceled,
+            @Param("status") ParticipationStatus status,
             Pageable pageable
     );
 

@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.security.util.SecurityUtil;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventDetailResponse;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
@@ -41,9 +42,9 @@ public class EventService {
         return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistory(userId, pageable));
     }
 
-    public EventParticipationHistoryPageResponse getUserEventListByCanceled(@NotNull int pageNumber, boolean canceled) {
+    public EventParticipationHistoryPageResponse getUserEventListByStatus(@NotNull int pageNumber, ParticipationStatus status) {
         String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
-        return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistoryByCanceled(userId, pageable, canceled));
+        return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistoryByCanceled(userId, status, pageable));
     }
 }

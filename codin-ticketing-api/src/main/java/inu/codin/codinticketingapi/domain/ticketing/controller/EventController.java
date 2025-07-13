@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import inu.codin.codinticketingapi.common.response.SingleResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.service.EventService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,13 +47,13 @@ public class EventController {
                 eventService.getUserEventList(pageNumber)));
     }
 
-    /** 유저 마이페이지 티켓팅 참여 완료, 취소 이력 조회 */
-    @GetMapping("/user/canceled")
-    public ResponseEntity<SingleResponse<?>> getUserEventListByCanceled(
+    /** 유저 마이페이지 티켓팅 참여 완료, 미수령, 취소 이력 조회 */
+    @GetMapping("/user/status")
+    public ResponseEntity<SingleResponse<?>> getUserEventListByStatus(
             @RequestParam("page") @NotNull int pageNumber,
-            @RequestParam("canceled") boolean canceled
+            @RequestParam("status") ParticipationStatus status
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "유저 티켓팅 참여 (완료, 취소) 이력 조회",
-                eventService.getUserEventListByCanceled(pageNumber, canceled)));
+                eventService.getUserEventListByStatus(pageNumber, status)));
     }
 }
