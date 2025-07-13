@@ -28,40 +28,40 @@ public class Participation extends BaseEntity {
     private Profile profile;
 
     /** 경품 수령 여부 */
-    @Column(name = "confirmed", nullable = false)
-    private boolean confirmed = false;
-
-    /** 취소 여부 */
-    @Column(name = "canceled", nullable = false)
-    private boolean canceled = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ParticipationStatus status = ParticipationStatus.WAITING;
 
     /** 교환권 번호 */
     @Column(name = "ticket_number", nullable = false)
     private Integer ticketNumber;
 
-    /** 서명 이미지 URL */
+    @Setter
     @Column(name = "signature_img_url")
     private String signatureImgUrl;
 
     @Builder
-    public Participation(Event event, Profile profile, boolean confirmed, boolean canceled, Integer ticketNumber, String signatureImgUrl) {
+    public Participation(Event event, Profile profile, Integer ticketNumber) {
         this.event = event;
         this.profile = profile;
-        this.confirmed = confirmed;
-        this.canceled = canceled;
         this.ticketNumber = ticketNumber;
-        this.signatureImgUrl = signatureImgUrl;
     }
 
     /** 경품 수령 처리 */
-    public void confirm(String signatureImgUrl) {
-        this.confirmed = true;
-        this.signatureImgUrl = signatureImgUrl;
+    public void confirm() {
+        this.status = ParticipationStatus.COMPLETED;
+    }
+
+    /** 취소 처리 */
+    public void cancel() {
+        if (this.status == ParticipationStatus.WAITING) {
+            this.status = ParticipationStatus.FAILED;
+        }
     }
 
     /** 수령 상태 초기화 */
     public void reset() {
-        this.confirmed = false;
+        this.status = ParticipationStatus.WAITING;
         this.signatureImgUrl = null;
     }
 }
