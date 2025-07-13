@@ -22,6 +22,9 @@ public class EventResponse {
     @NotBlank
     private String eventTitle;
 
+    @Schema(description = "이벤트 이미지", example = "https://codin-s3-bucket.s3.ap-northeast-2.amazonaws.com/5eec3638-fda1-40aa-b940-e9124c45bf1c.jpeg")
+    private String eventImageUrl;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00:00")
     private LocalDateTime eventDate;
@@ -36,6 +39,7 @@ public class EventResponse {
         return EventResponse.builder()
                 .eventId(event.getId())
                 .eventTitle(event.getTitle())
+                .eventImageUrl(event.getEventImageUrl())
                 .eventDate(event.getEventTime())
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getQuantity())
