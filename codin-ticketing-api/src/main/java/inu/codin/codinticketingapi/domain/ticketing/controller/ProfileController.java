@@ -17,14 +17,14 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
-    // todo: 1. 티켓팅 수령자 정보 가져오기
+    /** 접속 유저 티켓팅 수령자 정보 조회 */
     @GetMapping("/user-profile")
     public ResponseEntity<SingleResponse<?>> getUserTicketingProfile() {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 수령자 정보 반환",
                 profileService.getUserTicketingProfile()));
     }
 
-    // todo: 2. 티켓팅 수령자 정보 입력
+    /** 티켓팅 수령자 정보 입력 */
     @PostMapping("/user-profile")
     public SingleResponse<?> registerUserTicketingInfo(
             @RequestBody TicketingUserProfileRequest ticketingUserProfileRequest
