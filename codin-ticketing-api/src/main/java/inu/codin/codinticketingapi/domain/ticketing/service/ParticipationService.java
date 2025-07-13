@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ParticipationReadService {
+public class ParticipationService {
 
     private final ParticipationRepository participationRepository;
 

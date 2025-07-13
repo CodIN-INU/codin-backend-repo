@@ -23,7 +23,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final UserClientService userClientService;
-    private final ParticipationReadService participationReadService;
+    private final ParticipationService participationService;
 
     public EventPageResponse getEventList(@Valid Campus campus, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
@@ -38,12 +38,12 @@ public class EventService {
     public EventParticipationHistoryPageResponse getUserEventList(@NotNull int pageNumber) {
         String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
-        return EventParticipationHistoryPageResponse.of(participationReadService.getUserEventHistory(userId, pageable));
+        return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistory(userId, pageable));
     }
 
     public EventParticipationHistoryPageResponse getUserEventListByCanceled(@NotNull int pageNumber, boolean canceled) {
         String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
-        return EventParticipationHistoryPageResponse.of(participationReadService.getUserEventHistoryByCanceled(userId, pageable, canceled));
+        return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistoryByCanceled(userId, pageable, canceled));
     }
 }
