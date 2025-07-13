@@ -1,8 +1,10 @@
 package inu.codin.codinticketingapi.domain.ticketing.repository;
 
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -54,4 +56,5 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             Pageable pageable
     );
 
+    Participation findByEventAndProfile(Event event, Profile profile);
 }

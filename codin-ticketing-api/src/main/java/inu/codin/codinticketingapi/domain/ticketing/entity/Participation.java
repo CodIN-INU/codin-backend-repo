@@ -48,14 +48,14 @@ public class Participation extends BaseEntity {
     }
 
     /** 경품 수령 처리 */
-    public void confirm() {
+    public void changeStatusCompleted() {
         this.status = ParticipationStatus.COMPLETED;
     }
 
     /** 취소 처리 */
-    public void cancel() {
+    public void changeStatusCanceled() {
         if (this.status == ParticipationStatus.WAITING) {
-            this.status = ParticipationStatus.FAILED;
+            this.status = ParticipationStatus.CANCELED;
         }
     }
 
