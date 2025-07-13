@@ -17,14 +17,13 @@ public class TicketingController {
     // todo: 사용자 티켓팅 잔여수량 (SSE, WebSocket..)
     // todo: 사용자 티켓팅 취소
 
-    // todo: 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)
+    /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/events/{eventId}/join")
     public SingleResponse<?> joinTicketingEvent(
             @PathVariable Long eventId
     ) {
-        // 실제 구현 필요
-        // SecurityContextHolder를 통해 유저 데이터 가져옴 (SecurityUtil)
-        return new SingleResponse<>(200, "티켓팅 이벤트 참여 및 교환권 부여 성공", null);
+        return new SingleResponse<>(200, "티켓팅 이벤트 참여 및 교환권 부여 성공",
+                ticketingService.createUserParticipation(eventId));
     }
 
     // todo: 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인
