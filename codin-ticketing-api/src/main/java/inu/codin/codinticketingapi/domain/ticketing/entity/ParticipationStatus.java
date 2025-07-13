@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum ParticipationStatus {
     COMPLETED("경품 수령 완료"),
     WAITING("경품 수령 대기"),
-    FAILED("티켓팅 취소");
+    CANCELED("티켓팅 취소");
 
     private final String description;
 }
