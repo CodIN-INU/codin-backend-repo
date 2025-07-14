@@ -23,8 +23,7 @@ public class PollVoteEntity {
     private List<Integer> selectedOptions; // 선택한 옵션 인덱스
 
     @Builder
-    public PollVoteEntity(ObjectId _id, ObjectId pollId, ObjectId userId, List<Integer> selectedOptions) {
-        this._id = _id;
+    public PollVoteEntity(ObjectId pollId, ObjectId userId, List<Integer> selectedOptions) {
         this.pollId = pollId;
         this.userId = userId;
         this.selectedOptions = selectedOptions;

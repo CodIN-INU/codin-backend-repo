@@ -32,9 +32,8 @@ public class PollEntity extends BaseTimeEntity {
 
 
     @Builder
-    public PollEntity(ObjectId _id, ObjectId postId, List<String> pollOptions,
+    public PollEntity(ObjectId postId, List<String> pollOptions,
                       LocalDateTime pollEndTime, boolean multipleChoice) {
-        this._id = _id;
         this.postId = postId;
         this.pollOptions = pollOptions;
 

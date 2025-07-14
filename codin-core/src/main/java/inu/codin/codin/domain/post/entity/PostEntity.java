@@ -35,8 +35,7 @@ public class PostEntity extends BaseTimeEntity {
     private PostAnonymous anonymous = new PostAnonymous();
 
     @Builder
-    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {
-        this._id = _id;
+    public PostEntity(ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {
         this.userId = userId;
         this.title = title;
         this.content = content;
@@ -48,7 +47,6 @@ public class PostEntity extends BaseTimeEntity {
 
     public static PostEntity create(ObjectId userId, PostCreateRequestDTO dto, List<String> imageUrls) {
         return new PostEntity(
-                new ObjectId(),
                 userId,
                 dto.getPostCategory(),
                 dto.getTitle(),
