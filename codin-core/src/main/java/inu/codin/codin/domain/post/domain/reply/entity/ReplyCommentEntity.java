@@ -23,8 +23,7 @@ public class ReplyCommentEntity extends BaseTimeEntity {
     private boolean anonymous;
 
     @Builder
-    public ReplyCommentEntity(ObjectId _id, ObjectId commentId, ObjectId userId,String content,  boolean anonymous) {
-        this._id = _id;
+    public ReplyCommentEntity(ObjectId commentId, ObjectId userId,String content,  boolean anonymous) {
         this.commentId = commentId;
         this.userId = userId;
         this.content = content;
@@ -33,7 +32,6 @@ public class ReplyCommentEntity extends BaseTimeEntity {
 
     public static ReplyCommentEntity create(ObjectId commentId, ObjectId userId, ReplyCreateRequestDTO requestDTO) {
         return new ReplyCommentEntity(
-                new ObjectId(),
                 commentId,
                 userId,
                 requestDTO.getContent(),
