@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.domain.comment.service;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
@@ -16,6 +17,8 @@ import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
@@ -55,9 +58,9 @@ public class CommentService {
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
 
-        ObjectId postId = new ObjectId(id);
-        PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
+        ObjectId postId = ObjectIdUtil.toObjectId(id);
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
 
@@ -74,14 +77,14 @@ public class CommentService {
 
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String id) {
-        ObjectId commentId = new ObjectId(id);
+        ObjectId commentId = ObjectIdUtil.toObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
         SecurityUtils.validateUser(comment.getUserId());
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
         // 댓글 Soft Delete 처리
         comment.delete();
@@ -99,7 +102,7 @@ public class CommentService {
      */
     public List<CommentResponseDTO> getCommentsByPostId(String id) {
         // 1. 입력 검증 및 게시물 조회
-        ObjectId postId = validateAndConvertPostId(id);
+        ObjectId postId = ObjectIdUtil.toObjectId(id);
         PostEntity post = findPostById(postId);
 
         // 2. 댓글 목록 조회
@@ -118,18 +121,10 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 게시물 ID 검증 및 ObjectId 변환
-     */
-    private ObjectId validateAndConvertPostId(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("게시물 ID는 필수입니다.");
-        }return new ObjectId(id);
-    }
 
     private PostEntity findPostById(ObjectId postId) {
         return postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
     }
     /**
      * 댓글 작성자들의 사용자 정보 맵 생성
@@ -179,7 +174,7 @@ public class CommentService {
     public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
         log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", id, requestDTO.getContent());
 
-        ObjectId commentId = new ObjectId(id);
+        ObjectId commentId = ObjectIdUtil.toObjectId(id);
         CommentEntity comment = commentRepository.findByIdAndNotDeleted(commentId)
                 .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 
