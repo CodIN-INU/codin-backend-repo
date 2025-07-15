@@ -61,10 +61,9 @@ public class AuthController {
 
     @Operation(summary = "회원 정보 입력 마무리")
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>> completeUserProfile(
-            @RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
-            @RequestPart(value = "userImage", required = false) MultipartFile userImage,
-            HttpServletResponse response) {
+    public ResponseEntity<SingleResponse<?>> completeUserProfile(@RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
+                                                                @RequestPart(value = "userImage", required = false) MultipartFile userImage,
+                                                                HttpServletResponse response) {
         authCommonService.completeUserProfile(userProfileRequestDto, userImage, response);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 정보 입력 마무리 성공", null));
