@@ -3,14 +3,12 @@ package inu.codin.codin.common.security.controller;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.service.AuthCommonService;
-import inu.codin.codin.common.security.service.AuthSessionService;
 import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -28,13 +26,10 @@ public class AuthController {
 
     private final JwtService jwtService;
     private final AuthCommonService authCommonService;
-    private final AuthSessionService authSessionService;
 
     @GetMapping("/google")
-    public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response,
-                                                         @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
-        authSessionService.setSession(redirect_url);
-        response.sendRedirect("/oauth2/authorization/google");
+    public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/api/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }

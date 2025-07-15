@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.service.oauth2;
+package inu.codin.codin.common.security.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
