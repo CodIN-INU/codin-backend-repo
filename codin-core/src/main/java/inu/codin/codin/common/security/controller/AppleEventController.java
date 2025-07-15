@@ -1,10 +1,5 @@
 package inu.codin.codin.common.security.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codin.common.security.dto.apple.AppleAuthRequest;
-import inu.codin.codin.common.security.dto.apple.AppleLoginResponse;
-import inu.codin.codin.common.security.service.AppleOAuth2UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,20 +7,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class AppleEventController {
-
-    private final ObjectMapper objectMapper;
 
     @PostMapping("/login/oauth2/code/apple")
     public ResponseEntity<?> appleCallback(HttpServletRequest request, HttpServletResponse response) {
