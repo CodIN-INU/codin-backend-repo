@@ -1,8 +1,9 @@
-package inu.codin.codin.common.security.service;
+package inu.codin.codin.common.security.service.oauth2;
 
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.enums.AuthResultStatus;
+import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
