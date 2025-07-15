@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -33,7 +34,7 @@ public class AuthController {
     public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response,
                                                          @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
         authSessionService.setSession(redirect_url);
-        response.sendRedirect("/api/oauth2/authorization/google");
+        response.sendRedirect("/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }
