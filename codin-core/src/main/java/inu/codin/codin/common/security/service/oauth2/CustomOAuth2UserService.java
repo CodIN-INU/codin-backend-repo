@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.service;
+package inu.codin.codin.common.security.service.oauth2;
 
 
 import inu.codin.codin.common.security.dto.AccessEmailProperties;
