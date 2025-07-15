@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.service.oauth2;
+package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.security.enums.AuthResultStatus;
 import jakarta.servlet.http.HttpServletResponse;
