@@ -1,15 +1,15 @@
-package inu.codin.codin.common.security.service.oauth2;
+package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.enums.AuthResultStatus;
-import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
