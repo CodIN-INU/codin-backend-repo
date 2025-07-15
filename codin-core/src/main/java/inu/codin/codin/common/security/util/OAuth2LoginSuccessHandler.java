@@ -55,8 +55,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
-        String redirectUrl = request.getSession().getAttribute("redirect_url").toString();
+        String redirectUrl = (String) request.getSession().getAttribute("redirect_url");
         if (Objects.equals(redirectUrl, null)) redirectUrl = BASEURL;
+        request.getSession().removeAttribute("redirect_url");
 
         switch (result) {
             case LOGIN_SUCCESS -> {
