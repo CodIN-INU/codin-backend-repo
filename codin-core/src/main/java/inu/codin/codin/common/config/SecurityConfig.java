@@ -186,6 +186,7 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 BASEURL,
                 "https://front-end-peach-two.vercel.app",
+                "https://front-end-dun-mu.vercel.app",
                 "https://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "http://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "https://appleid.apple.com"
