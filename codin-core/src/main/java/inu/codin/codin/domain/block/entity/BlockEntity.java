@@ -1,33 +1,47 @@
 package inu.codin.codin.domain.block.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
 @Document(collection = "blocks")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BlockEntity extends BaseTimeEntity {
+
     @Id
-    private ObjectId id;  // MongoDB의 기본 ID
+    private ObjectId id;
 
-    @NotNull
-    private ObjectId blockingUserId;  // 차단한 사용자
+    @Indexed
+    private ObjectId userId;
 
-    @NotNull
-    private ObjectId blockedUserId;   // 차단된 사용자
+    private List<ObjectId> blockedUsers = new ArrayList<>();
 
     @Builder
-    public BlockEntity(ObjectId blockingUserId, ObjectId blockedUserId) {
-        this.blockingUserId = blockingUserId;
-        this.blockedUserId = blockedUserId;
+    public BlockEntity(ObjectId userId, ObjectId blockedUser) {
+        this.userId = userId;
+        this.blockedUsers.add(blockedUser);
+    }
+
+    public static BlockEntity ofNew(ObjectId userId) {
+        return BlockEntity.builder()
+                .userId(userId)
+                .build();
+    }
+
+    public BlockEntity addBlockedUser(ObjectId blockedUser) {
+        this.blockedUsers.add(blockedUser);
+        return this;
+    }
+
+    public void removeBlockedUser(ObjectId blockedUser) {
+        this.blockedUsers.remove(blockedUser);
     }
 }

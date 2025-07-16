@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.notification.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;

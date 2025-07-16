@@ -94,21 +94,34 @@ public class JwtService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
+        // Authorization 헤더에 Access Token 추가
+        response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
+
+        // todo: access token 헤더 방식으로 전환
         Cookie jwtCookie = new Cookie("access_token", newToken.getAccessToken());
         jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
         jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
         jwtCookie.setPath("/");       // 모든 요청에 포함
-        jwtCookie.setMaxAge(60 * 60); // 1시간 유지
+        jwtCookie.setMaxAge(30 * 60); // 30분 유지
         jwtCookie.setDomain(BASERURL.split("//")[1]);
         jwtCookie.setAttribute("SameSite", "None");
         response.addCookie(jwtCookie);
 
+        Cookie newRefreshToken = new Cookie("x-refresh-token", newToken.getRefreshToken());
+        newRefreshToken.setHttpOnly(true);
+        newRefreshToken.setSecure(true);
+        newRefreshToken.setPath("/");
+        newRefreshToken.setMaxAge(10 * 24 * 60 * 60); // 10일
+        newRefreshToken.setDomain(BASERURL.split("//")[1]);
+        newRefreshToken.setAttribute("SameSite", "None");
+        response.addCookie(newRefreshToken);
 
+        // todo: refresh token 명칭 변경
         Cookie refreshCookie = new Cookie("refresh_token", newToken.getRefreshToken());
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+        refreshCookie.setMaxAge(10 * 24 * 60 * 60); // 10일
         refreshCookie.setDomain(BASERURL.split("//")[1]);
         refreshCookie.setAttribute("SameSite", "None");
         response.addCookie(refreshCookie);
