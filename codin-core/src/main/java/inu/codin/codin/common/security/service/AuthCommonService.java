@@ -2,7 +2,7 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
-import inu.codin.codin.common.security.service.oauth2.AbstractAuthService;
+import inu.codin.codin.common.security.service.AbstractAuthService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
