@@ -1,10 +1,10 @@
 package inu.codin.codin.domain.info.repository;
 
 import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.domain.info.domain.lab.entity.Lab;
-import inu.codin.codin.domain.info.domain.office.entity.Office;
-import inu.codin.codin.domain.info.domain.professor.entity.Professor;
 import inu.codin.codin.domain.info.entity.Info;
+import inu.codin.codin.domain.info.entity.Lab;
+import inu.codin.codin.domain.info.entity.Office;
+import inu.codin.codin.domain.info.entity.Professor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;

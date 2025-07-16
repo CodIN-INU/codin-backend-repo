@@ -6,8 +6,8 @@ import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.AppleOAuth2UserService;
-import inu.codin.codin.common.security.service.CustomOAuth2UserService;
+import inu.codin.codin.common.security.service.oauth2.AppleOAuth2UserService;
+import inu.codin.codin.common.security.service.oauth2.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.*;
 import inu.codin.codin.common.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
@@ -186,6 +186,7 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 BASEURL,
                 "https://front-end-peach-two.vercel.app",
+                "https://front-end-dun-mu.vercel.app",
                 "https://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "http://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "https://appleid.apple.com"
