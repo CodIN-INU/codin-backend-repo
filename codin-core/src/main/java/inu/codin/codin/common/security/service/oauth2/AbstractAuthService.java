@@ -1,10 +1,8 @@
-package inu.codin.codin.common.security.service.oauth2;
+package inu.codin.codin.common.security.service;
 
-import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
