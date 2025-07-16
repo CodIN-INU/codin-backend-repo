@@ -1,5 +1,6 @@
 package inu.codin.codin.common.security.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +18,8 @@ import java.util.Base64;
 @RequiredArgsConstructor
 @Slf4j
 public class AppleEventController {
+
+    private final ObjectMapper objectMapper;
 
     @PostMapping("/login/oauth2/code/apple")
     public ResponseEntity<?> appleCallback(HttpServletRequest request, HttpServletResponse response) {

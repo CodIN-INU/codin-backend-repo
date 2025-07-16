@@ -2,8 +2,6 @@ package inu.codin.codin.common.ratelimit;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Arrays;
-
 public class ClientIpUtil {
     private static final String[] IP_HEADER_CANDIDATES = {
             "X-Forwarded-For",

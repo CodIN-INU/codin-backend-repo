@@ -12,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import static inu.codin.codin.common.ratelimit.RateLimitBucketConstants.*;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static inu.codin.codin.common.ratelimit.RateLimitBucketConstants.*;
 
 /**
  * Reference : https://velog.io/@whcksdud8/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-Rate-limit-%ED%95%B8%EB%93%A4%EB%A7%81-%EB%B0%8F-%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81
