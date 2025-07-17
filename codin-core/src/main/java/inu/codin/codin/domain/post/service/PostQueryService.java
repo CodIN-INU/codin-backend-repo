@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.like.entity.LikeType;
@@ -22,7 +21,6 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.domain.user.service.UserService;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -165,6 +163,16 @@ public class PostQueryService
      */
     public Integer getUserAnonymousNumber(PostAnonymous postAnonymous, ObjectId userId) {
         return postAnonymous.getAnonNumber(userId);
+    }
+
+    /**
+     *
+     * @param postId
+     * @return validated PostEntity
+     */
+    public PostEntity findPostById(ObjectId postId) {
+        return postRepository.findByIdAndNotDeleted(postId)
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
     }
 
 

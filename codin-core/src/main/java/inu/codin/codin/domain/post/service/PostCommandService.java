@@ -1,25 +1,18 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.domain.post.domain.poll.service.PollService;
+import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostStatusUpdateRequestDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
+import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
-import inu.codin.codin.domain.post.exception.PostException;
-import inu.codin.codin.domain.post.exception.PostErrorCode;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserRole;
-import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -34,6 +27,7 @@ import java.util.List;
 public class PostCommandService {
     private final PostRepository postRepository;
     private final PostInteractionService postInteractionService;
+    private final PostQueryService postQueryService;
 
     /**
      * 게시글 생성
@@ -43,17 +37,12 @@ public class PostCommandService {
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
         log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
         List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
-        ObjectId userId = SecurityUtils.getCurrentUserId();
 
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                postCreateRequestDTO.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            log.error("비교과 게시물에 대한 접근권한 없음. UserId: {}", userId);
-            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
-        }
+        ObjectId userId = validateUserAndPost(postCreateRequestDTO.getPostCategory());
 
         PostEntity postEntity = PostEntity.create(userId, postCreateRequestDTO, imageUrls);
         postRepository.save(postEntity);
-        log.info("게시물 성공적으로 생성됨. PostId: {}, UserId: {}", postEntity.get_id(), userId);
+        log.info("게시물 성공적으로 생성됨. UserId: {}, PostId: {} ", postEntity.get_id(), userId);
     }
 
     /**
@@ -61,37 +50,34 @@ public class PostCommandService {
      */
     public void updatePostContent(String postId, PostContentUpdateRequestDTO requestDTO, List<MultipartFile> postImages) {
         log.info("게시물 수정 시작. PostId: {}", postId);
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        validateUserAndPost(post);
+        PostEntity post = postQueryService.findPostById(ObjectIdUtil.toObjectId(postId));
+        ObjectId userId = validateUserAndPost(post.getPostCategory());
         List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
         post.updatePostContent(requestDTO.getContent(), imageUrls);
         postRepository.save(post);
-        log.info("게시물 수정 성공. PostId: {}", postId);
+        log.info("게시물 수정 성공. UserId: {}, PostId: {}",userId, postId);
     }
 
     /**
      * 게시글 익명 설정 수정
      */
     public void updatePostAnonymous(String postId, PostAnonymousUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        validateUserAndPost(post);
+        PostEntity post = postQueryService.findPostById(ObjectIdUtil.toObjectId(postId));
+        ObjectId userId = validateUserAndPost(post.getPostCategory());
         post.updatePostAnonymous(requestDTO.isAnonymous());
         postRepository.save(post);
-        log.info("게시물 익명 수정 성공. PostId: {}", postId);
+        log.info("게시물 익명 수정 성공. UserId: {}, PostId: {}",userId, postId);
     }
 
     /**
      * 게시글 상태 수정
      */
     public void updatePostStatus(String postId, PostStatusUpdateRequestDTO requestDTO) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        validateUserAndPost(post);
+        PostEntity post = postQueryService.findPostById(ObjectIdUtil.toObjectId(postId));
+        ObjectId userId = validateUserAndPost(post.getPostCategory());
         post.updatePostStatus(requestDTO.getPostStatus());
         postRepository.save(post);
-        log.info("게시물 상태 수정 성공. PostId: {}, Status: {}", postId, requestDTO.getPostStatus());
+        log.info("게시물 상태 수정 성공. UserId : {}. PostId: {}, Status: {}", userId, postId, requestDTO.getPostStatus());
     }
 
 
@@ -100,22 +86,21 @@ public class PostCommandService {
      * 게시물 소프트 삭제
      */
     public void softDeletePost(String postId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        validateUserAndPost(post);
+        PostEntity post = postQueryService.findPostById(ObjectIdUtil.toObjectId(postId));
+        ObjectId userId = validateUserAndPost(post.getPostCategory());
         post.delete();
-        log.info("게시물 안전 삭제. PostId: {}", postId);
         postRepository.save(post);
+        log.info("게시물 안전 삭제. UserId: {} PostId: {}", userId, postId);
     }
 
     /**
      * 게시물 이미지 삭제
      */
     public void deletePostImage(String postId, String imageUrl) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-        validateUserAndPost(post);
+        PostEntity post = postQueryService.findPostById(ObjectIdUtil.toObjectId(postId));
+        ObjectId userId = validateUserAndPost(post.getPostCategory());
         postInteractionService.deletePostImageInternal(post, imageUrl);
+        log.info("게시물 이미지 삭제. UserId: {} PostId: {}", userId, postId);
     }
 
     /**
@@ -170,14 +155,15 @@ public class PostCommandService {
     }
 
 
-    private void validateUserAndPost(PostEntity post) {
+    private ObjectId validateUserAndPost(PostCategory postCategory) {
+        ObjectId userId = SecurityUtils.getCurrentUserId();
         if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
-                post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
-            log.error("비교과 게시글에 대한 권한이 없음. PostId: {}", post.get_id());
+                postCategory.toString().split("_")[0].equals("EXTRACURRICULAR")){
+            log.error("비교과 게시글에 대한 권한이 없음. userId: {}", userId);
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
-        SecurityUtils.validateUser(post.getUserId());
+        SecurityUtils.validateUser(userId);
+        return userId;
     }
-
 
 }

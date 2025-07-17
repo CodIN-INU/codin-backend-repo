@@ -5,10 +5,10 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.comment.service.CommentService;
+import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.domain.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -48,8 +48,8 @@ import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 public class ReportService {
 
     private final PostQueryService postQueryService;
-    private final CommentService commentService;
-    private final ReplyCommentService replyCommentService;
+    private final CommentQueryService commentQueryService;
+    private final ReplyQueryService replyQueryService;
 
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
@@ -357,7 +357,7 @@ public class ReportService {
 
 
     public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
-        List<CommentResponseDTO> comments = commentService.getCommentsByPostId(postId);
+        List<CommentResponseDTO> comments = commentQueryService.getCommentsByPostId(postId);
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
@@ -379,7 +379,7 @@ public class ReportService {
 
     public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(PostAnonymous postAnonymous, String id, String reportedEntityId) {
         ObjectId commentId = new ObjectId(id);
-        List<CommentResponseDTO> replies = replyCommentService.getRepliesByCommentId(postAnonymous, commentId);
+        List<CommentResponseDTO> replies = replyQueryService.getRepliesByCommentId(postAnonymous, commentId);
 
         return replies.stream()
                 .map(reply -> {
