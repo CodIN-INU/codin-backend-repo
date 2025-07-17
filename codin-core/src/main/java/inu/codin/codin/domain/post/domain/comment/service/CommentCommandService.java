@@ -8,9 +8,9 @@ import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateReque
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.infra.redis.service.RedisBestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -22,10 +22,11 @@ import org.springframework.stereotype.Service;
 public class CommentCommandService {
     private final CommentRepository commentRepository;
     private final NotificationService notificationService;
-    private final RedisBestService redisBestService;
     private final PostCommandService postCommandService;
     private final PostQueryService postQueryService;
     private final CommentQueryService commentQueryService;
+    private final BestService bestService;
+
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
 
@@ -38,7 +39,7 @@ public class CommentCommandService {
         commentRepository.save(comment);
 
         postCommandService.handleCommentCreation(post, userId);
-        redisBestService.applyBestScore(1, postId);
+        bestService.applyBestScore(postId);
 
         log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
         if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
@@ -77,7 +78,7 @@ public class CommentCommandService {
         commentRepository.save(comment);
 
         postCommandService.decreaseCommentCount(post);
-        redisBestService.applyBestScore(-1, postId);
+//        bestService.applyBestScore( postId);
 
         log.info("삭제된 commentId: {}", commentId);
     }
