@@ -3,6 +3,7 @@ package inu.codin.codin.domain.post.domain.reply.service;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
+import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
 import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
@@ -12,7 +13,6 @@ import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepositor
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.infra.redis.service.RedisBestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class ReplyCommandService {
     private final PostQueryService postQueryService;
 
     private final NotificationService notificationService;
-    private final RedisBestService redisBestService;
+    private final BestService bestService;
     private final CommentQueryService commentQueryService;
     private final ReplyQueryService replyQueryService;
 
@@ -48,7 +48,7 @@ public class ReplyCommandService {
         replyCommentRepository.save(reply);
 
         postCommandService.handleCommentCreation(post, userId);
-        redisBestService.applyBestScore(1, post.get_id());
+        bestService.applyBestScore(post.get_id());
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
@@ -82,7 +82,7 @@ public class ReplyCommandService {
         replyCommentRepository.save(reply);
 
         postCommandService.decreaseCommentCount(post);
-        redisBestService.applyBestScore(-1, post.get_id());
+//        bestService.applyBestScore(post.get_id());
 
         log.info("대댓글 성공적 삭제  replyId: {}", reply.get_id());
     }

@@ -1,9 +1,12 @@
 package inu.codin.codin.domain.post.service;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.post.domain.best.BestEntity;
+import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.domain.poll.service.PollService;
 import inu.codin.codin.domain.post.dto.UserDto;
@@ -31,6 +34,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -44,7 +48,7 @@ public class PostQueryService
     private final PollService pollService;
     private final BlockService blockService;
     private final PostInteractionService postInteractionService;
-    private final BestPostService bestPostService;
+    private final BestService bestService;
     private final ScrapService scrapService;
     private final LikeService likeService;
     private final S3Service s3Service;
@@ -74,8 +78,7 @@ public class PostQueryService
      * 게시물 상세 조회
      */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
-        PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        PostEntity post = findPostById(ObjectIdUtil.toObjectId(postId));
         ObjectId userId = SecurityUtils.getCurrentUserId();
         postInteractionService.increaseHits(post, userId);
         return toPageItemDTO(post);
@@ -108,19 +111,48 @@ public class PostQueryService
      * Top 3 베스트 게시물 조회 (불변 리스트)
      */
     public List<PostPageItemResponseDTO> getTop3BestPosts() {
-        List<PostEntity> bestPosts = bestPostService.getTop3BestPostsInternal();
+        List<String> bestPostIds = bestService.getTop3BestPostIds();
+
+        List<PostEntity> validPosts = bestPostIds.stream()
+                .map(postId -> {
+                    try {
+                        return findPostById(ObjectIdUtil.toObjectId(postId));
+                    } catch (PostException e) {
+                        bestService.deleteBestPost(postId); // 검증 실패시 삭제
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
         log.info("Top 3 베스트 게시물 반환.");
-        return getPostListResponseDtos(bestPosts);
+        return getPostListResponseDtos(validPosts);
     }
 
     /**
      * 베스트 게시물 페이지 조회
      */
     public PostPageResponse getBestPosts(int pageNumber) {
-        Page<PostEntity> page = bestPostService.getBestPostsInternal(pageNumber);
-        return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
-    }
+        Page<BestEntity> bestEntities = bestService.getBestEntities(pageNumber);
 
+        List<PostEntity> validPosts = bestEntities.getContent().stream()
+                .map(bestEntity -> {
+                    try {
+                        return findPostById(bestEntity.getPostId());
+                    } catch (PostException e) {
+                        bestService.deleteBestPost(bestEntity.getPostId().toString());
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        return PostPageResponse.of(
+                getPostListResponseDtos(validPosts),
+                bestEntities.getTotalPages() - 1,
+                bestEntities.hasNext() ? bestEntities.getPageable().getPageNumber() + 1 : -1
+        );
+    }
 
 
     // PostEntity → PostPageItemResponseDTO 변환 (공통 변환 로직)
