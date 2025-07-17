@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.schedular;
 
-import inu.codin.codin.domain.post.exception.PostException;
-import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.schedular.exception.SchedulerErrorCode;
+import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -41,7 +41,7 @@ public class PostsScheduler {
             else log.warn("[PostsScheduler] 학과 공지사항 업데이트 실패");
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e.getStackTrace()[0]);
-            throw new PostException(PostErrorCode.SCHEDULER_ERROR);
+            throw new SchedulerException(SchedulerErrorCode.SCHEDULER_INTERRUPT_ERROR);
         }
 
     }
@@ -64,7 +64,7 @@ public class PostsScheduler {
             else log.warn("[PostsScheduler] STARINU 공지사항 업데이트 실패");
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e.getStackTrace()[0]);
-            throw new PostException(PostErrorCode.SCHEDULER_ERROR);
+            throw new SchedulerException(SchedulerErrorCode.SCHEDULER_INTERRUPT_ERROR);
         }
     }
 }

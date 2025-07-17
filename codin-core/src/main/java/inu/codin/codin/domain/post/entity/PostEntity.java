@@ -2,6 +2,8 @@ package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.schedular.exception.SchedulerErrorCode;
 import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
 import jakarta.validation.constraints.NotBlank;
@@ -64,7 +66,7 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostAnonymous(boolean isAnonymous) {
         if (this.isAnonymous == isAnonymous) {
-            throw new SchedulerException(SchedulerErrorCode.DUPLICATE_ANONYMOUS_STATE);
+            throw new PostException(PostErrorCode.DUPLICATE_ANONYMOUS_STATE);
         }
         this.isAnonymous = isAnonymous;
     }
