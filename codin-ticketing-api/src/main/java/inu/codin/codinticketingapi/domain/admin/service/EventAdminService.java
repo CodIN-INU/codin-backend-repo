@@ -1,16 +1,16 @@
 package inu.codin.codinticketingapi.domain.admin.service;
 
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
-import inu.codin.codinticketingapi.security.util.SecurityUtil;
-import inu.codin.codinticketingapi.infra.redis.RedisEventService;
-import inu.codin.codinticketingapi.domain.image.service.ImageService;
 import inu.codin.codinticketingapi.domain.admin.dto.EventCreateRequest;
 import inu.codin.codinticketingapi.domain.admin.dto.EventUpdateRequest;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.image.service.ImageService;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import inu.codin.codinticketingapi.infra.redis.RedisEventService;
+import inu.codin.codinticketingapi.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +30,9 @@ public class EventAdminService {
 
     private final ImageService imageService;
     private final RedisEventService redisEventService;
-//    private final Clock clock;
 
     public EventPageResponse getEventListByManager(int pageNumber) {
-        String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
+        String userId = userClientService.fetchUser().getUserId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventPageResponse.of(eventRepository.findByCreatedUserId(userId, pageable));
     }
@@ -49,7 +45,7 @@ public class EventAdminService {
 
     @Transactional
     public Event createEvent(EventCreateRequest request, MultipartFile eventImage) {
-        String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
+        String userId = userClientService.fetchUser().getUserId();
         request.validateEventTimes();
 
         String eventImageUrl = imageService.handleImageUpload(eventImage);
@@ -65,9 +61,7 @@ public class EventAdminService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
 
-        String currentUserId = userClientService
-                .fetchUserIdAndUsername(SecurityUtil.getEmail())
-                .userId();
+        String currentUserId = userClientService.fetchUser().getUserId();
 
         if (!event.getUserId().equals(currentUserId) && !SecurityUtil.hasRole("ADMIN")) {
             throw new TicketingException(TicketingErrorCode.UNAUTHORIZED_EVENT_UPDATE);

@@ -17,10 +17,9 @@ public class TicketingController {
     private final TicketingService ticketingService;
 
     // todo: 사용자 티켓팅 잔여수량 (SSE, WebSocket..)
-    // todo: 사용자 티켓팅 취소
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
-    @PostMapping("/events/{eventId}/join")
+    @PostMapping("/events/join/{eventId}")
     public SingleResponse<?> createUserParticipation(
             @PathVariable Long eventId
     ) {
@@ -29,7 +28,7 @@ public class TicketingController {
     }
 
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
-    @PostMapping(value = "/events/{eventId}/complete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/events/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public SingleResponse<?> updateParticipationStatusByPassword(
             @PathVariable Long eventId,
             @RequestPart("password") String adminPassword,
@@ -39,15 +38,12 @@ public class TicketingController {
         return new SingleResponse<>(200, "관리자 비밀번호로 수령 확인 성공", null);
     }
 
-//    // todo: 서명을 통한 데이터를 사용자에게 받아와 S3 저장 및 처리
-//    @PostMapping(value = "/events/{eventId}/signature", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public SingleResponse<?> uploadSignature(
-//            @PathVariable Long eventId,
-//            @RequestParam String signatureImgUrl,
-//            @RequestParam MultipartFile signatureImage
-//    ) {
-//        // 실제 구현 필요
-//        // SecurityContextHolder를 통해 유저 데이터 가져옴 (SecurityUtil)
-//        return new SingleResponse<>(200, "서명 이미지 저장 및 처리 성공", null);
-//    }
+    /** 사용자 티켓팅 취소 */
+    @DeleteMapping(value = "/events/cancele/{eventId}")
+    public SingleResponse<?> updateStatusCanceledParticipation(
+            @PathVariable Long eventId
+    ) {
+        ticketingService.changeParticipationStatusCanceled(eventId);
+        return new SingleResponse<>(200, "티켓팅 취소 완료", null);
+    }
 }

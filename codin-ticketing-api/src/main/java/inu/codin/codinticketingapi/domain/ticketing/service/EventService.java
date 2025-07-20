@@ -37,13 +37,13 @@ public class EventService {
     }
 
     public EventParticipationHistoryPageResponse getUserEventList(@NotNull int pageNumber) {
-        String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
+        String userId = userClientService.fetchUser().getUserId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistory(userId, pageable));
     }
 
     public EventParticipationHistoryPageResponse getUserEventListByStatus(@NotNull int pageNumber, ParticipationStatus status) {
-        String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
+        String userId = userClientService.fetchUser().getUserId();
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationService.getUserEventHistoryByCanceled(userId, status, pageable));
     }

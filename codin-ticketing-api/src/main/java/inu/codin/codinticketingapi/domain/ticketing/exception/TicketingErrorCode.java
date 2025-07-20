@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 public enum TicketingErrorCode implements GlobalErrorCode {
 
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "이벤트를 찾을 수 없습니다."),
-    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "수령자 정보가 존재하지 않습니다."),
+    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "수령자 정보를 찾을 수 없습니다."),
+    PARTICIPATION_NOT_FOUND(HttpStatus.NOT_FOUND, "이벤트 참여 기록을 찾을 수 없습니다."),
+    STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "재고 정보를 찾을 수 없습니다."),
     ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "옳바르지 않은 정보입니다."),
     SOLD_OUT(HttpStatus.BAD_REQUEST, "티켓팅이 마감되었습니다."),
     PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "관리자 비밀번호가 맞지 않습니다."),

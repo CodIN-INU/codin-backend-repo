@@ -12,6 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
 
@@ -55,6 +58,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             @Param("status") ParticipationStatus status,
             Pageable pageable
     );
+    Optional<Participation> findByEventAndProfile(Event event, Profile profile);
 
-    Participation findByEventAndProfile(Event event, Profile profile);
+    List<Participation> findByEvent(Event event);
 }

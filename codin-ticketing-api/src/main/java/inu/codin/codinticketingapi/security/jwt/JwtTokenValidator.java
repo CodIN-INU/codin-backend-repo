@@ -55,6 +55,13 @@ public class JwtTokenValidator {
      * 토큰에서 사용자 ID 추출
      */
     public String getUserId(String token) {
+        return getClaims(token).get("userId",  String.class);
+    }
+
+    /**
+     * 토큰에서 사용자 이메일(유저네임) 추출
+     */
+    public String getUsername(String token) {
         return getClaims(token).getSubject();
     }
 
