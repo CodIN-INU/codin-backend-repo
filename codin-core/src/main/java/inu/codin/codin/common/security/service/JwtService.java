@@ -36,6 +36,10 @@ public class JwtService {
     @Value("${server.domain}")
     private String BASERURL;
 
+    private final String REFRESH_TOKEN = "x-refresh-token";
+    private final String ACCESS_TOKEN = "Authorization";
+    private final String ACCESS_TOKEN_PREFIX = "Bearer ";
+
     /**
      * 최초 로그인 시 Access Token, Refresh Token 발급
      * @param response
@@ -95,19 +99,9 @@ public class JwtService {
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
 
         // Authorization 헤더에 Access Token 추가
-        response.setHeader("Authorization", "Bearer " + newToken.getAccessToken());
+        response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
 
-        // todo: access token 헤더 방식으로 전환
-        Cookie jwtCookie = new Cookie("access_token", newToken.getAccessToken());
-        jwtCookie.setHttpOnly(true);  // JavaScript에서 접근 불가
-        jwtCookie.setSecure(true);    // HTTPS 환경에서만 전송
-        jwtCookie.setPath("/");       // 모든 요청에 포함
-        jwtCookie.setMaxAge(30 * 60); // 30분 유지
-        jwtCookie.setDomain(BASERURL.split("//")[1]);
-        jwtCookie.setAttribute("SameSite", "None");
-        response.addCookie(jwtCookie);
-
-        Cookie newRefreshToken = new Cookie("x-refresh-token", newToken.getRefreshToken());
+        Cookie newRefreshToken = new Cookie(REFRESH_TOKEN, newToken.getRefreshToken());
         newRefreshToken.setHttpOnly(true);
         newRefreshToken.setSecure(true);
         newRefreshToken.setPath("/");
@@ -115,16 +109,6 @@ public class JwtService {
         newRefreshToken.setDomain(BASERURL.split("//")[1]);
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
-
-        // todo: refresh token 명칭 변경
-        Cookie refreshCookie = new Cookie("refresh_token", newToken.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(10 * 24 * 60 * 60); // 10일
-        refreshCookie.setDomain(BASERURL.split("//")[1]);
-        refreshCookie.setAttribute("SameSite", "None");
-        response.addCookie(refreshCookie);
 
         log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
     }
@@ -144,14 +128,7 @@ public class JwtService {
     }
 
     private void deleteCookie(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("access_token", "");
-        jwtCookie.setMaxAge(0);  // 쿠키 삭제
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true);
-        jwtCookie.setPath("/");  // 쿠키가 적용될 경로
-        response.addCookie(jwtCookie);
-
-        Cookie refreshCookie = new Cookie("refresh_token", "");
+        Cookie refreshCookie = new Cookie(REFRESH_TOKEN, "");
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
@@ -163,17 +140,15 @@ public class JwtService {
         String accessToken = jwtUtils.getAccessToken(serverHttpRequest.getServletRequest());
 
         // Access Token이 있는 경우
-        if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
-            if (jwtTokenProvider.validateAccessToken(accessToken)) {
-                String email = jwtTokenProvider.getUsername(accessToken);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+            String email = jwtTokenProvider.getUsername(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
-                if (userDetails != null) {
-                    // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
-                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+            // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
+            if (userDetails != null) {
+                // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
+                JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } else {
             SecurityContextHolder.clearContext();

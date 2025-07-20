@@ -197,7 +197,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "X-Requested-With",
                 "Accept",
-                "Cache-Control"
+                "Cache-Control",
+                "X-Refresh-Token"
         ));
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
@@ -216,10 +217,6 @@ public class SecurityConfig {
     // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/v3/api-docs",
-            "/swagger-resources/**"
     };
 
     // Manager 권한 URL

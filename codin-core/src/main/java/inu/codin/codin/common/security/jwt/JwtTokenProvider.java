@@ -101,16 +101,16 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 유효성 검사 (토큰 변조, 만료)
-     * @param accessToken
+     * @param token
      * @return true: 유효한 토큰, false: 유효하지 않은 토큰
      */
-    public boolean validateAccessToken(String accessToken) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(SECRET_KEY)
                     .setAllowedClockSkewSeconds(60)
                     .build()
-                    .parseClaimsJws(accessToken);
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) { // 토큰 만료
             log.error("[validateAccessToken] 토큰 만료 : {}", e.getMessage());

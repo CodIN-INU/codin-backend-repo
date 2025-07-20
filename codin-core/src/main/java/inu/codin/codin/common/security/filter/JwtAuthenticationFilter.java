@@ -16,6 +16,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * JWT 토큰을 검증하여 인증하는 필터
@@ -29,6 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final PermitAllProperties permitAllProperties;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    private final String [] SWAGGER_AUTH_PATHS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**"
+    };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -39,11 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = jwtUtils.getAccessToken(request);
+        String token = null;
+        if (Arrays.stream(SWAGGER_AUTH_PATHS).anyMatch(url -> pathMatcher.match(url, requestURI))) {
+            token = jwtUtils.getRefreshToken(request);
+        } else {
+            token = jwtUtils.getAccessToken(request);
+        }
 
         // Access Token이 있는 경우
-        if (accessToken != null && jwtTokenProvider.validateAccessToken(accessToken)) {
-            setAuthentication(accessToken);
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            setAuthentication(token);
         } else {
             SecurityContextHolder.clearContext();
         }
