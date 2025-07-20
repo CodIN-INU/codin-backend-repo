@@ -2,6 +2,7 @@ package inu.codin.codin.common.security.dto.apple;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
 import java.util.Map;
 
 @Getter

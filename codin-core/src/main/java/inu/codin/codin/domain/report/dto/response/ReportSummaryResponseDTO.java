@@ -2,7 +2,6 @@ package inu.codin.codin.domain.report.dto.response;
 
 import inu.codin.codin.domain.report.entity.ReportType;
 import lombok.Getter;
-import org.bson.types.ObjectId;
 
 import java.util.Map;
 

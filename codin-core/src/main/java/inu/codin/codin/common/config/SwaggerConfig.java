@@ -33,18 +33,19 @@ public class SwaggerConfig {
 
         // Bearer Auth 설정
         SecurityScheme securityScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.COOKIE)
-                .name("access_token");
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .description("Bearer ... 을 통한 Authorization 진행");
 
         // Bearer Auth를 사용하는 Security Requirement 설정
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("cookieAuth");
+                .addList("bearerAuth");
 
         return new OpenAPI()
                 .info(info)
                 .security(List.of(securityRequirement))
-                .components(new Components().addSecuritySchemes("cookieAuth", securityScheme))
+                .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Server"), // Local Server
                         new Server().url(BASEURL+"/api").description("Production Server"), // Production Server

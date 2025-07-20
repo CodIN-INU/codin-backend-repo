@@ -2,16 +2,13 @@ package inu.codin.codin.domain.report.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
-
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
-
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
@@ -29,10 +26,8 @@ import inu.codin.codin.domain.report.repository.ReportRepository;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
