@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: codin-ticketing-api
+  config:
+    import: optional:file:./.env[.properties]
+  jwt:
+    secret: ${SPRING_JWT_SECRET}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:1234}
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost/test}
+      auto-index-creation: true
+
+server:
+  domain: "https://codin.inu.ac.kr"
+  forward-headers-strategy: framework
+logging:
+  level:
+    root: info
+    sql: info
