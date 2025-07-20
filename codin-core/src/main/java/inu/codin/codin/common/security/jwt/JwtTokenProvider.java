@@ -2,6 +2,7 @@ package inu.codin.codin.common.security.jwt;
 
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.common.security.exception.SecurityErrorCode;
+import inu.codin.codin.domain.user.security.CustomUserDetails;
 import inu.codin.codin.infra.redis.RedisStorageService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -57,6 +58,9 @@ public class JwtTokenProvider {
                 .reduce((auth1, auth2) -> auth1 + "," + auth2)
                 .orElse("");
 
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String userId = userDetails.getId().toHexString();
+
         // 토큰 만료시간 설정
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + Long.parseLong(this.ACCESS_TOKEN_EXPIRATION) * 1000);
@@ -66,6 +70,7 @@ public class JwtTokenProvider {
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(accessTokenExpiration)
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
@@ -74,6 +79,7 @@ public class JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(refreshTokenExpiration)
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
