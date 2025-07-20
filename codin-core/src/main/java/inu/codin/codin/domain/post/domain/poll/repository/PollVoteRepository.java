@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.post.domain.poll.repository;
 
-import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import jakarta.validation.constraints.NotBlank;
 import org.bson.types.ObjectId;

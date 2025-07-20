@@ -2,13 +2,13 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
+import inu.codin.codin.common.security.service.AbstractAuthService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,8 +25,8 @@ import java.util.Optional;
 public class AuthCommonService extends AbstractAuthService {
 
 
-    public AuthCommonService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService, HttpServletRequest request) {
-        super(userRepository, s3Service, jwtService, userDetailsService, request);
+    public AuthCommonService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService) {
+        super(userRepository, s3Service, jwtService, userDetailsService);
     }
 
     public void completeUserProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage, HttpServletResponse response) {

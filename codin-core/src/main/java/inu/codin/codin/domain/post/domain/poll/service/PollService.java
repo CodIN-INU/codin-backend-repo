@@ -1,8 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
@@ -16,7 +14,6 @@ import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
