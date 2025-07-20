@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.global.exception;
+package inu.codin.codin.global.common.exception;
 
 import org.springframework.http.HttpStatus;
 
