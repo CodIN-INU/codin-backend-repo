@@ -41,9 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         // 테스트 API 경로 - @PreAuthorize로 권한 제어
                         .requestMatchers("/v3/api/test**").permitAll()
-                        // 나머지 모든 요청은 인증 필요
-                        .anyRequest().permitAll()
-//                        .anyRequest().hasRole("USER")
+                        // 모든 요청은 인증 필요
+                        .anyRequest().hasAnyRole("USER", "MANAGER", "ADMIN")
                 )
                 .addFilterBefore(
                         new TokenValidationFilter(jwtTokenValidator),
