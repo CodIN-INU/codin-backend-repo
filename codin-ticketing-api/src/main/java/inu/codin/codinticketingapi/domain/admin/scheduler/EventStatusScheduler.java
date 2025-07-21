@@ -83,7 +83,7 @@ public class EventStatusScheduler implements ApplicationRunner {
         log.info("모든 UPCOMING 이벤트 스케줄링 완료.");
     }
 
-    public void schedulerDeleteOpenEvent(Long eventId) {
+    public void deleteOpenEventScheduler(Long eventId) {
         try {
             scheduler.deleteJob(new JobKey("startJob-" + eventId, "event-status"));
 

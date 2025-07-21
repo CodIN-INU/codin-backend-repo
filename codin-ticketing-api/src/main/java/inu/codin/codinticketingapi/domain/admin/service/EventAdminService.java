@@ -41,7 +41,7 @@ public class EventAdminService {
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
-    private final static int PAGE_NUMBER = 10;
+    private final static int PAGE_SIZE = 10;
 
     private final ImageService imageService;
     private final UserClientService userClientService;
@@ -130,11 +130,6 @@ public class EventAdminService {
         eventStatusScheduler.scheduleAllDelete(findEvent);
     }
 
-//    public String getSignImage(long eventId, String userId) {
-//
-//        return participationRepository.findSignatureImgUrlByEventIdAndUserId(eventId, userId).orElseThrow(() -> new UserException(UserErrorCode.USER_VALIDATION_FAILED));
-//    }
-
     public EventParticipationProfilePageResponse getParticipationList(Long eventId, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("ticketNumber").descending());
 
@@ -182,13 +177,13 @@ public class EventAdminService {
         }
 
         findEvent.updateStatus(EventStatus.ACTIVE);
-        eventStatusScheduler.schedulerDeleteOpenEvent(eventId);
+        eventStatusScheduler.deleteOpenEventScheduler(eventId);
 
         return true;
     }
 
     private EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, PAGE_NUMBER, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by("createdAt").descending());
 
         return switch (status) {
             case "all" -> EventPageResponse.of(eventRepository.findAll(pageable));
@@ -206,17 +201,15 @@ public class EventAdminService {
     }
 
     private String findAdminUser() {
-//        String userId = userClientService
-//                .fetchUserIdAndUsername(SecurityUtil.getEmail())
-//                .userId();
-//
-//        if (userId == null || userId.isBlank()) {
-//            throw new UserException(UserErrorCode.USER_VALIDATION_FAILED);
-//        }
-//
-//        return userId;
+        String userId = userClientService
+                .fetchUserIdAndUsername(SecurityUtil.getEmail())
+                .userId();
 
-        return "1";
+        if (userId == null || userId.isBlank()) {
+            throw new UserException(UserErrorCode.USER_VALIDATION_FAILED);
+        }
+
+        return userId;
     }
 
     private void validationEvent(Event event, String userId) {
