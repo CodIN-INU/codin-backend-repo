@@ -50,7 +50,7 @@ public class EventDetailResponse {
                 .eventImageUrls(event.getEventImageUrl())
                 .eventTitle(event.getTitle())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getQuantity())
+                .quantity(event.getStock().getStock())
                 .target(event.getTarget())
                 .description(event.getDescription())
                 .build();

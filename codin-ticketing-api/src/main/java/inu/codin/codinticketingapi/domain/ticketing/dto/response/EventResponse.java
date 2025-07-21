@@ -38,7 +38,7 @@ public class EventResponse {
                 .eventTitle(event.getTitle())
                 .eventDate(event.getEventTime())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getQuantity())
+                .quantity(event.getStock().getStock())
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.domain.admin.dto;
+package inu.codin.codinticketingapi.domain.admin.dto.request;
 
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
