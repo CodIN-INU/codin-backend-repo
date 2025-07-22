@@ -59,6 +59,10 @@ public class Participation extends BaseEntity {
         }
     }
 
+    public void changeConfirmStatus() {
+        this.confirmed = !confirmed;
+    }
+
     /** 수령 상태 초기화 */
     public void reset() {
         this.status = ParticipationStatus.WAITING;

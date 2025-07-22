@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.domain.admin.dto;
+package inu.codin.codinticketingapi.domain.admin.dto.request;
 
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
@@ -56,7 +56,6 @@ public class EventCreateRequest {
                 .eventImageUrl(eventImageUrl)
                 .title(this.title)
                 .locationInfo(this.locationInfo)
-                .quantity(this.quantity)
                 .target(this.target)
                 .description(this.description)
                 .inquiryNumber(this.inquiryNumber)

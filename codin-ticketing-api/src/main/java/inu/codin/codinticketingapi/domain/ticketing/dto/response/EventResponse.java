@@ -42,7 +42,7 @@ public class EventResponse {
                 .eventImageUrl(event.getEventImageUrl())
                 .eventDate(event.getEventTime())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getQuantity())
+                .quantity(event.getStock().getStock())
                 .build();
     }
 }

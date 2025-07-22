@@ -1,8 +1,9 @@
 package inu.codin.codinticketingapi.domain.admin.entity;
 
 import inu.codin.codinticketingapi.common.entity.BaseEntity;
-import inu.codin.codinticketingapi.domain.admin.dto.EventUpdateRequest;
+import inu.codin.codinticketingapi.domain.admin.dto.request.EventUpdateRequest;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -56,8 +57,8 @@ public class Event extends BaseEntity {
     private String locationInfo;
 
     /** 제공 수량 (햄버거 100개) */
-    @Column(name = "quantity", nullable = false)
-    private int quantity;
+    @OneToOne(mappedBy = "event", fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    private Stock stock;
 
     /** 이벤트 대상자 (정보대 학생) */
     @Column(name = "target")
@@ -79,8 +80,13 @@ public class Event extends BaseEntity {
     @Column(name = "event_password", nullable = false)
     private String eventPassword;
 
+    // 이벤트 진행 상태
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EventStatus eventStatus;
+
     @Builder
-    public Event(String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, int quantity, String target, String description, String inquiryNumber, String promotionLink) {
+    public Event(String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink) {
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
@@ -88,12 +94,16 @@ public class Event extends BaseEntity {
         this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
-        this.quantity = quantity;
         this.target = target;
         this.description = description;
         this.inquiryNumber = inquiryNumber;
         this.promotionLink = promotionLink;
         this.eventPassword = generateEventPassword();
+        this.eventStatus = EventStatus.UPCOMING;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     public void updateFrom(EventUpdateRequest dto) {
@@ -102,15 +112,27 @@ public class Event extends BaseEntity {
         this.eventEndTime = dto.getEventEndTime();
         this.title = dto.getTitle();
         this.locationInfo = dto.getLocationInfo();
-        this.quantity = dto.getQuantity();
         this.target = dto.getTarget();
         this.description = dto.getDescription();
         this.inquiryNumber = dto.getInquiryNumber();
         this.promotionLink = dto.getPromotionLink();
+
+        if (this.stock != null) {
+            this.stock.updateStock(dto.getQuantity());
+        }
     }
 
     public void updateImageUrl(String newImageUrl) {
         this.eventImageUrl = newImageUrl;
+    }
+
+    public void updateStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+    }
+
+    public void closeEvent() {
+        this.eventStatus = EventStatus.ENDED;
+        this.eventEndTime = LocalDateTime.now();
     }
 
     /** 이벤트 비밀번호 생성 (무작위 4자리 숫자) */
