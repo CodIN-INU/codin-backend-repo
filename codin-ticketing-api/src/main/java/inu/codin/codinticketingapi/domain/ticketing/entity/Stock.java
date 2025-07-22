@@ -29,11 +29,16 @@ public class Stock extends BaseEntity {
             name = "event_id", nullable = false, unique = true,
             foreignKey = @ForeignKey(name = "fk_stock_event")
     )
+
     private Event event;
 
     /** 남은 재고 수 */
     @Column(name = "stock", nullable = false)
     private int stock;
+
+    // 초기 재고 수
+    @Column(name = "initial_stock", nullable = false)
+    private int initialStock;
 
     /** 낙관적 잠금을 위한 버전 */
     @Version
@@ -43,6 +48,11 @@ public class Stock extends BaseEntity {
     public Stock(Event event, int initialStock) {
         this.event = event;
         this.stock = initialStock;
+        this.initialStock = initialStock;
+
+        if (event != null && event.getStock() != this) {
+            event.setStock(this);
+        }
     }
 
     /** 재고 차감 (원자적 경쟁 방지) */
@@ -50,5 +60,9 @@ public class Stock extends BaseEntity {
         if (stock <= 0) return false;
         stock--;
         return true;
+    }
+
+    public void updateStock(int stock) {
+        this.stock = stock;
     }
 }
