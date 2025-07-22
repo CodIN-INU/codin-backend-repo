@@ -39,18 +39,18 @@ spring:
       database: ${REDIS_DATABASE:0}
 
   # Kafka Configuration
-  kafka:
-    bootstrap-servers: ${KAFKA_HOST}
-    consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP_ID:ticketing-api-group}
-      auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: inu.codin.codinticketingapi.domain.user.dto
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#  kafka:
+#    bootstrap-servers: ${KAFKA_HOST}
+#    consumer:
+#      group-id: ${KAFKA_CONSUMER_GROUP_ID:ticketing-api-group}
+#      auto-offset-reset: latest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring.json.trusted.packages: inu.codin.codinticketingapi.domain.user.dto
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 server:
   domain: https://codin.inu.ac.kr

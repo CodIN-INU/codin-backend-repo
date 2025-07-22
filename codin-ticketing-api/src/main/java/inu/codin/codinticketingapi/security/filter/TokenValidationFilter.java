@@ -23,16 +23,23 @@ import java.io.IOException;
 public class TokenValidationFilter extends OncePerRequestFilter {
     private final JwtTokenValidator jwtTokenValidator;
 
+    private final String [] SWAGGER_AUTH_PATHS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**"
+    };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = TokenUtil.extractToken(request);
 
         if (accessToken != null && jwtTokenValidator.validateAccessToken(accessToken)) {
-            log.info("[TokenValidationFilter] Access Token이 있고 유효한 경우");
+            log.debug("[TokenValidationFilter] Access Token이 유효함");
             // Access Token이 있고 유효한 경우
             setAuthentication(accessToken);
         } else {
-            log.info("[TokenValidationFilter] Access Token이 유효하지 않음");
+            log.debug("[TokenValidationFilter] Access Token이 유효하지 않음");
             SecurityContextHolder.clearContext();
         }
 
@@ -45,17 +52,17 @@ public class TokenValidationFilter extends OncePerRequestFilter {
     private void setAuthentication(String token) {
         try {
             String userId = jwtTokenValidator.getUserId(token);
+            String username = jwtTokenValidator.getUsername(token);
             String role = jwtTokenValidator.getUserRole(token);
-            log.info("[setAuthentication] : {}, {}", userId, role);
+            log.debug("[setAuthentication] : {}, {}", userId, role);
 
-            TokenUserDetails userDetails = TokenUserDetails.fromTokenClaims(userId, role);
+            TokenUserDetails userDetails = TokenUserDetails.fromTokenClaims(userId, username, role, token);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            log.info("[TokenValidationFilter] 인증 설정 완료: userId={}, role={}", userId, role);
+            log.info("[TokenValidationFilter] Authentication 설정 완료: userId={}, username={}, role={}", userId, username, role);
         } catch (Exception e) {
             log.error("[TokenValidationFilter] 인증 설정 실패: {}", e.getMessage());
             SecurityContextHolder.clearContext();

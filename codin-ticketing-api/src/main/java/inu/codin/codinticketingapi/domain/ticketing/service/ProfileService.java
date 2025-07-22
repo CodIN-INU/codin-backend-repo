@@ -6,7 +6,7 @@ import inu.codin.codinticketingapi.domain.ticketing.dto.response.UserTicketingPr
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ProfileRepository;
-import inu.codin.codinticketingapi.domain.user.dto.UserReply;
+import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
@@ -24,8 +23,9 @@ public class ProfileService {
      * 유저의 티켓팅 수령자 정보 반환
      * @return UserTicketingProfileResponse
      */
+    @Transactional(readOnly = true)
     public UserTicketingProfileResponse getUserTicketingProfile() {
-        String userId = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail()).userId();
+        String userId = userClientService.fetchUser().getUserId();
         return UserTicketingProfileResponse.of(
                 profileRepository.findByUserId(userId)
                     .orElseThrow(() -> new TicketingException(TicketingErrorCode.PROFILE_NOT_FOUND)));
@@ -37,13 +37,13 @@ public class ProfileService {
      */
     @Transactional
     public UserTicketingProfileResponse createUserTicketingProfile(TicketingUserProfileRequest requestDto) {
-        UserReply userReply = userClientService.fetchUserIdAndUsername(SecurityUtil.getEmail());
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
 
-        return UserTicketingProfileResponse.of(profileRepository.findByUserId(userReply.userId())
+        return UserTicketingProfileResponse.of(profileRepository.findByUserId(userInfoResponse.getUserId())
                 .map(existingProfile -> {
                     existingProfile.updateProfile(requestDto.getDepartment(), requestDto.getStudentId());
                     return existingProfile;
                 })
-                .orElseGet(() -> profileRepository.save(TicketingUserProfileRequest.toEntity(requestDto, userReply.userId(), userReply.username()))));
+                .orElseGet(() -> profileRepository.save(TicketingUserProfileRequest.toEntity(requestDto, userInfoResponse.getUserId(), userInfoResponse.getUsername()))));
     }
 }
