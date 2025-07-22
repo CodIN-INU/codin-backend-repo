@@ -135,7 +135,7 @@ public class EventAdminService {
 
         Page<Participation> participationList = participationRepository.findAllByEvent_Id(eventId, pageable);
         List<EventParticipationProfileResponse> profileList = participationList.stream()
-                .map(p -> EventParticipationProfileResponse.of(p.getProfile(), p.getSignatureImgUrl()))
+                .map(EventParticipationProfileResponse::of)
                 .toList();
 
         int lastPage = getLastPage(participationList.getTotalPages());
@@ -202,8 +202,8 @@ public class EventAdminService {
 
     private String findAdminUser() {
         String userId = userClientService
-                .fetchUserIdAndUsername(SecurityUtil.getEmail())
-                .userId();
+                .fetchUser()
+                .getUserId();
 
         if (userId == null || userId.isBlank()) {
             throw new UserException(UserErrorCode.USER_VALIDATION_FAILED);

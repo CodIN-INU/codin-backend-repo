@@ -4,7 +4,6 @@ import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
-import inu.codin.codinticketingapi.domain.ticketing.entity.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -30,7 +29,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
         )
         FROM Participation p
         JOIN p.event e
-        WHERE p.profile.userId = :userId
+        WHERE p.userId = :userId
           AND e.deletedAt IS NULL
         ORDER BY p.createdAt DESC
         """)
@@ -48,7 +47,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
         )
         FROM Participation p
         JOIN p.event e
-        WHERE p.profile.userId = :userId
+        WHERE p.userId = :userId
           AND e.deletedAt IS NULL
           AND p.status = :status
         ORDER BY p.createdAt DESC
@@ -58,7 +57,8 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             @Param("status") ParticipationStatus status,
             Pageable pageable
     );
-    Optional<Participation> findByEventAndProfile(Event event, Profile profile);
+
+    Optional<Participation> findByEventAndUserId(Event event, String userId);
 
     @EntityGraph(attributePaths = {"profile"})
     Page<Participation> findAllByEvent_Id(Long eventId, Pageable pageable);
@@ -66,7 +66,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     @Query("""
                 SELECT p.signatureImgUrl
                 FROM Participation p
-                WHERE p.event.id = :eventId AND p.profile.userId = :userId
+                WHERE p.event.id = :eventId AND p.userId = :userId
             """)
     Optional<String> findSignatureImgUrlByEventIdAndUserId(@Param("eventId") Long eventId, @Param("userId") String userId);
 
