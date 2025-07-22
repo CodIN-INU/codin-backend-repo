@@ -40,9 +40,10 @@ public class RedisConfig {
         redisStandAloneConfiguration.setHostName(host);
         redisStandAloneConfiguration.setPassword(password);
         redisStandAloneConfiguration.setDatabase(database);
+        log.info("[redisConnectionFactory] Injected Redis hostName:{}, port:{}, database:{}", host, port, database);
 
         return new LettuceConnectionFactory(redisStandAloneConfiguration, LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofMillis(500)) // 명령 타임아웃
+                .commandTimeout(Duration.ofMillis(3000)) // 명령 타임아웃
                 .shutdownTimeout(Duration.ofMillis(100)) // 셧다운 타임아웃
                 .build());
     }

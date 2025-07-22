@@ -1,5 +1,6 @@
 package inu.codin.codinticketingsse.sse.service;
 
+import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.dto.SseStockResponse;
 import inu.codin.codinticketingsse.sse.repository.SseEmitterRepository;
 import org.slf4j.Logger;
@@ -23,15 +24,15 @@ public class SseService {
         this.sseEmitterRepository = sseEmitterRepository;
     }
 
-    /** 구독 시작 */
+    /** SSE 구독 시작 */
     public SseEmitter subscribeEventStock(Long eventId) {
         SseEmitter emitter = sseEmitterRepository.saveEmitter(eventId,  new SseEmitter(DEFAULT_TIMEOUT));
-        log.info("Subscribed to event : {}, emitter : {}", eventId, emitter.toString());
+        log.info("SSE 구독 시작, event : {}, emitter : {}", eventId, emitter.toString());
 
         emitter.onCompletion(() -> sseEmitterRepository.deleteByEventIdAndEmitter(eventId, emitter));
         emitter.onTimeout(() -> sseEmitterRepository.deleteByEventIdAndEmitter(eventId, emitter));
         emitter.onError(e -> {
-                    log.error("EventSource Failed : {}", e.getMessage());
+                    log.warn("Emitter onError 처리 : {}", e.getMessage());
                     sseEmitterRepository.deleteByEventIdAndEmitter(eventId, emitter);
         });
 
@@ -39,12 +40,12 @@ public class SseService {
         return emitter;
     }
 
-    /** 이벤트 ID에 대해 payload 전송 */
-    public void publishEventStock(Long eventId, Long quantity) {
-        SseStockResponse data = SseStockResponse.ofNew(eventId, quantity);
-        List<SseEmitter> list = sseEmitterRepository.findAll(eventId);
+    /** 이벤트 ID에 대해 SSE payload 전송 */
+    public void publishEventStock(EventStockStream stream) {
+        SseStockResponse data = SseStockResponse.ofNew(stream);
+        List<SseEmitter> list = sseEmitterRepository.findAll(data.eventId());
 
-        log.info("[publishEventStock] Sent Event, size : {}, eventId : {}", list.size(), eventId);
+        log.info("[publishEventStock] 재고상태 SSE 전송, size : {}, eventId : {}", list.size(), data.eventId());
         for (SseEmitter emitter : list) {
             sendAsyncToClient(emitter, data, "ticketing-stock-sse");
         }

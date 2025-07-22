@@ -24,8 +24,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         Info info = new Info()
-                .title("CODIN Ticketing Module API Documentation")
-                .description("CODIN Ticketing Module API 명세서")
+                .title("CODIN Ticketing SSE Module Documentation")
+                .description("CODIN Ticketing SSE Module 명세서")
                 .version("v1.0.0");
 
         // Cookie Auth 설정
@@ -35,7 +35,7 @@ public class SwaggerConfig {
                 .name("access_token")
                 .description("쿠키를 통한 인증 (access_token)");
 
-        // Bearer Token Auth 설정 (백업용)
+        // Bearer Token Auth 설정
         SecurityScheme bearerAuth = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
