@@ -38,7 +38,7 @@ public class TicketingController {
     }
 
     /** 사용자 티켓팅 취소 */
-    @DeleteMapping(value = "/events/cancele/{eventId}")
+    @DeleteMapping(value = "/events/cancel/{eventId}")
     public ResponseEntity<SingleResponse<?>> updateStatusCanceledParticipation(
             @PathVariable Long eventId
     ) {
