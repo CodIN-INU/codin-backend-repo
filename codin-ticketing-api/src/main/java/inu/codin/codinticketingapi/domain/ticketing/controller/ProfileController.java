@@ -26,10 +26,10 @@ public class ProfileController {
 
     /** 티켓팅 수령자 정보 입력 */
     @PostMapping("/user-profile")
-    public SingleResponse<?> registerUserTicketingInfo(
+    public ResponseEntity<SingleResponse<?>> registerUserTicketingInfo(
             @RequestBody TicketingUserProfileRequest ticketingUserProfileRequest
     ) {
-        return new SingleResponse<>(200, "티켓팅 수령자 정보 입력 성공",
-                profileService.createUserTicketingProfile(ticketingUserProfileRequest));
+        return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 수령자 정보 입력 성공",
+                profileService.createUserTicketingProfile(ticketingUserProfileRequest)));
     }
 }

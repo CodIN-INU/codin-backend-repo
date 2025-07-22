@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
@@ -24,6 +23,7 @@ public class ProfileService {
      * 유저의 티켓팅 수령자 정보 반환
      * @return UserTicketingProfileResponse
      */
+    @Transactional(readOnly = true)
     public UserTicketingProfileResponse getUserTicketingProfile() {
         String userId = userClientService.fetchUser().getUserId();
         return UserTicketingProfileResponse.of(
