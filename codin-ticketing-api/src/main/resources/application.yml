@@ -82,9 +82,6 @@ cloud:
 logging:
   level:
     root: info
-    sql: info
-    org.hibernate.SQL: info
-    org.hibernate.type.descriptor.sql.BasicBinder: info
-    org:
-      apache.kafka: INFO
-      springframework.kafka: INFO
+    sql: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_LOG_LEVEL:warn}

@@ -1,3 +1,4 @@
+# 로컬 개발용 Docker Compose 
 version: "3.8"
 services:
   mysql:
@@ -11,7 +12,7 @@ services:
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./mysql/data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
@@ -23,9 +24,5 @@ services:
       - "${REDIS_PORT:-6380}:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD:-1234}
     volumes:
-      - redis_data:/data
+      - ./redis/data:/data
     restart: unless-stopped
-
-volumes:
-  mysql_data:
-  redis_data:
