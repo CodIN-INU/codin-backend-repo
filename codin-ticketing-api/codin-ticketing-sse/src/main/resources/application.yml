@@ -23,3 +23,16 @@ server:
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
   port: ${SSE_SERVER_PORT:8082}
+
+# Swagger SpringDoc Configuration
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    enabled: true
+  swagger-ui:
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: alpha
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true

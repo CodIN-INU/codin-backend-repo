@@ -4,6 +4,7 @@ import inu.codin.codinticketingapi.common.response.SingleResponse;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ public class TicketingController {
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/event/join/{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
+    @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 및 교환권 부여 성공")
     public ResponseEntity<SingleResponse<?>> createUserParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
@@ -32,6 +34,7 @@ public class TicketingController {
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
     @PostMapping(value = "/event/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장")
+    @ApiResponse(responseCode = "200", description = "관리자 비밀번호로 수령 확인 성공")
     public ResponseEntity<SingleResponse<?>> updateParticipationStatusByPassword(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId,
             @Parameter(description = "관리자 비밀번호 (4자리)", example = "1234") @RequestPart("password") String adminPassword,
@@ -44,6 +47,7 @@ public class TicketingController {
     /** 사용자 티켓팅 취소 */
     @DeleteMapping(value = "/event/cancel/{eventId}")
     @Operation(summary = "사용자 티켓팅 취소")
+    @ApiResponse(responseCode = "200", description = "티켓팅 취소 완료")
     public ResponseEntity<SingleResponse<?>> updateStatusCanceledParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {

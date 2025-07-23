@@ -9,6 +9,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@Schema(description = "티켓팅 이벤트 참여 기록 페이지 응답 DTO")
 public class EventParticipationHistoryPageResponse {
 
     @Schema(description = "참여 이벤트 목록")

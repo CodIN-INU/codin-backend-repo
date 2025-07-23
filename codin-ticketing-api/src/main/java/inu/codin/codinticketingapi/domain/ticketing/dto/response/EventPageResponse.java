@@ -12,6 +12,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "이벤트 페이지 목록 응답 DTO")
 public class EventPageResponse {
 
     @Schema(description = "이벤트 목록")

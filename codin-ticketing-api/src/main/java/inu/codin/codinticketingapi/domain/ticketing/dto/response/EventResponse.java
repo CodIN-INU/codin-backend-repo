@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@Schema(description = "티켓팅 이벤트 응답 DTO")
 public class EventResponse {
 
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")

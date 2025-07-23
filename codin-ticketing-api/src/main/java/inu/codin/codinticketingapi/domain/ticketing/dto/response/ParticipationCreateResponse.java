@@ -8,6 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
+@Schema(description = "티켓팅 이벤트 수령 생성 응답 DTO")
 public class ParticipationCreateResponse {
 
     @Schema(description = "참여 상태", example = "PENDING")

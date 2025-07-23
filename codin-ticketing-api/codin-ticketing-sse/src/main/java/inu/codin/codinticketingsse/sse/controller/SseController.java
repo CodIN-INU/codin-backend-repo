@@ -29,7 +29,7 @@ public class SseController {
     }
 
     @PostMapping(value = "sse/{eventId}")
-    @Operation(summary = "[테스트] 재고상태 SSE 전송")
+    @Operation(summary = "[테스트] 재고상태 SSE 전송 - MANAGER, ADMIN")
     public ResponseEntity<?> sendQuantityUpdateEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId,
             @Parameter(description = "전송할 임의 재고 상태", example = "100") @RequestParam Long quantity

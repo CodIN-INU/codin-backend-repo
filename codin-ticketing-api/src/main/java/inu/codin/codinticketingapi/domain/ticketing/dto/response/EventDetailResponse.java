@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@Schema(description = "이벤트 세부 정보 응답 DTO")
 public class EventDetailResponse {
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     private Long eventId;
@@ -42,7 +43,7 @@ public class EventDetailResponse {
     @Schema(description = "이벤트 대상", example = "컴퓨터 공학부 재학생")
     private String target;
 
-    @Schema(description = "이벤트 부가 설명")
+    @Schema(description = "이벤트 부가 설명", example = "이벤트 부가 설명문 ~~")
     private String description;
 
     public static EventDetailResponse of(Event event) {
