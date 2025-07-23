@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface StockRepository extends JpaRepository<Stock, Long> {
 
     Optional<Stock> findByEvent(Event event);
+
+    Optional<Stock> findByEvent_Id(Long eventId);
 }

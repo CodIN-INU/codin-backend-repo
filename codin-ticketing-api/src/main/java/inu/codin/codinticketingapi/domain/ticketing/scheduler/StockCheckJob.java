@@ -32,7 +32,8 @@ public class StockCheckJob implements Job {
         Long eventId = context.getJobDetail().getJobDataMap().getLong("eventId");
         try {
             log.info("StockCheckJob 실행, Event Id : {}",  eventId);
-            Stock stock = stockRepository.findById(eventId).orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
+            Stock stock = stockRepository.findByEvent_Id(eventId)
+                    .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
 
             final int current = stock.getStock();
 
