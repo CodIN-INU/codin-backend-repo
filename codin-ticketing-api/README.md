@@ -81,6 +81,9 @@ docker buildx inspect multi-builder --bootstrap
 ### 2. Ticketing-API 이미지 빌드 & tar.gz 추출
 ```bash
 # 1) AMD64 전용 이미지 빌드 후 로컬 데몬에 바로 로드
+./gradlew clean
+./gradlew -x build 
+
 docker buildx build \
 --platform linux/amd64 \
 --load \
@@ -99,6 +102,9 @@ gzip codin-ticketing-api-amd64.tar   # → codin-ticketing-api-amd64.tar.gz
 ```bash
 # 1) AMD64 전용 이미지 빌드 후 로드
 cd codin-ticketing-sse
+
+./gradlew clean
+./gradlew -x build 
 
 docker buildx build \
   --platform linux/amd64 \
