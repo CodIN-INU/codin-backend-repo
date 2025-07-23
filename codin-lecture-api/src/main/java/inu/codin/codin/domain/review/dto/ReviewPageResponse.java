@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.lecture.domain.review.dto;
+package inu.codin.codin.domain.review.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;
