@@ -1,8 +1,8 @@
 package inu.codin.codinticketingapi.domain.ticketing.repository;
 
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
-import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

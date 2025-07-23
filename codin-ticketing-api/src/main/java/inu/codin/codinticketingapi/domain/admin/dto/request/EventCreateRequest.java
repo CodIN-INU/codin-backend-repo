@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.admin.dto.request;
 
-import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import io.swagger.v3.oas.annotations.media.Schema;

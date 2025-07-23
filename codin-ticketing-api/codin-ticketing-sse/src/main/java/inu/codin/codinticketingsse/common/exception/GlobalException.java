@@ -1,7 +1,5 @@
 package inu.codin.codinticketingsse.common.exception;
 
-import lombok.Getter;
-
 public class GlobalException extends RuntimeException{
 
     private final GlobalErrorCode errorCode;

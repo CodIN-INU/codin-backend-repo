@@ -5,7 +5,10 @@ import inu.codin.codinticketingapi.domain.admin.dto.request.EventUpdateRequest;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Random;

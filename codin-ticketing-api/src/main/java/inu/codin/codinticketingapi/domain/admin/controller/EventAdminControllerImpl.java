@@ -9,7 +9,6 @@ import inu.codin.codinticketingapi.domain.admin.dto.response.EventResponse;
 import inu.codin.codinticketingapi.domain.admin.dto.response.EventStockResponse;
 import inu.codin.codinticketingapi.domain.admin.service.EventAdminService;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
