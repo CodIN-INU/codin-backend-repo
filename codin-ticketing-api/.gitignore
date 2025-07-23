@@ -43,3 +43,4 @@ logs
 /docker/db/mysql
 /docker/db/redis
 *.tar.gz
+*.tar
