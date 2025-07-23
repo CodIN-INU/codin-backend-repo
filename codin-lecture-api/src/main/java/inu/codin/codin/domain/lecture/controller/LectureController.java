@@ -1,10 +1,9 @@
-package inu.codin.codinlectureapi.lecture.controller;
-
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.lecture.dto.Option;
+package inu.codin.codin.domain.lecture.controller;
+import inu.codin.codin.domain.lecture.entity.SortingOption;
 import inu.codin.codin.domain.lecture.service.LectureService;
+import inu.codin.codin.global.common.entity.Department;
+import inu.codin.codin.global.common.response.ListResponse;
+import inu.codin.codin.global.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -24,19 +23,17 @@ public class LectureController {
     @Operation(
             summary = "학과명 및 과목/교수 정렬 페이지",
             description = "학과명과 검색 키워드(optional), 과목/교수 라디오 토클을 통해 정렬한 리스트 반환<br>"+
-                    "department : COMPUTER_SCI, INFO_COMM, EMBEDDED, OTHER(공통) <br>"+
+                    "department : COMPUTER_SCI, INFO_COMM, EMBEDDED <br>"+
                     "keyword : 검색 키워드 (Optional)"+
-                    "option : LEC(과목명) , PROF(교수명)"
+                    "option : RATING(평점 높은 순) , LIKE(좋아요 많은 순), HIT(조회수 많은 순)"
     )
     @GetMapping("/list")
-    public ResponseEntity<SingleResponse<?>> sortListOfLectures(@RequestParam("department") Department department,
-                                                           @RequestParam(value = "keyword", required = false) String keyword,
-                                                           @RequestParam("option") Option option,
-                                                              @RequestParam("page") int page){
+    public ResponseEntity<SingleResponse<?>> sortListOfLectures(@RequestParam(value = "department", required = false) Department department,
+                                                                @RequestParam(value = "sort", required = false) SortingOption sort,
+                                                                @RequestParam("page") int page){
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200,
-                        department.getDescription()+" 강의들 "+option.getDescription()+"순으로 정렬 반환",
-                        lectureService.sortListOfLectures(department, keyword, option, page)));
+                .body(new SingleResponse<>(200, "과목 리스트 반환 완료",
+                        lectureService.sortListOfLectures(department, sort, page)));
     }
 
     @Operation(

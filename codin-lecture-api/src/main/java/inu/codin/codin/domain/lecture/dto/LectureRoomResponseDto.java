@@ -1,6 +1,7 @@
-package inu.codin.codinlectureapi.lecture.domain.room.dto;
+package inu.codin.codin.domain.lecture.dto;
 
-import inu.codin.codin.domain.lecture.domain.room.entity.LectureRoomEntity;
+import inu.codin.codin.domain.lecture.entity.LectureSchedule;
+import inu.codin.codin.domain.lecture.entity.Lecture;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EmptyRoomResponseDto {
+public class LectureRoomResponseDto {
 
     @Schema(description = "강의명", example = "Java")
     private String lectureNm;
@@ -26,7 +27,7 @@ public class EmptyRoomResponseDto {
     private String endTime;
 
     @Builder
-    public EmptyRoomResponseDto(String lectureNm, String professor, int roomNum, String startTime, String endTime) {
+    public LectureRoomResponseDto(String lectureNm, String professor, int roomNum, String startTime, String endTime) {
         this.lectureNm = lectureNm;
         this.professor = professor;
         this.roomNum = roomNum;
@@ -34,13 +35,13 @@ public class EmptyRoomResponseDto {
         this.endTime = endTime;
     }
 
-    public static EmptyRoomResponseDto of(LectureRoomEntity roomEntity, String time) {
-        return EmptyRoomResponseDto.builder()
-                .lectureNm(roomEntity.getLectureNm())
-                .professor(roomEntity.getProfessor())
-                .roomNum(roomEntity.getRoomNum())
-                .startTime(time.split("/")[0])
-                .endTime(time.split("/")[1])
+    public static LectureRoomResponseDto of(Lecture lecture, int room, LectureSchedule schedule) {
+        return LectureRoomResponseDto.builder()
+                .lectureNm(lecture.getLectureNm())
+                .professor(lecture.getProfessor())
+                .roomNum(room)
+                .startTime(schedule.getStart())
+                .endTime(schedule.getEnd())
                 .build();
     }
 

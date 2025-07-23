@@ -1,7 +1,7 @@
-package inu.codin.codinlectureapi.lecture.domain.room.controller;
+package inu.codin.codin.domain.lecture.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.lecture.domain.room.service.LectureRoomService;
+import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.codin.domain.lecture.service.LectureRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
