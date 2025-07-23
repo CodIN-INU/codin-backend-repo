@@ -5,7 +5,10 @@ import lombok.Getter;
 
 @Getter
 public class LectureException extends GlobalException {
+
+    private final LectureErrorCode errorCode;
     public LectureException(LectureErrorCode errorCode) {
         super(errorCode);
+        this.errorCode = errorCode;
     }
 }
