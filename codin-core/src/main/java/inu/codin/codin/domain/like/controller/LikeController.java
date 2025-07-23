@@ -22,7 +22,7 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @Operation(summary = "게시물, 댓글, 대댓글, 수강후기 좋아요 토글")
+    @Operation(summary = "게시물, 댓글, 대댓글, 수강후기, 과목 좋아요 토글")
     @PostMapping
     public ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody @Valid LikeRequestDto likeRequestDto) {
         String message = likeService.toggleLike(likeRequestDto);
