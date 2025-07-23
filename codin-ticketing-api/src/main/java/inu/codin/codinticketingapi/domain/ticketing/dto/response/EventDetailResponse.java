@@ -33,8 +33,11 @@ public class EventDetailResponse {
     @Schema(description = "이벤트 위치 정보", example = "정보기술대학 514호 ..")
     private String locationInfo;
 
-    @Schema(description = "이벤트 수량", example = "100")
+    @Schema(description = "이벤트 제공 수량", example = "100")
     private int quantity;
+
+    @Schema(description = "이벤트 현재 수량", example = "80")
+    private int currentQuantity;
 
     @Schema(description = "이벤트 대상", example = "컴퓨터 공학부 재학생")
     private String target;
@@ -50,7 +53,8 @@ public class EventDetailResponse {
                 .eventImageUrls(event.getEventImageUrl())
                 .eventTitle(event.getTitle())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getStock().getStock())
+                .quantity(event.getStock().getInitialStock())
+                .currentQuantity(event.getStock().getStock())
                 .target(event.getTarget())
                 .description(event.getDescription())
                 .build();

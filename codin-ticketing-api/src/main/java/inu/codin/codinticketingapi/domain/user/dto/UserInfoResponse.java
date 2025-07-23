@@ -14,7 +14,6 @@ public class UserInfoResponse {
     private Department department;
     private String studentId;
 
-
     public UserInfoResponse(String _id, String email, String name, Department department, String studentId) {
         this._id = _id;
         this.email = email;

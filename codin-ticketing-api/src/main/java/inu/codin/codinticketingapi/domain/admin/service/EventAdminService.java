@@ -20,7 +20,6 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepo
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
-import inu.codin.codinticketingapi.infra.redis.RedisEventService;
 import inu.codin.codinticketingapi.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,7 +44,6 @@ public class EventAdminService {
 
     private final ImageService imageService;
     private final UserClientService userClientService;
-    private final RedisEventService redisEventService;
     private final EventStatusScheduler eventStatusScheduler;
 
     @Transactional
@@ -61,7 +59,6 @@ public class EventAdminService {
                 .build();
 
         Event savedEvent = eventRepository.save(event);
-        redisEventService.initializeEvent(savedEvent.getId(), stock.getStock(), savedEvent.getEventEndTime());
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(savedEvent);
 
         return EventResponse.of(savedEvent);
@@ -98,10 +95,6 @@ public class EventAdminService {
         // Redis 동기화 - (수량 변경 시)
         int newQuantity = event.getStock().getStock();
 
-        if (newQuantity != oldQuantity) {
-            redisEventService.initializeEvent(event.getId(), event.getStock().getStock(), event.getEventEndTime());
-        }
-
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(event);
 
         return EventResponse.of(event);
@@ -111,7 +104,7 @@ public class EventAdminService {
     public void deleteEvent(Long eventId) {
         Event event = findEventById(eventId);
         event.delete();
-        redisEventService.deleteEvent(eventId);
+
         eventStatusScheduler.scheduleAllDelete(event);
     }
 
@@ -126,7 +119,6 @@ public class EventAdminService {
     public void closeEvent(Long eventId) {
         Event findEvent = findEventById(eventId);
         findEvent.delete();
-        redisEventService.deleteEvent(eventId);
         eventStatusScheduler.scheduleAllDelete(findEvent);
     }
 

@@ -56,9 +56,20 @@ public class Stock extends BaseEntity {
     }
 
     /** 재고 차감 (원자적 경쟁 방지) */
-    public boolean decrement() {
-        if (stock <= 0) return false;
+    public boolean decrease() {
+        if (stock <= 0) {
+            return false;
+        }
         stock--;
+        return true;
+    }
+
+    /** 재고 증가 - 티켓팅 취소시 */
+    public boolean increase() {
+        if (stock >= initialStock) {
+            return false;
+        }
+        stock++;
         return true;
     }
 

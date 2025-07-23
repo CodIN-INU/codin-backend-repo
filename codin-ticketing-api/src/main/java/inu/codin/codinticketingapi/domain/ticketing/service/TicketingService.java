@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.image.service.ImageService;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
@@ -13,7 +14,10 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepo
 import inu.codin.codinticketingapi.domain.ticketing.repository.StockRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,23 +39,39 @@ public class TicketingService {
      * @param eventId 유저가 참여할 티켓팅 이벤트
      * @return ParticipationCreateResponse 티켓팅 이벤트 유저 참여 정보
      */
+    @Retryable(
+            value = OptimisticLockException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 100)
+    )
     @Transactional
     public ParticipationCreateResponse saveParticipation(Long eventId) {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
+
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+        // 이벤트 활동 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
+
         Stock stock = stockRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
-        // todo: EventStatus 검증
+        // 재고 수량 감소
+        if (!stock.decrease()) {
+             throw new TicketingException(TicketingErrorCode.SOLD_OUT);
+        }
+        stockRepository.save(stock); // 명시적으로 낙관적락 적용
 
-        // todo: int ticketNumber = Stock에서 티켓팅 번호 가져오기
+        // 사용자 번호표
+        int ticketNumber = stock.getInitialStock() - stock.getStock() + 1;
+
         Participation participation = Participation.builder()
                 .event(event)
-                .ticketNumber(1)
+                .ticketNumber(ticketNumber)
                 .userInfoResponse(userInfoResponse)
                 .build();
 
-        // eventPublisher.publishEvent(new StockDecrementRequest(event));
         return ParticipationCreateResponse.of(participationRepository.save(participation));
     }
 
@@ -66,7 +86,10 @@ public class TicketingService {
         String userId = userClientService.fetchUser().getUserId();
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
-        // todo: EventStatus 검증
+        // 이벤트 활동 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
 
         // 비밀번호 확인
         if (!adminPassword.equals(event.getEventPassword())) {
@@ -96,16 +119,24 @@ public class TicketingService {
         String userId = userClientService.fetchUser().getUserId();
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
-        // todo: EventStatus 검증
+        // 이벤트 활동 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
+
         Participation participation = participationRepository.findByEventAndUserId(event, userId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
 
         if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
             throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
         }
-        // todo: 이벤트 시간 내에 취소시 Stock 개수 증가
+
+        // 재고 증가
+        Stock stock = stockRepository.findByEvent(event)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
+        stock.increase();
+        stockRepository.save(stock); // todo: 경쟁 상태, Retryable 로직
+
         participation.changeStatusCanceled();
     }
-
-    // todo: 특정 이벤트의 잔여수량 실시간 체크 기능 (STOMP?)
 }
