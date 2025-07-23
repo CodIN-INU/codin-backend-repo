@@ -38,24 +38,21 @@ spring:
       password: ${REDIS_PASSWORD:1234}
       database: ${REDIS_DATABASE:0}
 
-  # Kafka Configuration
-#  kafka:
-#    bootstrap-servers: ${KAFKA_HOST}
-#    consumer:
-#      group-id: ${KAFKA_CONSUMER_GROUP_ID:ticketing-api-group}
-#      auto-offset-reset: latest
-#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-#      properties:
-#        spring.json.trusted.packages: inu.codin.codinticketingapi.domain.user.dto
-#    producer:
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+# Redis Stream Configuration
+redis:
+  stream:
+    stock:
+      key: ${STOCK_REDIS_STREAM_KEY:"event-stock-stream"}
 
 server:
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
   port: ${SERVER_PORT}
+
+# Feign Main API Server URL
+user:
+  client:
+    url: ${USER_CLIENT_URL:http://localhost:8080}
 
 # Swagger SpringDoc Configuration
 springdoc:

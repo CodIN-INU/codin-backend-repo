@@ -22,24 +22,24 @@ import java.time.Duration;
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
-    private String host;
+    private String REDIS_HOST;
 
     @Value("${spring.data.redis.port}")
-    private int port;
+    private int REDIS_PORT;
 
     @Value("${spring.data.redis.database}")
-    private int database;
+    private int REDIS_DATABASE;
 
     @Value("${spring.data.redis.password}")
-    private String password;
+    private String REDIS_PASSWORD;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandAloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandAloneConfiguration.setPort(port);
-        redisStandAloneConfiguration.setHostName(host);
-        redisStandAloneConfiguration.setPassword(password);
-        redisStandAloneConfiguration.setDatabase(database);
+        redisStandAloneConfiguration.setPort(REDIS_PORT);
+        redisStandAloneConfiguration.setHostName(REDIS_HOST);
+        redisStandAloneConfiguration.setPassword(REDIS_PASSWORD);
+        redisStandAloneConfiguration.setDatabase(REDIS_DATABASE);
 
         return new LettuceConnectionFactory(redisStandAloneConfiguration, LettuceClientConfiguration.builder()
                     .commandTimeout(Duration.ofMillis(500)) // 명령 타임아웃

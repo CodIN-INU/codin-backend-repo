@@ -11,6 +11,14 @@ spring:
       password: ${REDIS_PASSWORD:1234}
       database: ${REDIS_DATABASE:0}
 
+# Redis Stream Configuration
+redis:
+  stream:
+    stock:
+      key: ${STOCK_REDIS_STREAM_KEY:event-stock-stream}
+      group: ${STOCK_REDIS_STREAM_GROUP:event-stock-group}
+      consumer: ${STOCK_REDIS_STREAM_CONSUMER:event-stock-consumer}
+
 server:
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework

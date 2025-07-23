@@ -4,6 +4,7 @@ import inu.codin.codinticketingsse.sse.listener.EventStockStreamListener;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.stream.*;
@@ -22,9 +23,12 @@ public class RedisStreamListenerConfig {
     private final RedisTemplate<String, Object> redisTemplate;
     private final EventStockStreamListener streamListener;
 
-    private static final String STREAM_KEY    = "event-stock-stream";
-    private static final String GROUP_NAME    = "event-stock-group";
-    private static final String CONSUMER_NAME = "event-stock-consumer";
+    @Value("${redis.stream.stock.key}")
+    private String STREAM_KEY;
+    @Value("${redis.stream.stock.group}")
+    private String GROUP_NAME;
+    @Value("${redis.stream.stock.consumer}")
+    private String CONSUMER_NAME;
 
     @PostConstruct
     public void initializeRedisStreamListener() {

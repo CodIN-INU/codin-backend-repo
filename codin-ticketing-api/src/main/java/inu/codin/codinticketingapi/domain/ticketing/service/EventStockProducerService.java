@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.service;
 import inu.codin.codinticketingapi.domain.ticketing.dto.stream.EventStockStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.connection.stream.StreamRecords;
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventStockProducerService {
 
-    private static final String STREAM_KEY = "event-stock-stream";
+    @Value("${redis.stream.stock.key}")
+    private String STREAM_KEY;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
