@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.admin.scheduler;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
+import inu.codin.codinticketingapi.domain.ticketing.scheduler.StockCheckJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -46,6 +47,11 @@ public class EventStatusScheduler implements ApplicationRunner {
                 Trigger endTrigger = createEndTrigger(event);
                 scheduler.scheduleJob(endJobDetail, endTrigger);
                 log.info("새/업데이트 이벤트 종료 Job 스케줄링: ID = {}", event.getId());
+
+                JobDetail stockJob = createStockCheckJob(event);
+                Trigger stockTrigger = createStockCheckTrigger(event);
+                scheduler.scheduleJob(stockJob, stockTrigger);
+                log.info("새/업데이트 이벤트 재고 상태 Job 스케줄링: ID = {}", event.getId());
             } else {
                 log.info("이벤트 ID {}는 UPCOMING 상태가 아니거나 이미 시작 시간이 지났으므로 스케줄링하지 않습니다.", event.getId());
             }
@@ -129,6 +135,30 @@ public class EventStatusScheduler implements ApplicationRunner {
                 .withIdentity("endTrigger-" + event.getId(), "event-status")
                 .startAt(Date.from(event.getEventEndTime().atZone(ZoneId.systemDefault()).toInstant()))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
+    }
+
+    private JobDetail createStockCheckJob(Event event) {
+        return newJob(StockCheckJob.class)
+                .withIdentity("stockJob-" + event.getId(), "stock")
+                .usingJobData("eventId", event.getId())
+                .build();
+    }
+
+    /**
+     * 이벤트 시작 시간부터 이벤트 종료시각까지 1초에 한번씩 Job 트리거
+     * @param event 이벤트
+     * @return Trigger
+     */
+    private Trigger createStockCheckTrigger(Event event) {
+        return newTrigger()
+                .withIdentity("stockTrigger-" + event.getId(), "stock")
+                .startAt(Date.from(event.getEventTime().atZone(ZoneId.systemDefault()).toInstant()))
+                .endAt(Date.from(event.getEventEndTime().atZone(ZoneId.systemDefault()).toInstant()))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInSeconds(1)
+                        .repeatForever()
+                        .withMisfireHandlingInstructionFireNow())
                 .build();
     }
 }

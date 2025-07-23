@@ -16,7 +16,7 @@ import java.util.List;
 public class SseService {
 
     private final Logger log = LoggerFactory.getLogger(SseService.class);
-    private final Long DEFAULT_TIMEOUT = 5 * 60 * 1000L;
+    private final Long DEFAULT_TIMEOUT = 30 * 60 * 1000L; // 30분
 
     // todo : 이벤트 상황이 아닐 때에는 HearBeat 기능 추가
 
@@ -59,7 +59,7 @@ public class SseService {
      * @param data Object 데이터
      * @param name 이벤트 이름
      */
-    @Async
+    @Async("taskExecutor")
     public void sendAsyncToClient(SseEmitter emitter, Object data, String name) {
         try {
             emitter.send(SseEmitter.event()
