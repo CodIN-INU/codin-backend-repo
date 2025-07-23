@@ -6,7 +6,6 @@ import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,7 +59,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     Optional<Participation> findByEventAndUserId(Event event, String userId);
 
-    @EntityGraph(attributePaths = {"profile"})
     Page<Participation> findAllByEvent_Id(Long eventId, Pageable pageable);
 
     @Query("""
@@ -70,5 +68,5 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             """)
     Optional<String> findSignatureImgUrlByEventIdAndUserId(@Param("eventId") Long eventId, @Param("userId") String userId);
 
-    Optional<Participation> findByEvent_IdAndProfile_UserId(Long eventId, String profileUserId);
+    Optional<Participation> findByEvent_IdAndUserId(Long eventId, String profileUserId);
 }
