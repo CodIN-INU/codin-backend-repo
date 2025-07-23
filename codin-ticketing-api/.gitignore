@@ -39,3 +39,7 @@ out/
 .env.*
 !.env.example
 logs
+
+/docker/db/mysql
+/docker/db/redis
+*.tar.gz
