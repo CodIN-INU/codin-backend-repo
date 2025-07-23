@@ -20,7 +20,7 @@ public class TicketingController {
     private final TicketingService ticketingService;
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
-    @PostMapping("/events/join/{eventId}")
+    @PostMapping("/event/join/{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
     public ResponseEntity<SingleResponse<?>> createUserParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId
@@ -30,7 +30,7 @@ public class TicketingController {
     }
 
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
-    @PostMapping(value = "/events/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/event/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장")
     public ResponseEntity<SingleResponse<?>> updateParticipationStatusByPassword(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId,
@@ -42,7 +42,7 @@ public class TicketingController {
     }
 
     /** 사용자 티켓팅 취소 */
-    @DeleteMapping(value = "/events/cancel/{eventId}")
+    @DeleteMapping(value = "/event/cancel/{eventId}")
     @Operation(summary = "사용자 티켓팅 취소")
     public ResponseEntity<SingleResponse<?>> updateStatusCanceledParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId
