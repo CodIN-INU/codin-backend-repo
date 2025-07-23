@@ -23,7 +23,7 @@ public class TicketingController {
             @PathVariable Long eventId
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 참여 및 교환권 부여 성공",
-                ticketingService.saveParticipation(eventId)));
+                ticketingService.decrement(eventId)));
     }
 
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
