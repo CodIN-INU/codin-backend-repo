@@ -30,49 +30,19 @@ public class TicketingService {
     private final ParticipationRepository participationRepository;
     private final StockRepository stockRepository;
 
-//    private final ApplicationEventPublisher eventPublisher;
     private final UserClientService userClientService;
     private final ImageService imageService;
 
-    /**
-     * 유저 티켓팅 참여
-     * @param eventId 유저가 참여할 티켓팅 이벤트
-     * @return ParticipationCreateResponse 티켓팅 이벤트 유저 참여 정보
-     */
-    @Retryable(
-            value = OptimisticLockException.class,
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 100)
-    )
     @Transactional
-    public ParticipationCreateResponse saveParticipation(Long eventId) {
-        UserInfoResponse userInfoResponse = userClientService.fetchUser();
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
-        // 이벤트 활동 상태 검증
-        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
-            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
-        }
-
-        Stock stock = stockRepository.findById(eventId)
+    public Stock decrement(Long eventId) {
+        Stock stock = stockRepository.findByEvent_Id(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
         // 재고 수량 감소
         if (!stock.decrease()) {
-             throw new TicketingException(TicketingErrorCode.SOLD_OUT);
+            throw new TicketingException(TicketingErrorCode.SOLD_OUT);
         }
-        stockRepository.save(stock); // 명시적으로 낙관적락 적용
 
-        // 사용자 번호표
-        int ticketNumber = stock.getInitialStock() - stock.getStock() + 1;
-
-        Participation participation = Participation.builder()
-                .event(event)
-                .ticketNumber(ticketNumber)
-                .userInfoResponse(userInfoResponse)
-                .build();
-
-        return ParticipationCreateResponse.of(participationRepository.save(participation));
+        return stock;
     }
 
     /**
