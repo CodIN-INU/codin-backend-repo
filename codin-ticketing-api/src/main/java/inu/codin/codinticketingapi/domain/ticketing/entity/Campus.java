@@ -17,7 +17,7 @@ public enum Campus {
     @JsonCreator
     public static Campus fromDescription(String description) {
         for (Campus campus : values()) {
-            if (campus.description.equals(description)) {
+            if (campus.description.equals(description) || campus.name().equals(description)) {
                 return campus;
             }
         }

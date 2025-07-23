@@ -10,9 +10,11 @@ public class UserInfoResponse {
 
     private String _id;
     private String email;
-    private String name;
-    private Department department;
     private String studentId;
+    private String name;
+    private String nickname;
+    private String profileImageUrl;
+    private Department department;
 
     public UserInfoResponse(String _id, String email, String name, Department department, String studentId) {
         this._id = _id;

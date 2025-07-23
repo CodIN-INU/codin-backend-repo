@@ -57,6 +57,15 @@ user:
 # Swagger SpringDoc Configuration
 springdoc:
   override-with-generic-response: false
+  api-docs:
+    enabled: true
+  swagger-ui:
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: alpha
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
 
 # S3 Configuration
 cloud:
@@ -69,6 +78,7 @@ cloud:
       access-key: ${S3_ACCESS_KEY}
       secret-key: ${S3_SECRET_KEY}
 
+# Hibernate Log Level Configuration
 logging:
   level:
     root: info

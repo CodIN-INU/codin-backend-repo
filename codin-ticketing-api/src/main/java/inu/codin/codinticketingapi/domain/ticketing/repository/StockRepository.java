@@ -15,6 +15,7 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
 
     Optional<Stock> findByEvent(Event event);
 
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Stock s where s.event.id = :eventId")
     Optional<Stock> findByEvent_Id(Long eventId);
