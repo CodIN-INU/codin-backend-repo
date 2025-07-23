@@ -27,8 +27,14 @@ public class EventEndJob implements Job {
 
                 try {
                     Scheduler scheduler = context.getScheduler();
+                    // 기존 endJob 삭제
                     scheduler.deleteJob(context.getJobDetail().getKey());
                     log.info("EventEndJob 삭제 완료: Event ID = {}", eventId);
+
+                    // stock 스케줄러도 함께 삭제
+                    JobKey stockJobKey = new JobKey("stockJob-" + eventId, "stock");
+                    scheduler.deleteJob(stockJobKey);
+                    log.info("StockCheckJob 삭제 완료: Event ID = {}", eventId);
                 } catch (SchedulerException e) {
                     log.error("EventEndJob 삭제 중 오류 발생: Event ID = {}", eventId, e);
                 }
