@@ -20,6 +20,9 @@ public class LecturePreviewResponseDto {
     @Schema(description = "과목명", example = "운영체제")
     private String title;
 
+    @Schema(description = "교수명", example = "홍길동")
+    private String professor;
+
     @Schema(description = "과목 유형", example = "전공핵심")
     private Type type;
 
@@ -36,9 +39,10 @@ public class LecturePreviewResponseDto {
     private Boolean liked;
 
     @Builder
-    public LecturePreviewResponseDto(String id, String title, Type type, int grade, int credit, List<String> tags, boolean liked) {
+    public LecturePreviewResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, boolean liked) {
         this.id = id;
         this.title = title;
+        this.professor = professor;
         this.type = type;
         this.grade = grade;
         this.credit = credit;
@@ -48,8 +52,9 @@ public class LecturePreviewResponseDto {
 
     public static LecturePreviewResponseDto of(Lecture lecture){
         return LecturePreviewResponseDto.builder()
-                .id(lecture.getLectureCode())
+                .id(lecture.getId().toString())
                 .title(lecture.getLectureNm())
+                .professor(lecture.getProfessor())
                 .type(lecture.getType())
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())

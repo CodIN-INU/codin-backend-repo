@@ -1,8 +1,10 @@
 package inu.codin.codin.domain.lecture.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity(name = "lecture_semesters")
+@Getter
 public class LectureSemester {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

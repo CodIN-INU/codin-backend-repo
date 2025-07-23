@@ -20,4 +20,9 @@ public class Semester {
 
     @OneToMany(mappedBy = "semester", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<LectureSemester> lectureSemesters;
+
+    @Transient
+    public String getString() {
+        return year + "-" + quarter;
+    }
 }

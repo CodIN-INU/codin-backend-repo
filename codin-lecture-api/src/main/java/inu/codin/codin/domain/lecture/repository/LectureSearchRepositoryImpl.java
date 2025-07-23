@@ -23,19 +23,22 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
 
     @Override
     public Page<Lecture> search(String keyword, Department department, SortingOption sortingOption, Pageable pageable) {
-        validDepartment(department);
-
         QLecture lecture = QLecture.lecture;
         QTag tag = QTag.tag;
         QLectureTag lectureTag = QLectureTag.lectureTag;
 
         BooleanBuilder builder = new BooleanBuilder();
+
+        if (department != null) {
+            validDepartment(department);
+            builder.and(lecture.department.eq(department));
+        }
+
         if (keyword != null && !keyword.isBlank()){
             builder.andAnyOf(
                     lecture.lectureNm.containsIgnoreCase(keyword),
-                    lecture.lectureCode.containsIgnoreCase(keyword),
                     lecture.lectureType.containsIgnoreCase(keyword),
-                    lecture.evaluation.containsIgnoreCase(keyword),
+                    lecture.evaluation.stringValue().containsIgnoreCase(keyword),
                     lecture.preCourse.containsIgnoreCase(keyword),
                     lecture.type.stringValue().containsIgnoreCase(keyword),
                     lecture.professor.containsIgnoreCase(keyword),
@@ -43,12 +46,7 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
             );
         }
 
-        if (department != null)
-            builder.and(lecture.department.eq(department));
-
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(lecture, sortingOption);
-
-
         List<Lecture> lectures = jpaQueryFactory
                 .selectDistinct(lecture)
                 .from(lecture)
@@ -60,16 +58,13 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
                 .limit(pageable.getPageSize())
                 .fetch();
 
-
         Long total = jpaQueryFactory
                 .select(lecture.countDistinct())
                 .from(lecture)
-                .join(lecture.tags, lectureTag)
-                .join(lectureTag.tag, tag)
                 .where(builder)
                 .fetchOne();
 
-        return new PageImpl<>(lectures, pageable, total != null ? total : 0);
+        return new PageImpl<>(lectures, pageable, total != null? total : 0);
     }
 
     private OrderSpecifier<?> getOrderSpecifier(QLecture lecture, SortingOption sortingOption) {

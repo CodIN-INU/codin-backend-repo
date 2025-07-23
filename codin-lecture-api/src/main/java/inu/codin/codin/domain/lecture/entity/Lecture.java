@@ -1,13 +1,13 @@
 package inu.codin.codin.domain.lecture.entity;
 
+import inu.codin.codin.domain.lecture.converter.EvaluationConverter;
 import inu.codin.codin.domain.lecture.converter.TypeConverter;
+import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.global.common.entity.Department;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.util.List;
 
@@ -19,8 +19,6 @@ public class Lecture {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Indexed @NotNull
-    private String lectureCode;
     private String lectureNm;
     private int grade; //0 : 전학년
     private int credit;
@@ -31,17 +29,18 @@ public class Lecture {
 
     @Convert(converter = TypeConverter.class)
     private Type type;
-
-//    @Enumerated(EnumType.STRING)
     private String lectureType;
-    private String evaluation; //todo enum 관리?
+
+    @Convert(converter = EvaluationConverter.class)
+    private Evaluation evaluation;
     private String preCourse;
     private double starRating;
     private int likes;
     private int hits;
 
-//    @OneToOne
-//    private Emotion emotion; //todo Emotion을 사용할 지에 대한 유무
+    @OneToOne
+    private Emotion emotion = new Emotion();
+
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<LectureSemester> semester;
 
@@ -50,6 +49,9 @@ public class Lecture {
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LectureSchedule> schedule;
+
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lectures_room_id")
@@ -61,4 +63,12 @@ public class Lecture {
 //        this.emotion = emotion;
 //    }
 
+    public void increaseHits(){
+        this.hits++;
+    }
+
+    public void updateReviewRating(double starRating, Emotion emotion) {
+        this.starRating = starRating;
+        this.emotion = emotion;
+    }
 }

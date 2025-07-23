@@ -1,15 +1,24 @@
-package inu.codin.codinlectureapi.lecture.dto;
+package inu.codin.codin.domain.lecture.entity;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@Entity(name = "emotions")
 public class Emotion {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private double hard;
     private double ok;
     private double best;
 
+    @OneToOne
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
 
     public Emotion() {
         this.hard = 0;
@@ -33,5 +42,4 @@ public class Emotion {
         }
         return this;
     }
-
 }

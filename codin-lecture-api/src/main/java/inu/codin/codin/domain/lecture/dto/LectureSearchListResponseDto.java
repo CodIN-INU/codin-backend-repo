@@ -1,6 +1,6 @@
-package inu.codin.codinlectureapi.lecture.dto;
+package inu.codin.codin.domain.lecture.dto;
 
-import inu.codin.codin.domain.lecture.entity.LectureEntity;
+import inu.codin.codin.domain.lecture.entity.Lecture;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -24,22 +24,21 @@ public class LectureSearchListResponseDto {
     };
 
 
-    public static List<LectureSearchListResponseDto> of(LectureEntity lecture) {
+    public static List<LectureSearchListResponseDto> of(Lecture lecture) {
         List<LectureSearchListResponseDto> listResponseDtos = new ArrayList<>();
-        for (String semester: lecture.getSemester()){
-            listResponseDtos.add(LectureSearchListResponseDto.builder()
-                    ._id(lecture.get_id().toString())
-                    .lectureNm(lecture.getLectureNm())
-                    .professor(lecture.getProfessor())
-                    .semester(semester)
-                    .build());
-        }
+//        for (String semester: lecture.getSemester()){
+//            listResponseDtos.add(LectureSearchListResponseDto.builder()
+//                    ._id(lecture.get_id().toString())
+//                    .lectureNm(lecture.getLectureNm())
+//                    .professor(lecture.getProfessor())
+//                    .semester(semester)
+//                    .build());
+//        }
         return listResponseDtos;
     }
 
-    public static LectureSearchListResponseDto of(LectureEntity lecture, String semester) {
+    public static LectureSearchListResponseDto of(Lecture lecture, String semester) {
             return LectureSearchListResponseDto.builder()
-                    ._id(lecture.get_id().toString())
                     .lectureNm(lecture.getLectureNm())
                     .professor(lecture.getProfessor())
                     .semester(semester)
