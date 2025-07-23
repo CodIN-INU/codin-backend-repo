@@ -131,7 +131,7 @@ public class EventAdminService {
     }
 
     public EventParticipationProfilePageResponse getParticipationList(Long eventId, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("ticketNumber").descending());
+        Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("ticketNumber").descending());
 
         Page<Participation> participationList = participationRepository.findAllByEvent_Id(eventId, pageable);
         List<EventParticipationProfileResponse> profileList = participationList.stream()
@@ -147,7 +147,7 @@ public class EventAdminService {
     @Transactional
     public boolean changeReceiveStatus(Long eventId, String userId) {
         Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
-        findParticipation.changeConfirmStatus();
+        findParticipation.changeStatusCompleted();
 
         return true;
     }
@@ -160,9 +160,10 @@ public class EventAdminService {
         return EventStockResponse.of(stock.getStock());
     }
 
+    @Transactional
     public Boolean cancelTicket(Long eventId, String userId) {
         Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
-        participationRepository.deleteById(findParticipation.getId());
+        findParticipation.changeStatusCanceled();
 
         return true;
     }
@@ -237,6 +238,6 @@ public class EventAdminService {
 
     private Participation getParticipationByEventIdAndUserId(Long eventId, String userId) {
 
-        return participationRepository.findByEvent_IdAndProfile_UserId(eventId, userId).orElseThrow(() -> new UserException(UserErrorCode.USER_VALIDATION_FAILED));
+        return participationRepository.findByEvent_IdAndUserId(eventId, userId).orElseThrow(() -> new UserException(UserErrorCode.USER_VALIDATION_FAILED));
     }
 }
