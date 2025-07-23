@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.admin.dto.response;
 
 import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
-import inu.codin.codinticketingapi.domain.ticketing.entity.Profile;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,13 +16,13 @@ public class EventParticipationProfileResponse {
     private Department department;
     private String imageURL;
 
-    public static EventParticipationProfileResponse of(Profile profile, String imageURL) {
+    public static EventParticipationProfileResponse of(Participation participation) {
         return EventParticipationProfileResponse.builder()
-                .userId(profile.getUserId())
-                .name(profile.getName())
-                .studentId(profile.getStudentId())
-                .department(profile.getDepartment())
-                .imageURL(imageURL)
+                .userId(participation.getUserId())
+                .name(participation.getName())
+                .studentId(participation.getStudentId())
+                .department(participation.getDepartment())
+                .imageURL(participation.getSignatureImgUrl())
                 .build();
     }
 }

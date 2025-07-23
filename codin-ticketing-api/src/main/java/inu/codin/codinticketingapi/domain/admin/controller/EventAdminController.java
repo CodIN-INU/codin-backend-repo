@@ -112,7 +112,7 @@ public class EventAdminController {
      * 관리자가 수령 상태 변경 기능
      */
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    @GetMapping("{eventId}/management/status/{userId}")
+    @PutMapping("{eventId}/management/status/{userId}")
     public ResponseEntity<SingleResponse<Boolean>> changeReceiveStatus(@PathVariable Long eventId, @PathVariable String userId) {
 
         return ResponseEntity.ok(new SingleResponse<>(200, "수령완료 변경 성공", eventAdminService.changeReceiveStatus(eventId, userId)));
@@ -142,7 +142,7 @@ public class EventAdminController {
      * 관리자가 이벤트 수동 오픈
      */
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    @GetMapping("/{eventId}/open")
+    @PostMapping("/{eventId}/open")
     public ResponseEntity<SingleResponse<Boolean>> openEvent(@PathVariable Long eventId) {
 
         return ResponseEntity.ok(new SingleResponse<>(200, "이벤트 수동 오픈 성공", eventAdminService.openEvent(eventId)));

@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.ticketing.entity;
 
 import inu.codin.codinticketingapi.common.entity.BaseEntity;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,9 +24,18 @@ public class Participation extends BaseEntity {
     @JoinColumn(name = "event_id", nullable = false, foreignKey = @ForeignKey(name = "fk_participation_event"))
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "profile_id", nullable = false, foreignKey = @ForeignKey(name = "fk_participation_profile"))
-    private Profile profile;
+    @Column(name = "user_id", nullable = false, length = 24)
+    private String userId;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "department", nullable = false)
+    private Department department;
+
+    @Column(name = "student_id", nullable = false)
+    private String studentId;
 
     /** 경품 수령 여부 */
     @Enumerated(EnumType.STRING)
@@ -41,10 +51,13 @@ public class Participation extends BaseEntity {
     private String signatureImgUrl;
 
     @Builder
-    public Participation(Event event, Profile profile, Integer ticketNumber) {
+    public Participation(Event event, Integer ticketNumber, UserInfoResponse userInfoResponse) {
         this.event = event;
-        this.profile = profile;
         this.ticketNumber = ticketNumber;
+        this.userId = userInfoResponse.getUserId();
+        this.name = userInfoResponse.getName();
+        this.studentId = userInfoResponse.getStudentId();
+        this.department = userInfoResponse.getDepartment();
     }
 
     /** 경품 수령 처리 */
@@ -57,10 +70,6 @@ public class Participation extends BaseEntity {
         if (this.status == ParticipationStatus.WAITING) {
             this.status = ParticipationStatus.CANCELED;
         }
-    }
-
-    public void changeConfirmStatus() {
-        this.confirmed = !confirmed;
     }
 
     /** 수령 상태 초기화 */

@@ -5,14 +5,13 @@ import inu.codin.codinticketingapi.domain.image.service.ImageService;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
-import inu.codin.codinticketingapi.domain.ticketing.entity.Profile;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
-import inu.codin.codinticketingapi.domain.ticketing.repository.ProfileRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.StockRepository;
+import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class TicketingService {
 
     private final EventRepository eventRepository;
-    private final ProfileRepository profileRepository;
     private final ParticipationRepository participationRepository;
     private final StockRepository stockRepository;
 
@@ -39,10 +37,7 @@ public class TicketingService {
      */
     @Transactional
     public ParticipationCreateResponse saveParticipation(Long eventId) {
-        String userId = userClientService.fetchUser().getUserId();
-
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PROFILE_NOT_FOUND));
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
         Stock stock = stockRepository.findById(eventId)
@@ -53,7 +48,7 @@ public class TicketingService {
         Participation participation = Participation.builder()
                 .event(event)
                 .ticketNumber(1)
-                .profile(profile)
+                .userInfoResponse(userInfoResponse)
                 .build();
 
         // eventPublisher.publishEvent(new StockDecrementRequest(event));
@@ -69,9 +64,6 @@ public class TicketingService {
     @Transactional
     public void processParticipationSuccess(Long eventId, String adminPassword, MultipartFile signatureImage) {
         String userId = userClientService.fetchUser().getUserId();
-
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PROFILE_NOT_FOUND));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
         // todo: EventStatus 검증
@@ -84,7 +76,7 @@ public class TicketingService {
         String signatureImageUrl = imageService.handleImageUpload(signatureImage);
 
         // 참여자 정보 조회
-        Participation participation = participationRepository.findByEventAndProfile(event, profile)
+        Participation participation = participationRepository.findByEventAndUserId(event, userId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
 
         // 수령 완료 상태로 변경
@@ -102,13 +94,10 @@ public class TicketingService {
     @Transactional
     public void changeParticipationStatusCanceled(Long eventId) {
         String userId = userClientService.fetchUser().getUserId();
-
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PROFILE_NOT_FOUND));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
         // todo: EventStatus 검증
-        Participation participation = participationRepository.findByEventAndProfile(event, profile)
+        Participation participation = participationRepository.findByEventAndUserId(event, userId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
 
         if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
