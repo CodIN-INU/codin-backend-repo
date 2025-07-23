@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.global.auth.util;
+package inu.codin.codin.global.auth.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

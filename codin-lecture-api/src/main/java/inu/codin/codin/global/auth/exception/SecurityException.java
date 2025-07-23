@@ -1,6 +1,6 @@
-package inu.codin.codinlectureapi.global.auth.exception;
+package inu.codin.codin.global.auth.exception;
 
-import inu.codin.codinlectureapi.global.exception.GlobalException;
+import inu.codin.codin.global.common.exception.GlobalException;
 import lombok.Getter;
 
 @Getter

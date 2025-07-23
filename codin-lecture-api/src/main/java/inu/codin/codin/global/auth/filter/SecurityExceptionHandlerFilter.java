@@ -1,8 +1,8 @@
-package inu.codin.codinlectureapi.global.auth.filter;
+package inu.codin.codin.global.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codinlectureapi.global.auth.exception.SecurityException;
-import inu.codin.codinlectureapi.global.response.ExceptionResponse;
+import inu.codin.codin.global.common.response.ExceptionResponse;
+import inu.codin.codin.global.auth.exception.SecurityException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

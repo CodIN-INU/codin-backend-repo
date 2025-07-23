@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.global.config;
+package inu.codin.codin.global.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -56,7 +56,7 @@ public class SwaggerConfig {
                         .addSecuritySchemes("bearerAuth", bearerAuth)
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local Server"),
+                        new Server().url("http://localhost:8082").description("Local Server"),
                         new Server().url(BASE_DOMAIN_URL + "/api").description("Production Server"),
                         new Server().url(BASE_DOMAIN_URL + "/dev").description("Development Server")
                 ));

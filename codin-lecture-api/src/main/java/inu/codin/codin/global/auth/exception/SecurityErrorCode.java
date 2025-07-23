@@ -1,6 +1,6 @@
-package inu.codin.codinlectureapi.global.auth.exception;
+package inu.codin.codin.global.auth.exception;
 
-import inu.codin.codinlectureapi.global.exception.GlobalErrorCode;
+import inu.codin.codin.global.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 

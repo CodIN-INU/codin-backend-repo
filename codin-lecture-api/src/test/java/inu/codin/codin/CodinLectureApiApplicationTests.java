@@ -1,10 +1,10 @@
-package inu.codin.codinlectureapi;
+package inu.codin.codin;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CodinTicketingApiApplicationTests {
+class CodinLectureApiApplicationTests {
 
     @Test
     void contextLoads() {

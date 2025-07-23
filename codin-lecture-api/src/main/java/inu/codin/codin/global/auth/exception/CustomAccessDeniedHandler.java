@@ -1,7 +1,7 @@
-package inu.codin.codinlectureapi.global.auth.exception;
+package inu.codin.codin.global.auth.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codinlectureapi.global.response.ExceptionResponse;
+import inu.codin.codin.global.common.response.ExceptionResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

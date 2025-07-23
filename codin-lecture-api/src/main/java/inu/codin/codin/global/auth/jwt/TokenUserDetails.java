@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.global.auth.jwt;
+package inu.codin.codin.global.auth.jwt;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,7 +1,7 @@
-package inu.codin.codinlectureapi.global.auth.jwt;
+package inu.codin.codin.global.auth.jwt;
 
-import inu.codin.codinlectureapi.global.auth.exception.SecurityErrorCode;
-import inu.codin.codinlectureapi.global.auth.exception.SecurityException;
+import inu.codin.codin.global.auth.exception.SecurityErrorCode;
+import inu.codin.codin.global.auth.exception.SecurityException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

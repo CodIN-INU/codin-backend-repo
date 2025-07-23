@@ -1,8 +1,8 @@
-package inu.codin.codinlectureapi.global.auth.util;
+package inu.codin.codin.global.auth.util;
 
-import inu.codin.codinlectureapi.global.auth.exception.SecurityErrorCode;
-import inu.codin.codinlectureapi.global.auth.exception.SecurityException;
-import inu.codin.codinlectureapi.global.auth.jwt.TokenUserDetails;
+import inu.codin.codin.global.auth.jwt.TokenUserDetails;
+import inu.codin.codin.global.auth.exception.SecurityErrorCode;
+import inu.codin.codin.global.auth.exception.SecurityException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

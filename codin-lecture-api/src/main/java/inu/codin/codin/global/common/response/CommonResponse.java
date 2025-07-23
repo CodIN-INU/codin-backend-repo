@@ -1,4 +1,4 @@
-package inu.codin.codinlectureapi.global.response;
+package inu.codin.codin.global.common.response;
 
 import lombok.Getter;
 

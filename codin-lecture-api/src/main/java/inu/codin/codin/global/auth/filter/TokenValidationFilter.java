@@ -1,8 +1,8 @@
-package inu.codin.codinlectureapi.global.auth.filter;
+package inu.codin.codin.global.auth.filter;
 
-import inu.codin.codinlectureapi.global.auth.jwt.JwtTokenValidator;
-import inu.codin.codinlectureapi.global.auth.jwt.TokenUserDetails;
-import inu.codin.codinlectureapi.global.auth.util.TokenUtils;
+import inu.codin.codin.global.auth.jwt.JwtTokenValidator;
+import inu.codin.codin.global.auth.jwt.TokenUserDetails;
+import inu.codin.codin.global.auth.util.TokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,9 +1,9 @@
-package inu.codin.codinlectureapi.global.config;
+package inu.codin.codin.global.config;
 
-import inu.codin.codinlectureapi.global.auth.exception.CustomAccessDeniedHandler;
-import inu.codin.codinlectureapi.global.auth.filter.SecurityExceptionHandlerFilter;
-import inu.codin.codinlectureapi.global.auth.filter.TokenValidationFilter;
-import inu.codin.codinlectureapi.global.auth.jwt.JwtTokenValidator;
+import inu.codin.codin.global.auth.exception.CustomAccessDeniedHandler;
+import inu.codin.codin.global.auth.filter.SecurityExceptionHandlerFilter;
+import inu.codin.codin.global.auth.filter.TokenValidationFilter;
+import inu.codin.codin.global.auth.jwt.JwtTokenValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,11 +38,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Swagger 관련 경로 허용
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
                         // 테스트 API 경로 - @PreAuthorize로 권한 제어
                         .requestMatchers("/v3/api/test**").permitAll()
                         // 나머지 모든 요청은 인증 필요
-                        .anyRequest().hasRole("USER")
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(
                         new TokenValidationFilter(jwtTokenValidator),
