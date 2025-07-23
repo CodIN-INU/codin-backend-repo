@@ -21,7 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/ticketing/event")
+@RequestMapping("/event")
 @RequiredArgsConstructor
 @Tag(name = "Event API", description = "티켓팅 이벤트 API")
 public class EventController {

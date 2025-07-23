@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/ticketing")
 @RequiredArgsConstructor
+@RequestMapping("/event")
 @Tag(name = "Ticketing API", description = "티켓팅 API")
 public class TicketingController {
 
@@ -23,7 +23,7 @@ public class TicketingController {
     private final ParticipationService participationService;
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
-    @PostMapping("/event/join/{eventId}")
+    @PostMapping("/join/{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 및 교환권 부여 성공")
     public ResponseEntity<SingleResponse<?>> createUserParticipation(
@@ -34,7 +34,7 @@ public class TicketingController {
     }
 
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
-    @PostMapping(value = "/event/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/complete/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장")
     @ApiResponse(responseCode = "200", description = "관리자 비밀번호로 수령 확인 성공")
     public ResponseEntity<SingleResponse<?>> updateParticipationStatusByPassword(
@@ -47,7 +47,7 @@ public class TicketingController {
     }
 
     /** 사용자 티켓팅 취소 */
-    @DeleteMapping(value = "/event/cancel/{eventId}")
+    @DeleteMapping(value = "/cancel/{eventId}")
     @Operation(summary = "사용자 티켓팅 취소")
     @ApiResponse(responseCode = "200", description = "티켓팅 취소 완료")
     public ResponseEntity<SingleResponse<?>> updateStatusCanceledParticipation(

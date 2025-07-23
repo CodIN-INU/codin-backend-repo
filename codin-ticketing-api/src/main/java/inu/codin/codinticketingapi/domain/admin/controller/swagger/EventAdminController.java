@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "admin API", description = "관리자 권한을 가진 사용자들을 위한 이벤트 관리 API")
+@Tag(name = "Admin API", description = "관리자 권한을 가진 사용자들을 위한 이벤트 관리 API")
 public interface EventAdminController {
 
     @Operation(summary = "티켓팅 이벤트 생성", description = "새로운 티켓팅 이벤트를 생성합니다. 관리자/매니저 권한이 필요합니다.")
