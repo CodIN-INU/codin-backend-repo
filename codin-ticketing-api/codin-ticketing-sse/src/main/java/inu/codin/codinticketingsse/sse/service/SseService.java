@@ -59,7 +59,7 @@ public class SseService {
      * @param data Object 데이터
      * @param name 이벤트 이름
      */
-    @Async
+    @Async("taskExecutor")
     public void sendAsyncToClient(SseEmitter emitter, Object data, String name) {
         try {
             emitter.send(SseEmitter.event()
