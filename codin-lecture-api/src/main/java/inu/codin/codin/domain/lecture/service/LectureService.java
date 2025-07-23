@@ -9,12 +9,13 @@ import inu.codin.codin.domain.lecture.entity.SortingOption;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
+import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,37 +24,43 @@ import java.util.List;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
+    private final LectureSearchRepositoryCustom lectureSearchRepository;
 
+    /**
+     * 여러 옵션을 선택하여 강의 리스트 반환
+     *
+     * @param keyword
+     * @param department    Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
+     * @param sortingOption 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
+     * @param page          페이지 번호
+     * @return LecturePageResponse
+     */
+    public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, int page) {
+        Page<Lecture> lecturePage = lectureSearchRepository.search(keyword, department, sortingOption, PageRequest.of(page, 10));
+        return getLecturePageResponse(lecturePage);
+    }
 
     /**
      * 강의의 상세 별점 반환
      * @param lectureId 강의 _id
      * @return LectureDetailResponseDto
      */
-    public LectureDetailResponseDto getLectureDetails(String lectureId) {
-        Lecture lecture = lectureRepository.findLectureAndScheduleByLectureCode(lectureId)
+    @Transactional
+    public LectureDetailResponseDto getLectureDetails(Long lectureId) {
+        Lecture lecture = lectureRepository.findLectureWithScheduleAndTagsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
+        lecture.increaseHits();
         return LectureDetailResponseDto.of(lecture);
     }
 
     /**
-     * 여러 옵션을 선택하여 강의 리스트 반환
-     * @param department Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
-     * @param sortingOption 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
-     * @param page 페이지 번호
-     * @return LecturePageResponse
+     * 페이지로 반환된 LectureEntity -> Dto 변환
      */
-    public LecturePageResponse sortListOfLectures(Department department, SortingOption sortingOption, int page) {
-        Page<Lecture> lecturePage = null;
-        Sort sort = getSort(sortingOption);
-        PageRequest pageRequest = (sort != null) ? PageRequest.of(page, 20, sort) : PageRequest.of(page, 20);
-
-        if (department != null) {
-            validDepartment(department);
-            lecturePage = lectureRepository.findAllByDepartment(pageRequest, department);
-        } else lecturePage = lectureRepository.findAll(pageRequest);
-
-        return getLecturePageResponse(lecturePage);
+    private LecturePageResponse getLecturePageResponse(Page<Lecture> lecturePage) {
+        //todo Like의 여부
+        return LecturePageResponse.of(lecturePage.stream().map(LecturePreviewResponseDto::of).toList(),
+                            lecturePage.getTotalPages() - 1,
+                            lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }
 
     /**
@@ -70,19 +77,9 @@ public class LectureService {
 //                                    .toList();
 
         return lectures.stream()
-                    .map(LectureSearchListResponseDto::of)
-                    .flatMap(List::stream)
-                    .toList();
-    }
-
-    /**
-     * 페이지로 반환된 LectureEntity -> Dto 변환
-     */
-    private LecturePageResponse getLecturePageResponse(Page<Lecture> lecturePage) {
-        //todo Like의 여부
-        return LecturePageResponse.of(lecturePage.stream().map(LecturePreviewResponseDto::of).toList(),
-                            lecturePage.getTotalPages() - 1,
-                            lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
+                .map(LectureSearchListResponseDto::of)
+                .flatMap(List::stream)
+                .toList();
     }
 
     /**
@@ -90,21 +87,5 @@ public class LectureService {
      */
     public List<Lecture> findLectures(Department department, Integer grade, String semester) {
         return List.of();
-    }
-
-    private Sort getSort(SortingOption sortingOption) {
-        if (sortingOption == null) return null;
-        Sort sort = null;
-        switch (sortingOption) {
-            case HIT -> sort = Sort.by("hits");
-            case LIKE -> sort = Sort.by("likes");
-            case RATING -> sort = Sort.by("starRating");
-        }
-        return sort;
-    }
-
-    private void validDepartment(Department department) {
-        if (! (department.equals(Department.EMBEDDED) || department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM)))
-            throw new LectureException(LectureErrorCode.DEPARTMENT_WRONG_INPUT);
     }
 }
