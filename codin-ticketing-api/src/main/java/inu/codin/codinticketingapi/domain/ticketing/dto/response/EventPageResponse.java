@@ -18,6 +18,7 @@ public class EventPageResponse {
     @Schema(description = "이벤트 목록")
     private List<EventResponse> eventList = new ArrayList<>();
 
+
     @Schema(description = "마지막 페이지 인덱스", example = "0")
     private long lastPage;
 

@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.admin.controller;
 
 import inu.codin.codinticketingapi.common.response.SingleResponse;
+import inu.codin.codinticketingapi.domain.admin.controller.swagger.EventAdminController;
 import inu.codin.codinticketingapi.domain.admin.dto.request.EventCreateRequest;
 import inu.codin.codinticketingapi.domain.admin.dto.request.EventUpdateRequest;
 import inu.codin.codinticketingapi.domain.admin.dto.response.EventParticipationProfilePageResponse;
@@ -22,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/admin/event")
 @RequiredArgsConstructor
 @Tag(name = "admin API", description = "admin API")
-public class EventAdminController {
+public class EventAdminControllerImpl implements EventAdminController {
 
     private final EventAdminService eventAdminService;
 

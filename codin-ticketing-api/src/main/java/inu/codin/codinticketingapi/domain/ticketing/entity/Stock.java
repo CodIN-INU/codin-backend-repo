@@ -29,7 +29,6 @@ public class Stock extends BaseEntity {
             name = "event_id", nullable = false, unique = true,
             foreignKey = @ForeignKey(name = "fk_stock_event")
     )
-
     private Event event;
 
     /** 남은 재고 수 */
@@ -39,10 +38,6 @@ public class Stock extends BaseEntity {
     // 초기 재고 수
     @Column(name = "initial_stock", nullable = false)
     private int initialStock;
-
-    /** 낙관적 잠금을 위한 버전 */
-    @Version
-    private Long version;
 
     @Builder
     public Stock(Event event, int initialStock) {
