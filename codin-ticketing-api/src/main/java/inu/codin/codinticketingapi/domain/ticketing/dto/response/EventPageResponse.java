@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +14,13 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EventPageResponse {
 
+    @Schema(description = "이벤트 목록")
     private List<EventResponse> eventList = new ArrayList<>();
+
+    @Schema(description = "마지막 페이지 인덱스", example = "0")
     private long lastPage;
+
+    @Schema(description = "다음 페이지 인덱스", example = "-1")
     private long nextPage;
 
     public EventPageResponse(List<EventResponse> eventList, long lastPage, long nextPage) {

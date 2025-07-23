@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class EventResponse {
+
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     @NotBlank
     private Long eventId;
@@ -32,8 +33,11 @@ public class EventResponse {
     @Schema(description = "이벤트 위치 정보", example = "컴퓨터 공학부 과방")
     private String locationInfo;
 
-    @Schema(description = "이벤트 수량", example = "100")
+    @Schema(description = "이벤트 제공 수량", example = "100")
     private int quantity;
+
+    @Schema(description = "이벤트 현재 수량", example = "80")
+    private int currentQuantity;
 
     public static EventResponse of(Event event) {
         return EventResponse.builder()
@@ -42,7 +46,8 @@ public class EventResponse {
                 .eventImageUrl(event.getEventImageUrl())
                 .eventDate(event.getEventTime())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getStock().getStock())
+                .quantity(event.getStock().getInitialStock())
+                .currentQuantity(event.getStock().getStock())
                 .build();
     }
 }

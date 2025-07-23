@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
@@ -10,8 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 public class EventParticipationHistoryPageResponse {
 
+    @Schema(description = "참여 이벤트 목록")
     private final List<EventParticipationHistoryDto> eventList;
+
+    @Schema(description = "마지막 페이지 인덱스", example = "0")
     private final long lastPage;
+
+    @Schema(description = "다음 페이지 인덱스", example = "-1")
     private final long nextPage;
 
     public static EventParticipationHistoryPageResponse of(List<EventParticipationHistoryDto> eventList, long lastPage, long nextPage) {

@@ -16,12 +16,12 @@ public class EventDetailResponse {
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     private Long eventId;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00")
     private LocalDateTime eventTime;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 마감 시간", example = "2025-07-02 16:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 마감 시간", example = "2025-07-02 16:00")
     private LocalDateTime eventEndTime;
 
     @Schema(description = "이벤트 이미지 Url")
