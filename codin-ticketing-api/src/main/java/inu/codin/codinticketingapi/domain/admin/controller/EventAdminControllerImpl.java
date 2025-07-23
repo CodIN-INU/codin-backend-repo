@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/admin/event")
 @RequiredArgsConstructor
-@Tag(name = "admin API", description = "admin API")
+@Tag(name = "Admin API", description = "admin API")
 public class EventAdminControllerImpl implements EventAdminController {
 
     private final EventAdminService eventAdminService;
