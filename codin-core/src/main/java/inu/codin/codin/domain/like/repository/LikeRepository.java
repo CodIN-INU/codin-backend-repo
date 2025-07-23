@@ -14,10 +14,8 @@ import java.util.Optional;
 
 public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
     // 특정 엔티티(게시글/댓글/대댓글)의 좋아요 개수 조회
-    int countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(LikeType likeType, ObjectId likeTypeId);
-    int countAllByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(LikeType likeType, ObjectId likeTypeId);
-    boolean existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(LikeType likeType, ObjectId id, ObjectId userId);
-
-    Optional<LikeEntity> findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, ObjectId likeTypeId, ObjectId userId);
+    int countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(LikeType likeType, String likeTypeId);
+    boolean existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(LikeType likeType, String id, ObjectId userId);
+    Optional<LikeEntity> findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, String likeTypeId, ObjectId userId);
     Page<LikeEntity> findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
 }
