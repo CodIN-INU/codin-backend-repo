@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import inu.codin.codinticketingapi.common.response.SingleResponse;
+import inu.codin.codinticketingapi.domain.ticketing.service.ParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class TicketingController {
 
     private final TicketingService ticketingService;
+    private final ParticipationService participationService;
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/events/join/{eventId}")
@@ -23,7 +25,7 @@ public class TicketingController {
             @PathVariable Long eventId
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 참여 및 교환권 부여 성공",
-                ticketingService.decrement(eventId)));
+                participationService.saveParticipation(eventId)));
     }
 
     /** 교환권을 부여받은 이후 관리자의 비밀번호를 통해 수령 확인, 서명 이미지 저장 */
