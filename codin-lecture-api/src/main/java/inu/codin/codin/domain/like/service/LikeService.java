@@ -8,6 +8,7 @@ import inu.codin.codin.domain.like.controller.LikeFeignClient;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.domain.review.exception.ReviewErrorCode;
 import inu.codin.codin.domain.review.exception.ReviewException;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -96,5 +99,10 @@ public class LikeService {
         } else {
             review.decreaseLikes();
         }
+    }
+
+    public List<LikedResponseDto> getLiked(LikeType likeType) {
+        String userId = SecurityUtils.getUserId();
+        return likeFeignClient.getLiked(likeType, userId);
     }
 }

@@ -3,6 +3,7 @@ package inu.codin.codin.domain.like.controller;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.global.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/likes")
@@ -44,5 +47,11 @@ public class LikeController {
     public Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
                                                          @RequestParam("id") String id) {
         return likeService.isLiked(likeType, id);
+    }
+
+    @Hidden
+    @GetMapping("/list")
+    public List<LikedResponseDto> getLiked(@RequestParam("likeType") LikeType likeType) {
+        return likeService.getLiked(likeType);
     }
 }

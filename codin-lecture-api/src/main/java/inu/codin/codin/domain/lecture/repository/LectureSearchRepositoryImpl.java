@@ -7,6 +7,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import inu.codin.codin.domain.lecture.entity.*;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
+import inu.codin.codin.domain.like.controller.LikeFeignClient;
+import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.global.auth.util.SecurityUtils;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,9 +24,10 @@ import java.util.List;
 public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final LikeFeignClient likeFeignClient;
 
     @Override
-    public Page<Lecture> search(String keyword, Department department, SortingOption sortingOption, Pageable pageable) {
+    public Page<Lecture> search(String keyword, Department department, SortingOption sortingOption, Boolean like, Pageable pageable) {
         QLecture lecture = QLecture.lecture;
         QTag tag = QTag.tag;
         QLectureTag lectureTag = QLectureTag.lectureTag;
@@ -45,6 +49,18 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
                     lecture.professor.containsIgnoreCase(keyword),
                     lectureTag.tag.tagName.containsIgnoreCase(keyword)
             );
+        }
+
+        if (like != null && like) {
+            String userId = SecurityUtils.getUserId();
+            List<Long> liked = likeFeignClient.getLiked(LikeType.LECTURE, userId).stream()
+                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId())).toList();
+
+            if (liked.isEmpty()) {
+                return Page.empty(pageable);
+            }
+
+            builder.and(lecture.id.in(liked));
         }
 
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(lecture, sortingOption);

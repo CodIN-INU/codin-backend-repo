@@ -12,7 +12,6 @@ import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.like.dto.LikeType;
-import inu.codin.codin.global.auth.util.SecurityUtils;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,11 +36,12 @@ public class LectureService {
      * @param keyword
      * @param department    Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
      * @param sortingOption 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
+     * @param like
      * @param page          페이지 번호
      * @return LecturePageResponse
      */
-    public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, int page) {
-        Page<Lecture> lecturePage = lectureSearchRepository.search(keyword, department, sortingOption, PageRequest.of(page, 10));
+    public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
+        Page<Lecture> lecturePage = lectureSearchRepository.search(keyword, department, sortingOption, like, PageRequest.of(page, 10));
         return getLecturePageResponse(lecturePage);
     }
 
