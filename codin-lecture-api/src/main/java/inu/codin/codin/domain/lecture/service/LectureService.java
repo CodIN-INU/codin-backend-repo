@@ -10,8 +10,9 @@ import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.review.service.UserReviewStatsService;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final LectureSearchRepositoryCustom lectureSearchRepository;
 
+    private final UserReviewStatsService userReviewStatsService;
     private final LikeService likeService;
 
     /**
@@ -55,7 +57,8 @@ public class LectureService {
         Lecture lecture = lectureRepository.findLectureWithScheduleAndTagsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
         lecture.increaseHits();
-        return LectureDetailResponseDto.of(lecture);
+
+        return LectureDetailResponseDto.of(lecture, userReviewStatsService.isOpenKeyword());
     }
 
     /**

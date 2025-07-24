@@ -34,7 +34,9 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
     @Schema(description = "후기 평점들의 범위마다 100분율 계산", example = "hard : 30, ok : 20, best : 50")
     private EmotionResponseDto emotion;
 
-    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion) {
+    private boolean openKeyword;
+
+    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword) {
         super(id, title, professor, type, grade, credit, tags, null);
         this.department = department.getDescription();
         this.college = college.getDescription();
@@ -43,9 +45,10 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
         this.schedule = schedule;
         this.preCourse = preCourse;
         this.emotion = emotion;
+        this.openKeyword = openKeyword;
     }
 
-    public static LectureDetailResponseDto of(Lecture lecture){
+    public static LectureDetailResponseDto of(Lecture lecture, boolean openKeyword){
         List<Schedule> schedules = lecture.getSchedule().stream().map(Schedule::of).toList();
         List<String> tags = LecturePreviewResponseDto.getTags(lecture.getTags());
         return new LectureDetailResponseDto(
@@ -62,7 +65,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getLectureType(),
                 schedules,
                 lecture.getPreCourse(),
-                lecture.getEmotion().changeToPercentage()
+                lecture.getEmotion().changeToPercentage(),
+                openKeyword
         );
     }
     

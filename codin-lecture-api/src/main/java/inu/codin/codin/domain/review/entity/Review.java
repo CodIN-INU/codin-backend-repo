@@ -26,7 +26,7 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "lecture_id")
     private Lecture lecture;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "semester_id")
     private Semester semester;
 

@@ -45,6 +45,7 @@ public class ReviewService {
     private final EmotionRepository emotionRepository;
 
     private final LikeService likeService;
+    private final UserReviewStatsService userReviewStatsService;
 
     /**
      * 새로운 강의 후기 작성
@@ -59,13 +60,14 @@ public class ReviewService {
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
 
         String userId = SecurityUtils.getUserId();
-        checkReviewExisted(lectureId, userId, lecture);
+        checkReviewExisted(lectureId, userId, lecture); //리뷰를 작성한 상태인지 확인
 
         Semester semester = getSemester(createReviewRequestDto, lecture);
         Review newReview = Review.of(createReviewRequestDto, semester, lecture, userId);
 
         reviewRepository.save(newReview);
-        updateRating(lecture, createReviewRequestDto.getStarRating());
+        updateRating(lecture, createReviewRequestDto.getStarRating()); //과목의 평점 업데이트
+        userReviewStatsService.updateStats(userId); //유저의 리뷰 작성 현황 업데이트
 
         log.info("새로운 강의 후기 저장 - lectureId : {} userId : {}", lectureId, userId);
     }

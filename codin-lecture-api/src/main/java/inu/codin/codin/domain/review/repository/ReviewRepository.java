@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.review.repository;
 
-import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.review.entity.Review;
 import org.springframework.data.domain.Page;
