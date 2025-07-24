@@ -2,6 +2,7 @@ package inu.codin.codin.domain.review.repository;
 
 import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.lecture.entity.LectureSemester;
 import inu.codin.codin.domain.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    boolean existsByUserIdAndLectureAndDeletedAtIsNull(String userId, Lecture lecture);
+    boolean existsByUserIdAndLectureSemesterAndDeletedAtIsNull(String userId, LectureSemester lectureSemester);
 
     @Query("""
         SELECT AVG(r.starRating) FROM Review r WHERE r.lecture =:lecture

@@ -3,6 +3,7 @@ package inu.codin.codin.domain.review.service;
 
 import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.lecture.entity.LectureSemester;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
@@ -10,6 +11,7 @@ import inu.codin.codin.domain.lecture.exception.SemesterErrorCode;
 import inu.codin.codin.domain.lecture.exception.SemesterException;
 import inu.codin.codin.domain.lecture.repository.EmotionRepository;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
+import inu.codin.codin.domain.lecture.repository.LectureSemesterRepository;
 import inu.codin.codin.domain.lecture.repository.SemesterRepository;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.like.dto.LikeType;
@@ -43,6 +45,7 @@ public class ReviewService {
     private final LectureRepository lectureRepository;
     private final SemesterRepository semesterRepository;
     private final EmotionRepository emotionRepository;
+    private final LectureSemesterRepository lectureSemesterRepository;
 
     private final LikeService likeService;
 
@@ -57,12 +60,17 @@ public class ReviewService {
 
         Lecture lecture = lectureRepository.findLectureWithSemesterAndReviewsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
+        Semester semester = getSemester(createReviewRequestDto);
+
+        LectureSemester lectureSemester = lectureSemesterRepository
+                .findByLectureAndSemester(lecture, semester)
+                .orElseThrow(() -> new SemesterException(SemesterErrorCode.SEMESTER_NOT_FOUND));
 
         String userId = SecurityUtils.getUserId();
-        checkReviewExisted(lectureId, userId, lecture);
 
-        Semester semester = getSemester(createReviewRequestDto, lecture);
-        Review newReview = Review.of(createReviewRequestDto, semester, lecture, userId);
+        checkReviewExisted(userId, lectureSemester);
+
+        Review newReview = Review.of(createReviewRequestDto, userId, lectureSemester);
 
         reviewRepository.save(newReview);
         updateRating(lecture, createReviewRequestDto.getStarRating());
@@ -70,16 +78,10 @@ public class ReviewService {
         log.info("새로운 강의 후기 저장 - lectureId : {} userId : {}", lectureId, userId);
     }
 
-    private Semester getSemester(CreateReviewRequestDto createReviewRequestDto, Lecture lecture) {
+    private Semester getSemester(CreateReviewRequestDto createReviewRequestDto) {
         int[] parsed = parseSemester(createReviewRequestDto.getSemester());
-        Semester semester = semesterRepository.findSemesterByYearAndQuarter(parsed[0], parsed[1])
+        return semesterRepository.findSemesterByYearAndQuarter(parsed[0], parsed[1])
                 .orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER));
-        boolean isSemesterInLecture = lecture.getSemester().stream().anyMatch(s -> s.getSemester().equals(semester));
-        if (!isSemesterInLecture) {
-            throw new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER);
-        }
-
-        return semester;
     }
 
     private int[] parseSemester(String semesterStr) {
@@ -141,10 +143,10 @@ public class ReviewService {
         }
     }
 
-    private void checkReviewExisted(Long lectureId, String userId, Lecture lecture) {
-        boolean isExisted = reviewRepository.existsByUserIdAndLectureAndDeletedAtIsNull(userId, lecture);
+    private void checkReviewExisted(String userId, LectureSemester lectureSemester) {
+        boolean isExisted = reviewRepository.existsByUserIdAndLectureSemesterAndDeletedAtIsNull(userId, lectureSemester);
         if (isExisted) {
-            log.error("이미 유저가 작성한 후기가 존재합니다. userId: {}, lectureId: {}", userId, lectureId);
+            log.error("이미 유저가 작성한 후기가 존재합니다. userId: {}, lectureId: {}", userId, lectureSemester.getLecture().getId());
             throw new ReviewException(ReviewErrorCode.REVIEW_ALREADY_EXISTED);
         }
     }
