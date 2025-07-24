@@ -18,11 +18,11 @@ public interface LikeFeignClient {
     ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody LikeRequestDto likeRequestDto);
 
     @GetMapping("/likes")
-    ResponseEntity<SingleResponse<?>> getLikeCount(@RequestParam("likeType") LikeType likeType,
+    Integer getLikeCount(@RequestParam("likeType") LikeType likeType,
                                                      @RequestParam("id") String id);
 
     @GetMapping("/likes/user")
-    ResponseEntity<SingleResponse<?>> isUserLiked(@RequestParam("likeType") LikeType likeType,
+    Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
                                                     @RequestParam("id") String id,
                                                     @RequestParam("userId") String userId);
 }
