@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 
-@Entity(name = "lecture_schedules")
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LectureSchedule {

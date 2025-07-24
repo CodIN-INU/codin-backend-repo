@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Entity(name = "emotions")
+@Entity
 public class Emotion {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

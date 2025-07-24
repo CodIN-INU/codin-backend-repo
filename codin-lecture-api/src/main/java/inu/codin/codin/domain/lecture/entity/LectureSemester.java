@@ -3,7 +3,7 @@ package inu.codin.codin.domain.lecture.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-@Entity(name = "lecture_semesters")
+@Entity
 @Getter
 public class LectureSemester {
 

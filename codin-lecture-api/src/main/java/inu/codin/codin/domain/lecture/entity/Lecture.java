@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Getter
-@Entity(name = "lectures")
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Lecture {
 
@@ -57,11 +57,9 @@ public class Lecture {
     @JoinColumn(name = "lectures_room_id")
     private LectureRoom lectureRoom;
 
-//    public void updateReviewRating(double starRating, int participants, Emotion emotion){
-//        this.starRating = starRating;
-//        this.participants = participants;
-//        this.emotion = emotion;
-//    }
+    public void increaseLikes() { this.likes++; }
+
+    public void decreaseLikes() { this.likes--; };
 
     public void increaseHits(){
         this.hits++;
