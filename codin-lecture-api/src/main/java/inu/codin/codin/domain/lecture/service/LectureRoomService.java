@@ -2,7 +2,7 @@ package inu.codin.codin.domain.lecture.service;
 
 import inu.codin.codin.domain.lecture.dto.LectureRoomResponseDto;
 import inu.codin.codin.domain.lecture.entity.LectureRoom;
-import inu.codin.codin.domain.lecture.repository.LectureRoomsRepository;
+import inu.codin.codin.domain.lecture.repository.LectureRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LectureRoomService {
 
-    private final LectureRoomsRepository lectureRoomsRepository;
+    private final LectureRoomRepository lectureRoomRepository;
 
     /**
      * List 인덱스마다 층고를 뜻하며, 각각 강의실마다 진행되는 강의 스케줄을 Map 형식으로 관리
@@ -26,7 +26,7 @@ public class LectureRoomService {
     public List<Map<Integer, List<LectureRoomResponseDto>>> statusOfEmptyRoom() {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek today = now.getDayOfWeek();
-        List<LectureRoom> lectureRooms = lectureRoomsRepository.findAllWithSchedules();
+        List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedules();
 
         List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 

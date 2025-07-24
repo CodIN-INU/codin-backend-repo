@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LectureRoomsRepository extends JpaRepository<LectureRoom, Long> {
+public interface LectureRoomRepository extends JpaRepository<LectureRoom, Long> {
 
     @Query("SELECT lr FROM LectureRoom lr LEFT JOIN FETCH lr.schedules")
     List<LectureRoom> findAllWithSchedules();
