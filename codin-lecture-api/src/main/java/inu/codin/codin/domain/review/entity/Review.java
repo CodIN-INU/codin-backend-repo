@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.review.entity;
 
 import inu.codin.codin.domain.lecture.entity.Lecture;
-import inu.codin.codin.domain.lecture.entity.LectureSemester;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.review.dto.CreateReviewRequestDto;
 import inu.codin.codin.global.common.entity.BaseEntity;
@@ -24,22 +23,29 @@ public class Review extends BaseEntity {
     private int likes = 0;
 
     @ManyToOne
-    @JoinColumn(name = "lecture_semester_id")
-    private LectureSemester lectureSemester;
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
+
+    @OneToOne
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 
     @Builder
-    public Review(String content, double starRating, String userId, LectureSemester lectureSemester) {
+    public Review(String content, double starRating, Semester semester, String userId, Lecture lecture) {
         this.content = content;
         this.starRating = starRating;
+        this.semester = semester;
         this.userId = userId;
+        this.lecture = lecture;
     }
 
-    public static Review of(CreateReviewRequestDto createReviewRequestDto, String userId, LectureSemester lectureSemester) {
+    public static Review of(CreateReviewRequestDto createReviewRequestDto, Semester semester, Lecture lecture, String userId) {
         return Review.builder()
                 .content(createReviewRequestDto.getContent())
                 .starRating(createReviewRequestDto.getStarRating())
+                .semester(semester)
                 .userId(userId)
-                .lectureSemester(lectureSemester)
+                .lecture(lecture)
                 .build();
     }
 
