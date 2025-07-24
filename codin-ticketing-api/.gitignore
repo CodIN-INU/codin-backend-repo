@@ -36,4 +36,11 @@ out/
 ### VS Code ###
 .vscode/
 
-.env*
+.env.*
+!.env.example
+logs
+
+/docker/db/mysql
+/docker/db/redis
+*.tar.gz
+*.tar

@@ -1,0 +1,21 @@
+name: "⚙ Setting"
+description: "프로젝트 세팅"
+labels: ["⚙ Setting"]
+body:
+  - type: textarea
+    attributes:
+      label: 📄 Description
+      description: 새로운 세팅 변경사항에 대해서 적어주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: ✅ To Do
+      description: 할 일을 체크박스 형태로 작성해주세요.
+      placeholder: 최대한 세분화 해서 적어주세요!
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🙋🏻 Reference
+      description: 참고 자료가 있다면 작성해 주세요.

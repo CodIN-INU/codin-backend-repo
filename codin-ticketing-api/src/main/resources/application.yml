@@ -2,22 +2,86 @@ spring:
   application:
     name: codin-ticketing-api
   config:
-    import: optional:file:./.env[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
   jwt:
     secret: ${SPRING_JWT_SECRET}
+
+  # MySQL Database Configuration
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ticketing}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER:codin}
+    password: ${MYSQL_PASSWORD:codinpassword}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+
+  # Redis Configuration
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      port: ${REDIS_PORT:6380}
       password: ${REDIS_PASSWORD:1234}
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost/test}
-      auto-index-creation: true
+      database: ${REDIS_DATABASE:0}
+
+# Redis Stream Configuration
+redis:
+  stream:
+    stock:
+      key: ${STOCK_REDIS_STREAM_KEY:"event-stock-stream"}
 
 server:
-  domain: "https://codin.inu.ac.kr"
+  domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
+  port: ${SERVER_PORT}
+
+# Feign Main API Server URL
+user:
+  client:
+    url: ${USER_CLIENT_URL:http://localhost:8080}
+
+# Swagger SpringDoc Configuration
+springdoc:
+  override-with-generic-response: false
+  api-docs:
+    enabled: true
+  swagger-ui:
+    groups-order: DESC
+    doc-expansion: list
+    tags-sorter: alpha
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+
+# S3 Configuration
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    stack.auto: false
+    region.static: ${S3_REGION}
+    credentials:
+      access-key: ${S3_ACCESS_KEY}
+      secret-key: ${S3_SECRET_KEY}
+
+# Hibernate Log Level Configuration
 logging:
   level:
     root: info
-    sql: info
+    sql: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_LOG_LEVEL:warn}
