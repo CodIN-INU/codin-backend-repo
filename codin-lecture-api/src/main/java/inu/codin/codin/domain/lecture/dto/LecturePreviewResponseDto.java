@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -39,7 +40,7 @@ public class LecturePreviewResponseDto {
     private Boolean liked;
 
     @Builder
-    public LecturePreviewResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, boolean liked) {
+    public LecturePreviewResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked) {
         this.id = id;
         this.title = title;
         this.professor = professor;
@@ -50,7 +51,7 @@ public class LecturePreviewResponseDto {
         this.liked = liked;
     }
 
-    public static LecturePreviewResponseDto of(Lecture lecture){
+    public static LecturePreviewResponseDto of(Lecture lecture, boolean liked){
         return LecturePreviewResponseDto.builder()
                 .id(lecture.getId().toString())
                 .title(lecture.getLectureNm())
@@ -59,11 +60,11 @@ public class LecturePreviewResponseDto {
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())
                 .tags(getTags(lecture.getTags()))
-//                .liked(liked)
+                .liked(liked)
                 .build();
     }
 
-    public static List<String> getTags(List<LectureTag> tags) {
+    public static List<String> getTags(Set<LectureTag> tags) {
         return tags.stream().map(tag -> tag.getTag().getTagName()).toList();
     }
 }

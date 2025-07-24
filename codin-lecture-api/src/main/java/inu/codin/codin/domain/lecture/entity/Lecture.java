@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -18,7 +19,6 @@ public class Lecture {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String lectureNm;
     private int grade; //0 : 전학년
     private int credit;
@@ -42,20 +42,16 @@ public class Lecture {
     private Emotion emotion = new Emotion();
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<LectureSemester> semester;
+    private Set<LectureSemester> semester;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<LectureTag> tags;
+    private Set<LectureTag> tags;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LectureSchedule> schedule;
+    private Set<LectureSchedule> schedule;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lectures_room_id")
-    private LectureRoom lectureRoom;
 
     public void increaseLikes() { this.likes++; }
 

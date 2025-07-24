@@ -9,7 +9,8 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LecturePageResponse {
+public class
+LecturePageResponse {
 
     private List<LecturePreviewResponseDto> contents = new ArrayList<>();
     private long lastPage;

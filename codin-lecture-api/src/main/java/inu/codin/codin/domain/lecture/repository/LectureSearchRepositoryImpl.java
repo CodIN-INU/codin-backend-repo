@@ -2,6 +2,7 @@ package inu.codin.codin.domain.lecture.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import inu.codin.codin.domain.lecture.entity.*;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
@@ -42,25 +43,33 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
                     lecture.preCourse.containsIgnoreCase(keyword),
                     lecture.type.stringValue().containsIgnoreCase(keyword),
                     lecture.professor.containsIgnoreCase(keyword),
-                    tag.tagName.containsIgnoreCase(keyword)
+                    lectureTag.tag.tagName.containsIgnoreCase(keyword)
             );
         }
 
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(lecture, sortingOption);
-        List<Lecture> lectures = jpaQueryFactory
+        JPQLQuery<Lecture> query = jpaQueryFactory
                 .selectDistinct(lecture)
-                .from(lecture)
-                .leftJoin(lecture.tags, lectureTag)
-                .leftJoin(lectureTag.tag, tag)
-                .where(builder)
+                .from(lecture);
+
+        if (keyword != null && !keyword.isBlank()) {
+            query.leftJoin(lecture.tags, lectureTag)
+                    .leftJoin(lectureTag.tag, tag);
+        }
+
+
+        query.where(builder)
                 .orderBy(orderSpecifier != null ? orderSpecifier : lecture.id.desc())
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+                .limit(pageable.getPageSize());
+
+        List<Lecture> lectures = query.fetch();
 
         Long total = jpaQueryFactory
                 .select(lecture.countDistinct())
                 .from(lecture)
+                .leftJoin(lecture.tags, lectureTag)
+                .leftJoin(lectureTag.tag, tag)
                 .where(builder)
                 .fetchOne();
 

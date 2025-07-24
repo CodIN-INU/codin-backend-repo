@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface LectureRoomsRepository extends JpaRepository<LectureRoom, Long> {
 
-    @Query("SELECT lr FROM lecture_rooms lr LEFT JOIN FETCH lr.schedules")
+    @Query("SELECT lr FROM LectureRoom lr LEFT JOIN FETCH lr.schedules")
     List<LectureRoom> findAllWithSchedules();
 }
