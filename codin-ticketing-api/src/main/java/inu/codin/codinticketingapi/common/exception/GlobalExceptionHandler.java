@@ -19,39 +19,45 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
+        log.warn("[Exception] Error Message : {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse( e.getMessage(), HttpStatus.NOT_FOUND.value()));
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
     }
 
     @ExceptionHandler(GlobalException.class)
     protected ResponseEntity<ExceptionResponse> handleGlobalException(GlobalException e) {
         GlobalErrorCode code = e.getErrorCode();
+        log.warn("[GlobalException] Error Message : {}", e.getMessage());
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(e.getMessage(), code.httpStatus().value()));
     }
 
     @ExceptionHandler(TicketingException.class)
-    protected ResponseEntity<ExceptionResponse> handleGlobalException(TicketingException e) {
+    protected ResponseEntity<ExceptionResponse> handleTicketingException(TicketingException e) {
         TicketingErrorCode code = e.getErrorCode();
+        log.warn("[TicketingException] Error Message : {}", e.getMessage());
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(e.getMessage(), code.httpStatus().value()));
     }
 
     @ExceptionHandler(UserException.class)
-    protected ResponseEntity<ExceptionResponse> handleGlobalException(UserException e) {
+    protected ResponseEntity<ExceptionResponse> handleUserException(UserException e) {
         UserErrorCode code = e.getErrorCode();
+        log.warn("[UserException] Error Message : {}", e.getMessage());
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(e.getMessage(), code.httpStatus().value()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.warn("[MethodArgumentNotValidException] Error Message : {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ExceptionResponse> handleConstraintViolation(ConstraintViolationException e) {
+    public ResponseEntity<ExceptionResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        log.warn("[ConstraintViolationException] Error Message : {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
     }
