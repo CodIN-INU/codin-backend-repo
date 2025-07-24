@@ -4,7 +4,12 @@ spring:
   config:
     import: optional:file:./.env[.properties]
   jwt:
-    secret: ${SPRING_JWT_SECRET}
+    secret: ${SPRING_JWT_SECRET:dummySecret}
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:lecture}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER:codin}
+    password: ${MYSQL_PASSWORD:codinpassword}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -13,6 +18,31 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost/test}
       auto-index-creation: true
+    elasticsearch:
+      indices:
+        courses:
+          settings:
+            analysis:
+              analyzer: # 분석기
+                korean:
+                  type: custom
+                  tokenizer: nori_tokenizer
+                  filter: [ nori_readingform, lowercase ]
+              tokenizer: # 토크 나이저
+                nori_tokenizer:
+                  type: nori_tokenizer
+                  decompound_mode: mixed
+              filter: # 필터
+                nori_readingform:
+                  type: nori_readingform
+                nori_hanja_readingform:
+                  type: nori_hanja_readingform
+
+lecture:
+  python:
+    path: ./python-path
+  file:
+    path: ./lecture-path
 
 server:
   domain: "https://codin.inu.ac.kr"
