@@ -15,23 +15,29 @@ import java.util.Collections;
 @Getter
 public class TokenUserDetails implements UserDetails {
 
+    private final String userId;
     private final String email;
     private final String role;
+    private final String token;
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Builder
-    public TokenUserDetails(String email, String role) {
+    public TokenUserDetails(String userId, String email, String role, String token) {
+        this.userId = userId;
         this.email = email;
         this.role = role;
+        this.token = token;
         // JWT에서 이미 ROLE_ 접두사가 있는 경우 그대로 사용, 없는 경우 추가
         String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority(authority));
     }
 
-    public static TokenUserDetails fromTokenClaims(String email, String role) {
+    public static TokenUserDetails fromTokenClaims(String userId, String email, String role, String token) {
         return TokenUserDetails.builder()
+                .userId(userId)
                 .email(email)
                 .role(role)
+                .token(token)
                 .build();
     }
 

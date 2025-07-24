@@ -45,10 +45,11 @@ public class TokenValidationFilter extends OncePerRequestFilter {
     private void setAuthentication(String token) {
         try {
             String userId = jwtTokenValidator.getUserId(token);
+            String username = jwtTokenValidator.getUsername(token);
             String role = jwtTokenValidator.getUserRole(token);
             log.info("[setAuthentication] : {}, {}", userId, role);
 
-            TokenUserDetails userDetails = TokenUserDetails.fromTokenClaims(userId, role);
+            TokenUserDetails userDetails = TokenUserDetails.fromTokenClaims(userId, username, role, token);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

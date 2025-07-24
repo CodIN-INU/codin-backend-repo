@@ -16,26 +16,37 @@ public class SecurityUtils {
      * 현재 인증된 사용자의 이메일 ID 반환
      */
     public static String getUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !(authentication.getPrincipal() instanceof TokenUserDetails userDetails)) {
-            throw new SecurityException(SecurityErrorCode.ACCESS_DENIED);
-        }
-
-        return userDetails.getUsername();
+        return getTokenUserDetails().getUsername();
     }
 
     /**
      * 현재 인증된 사용자의 권한 반환
      */
     public static String getCurrentUserRole() {
+        return getTokenUserDetails().getRole();
+    }
+
+    /**
+     * 현재 인증된 사용자의 유저 토큰 반환
+     */
+    public static String getUserToken() {
+        return getTokenUserDetails().getToken();
+    }
+
+    /**
+     * 현재 인증된 사용자의 유저 pk 반환
+     */
+    public static String getUserId() {
+        return getTokenUserDetails().getUserId();
+    }
+
+    private static TokenUserDetails getTokenUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof TokenUserDetails userDetails)) {
             throw new SecurityException(SecurityErrorCode.ACCESS_DENIED);
         }
-
-        return userDetails.getRole();
+        return userDetails;
     }
 
     /**
