@@ -25,7 +25,7 @@ public class UserApiResponse {
                 "success=" + success +
                 ", code=" + code +
                 ", message='" + message + '\'' +
-                ", data=" + data.toString() +
+                ", data=" + Objects.toString(data) +
                 '}';
     }
 }
