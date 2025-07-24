@@ -4,6 +4,7 @@ import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -102,5 +103,15 @@ public class UserEntity extends BaseTimeEntity {
 
     public void updateTotalSuspensionEndDate(LocalDateTime totalSuspensionEndDate){
         this.totalSuspensionEndDate = totalSuspensionEndDate;
+    }
+
+    /**
+     * studentId(학번), name(실제 이름), department(소속) 정보 업데이트
+     * @param updateRequest 유저 티켓팅 참여 정보 업데이트 request dto
+     */
+    public void updateParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
+        this.studentId = updateRequest.getStudentId();
+        this.name = updateRequest.getName();
+        this.department = updateRequest.getDepartment();
     }
 }
