@@ -2,8 +2,8 @@ package inu.codin.codin.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.lecture.domain.review.repository.ReviewRepository;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
+import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
@@ -29,35 +29,34 @@ public class LikeService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
-    private final ReviewRepository reviewRepository;
 
     private final RedisLikeService redisLikeService;
     private final RedisBestService redisBestService;
     private final RedisHealthChecker redisHealthChecker;
 
 
-    public String toggleLike(LikeRequestDto likeRequestDto) {
+    public LikeResponseType toggleLike(LikeRequestDto likeRequestDto) {
         String likeId = likeRequestDto.getId();
         ObjectId userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
 
         // 이미 좋아요를 눌렀으면 취소, 그렇지 않으면 추가
         Optional<LikeEntity> like = likeRepository.findByLikeTypeAndLikeTypeIdAndUserId(likeRequestDto.getLikeType(), likeId, userId);
-        return getResult(likeRequestDto, like, likeId, userId);
+        return controlLike(likeRequestDto, like, likeId, userId);
     }
 
-    private String getResult(LikeRequestDto likeRequestDto, Optional<LikeEntity> like, String likeId, ObjectId userId) {
+    private LikeResponseType controlLike(LikeRequestDto likeRequestDto, Optional<LikeEntity> like, String likeId, ObjectId userId) {
         if (like.isPresent()){
             if (like.get().getDeletedAt() == null) {
                 removeLike(like.get());
-                return "좋아요가 삭제되었습니다.";
+                return LikeResponseType.REMOVE;
             } else {
                 restoreLike(like.get()); //좋아요가 존재하는데 삭제된 상태
-                return "좋아요가 복구되었습니다";
+                return LikeResponseType.RECOVER;
             }
         } else {
             addLike(likeRequestDto.getLikeType(), likeId, userId);
-            return "좋아요가 추가되었습니다.";
+            return LikeResponseType.ADD;
         }
     }
 
@@ -132,19 +131,26 @@ public class LikeService {
         return likeRepository.existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(likeType, likeTypeId, userId);
     }
 
+    public boolean isLiked(LikeType likeType, String likeTypeId, String userId){
+        return likeRepository.existsByLikeTypeAndLikeTypeIdAndUserIdAndDeletedAtIsNull(likeType, likeTypeId, new ObjectId(userId));
+    }
+
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
-        ObjectId id = new ObjectId(likeRequestDto.getId());
-        switch(likeRequestDto.getLikeType()){
-            case POST -> postRepository.findByIdAndNotDeleted(id)
-                    .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
-            case REPLY -> replyCommentRepository.findByIdAndNotDeleted(id)
-                    .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
-            case COMMENT -> commentRepository.findByIdAndNotDeleted(id)
-                    .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
-            case REVIEW -> reviewRepository.findBy_idAndDeletedAtIsNull(id)
-                    .orElseThrow(() ->new NotFoundException("수강 후기를 찾을 수 없습니다"));
-            //todo LECTURE
+        LikeType likeType = likeRequestDto.getLikeType();
+        if (likeType.equals(LikeType.LECTURE) || likeType.equals(LikeType.REVIEW)){
+            String likeTypeId = likeRequestDto.getId();
+         } else {
+            ObjectId id = new ObjectId(likeRequestDto.getId());
+            switch(likeType){
+                case POST -> postRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
+                case REPLY -> replyCommentRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
+                case COMMENT -> commentRepository.findByIdAndNotDeleted(id)
+                        .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
+            }
         }
+
     }
 
 
