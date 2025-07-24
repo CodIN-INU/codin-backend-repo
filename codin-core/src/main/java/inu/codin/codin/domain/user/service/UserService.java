@@ -15,7 +15,9 @@ import inu.codin.codin.domain.post.service.PostService;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
+import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -186,6 +188,32 @@ public class UserService {
         log.info("[프로필 이미지 업데이트 성공] 사용자 ID: {}, 프로필 이미지 URL: {}", userId, profileImageUrl);
     }
 
+    /**
+     * 유저 티켓팅 수령 정보 반환
+     * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
+     */
+    public UserTicketingParticipationInfoResponse getUserTicketingParticipationInfo() {
+        return UserTicketingParticipationInfoResponse.of(
+                userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                        .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다.")));
+    }
+
+    /**
+     * 유저 티켓팅 수령 정보 수정 (생성)
+     * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
+     */
+    public UserTicketingParticipationInfoResponse updateUserTicketingParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
+        UserEntity userEntity = userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+
+        userEntity.updateParticipationInfo(updateRequest);
+        userEntity = userRepository.save(userEntity);
+        return UserTicketingParticipationInfoResponse.of(userEntity);
+    }
+
+    /**
+     * 유저 도메인 상호작용 조회 Enum Class
+     */
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }
