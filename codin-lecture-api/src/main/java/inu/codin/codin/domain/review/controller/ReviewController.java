@@ -30,13 +30,13 @@ public class ReviewController {
                 .body(new SingleResponse<>(201, "수강 후기 작성 완료", null));
     }
 
-//    @Operation(
-//            summary = "해당 강의의 수강 후기 반환"
-//    )
-//    @GetMapping("/{lectureId}")
-//    public ResponseEntity<SingleResponse<?>> getListOfReviews(@PathVariable("lectureId") Long lectureId,
-//                                                              @RequestParam("page") int page){
-//        return ResponseEntity.ok()
-//                .body(new SingleResponse<>(200, "수강 후기 리스트 반환", reviewService.getListOfReviews(lectureId, page)));
-//    }
+    @Operation(
+            summary = "해당 강의의 수강 후기 반환"
+    )
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<SingleResponse<?>> getListOfReviews(@PathVariable("lectureId") Long lectureId,
+                                                              @RequestParam("page") int page){
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "수강 후기 리스트 반환", reviewService.getListOfReviews(lectureId, page)));
+    }
 }

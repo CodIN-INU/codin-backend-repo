@@ -10,16 +10,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "reviews")
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Review extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long _id;
+    private Long id;
     private String content;
     private double starRating;
-    private Long userId;
+    private String userId;
+    private int likes = 0;
 
     @ManyToOne
     @JoinColumn(name = "lecture_id")
@@ -30,7 +31,7 @@ public class Review extends BaseEntity {
     private Semester semester;
 
     @Builder
-    public Review(String content, double starRating, Semester semester, Long userId, Lecture lecture) {
+    public Review(String content, double starRating, Semester semester, String userId, Lecture lecture) {
         this.content = content;
         this.starRating = starRating;
         this.semester = semester;
@@ -38,7 +39,7 @@ public class Review extends BaseEntity {
         this.lecture = lecture;
     }
 
-    public static Review of(CreateReviewRequestDto createReviewRequestDto, Semester semester, Lecture lecture, Long userId) {
+    public static Review of(CreateReviewRequestDto createReviewRequestDto, Semester semester, Lecture lecture, String userId) {
         return Review.builder()
                 .content(createReviewRequestDto.getContent())
                 .starRating(createReviewRequestDto.getStarRating())
@@ -46,5 +47,13 @@ public class Review extends BaseEntity {
                 .userId(userId)
                 .lecture(lecture)
                 .build();
+    }
+
+    public void increaseLikes() {
+        this.likes++;
+    }
+
+    public void decreaseLikes() {
+        this.likes--;
     }
 }
