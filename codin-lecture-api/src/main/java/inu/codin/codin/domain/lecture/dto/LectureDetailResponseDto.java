@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.lecture.dto;
 
-import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.LectureSchedule;
 import inu.codin.codin.domain.lecture.entity.Type;
@@ -33,9 +32,9 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
     private String preCourse;
 
     @Schema(description = "후기 평점들의 범위마다 100분율 계산", example = "hard : 30, ok : 20, best : 50")
-    private Emotion emotion;
+    private EmotionResponseDto emotion;
 
-    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, Emotion emotion) {
+    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion) {
         super(id, title, professor, type, grade, credit, tags, null);
         this.department = department.getDescription();
         this.college = college.getDescription();
@@ -63,7 +62,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getLectureType(),
                 schedules,
                 lecture.getPreCourse(),
-                lecture.getEmotion()
+                lecture.getEmotion().changeToPercentage()
         );
     }
     

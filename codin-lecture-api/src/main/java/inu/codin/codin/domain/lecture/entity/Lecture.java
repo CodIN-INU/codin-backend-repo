@@ -39,7 +39,7 @@ public class Lecture {
     private int hits;
 
     @OneToOne
-    private Emotion emotion = new Emotion();
+    private Emotion emotion = new Emotion(this);
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<LectureSemester> semester;
