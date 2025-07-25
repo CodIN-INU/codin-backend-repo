@@ -69,7 +69,7 @@ public class LectureService {
                         .map(lecture -> {
                                     boolean liked = likeService.isLiked(LikeType.LECTURE, lecture.getId().toString());
                                     return LecturePreviewResponseDto.of(lecture, liked);
-                            }).toList(),
+                        }).toList(),
                 lecturePage.getTotalPages() - 1,
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }

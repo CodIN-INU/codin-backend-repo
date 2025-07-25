@@ -9,6 +9,8 @@ import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikeType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
+import inu.codin.codin.domain.like.exception.LikeErrorCode;
+import inu.codin.codin.domain.like.exception.LikeException;
 import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.domain.review.exception.ReviewErrorCode;
 import inu.codin.codin.domain.review.exception.ReviewException;
@@ -39,7 +41,9 @@ public class LikeService {
     public LikeResponseType toggleLike(LikeRequestDto likeRequestDto) {
         LikeResponseType message = null;
         try {
-            message = LikeResponseType.valueOf((String) likeFeignClient.toggleLike(likeRequestDto).getBody().getData());
+            Object data = likeFeignClient.toggleLike(likeRequestDto).getBody().getData();
+            if (data == null) throw new LikeException(LikeErrorCode.LIKE_UNEXPECTED_MESSAGE, null);
+            message = LikeResponseType.valueOf((String) data);
             boolean isLiked = parseLikeResponse(message);
             applyLikeChange(likeRequestDto, isLiked);
             return message;
