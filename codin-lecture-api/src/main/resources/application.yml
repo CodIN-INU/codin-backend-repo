@@ -1,23 +1,41 @@
 spring:
   application:
-    name: codin-ticketing-api
+    name: codin-lecture-api
   config:
-    import: optional:file:./.env[.properties]
+    import: optional:file:.env[.properties]
   jwt:
     secret: ${SPRING_JWT_SECRET}
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:1234}
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost/test}
-      auto-index-creation: true
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+lecture:
+  python:
+    path: ${PYTHON_PATH:./example}
+  file:
+    path: ${PYTHON_FILE_PATH:./example}
 
 server:
-  domain: "https://codin.inu.ac.kr"
+  port: ${SERVER_PORT}
+  domain: ${SERVER_DOMAIN}
   forward-headers-strategy: framework
+
 logging:
   level:
-    root: info
+    root: debug
     sql: info
+    org.hibernate.sql: info
