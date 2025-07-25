@@ -4,6 +4,7 @@ import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
+import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
@@ -19,6 +20,7 @@ import org.bson.types.ObjectId;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -153,5 +155,7 @@ public class LikeService {
 
     }
 
-
+    public List<LikedResponseDto> getLikedId(LikeType likeType, String userId) {
+        return likeRepository.findLikeTypeIdByLikeTypeAndUserId(likeType, new ObjectId(userId));
+    }
 }
