@@ -10,21 +10,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserReviewStatsService {
 
+    private static final int KEYWORD_UNLOCK_THRESHOLD = 3;
     private final UserReviewStatsRepository userReviewStatsRepository;
 
     public void updateStats(String userId) {
         UserReviewStats userReviewStats = userReviewStatsRepository.findByUserId(userId)
                         .orElse(new UserReviewStats(userId));
         userReviewStats.increaseCount();
-        if (!userReviewStats.isOpenKeyword() && userReviewStats.getCountOfReviews() >= 3)
+        if (!userReviewStats.isOpenKeyword() && userReviewStats.getCountOfReviews() >= KEYWORD_UNLOCK_THRESHOLD)
             userReviewStats.canOpenKeyword();
         userReviewStatsRepository.save(userReviewStats);
     }
 
     public boolean isOpenKeyword() {
         String userId = SecurityUtils.getUserId();
-        UserReviewStats userReviewStats = userReviewStatsRepository.findByUserId(userId)
-                        .orElse(new UserReviewStats(userId));
-        return userReviewStats.isOpenKeyword();
+        return userReviewStatsRepository.findByUserId(userId)
+                        .map(UserReviewStats::isOpenKeyword)
+                        .orElse(false);
     }
 }
