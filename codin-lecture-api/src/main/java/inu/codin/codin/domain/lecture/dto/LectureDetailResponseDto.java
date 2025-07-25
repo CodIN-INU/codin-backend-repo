@@ -13,9 +13,6 @@ import java.util.List;
 @Getter
 public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
-    @Schema(description = "학부", example = "컴퓨터공학부")
-    private String department;
-
     @Schema(description = "단과대", example = "정보기술대학")
     private String college;
 
@@ -36,9 +33,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
     private boolean openKeyword;
 
-    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword) {
-        super(id, title, professor, type, grade, credit, tags, null);
-        this.department = department.getDescription();
+    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes) {
+        super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes);
         this.college = college.getDescription();
         this.evaluation = evaluation;
         this.lectureType = lectureType;
@@ -66,7 +62,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 schedules,
                 lecture.getPreCourse(),
                 lecture.getEmotion().changeToPercentage(),
-                openKeyword
+                openKeyword,
+                lecture.getLikes()
         );
     }
     
