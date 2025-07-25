@@ -2,7 +2,7 @@ spring:
   application:
     name: codin-lecture-api
   config:
-    import: optional:file:.env.local[.properties]
+    import: optional:file:.env[.properties]
   jwt:
     secret: ${SPRING_JWT_SECRET}
   data:
@@ -25,9 +25,9 @@ spring:
 
 lecture:
   python:
-    path: ${PYTHON_PATH}
+    path: ${PYTHON_PATH:./example}
   file:
-    path: ${PYTHON_FILE_PATH}
+    path: ${PYTHON_FILE_PATH:./example}
 
 server:
   port: ${SERVER_PORT}
@@ -38,3 +38,4 @@ logging:
   level:
     root: debug
     sql: info
+    org.hibernate.sql: info
