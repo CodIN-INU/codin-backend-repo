@@ -10,9 +10,8 @@ import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.like.dto.LikeType;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -66,7 +65,7 @@ public class LectureService {
                         .map(lecture -> {
                                     boolean liked = likeService.isLiked(LikeType.LECTURE, lecture.getId().toString());
                                     return LecturePreviewResponseDto.of(lecture, liked);
-                            }).toList(),
+                        }).toList(),
                 lecturePage.getTotalPages() - 1,
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }
