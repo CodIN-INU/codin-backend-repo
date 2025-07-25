@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/lectures")
 @RequiredArgsConstructor
 @Tag(name = "Lecture API", description = "강의실 정보 API")
 public class LectureController {
