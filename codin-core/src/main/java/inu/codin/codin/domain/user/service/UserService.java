@@ -79,7 +79,7 @@ public class UserService {
                 log.info("[좋아요 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
-                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
+                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(new ObjectId(likeEntity.getLikeTypeId()))
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
