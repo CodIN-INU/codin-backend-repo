@@ -25,10 +25,9 @@ import java.util.List;
 public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
-    private final LikeFeignClient likeFeignClient;
 
     @Override
-    public Page<Lecture> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, Boolean like, Pageable pageable) {
+    public Page<Lecture> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<Long> liked, Pageable pageable) {
         QLecture lecture = QLecture.lecture;
         QTag tag = QTag.tag;
         QLectureTag lectureTag = QLectureTag.lectureTag;
@@ -37,8 +36,7 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
 
         searchByDepartment(department, builder, lecture); //학과 조건 추가
         searchByKeyword(keyword, builder, lecture, lectureTag); //키워드 조건 추가
-        Page<Lecture> resultOfLiked = searchByOnlyUserLiked(like, pageable, builder, lecture); //좋아요 조건 추가
-        if (resultOfLiked != null) return resultOfLiked;
+        addUserLikedFilter(liked, builder, lecture); //좋아요 조건 추가
 
         JPQLQuery<Lecture> query = jpaQueryFactory
                 .selectDistinct(lecture)
@@ -73,18 +71,12 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
                 .leftJoin(lectureTag.tag, tag);
     }
 
-    private Page<Lecture> searchByOnlyUserLiked(Boolean like, Pageable pageable, BooleanBuilder builder, QLecture lecture) {
-        if (like != null && like) { //좋아요가 true라면 좋아요한 강의의 id를 통해 결과 필터링
-            String userId = SecurityUtils.getUserId();
-            List<Long> liked = likeFeignClient.getLiked(LikeType.LECTURE, userId).stream()
-                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId())).toList();
-            if (liked.isEmpty()) {
-                return Page.empty(pageable);
-            }
+    private void addUserLikedFilter(List<Long> liked, BooleanBuilder builder, QLecture lecture) {
+        if (liked != null && !liked.isEmpty()) {
             builder.and(lecture.id.in(liked));
         }
-        return null;
     }
+
 
     private void searchByKeyword(String keyword, BooleanBuilder builder, QLecture lecture, QLectureTag lectureTag) {
         if (keyword != null && !keyword.isBlank()){ //키워드가 있다면 모든 정보에 대해서 확인

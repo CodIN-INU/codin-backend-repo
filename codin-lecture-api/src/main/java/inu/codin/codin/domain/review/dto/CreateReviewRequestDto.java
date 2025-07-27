@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
@@ -19,6 +20,7 @@ public class CreateReviewRequestDto {
     private double starRating;
 
     @NotBlank
+    @Pattern(regexp = "^\\d{2}-[1-2]{1}$", message = "학기는 'YY-학기' 형식이어야 합니다. 예: 24-2")
     @Schema(description = "수강 학기 (년도-학기)", example = "24-2")
     private String semester;
 }
