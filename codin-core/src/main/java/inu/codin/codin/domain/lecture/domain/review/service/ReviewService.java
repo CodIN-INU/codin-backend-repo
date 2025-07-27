@@ -2,9 +2,9 @@ package inu.codin.codin.domain.lecture.domain.review.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.lecture.domain.review.dto.CreateReviewRequestDto;
-import inu.codin.codin.domain.lecture.domain.review.dto.ReviewListResposneDto;
-import inu.codin.codin.domain.lecture.domain.review.dto.ReviewPageResponse;
+import inu.codin.codin.domain.lecture.domain.review.dto.request.CreateReviewRequestDto;
+import inu.codin.codin.domain.lecture.domain.review.dto.response.ReviewListResposneDto;
+import inu.codin.codin.domain.lecture.domain.review.dto.response.ReviewPageResponse;
 import inu.codin.codin.domain.lecture.domain.review.entity.ReviewEntity;
 import inu.codin.codin.domain.lecture.domain.review.exception.ReviewExistenceException;
 import inu.codin.codin.domain.lecture.domain.review.exception.WrongRatingException;

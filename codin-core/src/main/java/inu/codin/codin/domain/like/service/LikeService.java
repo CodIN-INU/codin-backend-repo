@@ -2,14 +2,14 @@ package inu.codin.codin.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
+import inu.codin.codin.domain.like.dto.request.LikeRequestDto;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.service.RedisBestService;
@@ -17,6 +17,7 @@ import inu.codin.codin.infra.redis.service.RedisLikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class LikeService {
 
 
     public LikeResponseType toggleLike(LikeRequestDto likeRequestDto) {
-        String likeId = likeRequestDto.getId();
+        String likeId = likeRequestDto.getLikeTypeId();
         ObjectId userId = SecurityUtils.getCurrentUserId();
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
 
@@ -65,20 +66,20 @@ public class LikeService {
     /*
         총 좋아요 개수는 Redis에, 누가 눌렀는지는 DB에 저장
      */
-    public void addLike(LikeType likeType, String likeId, ObjectId userId){
+    public void addLike(LikeType likeType, String likeTypeId, ObjectId userId){
         if (redisHealthChecker.isRedisAvailable()) {
-            redisLikeService.addLike(likeType.name(), likeId);
-            log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeId, userId);
+            redisLikeService.addLike(likeType.name(), likeTypeId);
+            log.info("Redis에 좋아요 추가 - likeType: {}, likeId: {}, userId: {}", likeType, likeTypeId, userId);
         }
 
         likeRepository.save(LikeEntity.builder()
                 .likeType(likeType)
-                .likeTypeId(likeId)
+                .likeTypeId(likeTypeId)
                 .userId(userId)
                 .build());
         if (likeType == LikeType.POST) {
-            redisBestService.applyBestScore(1, new ObjectId(likeId));
-            log.info("Redis에 Best Score 적용 - postId: {}", likeId);
+            redisBestService.applyBestScore(1, new ObjectId(likeTypeId));
+            log.info("Redis에 Best Score 적용 - postId: {}", likeTypeId);
         }
     }
 
@@ -109,18 +110,18 @@ public class LikeService {
         log.info("좋아요 삭제 완료 - likeId: {}, userId: {}", like.get_id(), like.getUserId());
     }
 
-    public int getLikeCount(LikeType entityType, String entityId) {
+    public int getLikeCount(LikeType likeType, String likeTypeId) {
         //Redis가 사용 가능하면 Redis 시도
         Object redisResult = null;
         if (redisHealthChecker.isRedisAvailable()) {
-            redisResult = redisLikeService.getLikeCount(entityType.name(), entityId);
+            redisResult = redisLikeService.getLikeCount(likeType.name(), likeTypeId);
             if (redisResult != null)
                 return Integer.parseInt(String.valueOf(redisResult));
         }
 
         //Redis가 꺼져 있거나 cache가 없을 경우 -> DB 조회
-        int likeCount = likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(entityType, entityId);
-        recoveryLike(entityType, entityId, likeCount);
+        int likeCount = likeRepository.countByLikeTypeAndLikeTypeIdAndDeletedAtIsNull(likeType, likeTypeId);
+        recoveryLike(likeType, likeTypeId, likeCount);
         return likeCount;
     }
 
@@ -140,7 +141,7 @@ public class LikeService {
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
         LikeType likeType = likeRequestDto.getLikeType();
         if (likeType.equals(LikeType.POST) || likeType.equals(LikeType.REPLY) || likeType.equals(LikeType.COMMENT)) {
-            ObjectId id = new ObjectId(likeRequestDto.getId());
+            ObjectId id = new ObjectId(likeRequestDto.getLikeTypeId());
             switch(likeType){
                 case POST -> postRepository.findByIdAndNotDeleted(id)
                         .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
