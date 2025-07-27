@@ -55,6 +55,7 @@ jobs:
               docker ps -a
               cd /opt/project/codin-lecture
 
+              docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/codin-lecture-api:latest || true
               docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-lecture-api:latest
             
               docker rm -f codin-lecture-api || true
