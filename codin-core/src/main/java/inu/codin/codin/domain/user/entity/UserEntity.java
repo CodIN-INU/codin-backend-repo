@@ -46,7 +46,7 @@ public class UserEntity extends BaseTimeEntity {
     private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
-    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, Boolean undergraduate, UserRole role, UserStatus status) {
+    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, UserRole role, UserStatus status) {
         this.email = email;
         this.password = password;
         this.studentId = studentId;
