@@ -126,7 +126,7 @@ public class CommentService {
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
                             replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
-                            likeService.getLikeCount(LikeType.COMMENT, comment.get_id()),
+                            likeService.getLikeCount(LikeType.COMMENT, comment.get_id().toString()),
                             getUserInfoAboutComment(comment.get_id()));
                 })
                 .toList();
@@ -149,7 +149,7 @@ public class CommentService {
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.COMMENT, commentId, userId))
+                .isLike(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId))
                 .build();
     }
 

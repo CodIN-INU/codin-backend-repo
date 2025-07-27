@@ -85,8 +85,8 @@ public class ReviewService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return ReviewPageResponse.of(reviewPage.stream()
                         .map(review -> ReviewListResposneDto.of(review,
-                                likeService.isLiked(LikeType.REVIEW, review.get_id(), userId),
-                                likeService.getLikeCount(LikeType.REVIEW, review.get_id()))).toList(),
+                                likeService.isLiked(LikeType.REVIEW, review.get_id().toString(), userId),
+                                likeService.getLikeCount(LikeType.REVIEW, review.get_id().toString()))).toList(),
                 reviewPage.getTotalPages() -1,
                 reviewPage.hasNext()? reviewPage.getPageable().getPageNumber() + 1: -1);
     }

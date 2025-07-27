@@ -16,8 +16,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class LikeEntity extends BaseTimeEntity {
     @Id @NotNull
     private ObjectId _id;
+
     @NotNull
-    private ObjectId likeTypeId; // 게시글, 댓글, 대댓글의 ID
+    private String likeTypeId; // 게시글, 댓글, 대댓글의 ID
 
     @NotNull
     private LikeType likeType; // 엔티티 타입 (post, comment, reply)
@@ -26,7 +27,7 @@ public class LikeEntity extends BaseTimeEntity {
     private ObjectId userId; // 좋아요를 누른 사용자 ID
 
     @Builder
-    public LikeEntity(ObjectId likeTypeId, LikeType likeType, ObjectId userId) {
+    public LikeEntity(String likeTypeId, LikeType likeType, ObjectId userId) {
         this.likeTypeId = likeTypeId;
         this.likeType = likeType;
         this.userId = userId;
