@@ -36,6 +36,7 @@ public class RedisBestService {
     private final BestRepository bestRepository;
     private final PostRepository postRepository;
     private final String BEST_KEY = "post:top3";
+    private final int SCORE_THRESHOLD = 4;
 
     /**
      * 이전 1시간 동안의 가장 score가 높은 게시글 N개를 반환, DB 조회가 안된다면 삭제
@@ -62,7 +63,7 @@ public class RedisBestService {
                             deleteBest(postId);
                             continue;
                         }
-                        if (score >= 4) {
+                        if (score >= SCORE_THRESHOLD) {
                             result.put(postId, score);
                             // 만약 Best 게시글에 포함되어 있지 않다면 저장
                         }
@@ -159,7 +160,7 @@ public class RedisBestService {
      */
     private void updateBests(String redisKey, String postId){
         Double score = redisTemplate.opsForZSet().score(redisKey, postId);
-        if (score < 4) return; //총 점수가 4점 미만이면 Best 게시글로 취급하지 않음
+        if (score < SCORE_THRESHOLD) return; //총 점수가 4점 미만이면 Best 게시글로 취급하지 않음
 
         Set<ZSetOperations.TypedTuple<String>> minEntry = redisTemplate.opsForZSet().rangeWithScores(BEST_KEY, 0, 0);
         if (minEntry!=null && !minEntry.isEmpty()){
