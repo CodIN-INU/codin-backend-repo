@@ -49,7 +49,13 @@ public class LectureService {
      * @return LecturePageResponse
      */
     public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
-        Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, like, PageRequest.of(page, 10));
+        List<Long> liked = null;
+        if (like != null && like) {
+            liked = likeService.getLiked(LikeType.LECTURE).stream()
+                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId())).toList();
+        }
+
+        Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, liked, PageRequest.of(page, 10));
         return getLecturePageResponse(lecturePage);
     }
 
