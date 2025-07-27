@@ -33,9 +33,11 @@ server:
   port: ${SERVER_PORT}
   domain: ${SERVER_DOMAIN}
   forward-headers-strategy: framework
+  feign:
+    url: ${SERVER_FEIGN_URL}
 
 logging:
   level:
-    root: debug
+    root: info
     sql: info
     org.hibernate.sql: info
