@@ -120,7 +120,7 @@ public class ReplyCommentService {
                         userImageUrl = reply.isAnonymous()? defaultImageUrl: userMap.get(reply.getUserId()).imageUrl();
                     }
                     return CommentResponseDTO.replyOf(reply, nickname, userImageUrl, List.of(),
-                            likeService.getLikeCount(LikeType.REPLY, reply.get_id()), // 대댓글 좋아요 수
+                            likeService.getLikeCount(LikeType.REPLY, reply.get_id().toString()), // 대댓글 좋아요 수
                             getUserInfoAboutReply(reply.get_id()));
                 }).toList();
     }
@@ -129,7 +129,7 @@ public class ReplyCommentService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         //log.info("대댓글 userInfo - replyId: {}, userId: {}", replyId, userId);
         return CommentResponseDTO.UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.REPLY, replyId, userId))
+                .isLike(likeService.isLiked(LikeType.REPLY, replyId.toString(), userId))
                 .build();
     }
 
