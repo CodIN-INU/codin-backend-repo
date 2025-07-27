@@ -35,7 +35,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-ticketing-api:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-lecture-api:latest
 
   # Lecture API Module CD
   deploy:
