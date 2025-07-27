@@ -27,6 +27,7 @@ public class Emotion {
         this.ok = 0;
         this.best = 0;
         this.lecture = lecture;
+        lecture.assignEmotion(this);
     }
 
     public EmotionResponseDto changeToPercentage(){
