@@ -139,9 +139,7 @@ public class LikeService {
 
     private void isEntityNotDeleted(LikeRequestDto likeRequestDto){
         LikeType likeType = likeRequestDto.getLikeType();
-        if (likeType.equals(LikeType.LECTURE) || likeType.equals(LikeType.REVIEW)){
-            String likeTypeId = likeRequestDto.getId();
-         } else {
+        if (likeType.equals(LikeType.POST) || likeType.equals(LikeType.REPLY) || likeType.equals(LikeType.COMMENT)) {
             ObjectId id = new ObjectId(likeRequestDto.getId());
             switch(likeType){
                 case POST -> postRepository.findByIdAndNotDeleted(id)
@@ -151,8 +149,12 @@ public class LikeService {
                 case COMMENT -> commentRepository.findByIdAndNotDeleted(id)
                         .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
             }
+        } //LECTURE, REVIEW는 외부 서버에서 사용하므로 삭제 여부 확인하지 않음
+        else if (likeType.equals(LikeType.LECTURE) || likeType.equals(LikeType.REVIEW)) {
+            return;
+        } else {
+            throw new NotFoundException("지원하지 않는 좋아요 타입입니다.");
         }
-
     }
 
     public List<LikedResponseDto> getLikedId(LikeType likeType, String userId) {
