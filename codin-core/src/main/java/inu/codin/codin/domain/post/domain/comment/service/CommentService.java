@@ -5,13 +5,14 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.notification.service.NotificationService;
+import inu.codin.codin.domain.post.domain.comment.dto.event.CommentNotificationEvent;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO.UserInfo;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyCommentService;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.dto.response.UserDto;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -22,6 +23,7 @@ import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +44,7 @@ public class CommentService {
     private final NotificationService notificationService;
     private final RedisBestService redisBestService;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
@@ -65,8 +68,8 @@ public class CommentService {
 
         redisBestService.applyBestScore(1, postId);
         log.info("댓글 추가완료 postId: {} commentId : {}", postId, comment.get_id());
-        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByComment(post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent());
-
+        if (!userId.equals(post.getUserId()))
+            eventPublisher.publishEvent(new CommentNotificationEvent(this, post.getPostCategory(), post.getUserId(), post.get_id().toString(), comment.getContent()));
     }
 
     // 댓글 삭제 (Soft Delete)
@@ -123,7 +126,7 @@ public class CommentService {
                     }
                     return CommentResponseDTO.commentOf(comment, nickname, userImageUrl,
                             replyCommentService.getRepliesByCommentId(post.getAnonymous(), comment.get_id()),
-                            likeService.getLikeCount(LikeType.COMMENT, comment.get_id()),
+                            likeService.getLikeCount(LikeType.COMMENT, comment.get_id().toString()),
                             getUserInfoAboutComment(comment.get_id()));
                 })
                 .toList();
@@ -146,7 +149,7 @@ public class CommentService {
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.COMMENT, commentId, userId))
+                .isLike(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId))
                 .build();
     }
 
