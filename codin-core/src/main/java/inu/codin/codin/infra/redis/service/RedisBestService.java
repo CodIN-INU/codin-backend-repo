@@ -62,8 +62,10 @@ public class RedisBestService {
                             deleteBest(postId);
                             continue;
                         }
-                        if (score >= 4)
+                        if (score >= 4) {
                             result.put(postId, score);
+                            // 만약 Best 게시글에 포함되어 있지 않다면 저장
+                        }
                     }
                 }
             }
@@ -139,7 +141,7 @@ public class RedisBestService {
                     }
                 }
             }
-            //score가 존재하지 않으면 현재 시간대로 새로 생성
+            //score가 존재하지 않으면 현재 시간대로 새로 생성, 새로 생성되면 4점 미만이기 때문에 best 게시글에 포함되지 않음
             redisKey = now.format(formatter);
             redisTemplate.expire(redisKey, 1, TimeUnit.DAYS); //하루가 지나면 필요없는 데이터
             redisTemplate.opsForZSet().add(redisKey, postId.toString(), score);

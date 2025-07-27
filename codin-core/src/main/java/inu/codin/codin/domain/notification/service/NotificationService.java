@@ -20,6 +20,7 @@ import inu.codin.codin.infra.fcm.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -204,7 +205,9 @@ public class NotificationService {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         userRepository.findById(userId)
                         .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다"));
-        List<NotificationEntity> notifications = notificationRepository.findAllByUserId(userId);
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        List<NotificationEntity> notifications = notificationRepository.findAllByUserId(userId, sort);
         return notifications.stream()
                 .map(NotificationListResponseDto::of)
                 .toList();

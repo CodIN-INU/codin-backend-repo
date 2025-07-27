@@ -56,9 +56,10 @@ jobs:
               docker ps -a
               docker rm -f codin-backend-dev || true
               docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend-dev:latest
-              docker run -d --net codin-docker_default -p 8082:8082 --name codin-backend-dev \
+              docker run -d --net codin-docker_default -p 8082:8080 --name codin-backend-dev \
                 -v /opt/project/backend-data/:/opt/project/backend-data/ \
-                ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend-dev:latest              
+                -e SPRING_PROFILES_ACTIVE=release \
+                ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend-dev:latest
               docker images -f "dangling=true" -q | xargs sudo docker rmi || true
               docker ps -a
             "
