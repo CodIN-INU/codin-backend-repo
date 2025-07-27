@@ -32,4 +32,8 @@ public class BestEntity {
         this.postId = postId;
         this.score = score;
     }
+
+    public void updateScore(int score){
+        this.score = score;
+    }
 }
