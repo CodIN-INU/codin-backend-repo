@@ -14,22 +14,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "likeClient", url = "http://localhost:8080")
+@FeignClient(name = "likeClient", url = "${server.feign.url}")
 public interface LikeFeignClient {
 
-    @PostMapping("/likes")
+    @PostMapping
     ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody LikeRequestDto likeRequestDto);
 
-    @GetMapping("/likes")
+    @GetMapping
     Integer getLikeCount(@RequestParam("likeType") LikeType likeType,
                                                      @RequestParam("id") String id);
 
-    @GetMapping("/likes/user")
+    @GetMapping("/user")
     Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
                                                     @RequestParam("id") String id,
                                                     @RequestParam("userId") String userId);
 
-    @GetMapping("/likes/list")
+    @GetMapping("/list")
     List<LikedResponseDto> getLiked(@RequestParam("likeType") LikeType likeType,
                                     @RequestParam("userId") String userId);
 }

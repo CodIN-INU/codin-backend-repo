@@ -49,9 +49,9 @@ public class LikeService {
             return message;
         } catch (Exception e){ //만약 오류가 났다면 좋아요 추가/취소 (토글) 기능 진행
             log.error("[toggleLike] 예외 발생으로 보상 트랜잭션이 진행됩니다. {}", e.getMessage());
-            if (message != null) message = LikeResponseType.valueOf((String) likeFeignClient.toggleLike(likeRequestDto).getBody().getData());
+            if (message != null) LikeResponseType.valueOf((String) likeFeignClient.toggleLike(likeRequestDto).getBody().getData());
+            throw new LikeException(LikeErrorCode.LIKE_UNEXPECTED_MESSAGE, e.getMessage());
         }
-        return message;
     }
 
     public int getLikeCount(LikeType likeType, String likeTypeId) {
@@ -78,7 +78,7 @@ public class LikeService {
     }
 
     private void applyLikeChange(LikeRequestDto dto, boolean isLiked) {
-        Long targetId = Long.parseLong(dto.getId());
+        Long targetId = Long.parseLong(dto.getLikeTypeId());
         switch (dto.getLikeType()) {
             case LECTURE -> applyLikeToLecture(targetId, isLiked);
             case REVIEW -> applyLikeToReview(targetId, isLiked);
