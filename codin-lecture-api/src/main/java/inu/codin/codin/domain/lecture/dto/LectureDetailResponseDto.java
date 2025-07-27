@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.lecture.dto;
 
+import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.LectureSchedule;
 import inu.codin.codin.domain.lecture.entity.Type;
@@ -33,7 +34,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
     private boolean openKeyword;
 
-    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes) {
+    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes) {
         super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes);
         this.college = college.getDescription();
         this.evaluation = evaluation;
@@ -44,11 +45,11 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
         this.openKeyword = openKeyword;
     }
 
-    public static LectureDetailResponseDto of(Lecture lecture, boolean openKeyword){
+    public static LectureDetailResponseDto of(Lecture lecture, Emotion emotion, boolean openKeyword){
         List<Schedule> schedules = lecture.getSchedule().stream().map(Schedule::of).toList();
         List<String> tags = LecturePreviewResponseDto.getTags(lecture.getTags());
         return new LectureDetailResponseDto(
-                lecture.getId().toString(),
+                lecture.getId(),
                 lecture.getLectureNm(),
                 lecture.getProfessor(),
                 lecture.getType(),
@@ -61,7 +62,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getLectureType(),
                 schedules,
                 lecture.getPreCourse(),
-                lecture.getEmotion().changeToPercentage(),
+                emotion.changeToPercentage(),
                 openKeyword,
                 lecture.getLikes()
         );

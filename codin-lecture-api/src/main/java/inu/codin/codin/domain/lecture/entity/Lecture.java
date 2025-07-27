@@ -39,7 +39,8 @@ public class Lecture {
     private int hits;                                           //조회 수
 
     @OneToOne
-    private Emotion emotion = new Emotion(this);        //수강 후기의 평점 분포도
+    @JoinColumn(name = "emotion_id")
+    private Emotion emotion;                                    //수강 후기의 평점 분포도
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<LectureSemester> semester;                      //과목이 진행된 학기
@@ -63,6 +64,10 @@ public class Lecture {
 
     public void updateReviewRating(double starRating, Emotion emotion) {
         this.starRating = starRating;
+        this.emotion = emotion;
+    }
+
+    public void setEmotion(Emotion emotion) {
         this.emotion = emotion;
     }
 }

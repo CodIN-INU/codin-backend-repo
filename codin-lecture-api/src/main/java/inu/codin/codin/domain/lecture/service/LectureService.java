@@ -4,6 +4,7 @@ import inu.codin.codin.domain.lecture.dto.LectureDetailResponseDto;
 import inu.codin.codin.domain.lecture.dto.LecturePageResponse;
 import inu.codin.codin.domain.lecture.dto.LecturePreviewResponseDto;
 import inu.codin.codin.domain.lecture.dto.LectureSearchListResponseDto;
+import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
@@ -31,8 +32,9 @@ public class LectureService {
 
     private final LectureRepository lectureRepository;
     private final LectureSearchRepositoryCustom lectureSearchRepository;
-    private final SemesterService semesterService;
 
+    private final EmotionService emotionService;
+    private final SemesterService semesterService;
     private final UserReviewStatsService userReviewStatsService;
     private final LikeService likeService;
 
@@ -61,8 +63,8 @@ public class LectureService {
         Lecture lecture = lectureRepository.findLectureWithScheduleAndTagsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
         lecture.increaseHits();
-
-        return LectureDetailResponseDto.of(lecture, userReviewStatsService.isOpenKeyword());
+        Emotion emotion = emotionService.getOrMakeEmotion(lecture);
+        return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }
 
     /**

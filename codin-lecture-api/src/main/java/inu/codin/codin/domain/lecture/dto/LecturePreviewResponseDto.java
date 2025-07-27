@@ -16,8 +16,8 @@ import java.util.Set;
 @Getter
 public class LecturePreviewResponseDto {
 
-    @Schema(description = "과목코드", example = "IAA6018")
-    private String id;
+    @Schema(description = "과목 pk", example = "1")
+    private Long id;
 
     @Schema(description = "과목명", example = "운영체제")
     private String title;
@@ -48,7 +48,7 @@ public class LecturePreviewResponseDto {
 
 
     @Builder
-    public LecturePreviewResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes) {
+    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes) {
         this.id = id;
         this.title = title;
         this.professor = professor;
@@ -63,7 +63,7 @@ public class LecturePreviewResponseDto {
 
     public static LecturePreviewResponseDto of(Lecture lecture, boolean liked){
         return LecturePreviewResponseDto.builder()
-                .id(lecture.getId().toString())
+                .id(lecture.getId())
                 .title(lecture.getLectureNm())
                 .professor(lecture.getProfessor())
                 .type(lecture.getType())

@@ -15,7 +15,7 @@ public class UserReviewStatsService {
 
     public void updateStats(String userId) {
         UserReviewStats userReviewStats = userReviewStatsRepository.findByUserId(userId)
-                        .orElse(new UserReviewStats(userId));
+                        .orElseGet(() -> new UserReviewStats(userId));
         userReviewStats.increaseCount();
         if (!userReviewStats.isOpenKeyword() && userReviewStats.getCountOfReviews() >= KEYWORD_UNLOCK_THRESHOLD)
             userReviewStats.canOpenKeyword();

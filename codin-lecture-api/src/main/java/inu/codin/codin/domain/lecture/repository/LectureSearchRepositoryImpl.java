@@ -40,8 +40,6 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
         Page<Lecture> resultOfLiked = searchByOnlyUserLiked(like, pageable, builder, lecture); //좋아요 조건 추가
         if (resultOfLiked != null) return resultOfLiked;
 
-        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(lecture, sortingOption); //정렬 조건 추가
-
         JPQLQuery<Lecture> query = jpaQueryFactory
                 .selectDistinct(lecture)
                 .from(lecture);
@@ -57,7 +55,7 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
 
         //조건에 맞는 강의들에 대해서만 필터링
         query.where(builder)
-                .orderBy(orderSpecifier != null ? orderSpecifier : lecture.id.desc())
+                .orderBy(getOrderSpecifier(lecture, sortingOption)) //정렬 조건 추가
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize());
 
@@ -133,12 +131,29 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
                 .fetch();
     }
 
-    private OrderSpecifier<?> getOrderSpecifier(QLecture lecture, SortingOption sortingOption) {
-        if (sortingOption == null) return null;
+    private OrderSpecifier[] getOrderSpecifier(QLecture lecture, SortingOption sortingOption) {
+        if (sortingOption == null) {
+            return new OrderSpecifier[]{lecture.starRating.desc(),
+                                        lecture.likes.desc(),
+                                        lecture.hits.desc()}; // 기본 정렬
+        }
+
         return switch (sortingOption) {
-            case HIT -> lecture.hits.desc();
-            case LIKE -> lecture.likes.desc();
-            case RATING -> lecture.starRating.desc();
+            case HIT -> new OrderSpecifier[]{
+                    lecture.hits.desc(),
+                    lecture.starRating.desc(),
+                    lecture.likes.desc()
+            };
+            case LIKE -> new OrderSpecifier[]{
+                    lecture.likes.desc(),
+                    lecture.starRating.desc(),
+                    lecture.hits.desc()
+            };
+            case RATING -> new OrderSpecifier[]{
+                    lecture.starRating.desc(),
+                    lecture.likes.desc(),
+                    lecture.hits.desc()
+            };
         };
     }
 
