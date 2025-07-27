@@ -6,13 +6,11 @@ import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
-import inu.codin.codin.domain.lecture.exception.SemesterErrorCode;
-import inu.codin.codin.domain.lecture.exception.SemesterException;
 import inu.codin.codin.domain.lecture.repository.EmotionRepository;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
-import inu.codin.codin.domain.lecture.repository.SemesterRepository;
-import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.lecture.service.SemesterService;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.review.dto.CreateReviewRequestDto;
 import inu.codin.codin.domain.review.dto.ReviewListResponseDto;
 import inu.codin.codin.domain.review.dto.ReviewPageResponse;
@@ -41,11 +39,11 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final LectureRepository lectureRepository;
-    private final SemesterRepository semesterRepository;
     private final EmotionRepository emotionRepository;
 
     private final LikeService likeService;
     private final UserReviewStatsService userReviewStatsService;
+    private final SemesterService semesterService;
 
     /**
      * 새로운 강의 후기 작성
@@ -73,23 +71,16 @@ public class ReviewService {
     }
 
     private Semester getSemester(CreateReviewRequestDto createReviewRequestDto, Lecture lecture) {
-        int[] parsed = parseSemester(createReviewRequestDto.getSemester());
-        Semester semester = semesterRepository.findSemesterByYearAndQuarter(parsed[0], parsed[1])
+        Semester semester = semesterService.getSemester(createReviewRequestDto.getSemester())
                 .orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER));
-        boolean isSemesterInLecture = lecture.getSemester().stream().anyMatch(s -> s.getSemester().equals(semester));
-        if (!isSemesterInLecture) {
-            throw new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER);
-        }
-
+        isLectureInSemester(lecture, semester);
         return semester;
     }
 
-    private int[] parseSemester(String semesterStr) {
-        try {
-            String[] parts = semesterStr.split("-");
-            return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
-        } catch (Exception e) {
-            throw new SemesterException(SemesterErrorCode.SEMESTER_INVALID_FORMAT);
+    private void isLectureInSemester(Lecture lecture, Semester semester) {
+        boolean isLectureInSemester = lecture.getSemester().stream().anyMatch(s -> s.getSemester().equals(semester));
+        if (!isLectureInSemester) {
+            throw new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER);
         }
     }
 

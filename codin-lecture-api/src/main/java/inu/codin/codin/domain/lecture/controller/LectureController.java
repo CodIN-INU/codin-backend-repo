@@ -53,11 +53,12 @@ public class LectureController {
                 .body(new SingleResponse<>(200, "강의 별점 정보 반환", lectureService.getLectureDetails(lectureId)));
     }
 
-    @Hidden
     @Operation(
             summary = "학과, 학년, 수강학기 로 강의 검색",
             description = "수강 후기 작성 시 필요한 검색엔진<br>" +
-                    "학과, 학년, 수강학기 중 하나만으로도 검색 가능"
+                    "학과(COMPUTER_SCI, INFO_COMM, EMBEDDED) <br>" +
+                    "학년(1,2,3,4) <br>" +
+                    "수강학기(25-1 ~ )중 하나만으로도 검색 가능"
     )
     @GetMapping("/search-review")
     public ResponseEntity<ListResponse<LectureSearchListResponseDto>> searchLecturesToReview(@RequestParam(required = false) Department department,
