@@ -14,5 +14,5 @@ public class LikeRequestDto {
 
     @NotBlank
     @Schema(description = "좋아요를 반영할 entity 의 _id 값", example = "111111")
-    private String id;
+    private String likeTypeId;
 }

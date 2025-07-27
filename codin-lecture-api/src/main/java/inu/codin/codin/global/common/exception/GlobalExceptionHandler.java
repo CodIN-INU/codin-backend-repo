@@ -3,6 +3,8 @@ package inu.codin.codin.global.common.exception;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.exception.LectureUploadException;
+import inu.codin.codin.domain.like.exception.LikeErrorCode;
+import inu.codin.codin.domain.like.exception.LikeException;
 import inu.codin.codin.domain.review.exception.ReviewErrorCode;
 import inu.codin.codin.domain.review.exception.ReviewException;
 import inu.codin.codin.global.common.response.ExceptionResponse;
@@ -46,5 +48,13 @@ public class GlobalExceptionHandler {
         ReviewErrorCode reviewErrorCode = e.getErrorCode();
         return ResponseEntity.status(reviewErrorCode.httpStatus())
                 .body(new ExceptionResponse(reviewErrorCode.httpStatus().value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(LikeException.class)
+    protected ResponseEntity<ExceptionResponse> handleLikeException(LikeException e) {
+        LikeErrorCode likeErrorCode = e.getErrorCode();
+        String errorMessage = e.getMessage() + " : " + e.getErrorMessage();
+        return ResponseEntity.status(likeErrorCode.httpStatus())
+                .body(new ExceptionResponse(likeErrorCode.httpStatus().value(), errorMessage));
     }
 }

@@ -25,4 +25,9 @@ public class Semester {
     public String getString() {
         return year + "-" + quarter;
     }
+
+    public static int[] parseSemester(String semesterStr) {
+        String[] parts = semesterStr.split("-");
+        return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
+    }
 }

@@ -8,6 +8,7 @@ import inu.codin.codin.domain.lecture.service.LectureService;
 import inu.codin.codin.global.common.entity.Department;
 import inu.codin.codin.global.common.response.ListResponse;
 import inu.codin.codin.global.common.response.SingleResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -17,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/lectures")
 @RequiredArgsConstructor
 @Tag(name = "Lecture API", description = "강의실 정보 API")
 public class LectureController {
@@ -29,21 +29,23 @@ public class LectureController {
             description = "학과명과 검색 키워드(optional), 과목/교수 라디오 토클을 통해 정렬한 리스트 10개씩 반환<br>"+
                     "department : COMPUTER_SCI, INFO_COMM, EMBEDDED <br>"+
                     "keyword : 검색 키워드 (Optional)"+
-                    "sort : RATING(평점 높은 순) , LIKE(좋아요 많은 순), HIT(조회수 많은 순)"
+                    "sort : RATING(평점 높은 순) , LIKE(좋아요 많은 순), HIT(조회수 많은 순) <br>"+
+                    "like : 좋아요한 과목 모아보기 true"
     )
     @GetMapping("/courses")
     public ResponseEntity<SingleResponse<LecturePageResponse>> sortListOfLectures(@RequestParam(value = "department", required = false) Department department,
                                                                                   @RequestParam(value = "keyword", required = false) String keyword,
                                                                                   @RequestParam(value = "sort", required = false) SortingOption sort,
+                                                                                  @RequestParam(value = "like", required = false) Boolean like,
                                                                                   @RequestParam("page") int page){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "과목 리스트 반환 완료",
-                        lectureService.sortListOfLectures(keyword, department, sort, page)));
+                        lectureService.sortListOfLectures(keyword, department, sort, like, page)));
     }
 
     @Operation(
-            summary = "강의 상세 정보 반환",
-            description = "강의 Preview를 눌렀을 때 뜨는 강의 정보 반환"
+            summary = "과목 상세 정보 반환",
+            description = "Preview를 눌렀을 때 뜨는 과목 정보 반환"
     )
     @GetMapping("/{lectureId}")
     public ResponseEntity<SingleResponse<LectureDetailResponseDto>> getLectureDetails(@PathVariable("lectureId") Long lectureId){
@@ -54,7 +56,9 @@ public class LectureController {
     @Operation(
             summary = "학과, 학년, 수강학기 로 강의 검색",
             description = "수강 후기 작성 시 필요한 검색엔진<br>" +
-                    "학과, 학년, 수강학기 중 하나만으로도 검색 가능"
+                    "학과(COMPUTER_SCI, INFO_COMM, EMBEDDED) <br>" +
+                    "학년(1,2,3,4) <br>" +
+                    "수강학기(25-1 ~ )중 하나만으로도 검색 가능"
     )
     @GetMapping("/search-review")
     public ResponseEntity<ListResponse<LectureSearchListResponseDto>> searchLecturesToReview(@RequestParam(required = false) Department department,

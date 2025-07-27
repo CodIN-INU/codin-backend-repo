@@ -7,44 +7,49 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class ReviewListResposneDto {
+public class ReviewListResponseDto {
 
     @Schema(description = "Review pk", example = "1")
-    private String _id;
+    private final Long id;
 
     @Schema(description = "수강 후기 내용", example = "완전 강추")
-    private String content;
+    private final String content;
 
     @Schema(description = "수강 후기 평점")
-    private double starRating;
+    private final double starRating;
 
     @Schema(description = "좋아요 수", example = "3")
-    private int likeCount;
+    private final int likeCount;
 
     @Schema(description = "유저의 좋아요 반영 여부", example = "true")
-    private boolean isLiked;
+    private final boolean isLiked;
 
     @Schema(description = "수강 학기", example = "24-2")
-    private String semester;
+    private final String semester;
+
+    @Schema(description = "좋아요 수", example = "24")
+    private final int likes;
 
     @Builder
-    public ReviewListResposneDto(String _id, String content, double starRating, int likeCount, boolean isLiked, String semester) {
-        this._id = _id;
+    public ReviewListResponseDto(Long id, String content, double starRating, int likeCount, boolean isLiked, String semester, int likes) {
+        this.id = id;
         this.content = content;
         this.starRating = starRating;
         this.likeCount = likeCount;
         this.isLiked = isLiked;
         this.semester = semester;
+        this.likes = likes;
     }
 
-    public static ReviewListResposneDto of(Review reviewEntity, boolean isLiked, int likeCount){
-        return ReviewListResposneDto.builder()
-                ._id(reviewEntity.get_id().toString())
+    public static ReviewListResponseDto of(Review reviewEntity, boolean isLiked, int likeCount){
+        return ReviewListResponseDto.builder()
+                .id(reviewEntity.getId())
                 .content(reviewEntity.getContent())
                 .starRating(reviewEntity.getStarRating())
                 .likeCount(likeCount)
                 .isLiked(isLiked)
                 .semester(reviewEntity.getSemester().getString())
+                .likes(reviewEntity.getLikes())
                 .build();
     }
 }

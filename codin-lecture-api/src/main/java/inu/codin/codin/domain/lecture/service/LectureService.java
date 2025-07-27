@@ -4,15 +4,19 @@ import inu.codin.codin.domain.lecture.dto.LectureDetailResponseDto;
 import inu.codin.codin.domain.lecture.dto.LecturePageResponse;
 import inu.codin.codin.domain.lecture.dto.LecturePreviewResponseDto;
 import inu.codin.codin.domain.lecture.dto.LectureSearchListResponseDto;
+import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
+import inu.codin.codin.domain.lecture.exception.SemesterErrorCode;
+import inu.codin.codin.domain.lecture.exception.SemesterException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.like.dto.LikeType;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.review.service.UserReviewStatsService;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +33,9 @@ public class LectureService {
     private final LectureRepository lectureRepository;
     private final LectureSearchRepositoryCustom lectureSearchRepository;
 
+    private final EmotionService emotionService;
+    private final SemesterService semesterService;
+    private final UserReviewStatsService userReviewStatsService;
     private final LikeService likeService;
 
     /**
@@ -37,17 +44,18 @@ public class LectureService {
      * @param keyword
      * @param department    Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
      * @param sortingOption 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
+     * @param like
      * @param page          페이지 번호
      * @return LecturePageResponse
      */
-    public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, int page) {
-        Page<Lecture> lecturePage = lectureSearchRepository.search(keyword, department, sortingOption, PageRequest.of(page, 10));
+    public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
+        Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, like, PageRequest.of(page, 10));
         return getLecturePageResponse(lecturePage);
     }
 
     /**
      * 강의의 상세 별점 반환
-     * @param lectureId 강의 _id
+     * @param lectureId 강의 id
      * @return LectureDetailResponseDto
      */
     @Transactional
@@ -55,7 +63,8 @@ public class LectureService {
         Lecture lecture = lectureRepository.findLectureWithScheduleAndTagsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
         lecture.increaseHits();
-        return LectureDetailResponseDto.of(lecture);
+        Emotion emotion = emotionService.getOrMakeEmotion(lecture);
+        return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }
 
     /**
@@ -66,34 +75,34 @@ public class LectureService {
                         .map(lecture -> {
                                     boolean liked = likeService.isLiked(LikeType.LECTURE, lecture.getId().toString());
                                     return LecturePreviewResponseDto.of(lecture, liked);
-                            }).toList(),
+                        }).toList(),
                 lecturePage.getTotalPages() - 1,
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
     }
 
     /**
      * 강의 후기를 작성할 강의 목록 검색
-     * @param department Department (COMPUTER_SCI, INFO_COMM, EMBEDDED, OTHERS)
+     * @param department Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
      * @param grade 학년 (1,2,3,4)
      * @param semester 수강 학기 (23-1, 23-2,,, 현재 학기)
      * @return List<LectureSearchListResponseDto> 검색 결과 리스트 반환
      */
     public List<LectureSearchListResponseDto> searchLecturesToReview(Department department, Integer grade, String semester) {
-        List<Lecture> lectures = findLectures(department, grade, semester);
-//        if (semester != null) return lectures.stream()
-//                                    .map(lecture -> LectureSearchListResponseDto.of(lecture, semester))
-//                                    .toList();
+        Semester semesterEntity = (semester != null)
+                        ? semesterService.getSemester(semester)
+                                .orElseThrow(() -> new SemesterException(SemesterErrorCode.SEMESTER_NOT_FOUND))
+                        : null;
 
-        return lectures.stream()
-                .map(LectureSearchListResponseDto::of)
-                .flatMap(List::stream)
-                .toList();
+        List<Lecture> lectures = lectureSearchRepository.searchLecturesAtReview(department, grade, semesterEntity);
+
+        return (semesterEntity != null)
+                ? lectures.stream()
+                        .map(lecture -> LectureSearchListResponseDto.of(lecture, semester))
+                        .toList()
+                : lectures.stream()
+                        .map(LectureSearchListResponseDto::of)
+                        .flatMap(List::stream)
+                        .toList();
     }
 
-    /**
-     * 강의 검색 시 선택된 옵션에 따라 검색 진행
-     */
-    public List<Lecture> findLectures(Department department, Integer grade, String semester) {
-        return List.of();
-    }
 }

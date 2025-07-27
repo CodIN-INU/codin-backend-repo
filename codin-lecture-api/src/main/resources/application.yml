@@ -1,53 +1,62 @@
 spring:
   application:
-    name: codin-ticketing-api
+    name: codin-lecture-api
   config:
-    import: optional:file:./.env[.properties]
+    import: optional:file:.env[.properties]
   jwt:
-    secret: ${SPRING_JWT_SECRET:dummySecret}
-  datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:lecture}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-    username: ${MYSQL_USER:codin}
-    password: ${MYSQL_PASSWORD:codinpassword}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    secret: ${SPRING_JWT_SECRET}
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:1234}
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost/test}
-      auto-index-creation: true
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
     elasticsearch:
       indices:
         courses:
           settings:
             analysis:
-              analyzer: # 분석기
+              analyzer:
                 korean:
                   type: custom
                   tokenizer: nori_tokenizer
                   filter: [ nori_readingform, lowercase ]
-              tokenizer: # 토크 나이저
+              tokenizer:
                 nori_tokenizer:
                   type: nori_tokenizer
                   decompound_mode: mixed
-              filter: # 필터
+              filter:
                 nori_readingform:
                   type: nori_readingform
                 nori_hanja_readingform:
                   type: nori_hanja_readingform
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
 lecture:
   python:
-    path: ./python-path
+    path: ${PYTHON_PATH:./example}
   file:
-    path: ./lecture-path
+    path: ${PYTHON_FILE_PATH:./example}
 
 server:
-  domain: "https://codin.inu.ac.kr"
+  port: ${SERVER_PORT}
+  domain: ${SERVER_DOMAIN}
   forward-headers-strategy: framework
+  feign:
+    url: ${SERVER_FEIGN_URL}
+
 logging:
   level:
     root: info
     sql: info
+    org.hibernate.sql: info
