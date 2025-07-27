@@ -3,6 +3,7 @@ package inu.codin.codin.domain.lecture.dto;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.LectureTag;
 import inu.codin.codin.domain.lecture.entity.Type;
+import inu.codin.codin.global.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,8 @@ import java.util.Set;
 @Getter
 public class LecturePreviewResponseDto {
 
-    @Schema(description = "과목코드", example = "IAA6018")
-    private String id;
+    @Schema(description = "과목 pk", example = "1")
+    private Long id;
 
     @Schema(description = "과목명", example = "운영체제")
     private String title;
@@ -39,8 +40,15 @@ public class LecturePreviewResponseDto {
     @Schema(description = "유저의 좋아요 여부", example = "true")
     private Boolean liked;
 
+    @Schema(description = "학과", example = "컴퓨터공학부")
+    private String department;
+
+    @Schema(description = "좋아요 수", example = "3")
+    private int likes;
+
+
     @Builder
-    public LecturePreviewResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked) {
+    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes) {
         this.id = id;
         this.title = title;
         this.professor = professor;
@@ -49,11 +57,13 @@ public class LecturePreviewResponseDto {
         this.credit = credit;
         this.tags = tags;
         this.liked = liked;
+        this.department = department;
+        this.likes = likes;
     }
 
     public static LecturePreviewResponseDto of(Lecture lecture, boolean liked){
         return LecturePreviewResponseDto.builder()
-                .id(lecture.getId().toString())
+                .id(lecture.getId())
                 .title(lecture.getLectureNm())
                 .professor(lecture.getProfessor())
                 .type(lecture.getType())
@@ -61,6 +71,8 @@ public class LecturePreviewResponseDto {
                 .credit(lecture.getCredit())
                 .tags(getTags(lecture.getTags()))
                 .liked(liked)
+                .department(lecture.getDepartment().getDescription())
+                .likes(lecture.getLikes())
                 .build();
     }
 

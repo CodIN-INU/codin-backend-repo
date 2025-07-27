@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/lectures/upload")
+@RequestMapping("/upload")
 @RequiredArgsConstructor
 @Tag(name = "Lecture Upload API", description = "강의 내역 및 강의실 현황 업데이트 API")
 public class LectureUploadController {

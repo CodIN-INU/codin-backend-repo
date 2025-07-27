@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping("/lectures/rooms")
+@RequestMapping("/rooms")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Lecture Room API", description = "강의실 현황 API")

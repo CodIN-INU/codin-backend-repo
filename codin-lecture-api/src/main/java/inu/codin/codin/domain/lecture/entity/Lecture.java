@@ -33,13 +33,14 @@ public class Lecture {
 
     @Convert(converter = EvaluationConverter.class)
     private Evaluation evaluation;                              //평가 방식(상대평가, 절대평가, 이수)
-    private String preCourse;                                   //사전 과목
+    private String preCourse;                                   //사전 과목 //todo List로 관리 피룡
     private double starRating;                                  //과목 평점
     private int likes;                                          //좋아요 수
     private int hits;                                           //조회 수
 
     @OneToOne
-    private Emotion emotion = new Emotion(this);        //수강 후기의 평점 분포도
+    @JoinColumn(name = "emotion_id")
+    private Emotion emotion;                                    //수강 후기의 평점 분포도
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<LectureSemester> semester;                      //과목이 진행된 학기
@@ -63,6 +64,10 @@ public class Lecture {
 
     public void updateReviewRating(double starRating, Emotion emotion) {
         this.starRating = starRating;
+        this.emotion = emotion;
+    }
+
+    public void assignEmotion(Emotion emotion) {
         this.emotion = emotion;
     }
 }

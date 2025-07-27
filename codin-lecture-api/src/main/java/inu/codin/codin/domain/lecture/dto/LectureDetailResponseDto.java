@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.lecture.dto;
 
+import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.LectureSchedule;
 import inu.codin.codin.domain.lecture.entity.Type;
@@ -12,9 +13,6 @@ import java.util.List;
 
 @Getter
 public class LectureDetailResponseDto extends LecturePreviewResponseDto {
-
-    @Schema(description = "학부", example = "컴퓨터공학부")
-    private String department;
 
     @Schema(description = "단과대", example = "정보기술대학")
     private String college;
@@ -34,22 +32,24 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
     @Schema(description = "후기 평점들의 범위마다 100분율 계산", example = "hard : 30, ok : 20, best : 50")
     private EmotionResponseDto emotion;
 
-    public LectureDetailResponseDto(String id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion) {
-        super(id, title, professor, type, grade, credit, tags, null);
-        this.department = department.getDescription();
+    private boolean openKeyword;
+
+    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes) {
+        super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes);
         this.college = college.getDescription();
         this.evaluation = evaluation;
         this.lectureType = lectureType;
         this.schedule = schedule;
         this.preCourse = preCourse;
         this.emotion = emotion;
+        this.openKeyword = openKeyword;
     }
 
-    public static LectureDetailResponseDto of(Lecture lecture){
+    public static LectureDetailResponseDto of(Lecture lecture, Emotion emotion, boolean openKeyword){
         List<Schedule> schedules = lecture.getSchedule().stream().map(Schedule::of).toList();
         List<String> tags = LecturePreviewResponseDto.getTags(lecture.getTags());
         return new LectureDetailResponseDto(
-                lecture.getId().toString(),
+                lecture.getId(),
                 lecture.getLectureNm(),
                 lecture.getProfessor(),
                 lecture.getType(),
@@ -62,7 +62,9 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getLectureType(),
                 schedules,
                 lecture.getPreCourse(),
-                lecture.getEmotion().changeToPercentage()
+                emotion.changeToPercentage(),
+                openKeyword,
+                lecture.getLikes()
         );
     }
     

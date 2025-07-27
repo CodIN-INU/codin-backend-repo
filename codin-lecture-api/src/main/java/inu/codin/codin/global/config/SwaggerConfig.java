@@ -47,9 +47,8 @@ public class SwaggerConfig {
                         .addSecuritySchemes("bearerAuth", bearerAuth)
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8082").description("Local Server"),
-                        new Server().url(BASE_DOMAIN_URL + "/api").description("Production Server"),
-                        new Server().url(BASE_DOMAIN_URL + "/dev").description("Development Server")
+                        new Server().url("http://localhost:8085").description("Local Server"),
+                        new Server().url(BASE_DOMAIN_URL).description("Production Server")
                 ));
     }
 

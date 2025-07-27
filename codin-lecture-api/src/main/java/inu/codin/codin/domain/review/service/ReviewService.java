@@ -6,13 +6,11 @@ import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
-import inu.codin.codin.domain.lecture.exception.SemesterErrorCode;
-import inu.codin.codin.domain.lecture.exception.SemesterException;
-import inu.codin.codin.domain.lecture.repository.EmotionRepository;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
-import inu.codin.codin.domain.lecture.repository.SemesterRepository;
-import inu.codin.codin.domain.like.service.LikeService;
+import inu.codin.codin.domain.lecture.service.EmotionService;
+import inu.codin.codin.domain.lecture.service.SemesterService;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.review.dto.CreateReviewRequestDto;
 import inu.codin.codin.domain.review.dto.ReviewListResponseDto;
 import inu.codin.codin.domain.review.dto.ReviewPageResponse;
@@ -41,10 +39,11 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final LectureRepository lectureRepository;
-    private final SemesterRepository semesterRepository;
-    private final EmotionRepository emotionRepository;
 
+    private final EmotionService emotionService;
     private final LikeService likeService;
+    private final UserReviewStatsService userReviewStatsService;
+    private final SemesterService semesterService;
 
     /**
      * 새로운 강의 후기 작성
@@ -59,35 +58,29 @@ public class ReviewService {
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
 
         String userId = SecurityUtils.getUserId();
-        checkReviewExisted(lectureId, userId, lecture);
+        checkReviewExisted(lectureId, userId, lecture); //리뷰를 작성한 상태인지 확인
 
         Semester semester = getSemester(createReviewRequestDto, lecture);
         Review newReview = Review.of(createReviewRequestDto, semester, lecture, userId);
 
         reviewRepository.save(newReview);
-        updateRating(lecture, createReviewRequestDto.getStarRating());
+        updateRating(lecture, createReviewRequestDto.getStarRating()); //과목의 평점 업데이트
+        userReviewStatsService.updateStats(userId); //유저의 리뷰 작성 현황 업데이트
 
         log.info("새로운 강의 후기 저장 - lectureId : {} userId : {}", lectureId, userId);
     }
 
     private Semester getSemester(CreateReviewRequestDto createReviewRequestDto, Lecture lecture) {
-        int[] parsed = parseSemester(createReviewRequestDto.getSemester());
-        Semester semester = semesterRepository.findSemesterByYearAndQuarter(parsed[0], parsed[1])
+        Semester semester = semesterService.getSemester(createReviewRequestDto.getSemester())
                 .orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER));
-        boolean isSemesterInLecture = lecture.getSemester().stream().anyMatch(s -> s.getSemester().equals(semester));
-        if (!isSemesterInLecture) {
-            throw new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER);
-        }
-
+        isLectureInSemester(lecture, semester);
         return semester;
     }
 
-    private int[] parseSemester(String semesterStr) {
-        try {
-            String[] parts = semesterStr.split("-");
-            return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
-        } catch (Exception e) {
-            throw new SemesterException(SemesterErrorCode.SEMESTER_INVALID_FORMAT);
+    private void isLectureInSemester(Lecture lecture, Semester semester) {
+        boolean isLectureInSemester = lecture.getSemester().stream().anyMatch(s -> s.getSemester().equals(semester));
+        if (!isLectureInSemester) {
+            throw new ReviewException(ReviewErrorCode.REVIEW_WRONG_SEMESTER);
         }
     }
 
@@ -99,11 +92,14 @@ public class ReviewService {
      */
     public void updateRating(Lecture lecture, @NotNull @Digits(integer = 1, fraction = 2) double starRating){
         double avgOfStarRating = reviewRepository.getAvgOfStarRatingByLecture(lecture);
-        Emotion emotion = lecture.getEmotion();
-        if (emotion == null) emotion = new Emotion(lecture);
-        emotion.updateScore(starRating);
-        emotionRepository.save(emotion);
+        Emotion emotion = getEmotion(lecture, starRating);
         lecture.updateReviewRating(avgOfStarRating, emotion);
+    }
+
+    private Emotion getEmotion(Lecture lecture, double starRating) {
+        Emotion emotion = emotionService.getOrMakeEmotion(lecture);
+        emotion.updateScore(starRating);
+        return emotion;
     }
 
 

@@ -3,6 +3,7 @@ package inu.codin.codin.domain.like.controller;
 
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.global.common.response.SingleResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +12,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "likeClient", url = "http://localhost:8080")
+import java.util.List;
+
+@FeignClient(name = "likeClient", url = "${server.feign.url}")
 public interface LikeFeignClient {
 
-    @PostMapping("/likes")
+    @PostMapping
     ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody LikeRequestDto likeRequestDto);
 
-    @GetMapping("/likes")
+    @GetMapping
     Integer getLikeCount(@RequestParam("likeType") LikeType likeType,
                                                      @RequestParam("id") String id);
 
-    @GetMapping("/likes/user")
+    @GetMapping("/user")
     Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
                                                     @RequestParam("id") String id,
                                                     @RequestParam("userId") String userId);
+
+    @GetMapping("/list")
+    List<LikedResponseDto> getLiked(@RequestParam("likeType") LikeType likeType,
+                                    @RequestParam("userId") String userId);
 }

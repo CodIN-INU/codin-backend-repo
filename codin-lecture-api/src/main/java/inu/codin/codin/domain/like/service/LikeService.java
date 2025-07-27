@@ -8,6 +8,7 @@ import inu.codin.codin.domain.like.controller.LikeFeignClient;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikeType;
+import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.exception.LikeErrorCode;
 import inu.codin.codin.domain.like.exception.LikeException;
 import inu.codin.codin.domain.review.entity.Review;
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -46,9 +49,9 @@ public class LikeService {
             return message;
         } catch (Exception e){ //만약 오류가 났다면 좋아요 추가/취소 (토글) 기능 진행
             log.error("[toggleLike] 예외 발생으로 보상 트랜잭션이 진행됩니다. {}", e.getMessage());
-            if (message != null) message = LikeResponseType.valueOf((String) likeFeignClient.toggleLike(likeRequestDto).getBody().getData());
+            if (message != null) likeFeignClient.toggleLike(likeRequestDto);
+            throw new LikeException(LikeErrorCode.LIKE_UNEXPECTED_MESSAGE, e.getMessage());
         }
-        return message;
     }
 
     public int getLikeCount(LikeType likeType, String likeTypeId) {
@@ -75,7 +78,7 @@ public class LikeService {
     }
 
     private void applyLikeChange(LikeRequestDto dto, boolean isLiked) {
-        Long targetId = Long.parseLong(dto.getId());
+        Long targetId = Long.parseLong(dto.getLikeTypeId());
         switch (dto.getLikeType()) {
             case LECTURE -> applyLikeToLecture(targetId, isLiked);
             case REVIEW -> applyLikeToReview(targetId, isLiked);
@@ -100,5 +103,10 @@ public class LikeService {
         } else {
             review.decreaseLikes();
         }
+    }
+
+    public List<LikedResponseDto> getLiked(LikeType likeType) {
+        String userId = SecurityUtils.getUserId();
+        return likeFeignClient.getLiked(likeType, userId);
     }
 }
