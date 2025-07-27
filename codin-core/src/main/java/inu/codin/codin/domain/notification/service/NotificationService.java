@@ -3,13 +3,13 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.notification.dto.NotificationListResponseDto;
+import inu.codin.codin.domain.notification.dto.response.NotificationListResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
@@ -41,7 +41,7 @@ public class NotificationService {
     private final FcmService fcmService;
     private final String NOTI_COMMENT = "댓글이 달렸습니다: ";
     private final String NOTI_REPLY = "대댓글이 달렸습니다: ";
-    private final String NOTI_LIKE = "";
+    private final String NOTI_LIKE = "좋아요가 달렸습니다";
     private final String NOTI_CHAT = "새로운 채팅이 있습니다.";
 
 
@@ -147,10 +147,10 @@ public class NotificationService {
         sendFcmMessageToUser(title, NOTI_REPLY+content, post, userId);
     }
 
-    public void sendNotificationMessageByLike(LikeType likeType, ObjectId id) {
+    public void sendNotificationMessageByLike(LikeType likeType, ObjectId likeTypeId) {
         switch(likeType){
             case POST -> {
-                PostEntity postEntity = postRepository.findByIdAndNotDeleted(id)
+                PostEntity postEntity = postRepository.findByIdAndNotDeleted(likeTypeId)
                         .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));
                 userRepository.findById(postEntity.getUserId())
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
@@ -159,7 +159,7 @@ public class NotificationService {
                 sendFcmMessageToUser(NOTI_LIKE, "내 게시글 보러 가기", post, postEntity.getUserId());
             }
             case REPLY -> {
-                ReplyCommentEntity replyCommentEntity = replyCommentRepository.findByIdAndNotDeleted(id)
+                ReplyCommentEntity replyCommentEntity = replyCommentRepository.findByIdAndNotDeleted(likeTypeId)
                         .orElseThrow(() -> new NotFoundException("대댓글을 찾을 수 없습니다."));
                 CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(replyCommentEntity.getCommentId())
                         .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
@@ -172,7 +172,7 @@ public class NotificationService {
                 sendFcmMessageToUser(NOTI_LIKE, "내 답글 보러 가기", post, replyCommentEntity.getUserId());
             }
             case COMMENT -> {
-                CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(id)
+                CommentEntity commentEntity = commentRepository.findByIdAndNotDeleted(likeTypeId)
                         .orElseThrow(() -> new NotFoundException("댓글을 찾을 수 없습니다."));
                 PostEntity postEntity = postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
                         .orElseThrow(() -> new NotFoundException("게시글을 찾을 수 없습니다."));

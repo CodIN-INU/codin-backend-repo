@@ -161,7 +161,7 @@ public class PostService {
 
         //Post 관련 인자 처리
 
-        int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id());
+        int likeCount = likeService.getLikeCount(LikeType.POST, post.get_id().toString());
         int scrapCount = scrapService.getScrapCount(post.get_id());
         int hitsCount = hitsService.getHitsCount(post.get_id());
         int commentCount = post.getCommentCount();
@@ -274,7 +274,7 @@ public class PostService {
 
     public UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
         return UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.POST, postId, currentUserId))
+                .isLike(likeService.isLiked(LikeType.POST, postId.toString(), currentUserId))
                 .isScrap(scrapService.isPostScraped(postId, currentUserId))
                 .isMine(postUserId.equals(currentUserId))
                 .build();

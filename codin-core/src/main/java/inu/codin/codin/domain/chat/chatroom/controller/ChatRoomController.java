@@ -2,8 +2,8 @@ package inu.codin.codin.domain.chat.chatroom.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomCreateRequestDto;
-import inu.codin.codin.domain.chat.chatroom.dto.ChatRoomListResponseDto;
+import inu.codin.codin.domain.chat.chatroom.dto.request.ChatRoomCreateRequestDto;
+import inu.codin.codin.domain.chat.chatroom.dto.response.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
