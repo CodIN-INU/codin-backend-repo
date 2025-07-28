@@ -98,7 +98,6 @@ public class JwtTokenProvider {
                 Long.parseLong(this.REFRESH_TOKEN_EXPIRATION)
         );
 
-
         return TokenDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
