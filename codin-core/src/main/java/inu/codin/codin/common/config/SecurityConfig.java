@@ -4,8 +4,7 @@ package inu.codin.codin.common.config;
 import inu.codin.codin.common.dto.PermitAllProperties;
 import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
-import inu.codin.codin.common.security.jwt.JwtTokenProvider;
-import inu.codin.codin.common.security.jwt.JwtUtils;
+import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.common.security.service.oauth2.AppleOAuth2UserService;
 import inu.codin.codin.common.security.service.oauth2.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.*;
@@ -52,9 +51,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -117,7 +115,7 @@ public class SecurityConfig {
 //                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils, permitAllProperties),
+                        new JwtAuthenticationFilter(jwtService, permitAllProperties),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가

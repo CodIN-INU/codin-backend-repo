@@ -71,6 +71,7 @@ public class JwtTokenProvider {
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
                 .claim("userId", userId)
+                .claim("type", "access")
                 .setIssuedAt(now)
                 .setExpiration(accessTokenExpiration)
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
@@ -78,8 +79,7 @@ public class JwtTokenProvider {
 
         String refreshToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .claim("userId", userId)
+                .claim("type", "refresh")
                 .setIssuedAt(now)
                 .setExpiration(refreshTokenExpiration)
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
@@ -133,6 +133,10 @@ public class JwtTokenProvider {
      */
     public boolean validateRefreshToken(String refreshToken) {
         try {
+            if (getType(refreshToken) == null || !getType(refreshToken).equals("refresh")) {
+                log.warn("[validateRefreshToken] Refresh Token이 아님");
+                return false;
+            }
             // Redis에 저장된 Refresh Token과 비교
             String storedRefreshToken = redisStorageService.getStoredRefreshToken(getClaims(refreshToken).getSubject());
             if (storedRefreshToken == null) {
@@ -156,6 +160,15 @@ public class JwtTokenProvider {
     /** 토큰에서 username 추출 */
     public String getUsername(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public String getType(String token) {
+        return getClaims(token).get("type", String.class);
+    }
+
+    public boolean validType(String token, String type) {
+        String tokenType = getType(token);
+        return tokenType != null && tokenType.equals(type);
     }
 
     @Getter
