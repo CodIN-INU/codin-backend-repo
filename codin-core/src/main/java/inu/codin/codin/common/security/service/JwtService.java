@@ -101,6 +101,15 @@ public class JwtService {
         // Authorization 헤더에 Access Token 추가
         response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
 
+        Cookie newAccessToken = new Cookie("accessToken", newToken.getRefreshToken());
+        newAccessToken.setHttpOnly(true);
+        newAccessToken.setSecure(true);
+        newAccessToken.setPath("/");
+        newAccessToken.setMaxAge(10 * 24 * 60 * 60); // 10일
+        newAccessToken.setDomain(BASERURL.split("//")[1]);
+        newAccessToken.setAttribute("SameSite", "None");
+        response.addCookie(newAccessToken);
+
         Cookie newRefreshToken = new Cookie(REFRESH_TOKEN, newToken.getRefreshToken());
         newRefreshToken.setHttpOnly(true);
         newRefreshToken.setSecure(true);
