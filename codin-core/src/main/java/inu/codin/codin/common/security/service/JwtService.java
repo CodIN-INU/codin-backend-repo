@@ -7,6 +7,8 @@ import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
 import inu.codin.codin.domain.user.security.CustomUserDetailsService;
 import inu.codin.codin.infra.redis.RedisStorageService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,7 +56,7 @@ public class JwtService {
      * @param request
      * @param response
      */
-    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public void checkRefreshTokenAndReissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtUtils.getRefreshToken(request);
 
         if (refreshToken == null) {
@@ -63,6 +65,8 @@ public class JwtService {
         }
 
         String username = jwtTokenProvider.getUsername(refreshToken);
+
+        validateRefreshTokenWithAccessToken(request, username, refreshToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
@@ -73,6 +77,22 @@ public class JwtService {
         }
 
         reissueToken(refreshToken, response);
+    }
+
+    //만료된 accessToken과 username을 비교
+    private void validateRefreshTokenWithAccessToken(HttpServletRequest request, String username, String refreshToken) {
+        String accessToken = jwtUtils.getAccessToken(request);
+        String accessUsername;
+        try {
+            accessUsername = jwtTokenProvider.getUsername(accessToken);
+        } catch (ExpiredJwtException e) {
+            Claims expiredClaims = e.getClaims();
+            accessUsername = expiredClaims.getSubject();
+        }
+        if (!accessUsername.equals(username)) {
+            log.error("[reissueToken] Access Token의 username과 Refresh Token가 일치하지 않습니다. : access - {}, refresh - {}", accessToken, refreshToken);
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Access Token의 username과 Refresh Token가 일치하지 않습니다..");
+        }
     }
 
     /**
@@ -119,7 +139,7 @@ public class JwtService {
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}, Refresh : {}",authentication.getName(), newToken.getAccessToken(), newToken.getRefreshToken());
     }
 
     /**
