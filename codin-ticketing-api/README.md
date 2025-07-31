@@ -10,6 +10,8 @@
 
 ### 주요 기능
 
+<img width="812" height="511" alt="image" src="https://github.com/user-attachments/assets/1499b0b8-bc7c-44c6-8baa-f51aee8bab29" />
+
 [API Endpoint 문서](/API.md)
 
 - **이벤트 관리**: 티켓팅 이벤트 생성, 조회, 수정, 삭제
@@ -61,3 +63,4 @@
   # .env.example 파일을 복사해 필요한 값들을 수정
   cp .env.example .env
   ```
+
