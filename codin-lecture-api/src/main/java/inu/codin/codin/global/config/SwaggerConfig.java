@@ -48,7 +48,7 @@ public class SwaggerConfig {
                 )
                 .servers(List.of(
                         new Server().url("http://localhost:8085").description("Local Server"),
-                        new Server().url(BASE_DOMAIN_URL).description("Production Server")
+                        new Server().url(BASE_DOMAIN_URL + "/api/lectures").description("Production Server")
                 ));
     }
 

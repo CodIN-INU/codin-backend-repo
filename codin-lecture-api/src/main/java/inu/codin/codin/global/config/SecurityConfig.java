@@ -5,6 +5,7 @@ import inu.codin.codin.global.auth.filter.SecurityExceptionHandlerFilter;
 import inu.codin.codin.global.auth.filter.TokenValidationFilter;
 import inu.codin.codin.global.auth.jwt.JwtTokenValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -31,8 +32,11 @@ public class SecurityConfig {
     private final JwtTokenValidator jwtTokenValidator;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
+    @Value("${server.domain}")
+    private String BASE_DOMAIN_URL;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(CsrfConfigurer::disable)
@@ -67,7 +71,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://front-end-dun-mu.vercel.app"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", BASE_DOMAIN_URL, "https://front-end-dun-mu.vercel.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("*"));
