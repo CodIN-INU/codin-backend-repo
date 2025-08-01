@@ -25,7 +25,7 @@ public class HttpHandShakeInterceptor implements HandshakeInterceptor {
             ServletServerHttpRequest serverHttpRequest = (ServletServerHttpRequest) request;
 
             try {
-                jwtService.setAuthentication(serverHttpRequest);
+                jwtService.setAuthentication(serverHttpRequest.getServletRequest());
             } catch (MessageDeliveryException e) {
                 throw new MessageDeliveryException("[Chatting] Jwt로 인한 메세지 전송 오류입니다.");
             } catch (MalformedJwtException e) {
