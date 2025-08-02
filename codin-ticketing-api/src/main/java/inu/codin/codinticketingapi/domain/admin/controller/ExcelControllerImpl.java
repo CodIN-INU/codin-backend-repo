@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.controller;
 
+import inu.codin.codinticketingapi.domain.admin.controller.swagger.ExcelController;
 import inu.codin.codinticketingapi.domain.admin.dto.response.ExcelResponse;
 import inu.codin.codinticketingapi.domain.admin.service.ExcelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/ticketing/excel")
 @RequiredArgsConstructor
 @Tag(name = "Event 엑셀 API", description = "티켓팅 이벤트 엑셀 정보 API")
-public class ExcelController {
+public class ExcelControllerImpl implements ExcelController {
     private final ExcelService excelService;
 
+    @Override
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @GetMapping("/{eventId}")
     public ResponseEntity<ByteArrayResource> downloadEventExcel(@PathVariable Long eventId) {
