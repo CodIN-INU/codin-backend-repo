@@ -1,41 +1,22 @@
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
-    container_name: es_local
+    container_name: elastic-search
     environment:
-      # 싱글 노드 모드
-      - discovery.type=single-node
-      # 보안 기능(인증/인가) 끄기
-      - xpack.security.enabled=false
-      # JVM 힙 사이즈 조정 (메모리 여유에 따라 변경)
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node # 싱글 노드 모드
+      - xpack.security.enabled=false # 보안 기능(인증/인가) 끄기
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # JVM 힙 사이즈 조정 (메모리 여유에 따라 변경)
+      - bootstrap.memory_lock=true
+    command: >
+      bash -c "elasticsearch-plugin install analysis-nori --batch && /usr/local/bin/docker-entrypoint.sh eswrapper"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata:/usr/share/elasticsearch/data
+      - esdata:/data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-    networks:
-      - esnet
-
-# (선택) Kibana를 함께 사용하고 싶다면 아래 주석을 해제하세요.
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:7.17.13
-#    container_name: kibana_local
-#    environment:
-#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-#      - xpack.security.enabled=false
-#    ports:
-#      - 5601:5601
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - esnet
 
 volumes:
   esdata:
-
-networks:
-  esnet:
