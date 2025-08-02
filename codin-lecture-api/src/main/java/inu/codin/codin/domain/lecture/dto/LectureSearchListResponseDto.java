@@ -23,7 +23,7 @@ public class LectureSearchListResponseDto {
         this.lectureNm = lectureNm;
         this.professor = professor;
         this.semester = semester;
-    };
+    }
 
 
     public static List<LectureSearchListResponseDto> of(Lecture lecture) {
@@ -41,6 +41,7 @@ public class LectureSearchListResponseDto {
 
     public static LectureSearchListResponseDto of(Lecture lecture, String semester) {
             return LectureSearchListResponseDto.builder()
+                    .id(lecture.getId())
                     .lectureNm(lecture.getLectureNm())
                     .professor(lecture.getProfessor())
                     .semester(semester)
