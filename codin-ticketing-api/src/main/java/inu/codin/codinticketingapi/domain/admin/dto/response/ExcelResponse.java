@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ExcelResponse {
-    byte[] excel;
-    String fileName;
+    private byte[] excel;
+    private String fileName;
 
     public static ExcelResponse of(byte[] excel, String fileName) {
         return ExcelResponse.builder()
