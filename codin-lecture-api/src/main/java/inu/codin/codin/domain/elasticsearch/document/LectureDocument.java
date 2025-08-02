@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.elastic.document;
+package inu.codin.codin.domain.elasticsearch.document;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -15,16 +15,15 @@ import java.util.List;
 public class LectureDocument {
 
     // todo: 강의계획서, 강의계획서 AI 요약본 ... 필드가 필요함.
-    // todo: 한글용 Nori 플러그인 기반으로 analyzer 적용
 
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @Field(type = FieldType.Text, analyzer = "nori_autocomplete", searchAnalyzer = "nori")
     private String lectureNm;
 
-    @Field(type = FieldType.Keyword)
-    private String professor;
+    @Field(type = FieldType.Integer)
+    private Integer grade;
 
     @Field(type = FieldType.Keyword)
     private String department;
@@ -38,8 +37,23 @@ public class LectureDocument {
     @Field(type = FieldType.Long)
     private Long hits;
 
-    @Field(type = FieldType.Integer)
-    private Integer grade;
+    @Field(type = FieldType.Keyword)
+    private String professor;
+
+    @Field(type = FieldType.Keyword)
+    private String type;
+
+    @Field(type = FieldType.Keyword)
+    private String lectureType;
+
+    @Field(type = FieldType.Keyword)
+    private String evaluation;
+
+    @Field(type = FieldType.Text, analyzer = "nori")
+    private List<String> preCourses;
+
+    @Field(type = FieldType.Keyword)
+    private List<String> tags;
 
     @Field(type = FieldType.Keyword)
     private List<String> semesters;

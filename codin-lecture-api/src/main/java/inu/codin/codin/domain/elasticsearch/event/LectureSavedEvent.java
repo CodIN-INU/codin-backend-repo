@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.elastic.event;
+package inu.codin.codin.domain.elasticsearch.event;
 
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import lombok.Builder;
