@@ -92,7 +92,7 @@ public class AuthController {
     @Operation(summary = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        jwtService.reissueToken(request, response);
+        jwtService.checkRefreshTokenAndReissue(request, response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "토큰 재발급 성공", null));
     }
 }
