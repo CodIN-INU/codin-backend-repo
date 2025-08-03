@@ -7,6 +7,8 @@ import inu.codin.codin.common.security.jwt.JwtTokenProvider;
 import inu.codin.codin.common.security.jwt.JwtUtils;
 import inu.codin.codin.domain.user.security.CustomUserDetailsService;
 import inu.codin.codin.infra.redis.RedisStorageService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,15 +56,15 @@ public class JwtService {
      * @param request
      * @param response
      */
-    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = jwtUtils.getRefreshToken(request);
-
+    public void checkRefreshTokenAndReissue(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = getRefreshToken(request);
         if (refreshToken == null) {
             log.error("[reissueToken] Refresh Token이 없습니다.");
             throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Refresh Token이 없습니다.");
         }
 
         String username = jwtTokenProvider.getUsername(refreshToken);
+        validateRefreshTokenWithAccessToken(request, username);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
@@ -73,6 +75,22 @@ public class JwtService {
         }
 
         reissueToken(refreshToken, response);
+    }
+
+    //만료된 accessToken과 username을 비교
+    private void validateRefreshTokenWithAccessToken(HttpServletRequest request, String username) {
+        String accessToken = getAccessToken(request);
+        String accessUsername;
+        try {
+            accessUsername = jwtTokenProvider.getUsername(accessToken);
+        } catch (ExpiredJwtException e) {
+            Claims expiredClaims = e.getClaims();
+            accessUsername = expiredClaims.getSubject();
+        }
+        if (!accessUsername.equals(username)) {
+            log.error("[reissueToken] Access Token의 username과 Refresh Token가 일치하지 않습니다.");
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Access Token의 username과 Refresh Token가 일치하지 않습니다.");
+        }
     }
 
     /**
@@ -145,23 +163,46 @@ public class JwtService {
         response.addCookie(refreshCookie);
     }
 
-    public void setAuthentication(ServletServerHttpRequest serverHttpRequest){
-        String accessToken = jwtUtils.getAccessToken(serverHttpRequest.getServletRequest());
+    public void setAuthentication(HttpServletRequest request){
+        String accessToken = getAccessToken(request);
 
         // Access Token이 있는 경우
-        if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-            String email = jwtTokenProvider.getUsername(accessToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
-            if (userDetails != null) {
-                // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
-                JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        if (accessToken != null) {
+            getUserDetailsAndSetAuthentication(accessToken);
         } else {
             SecurityContextHolder.clearContext();
             throw new MalformedJwtException("[Chatting] JWT를 찾을 수 없습니다.");
         }
+    }
+
+    public void getUserDetailsAndSetAuthentication(String token) {
+        jwtTokenProvider.validateToken(token);
+        String email = jwtTokenProvider.getUsername(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
+        if (userDetails != null) {
+            // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
+            JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    }
+
+    public String getAccessToken(HttpServletRequest request) {
+        String accessToken = jwtUtils.getAccessToken(request);
+        if (!jwtTokenProvider.validType(accessToken, "access")) {
+            log.error("[getAccessToken] Access Token이 아닙니다.");
+            throw new JwtException(SecurityErrorCode.INVALID_TYPE, "Access Token이 아닙니다.");
+        }
+        return accessToken;
+    }
+
+    public String getRefreshToken(HttpServletRequest request) {
+        String refreshToken = jwtUtils.getRefreshToken(request);
+        if (!jwtTokenProvider.validType(refreshToken, "refresh")) {
+            log.error("[getRefreshToken] Refresh Token이 아닙니다.");
+            throw new JwtException(SecurityErrorCode.INVALID_TYPE, "Refresh Token이 아닙니다.");
+        }
+        return refreshToken;
     }
 }
