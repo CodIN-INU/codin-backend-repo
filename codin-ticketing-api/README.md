@@ -10,6 +10,10 @@
 
 ### 주요 기능
 
+<img width="10046" height="4961" alt="image" src="https://github.com/user-attachments/assets/53a52f4c-e766-4a9d-80cc-f1d507c19413" />
+
+[API Endpoint 문서](/API.md)
+
 - **이벤트 관리**: 티켓팅 이벤트 생성, 조회, 수정, 삭제
 - **사용자 프로필**: 수령자 정보 관리 (학과, 학번)
 - **티켓팅 참여**: 실시간 티켓팅 참여 및 교환권 발급
@@ -70,55 +74,4 @@
   cp .env.example .env
   ```
 
-## 빌드 및 배포
 
-### 1. Buildx 멀티플랫폼 빌더 생성 및 활성화 (최초 1회)
-
-```bash
-# 멀티플랫폼 빌더 생성 후 활성화
-docker buildx create --name multi-builder --use
-
-# 빌더 상태 확인 및 부트스트랩
-docker buildx inspect multi-builder --bootstrap
-```
-
-### 2. Ticketing-API 이미지 빌드 & tar.gz 추출
-```bash
-# 1) AMD64 전용 이미지 빌드 후 로컬 데몬에 바로 로드
-./gradlew clean
-./gradlew -x build 
-
-docker buildx build \
---platform linux/amd64 \
---load \
--t codin-ticketing-api:latest \
-.
-
-# 2) 이미지 tar로 저장
-docker save codin-ticketing-api:latest -o codin-ticketing-api-amd64.tar
-
-# 3) gzip 압축
-gzip codin-ticketing-api-amd64.tar   # → codin-ticketing-api-amd64.tar.gz
-```
-
-### 3. Ticketing-SSE 이미지 빌드 & tar.gz 추출
-
-```bash
-# 1) AMD64 전용 이미지 빌드 후 로드
-cd codin-ticketing-sse
-
-./gradlew clean
-./gradlew -x build 
-
-docker buildx build \
-  --platform linux/amd64 \
-  --load \
-  -t codin-ticketing-sse:latest \
-  .
-
-# 2) 이미지 tar로 저장
-docker save codin-ticketing-sse:latest -o codin-ticketing-sse-amd64.tar
-
-# 3) gzip 압축
-gzip codin-ticketing-sse-amd64.tar    # → codin-ticketing-sse-amd64.tar.gz
-```
