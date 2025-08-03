@@ -58,6 +58,9 @@ dependencies {
     // Feign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation group: 'io.github.openfeign', name: 'feign-gson', version: '11.0'
+    // Excel
+    implementation 'org.apache.poi:poi:5.4.1'
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
