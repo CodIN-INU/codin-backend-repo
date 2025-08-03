@@ -119,6 +119,7 @@ public class JwtService {
         // Authorization 헤더에 Access Token 추가
         response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
 
+        // todo: x-access-token 쿠키에 Access Token 추가 - 추후 제거
         Cookie newAccessToken = new Cookie("x-access-token", newToken.getAccessToken());
         newAccessToken.setHttpOnly(true);
         newAccessToken.setSecure(true);
@@ -128,6 +129,7 @@ public class JwtService {
         newAccessToken.setAttribute("SameSite", "None");
         response.addCookie(newAccessToken);
 
+        // x-rfresh-token 쿠키에 Refresh Token 추가
         Cookie newRefreshToken = new Cookie(REFRESH_TOKEN, newToken.getRefreshToken());
         newRefreshToken.setHttpOnly(true);
         newRefreshToken.setSecure(true);
@@ -137,7 +139,7 @@ public class JwtService {
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}",authentication.getName(), newToken.getAccessToken());
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}", authentication.getName(), newToken.getAccessToken());
     }
 
     /**
