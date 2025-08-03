@@ -15,7 +15,7 @@ public class JwtUtils {
      * 헤더에서 Access 토큰 추출
      * HTTP Header : "Authorization" : "Bearer ..."
      *
-     * + 쿠키에서 Authorization 쿠키에서 추출
+     * + 쿠키에서 x-access-token 쿠키에서 추출
      * @return (null, 빈 문자열)의 경우 null 반환
      */
     public String getAccessToken(HttpServletRequest request) {
