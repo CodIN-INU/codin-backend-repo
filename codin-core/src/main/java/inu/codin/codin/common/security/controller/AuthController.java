@@ -30,8 +30,9 @@ public class AuthController {
     private final AuthSessionService authSessionService;
 
     @GetMapping("/google")
-    public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response,
-                                                         @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
+    public ResponseEntity<SingleResponse<?>> googleLogin(
+            HttpServletResponse response,
+            @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
         authSessionService.setSession(redirect_url);
         response.sendRedirect("/api/oauth2/authorization/google");
         return ResponseEntity.ok()
@@ -76,7 +77,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
         authCommonService.login(signUpAndLoginRequestDto, response);
-
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "로그인 성공", "기존 유저 로그인 완료"));
 
