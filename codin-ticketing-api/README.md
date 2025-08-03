@@ -10,7 +10,7 @@
 
 ### 주요 기능
 
-<img width="812" height="511" alt="image" src="https://github.com/user-attachments/assets/1499b0b8-bc7c-44c6-8baa-f51aee8bab29" />
+<img width="10046" height="4961" alt="image" src="https://github.com/user-attachments/assets/53a52f4c-e766-4a9d-80cc-f1d507c19413" />
 
 [API Endpoint 문서](/API.md)
 
@@ -63,4 +63,5 @@
   # .env.example 파일을 복사해 필요한 값들을 수정
   cp .env.example .env
   ```
+
 
