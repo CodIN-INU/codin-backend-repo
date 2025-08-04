@@ -28,7 +28,7 @@ public class LectureRoomController {
     )
     @GetMapping("/empty")
     public ResponseEntity<SingleResponse<List<Map<Integer, List<LectureRoomResponseDto>>>>> statusOfEmptyRoom(){
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "오늘의 강의실 현황 반환", lectureRoomService.statusOfEmptyRoom()));
+        return ResponseEntity.ok().body(new SingleResponse<>(200, "오늘의 강의실 현황 반환",
+                lectureRoomService.statusOfEmptyRoom()));
     }
 }

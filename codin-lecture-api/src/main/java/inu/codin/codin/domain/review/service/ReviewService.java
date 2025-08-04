@@ -87,8 +87,8 @@ public class ReviewService {
     /**
      * 강의 후기 작성 시 해당 강의의 Rating 업데이트
      *
-     * @param lecture
-     * @param starRating
+     * @param lecture 강의 엔티티
+     * @param starRating 별점
      */
     public void updateRating(Lecture lecture, @NotNull @Digits(integer = 1, fraction = 2) double starRating){
         double avgOfStarRating = reviewRepository.getAvgOfStarRatingByLecture(lecture);

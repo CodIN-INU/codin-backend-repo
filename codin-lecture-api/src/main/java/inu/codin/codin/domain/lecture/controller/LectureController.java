@@ -8,14 +8,16 @@ import inu.codin.codin.domain.lecture.service.LectureService;
 import inu.codin.codin.global.common.entity.Department;
 import inu.codin.codin.global.common.response.ListResponse;
 import inu.codin.codin.global.common.response.SingleResponse;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,13 +35,14 @@ public class LectureController {
                     "like : 좋아요한 과목 모아보기 true"
     )
     @GetMapping("/courses")
-    public ResponseEntity<SingleResponse<LecturePageResponse>> sortListOfLectures(@RequestParam(value = "department", required = false) Department department,
-                                                                                  @RequestParam(value = "keyword", required = false) String keyword,
-                                                                                  @RequestParam(value = "sort", required = false) SortingOption sort,
-                                                                                  @RequestParam(value = "like", required = false) Boolean like,
-                                                                                  @RequestParam("page") int page){
-        return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "과목 리스트 반환 완료",
+    public ResponseEntity<SingleResponse<LecturePageResponse>> sortListOfLectures(
+            @RequestParam(value = "department", required = false) Department department,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "sort", required = false) SortingOption sort,
+            @RequestParam(value = "like", required = false) Boolean like,
+            @RequestParam("page") int page)
+    {
+        return ResponseEntity.ok().body(new SingleResponse<>(200, "과목 리스트 반환 완료",
                         lectureService.sortListOfLectures(keyword, department, sort, like, page)));
     }
 
@@ -48,7 +51,7 @@ public class LectureController {
             description = "Preview를 눌렀을 때 뜨는 과목 정보 반환"
     )
     @GetMapping("/{lectureId}")
-    public ResponseEntity<SingleResponse<LectureDetailResponseDto>> getLectureDetails(@PathVariable("lectureId") Long lectureId){
+    public ResponseEntity<SingleResponse<LectureDetailResponseDto>> getLectureDetails(@PathVariable("lectureId") Long lectureId) {
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "강의 별점 정보 반환", lectureService.getLectureDetails(lectureId)));
     }
@@ -61,11 +64,12 @@ public class LectureController {
                     "수강학기(25-1 ~ )중 하나만으로도 검색 가능"
     )
     @GetMapping("/search-review")
-    public ResponseEntity<ListResponse<LectureSearchListResponseDto>> searchLecturesToReview(@RequestParam(required = false) Department department,
-                                                                                                   @RequestParam(required = false) @Min(1) @Max(4) Integer grade,
-                                                                                                   @RequestParam(required = false) String semester){
-        return ResponseEntity.ok()
-                .body(new ListResponse<>(200, "필터링 된 강의들 반환 완료",
+    public ResponseEntity<ListResponse<LectureSearchListResponseDto>> searchLecturesToReview(
+            @RequestParam(required = false) Department department,
+            @RequestParam(required = false) @Min(1) @Max(4) Integer grade,
+            @RequestParam(required = false) String semester)
+    {
+        return ResponseEntity.ok().body(new ListResponse<>(200, "필터링 된 강의들 반환 완료",
                         lectureService.searchLecturesToReview(department, grade, semester)));
     }
 

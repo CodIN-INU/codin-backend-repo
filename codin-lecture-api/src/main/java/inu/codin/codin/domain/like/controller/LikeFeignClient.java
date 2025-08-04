@@ -21,15 +21,21 @@ public interface LikeFeignClient {
     ResponseEntity<SingleResponse<?>> toggleLike(@RequestBody LikeRequestDto likeRequestDto);
 
     @GetMapping
-    Integer getLikeCount(@RequestParam("likeType") LikeType likeType,
-                                                     @RequestParam("id") String id);
+    Integer getLikeCount(
+            @RequestParam("likeType") LikeType likeType,
+            @RequestParam("id") String id
+    );
 
     @GetMapping("/user")
-    Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
-                                                    @RequestParam("id") String id,
-                                                    @RequestParam("userId") String userId);
+    Boolean isUserLiked(
+            @RequestParam("likeType") LikeType likeType,
+            @RequestParam("id") String id,
+            @RequestParam("userId") String userId
+    );
 
     @GetMapping("/list")
-    List<LikedResponseDto> getLiked(@RequestParam("likeType") LikeType likeType,
-                                    @RequestParam("userId") String userId);
+    List<LikedResponseDto> getLiked(
+            @RequestParam("likeType") LikeType likeType,
+            @RequestParam("userId") String userId
+    );
 }

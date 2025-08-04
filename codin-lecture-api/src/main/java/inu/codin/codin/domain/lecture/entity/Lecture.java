@@ -17,6 +17,8 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Lecture {
 
+    // todo: 강의계획서 내용, 강의 계획서 AI 요약 컬럼 추가
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String lectureNm;                                   //교과목명
