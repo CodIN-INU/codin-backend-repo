@@ -14,6 +14,8 @@ import java.util.List;
 @Getter
 public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
+    // todo: 강의 계획서, AI 요약본 반환 데이터 추가
+
     @Schema(description = "단과대", example = "정보기술대학")
     private String college;
 
