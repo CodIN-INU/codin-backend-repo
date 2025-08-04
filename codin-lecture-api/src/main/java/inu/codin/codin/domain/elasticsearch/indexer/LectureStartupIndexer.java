@@ -79,7 +79,7 @@ public class LectureStartupIndexer {
                 .type(lecture.getType().name())
                 .lectureType(lecture.getLectureType())
                 .evaluation(lecture.getEvaluation().name())
-                .preCourses(lecture.getPreCourse() != null ? List.of(lecture.getPreCourse()) : List.of())
+                .preCourses(Optional.ofNullable(lecture.getPreCourse()).map(List::of).orElse(List.of()))
                 .tags(lecture.getTags().stream()
                         .map(tag -> tag.getTag().getTagName())
                         .toList())
