@@ -21,7 +21,7 @@ public class RedisLikeService {
 
     public Object getLikeCount(String entityType, String entityId) {
         String redisKey = makeRedisKey(entityType, entityId);
-        if (redisTemplate.hasKey(redisKey)){
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))){
             redisTemplate.expire(redisKey, 1, TimeUnit.DAYS);
             return redisTemplate.opsForValue().get(redisKey);
         } else return null;
