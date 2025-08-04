@@ -64,7 +64,7 @@ public class LectureElasticService {
                                 .field("tags")
                                 .query(keyword)
                         ))
-                        .minimumShouldMatch("4"); // 최소 매칭 갯수
+                        .minimumShouldMatch("1"); // 최소 매칭 갯수
             } else {
                 // 검색 키워드가 없으면 모든 문서 반환
                 b.must(m -> m.matchAll(ma -> ma));
