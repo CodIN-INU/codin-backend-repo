@@ -2,16 +2,17 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
-import inu.codin.codin.common.security.service.AbstractAuthService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
+import inu.codin.codin.common.security.service.AbstractAuthService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,9 +25,11 @@ import java.util.Optional;
 @Slf4j
 public class AuthCommonService extends AbstractAuthService {
 
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthCommonService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService) {
+    public AuthCommonService(UserRepository userRepository, S3Service s3Service, JwtService jwtService, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         super(userRepository, s3Service, jwtService, userDetailsService);
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void completeUserProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage, HttpServletResponse response) {
@@ -71,8 +74,14 @@ public class AuthCommonService extends AbstractAuthService {
     }
 
     public void login(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
-        Optional<UserEntity> user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail());
-        if (user.isPresent()) {
+        UserEntity user = userRepository.findByEmail(signUpAndLoginRequestDto.getEmail())
+                .orElseThrow(() -> new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다."));
+        if (user.getPassword() == null) {
+            log.info("[login] 비밀번호가 존재하지 않는 유저 접근, email={}",  user.getEmail());
+            throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+        }
+        // 비밀번호 검증
+        if (passwordEncoder.matches(signUpAndLoginRequestDto.getPassword(), user.getPassword())) {
             issueJwtToken(signUpAndLoginRequestDto.getEmail(), response);
         } else {
             throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
