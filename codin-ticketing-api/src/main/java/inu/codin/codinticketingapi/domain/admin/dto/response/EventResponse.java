@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.admin.dto.response;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public class EventResponse {
     @Schema(description = "이벤트 ID", example = "1")
     private Long id;
     @Schema(description = "이벤트가 진행되는 캠퍼스", example = "송도 캠퍼스")
-    private String campus;
+    private Campus campus;
     @Schema(description = "이벤트 시작 시간", example = "2025-07-25T10:00:00")
     private LocalDateTime eventTime;
     @Schema(description = "이벤트 종료 시간", example = "2025-07-25T12:00:00")
@@ -44,7 +45,7 @@ public class EventResponse {
     public static EventResponse of(Event event) {
         return EventResponse.builder()
                 .id(event.getId())
-                .campus(event.getCampus().getDescription())
+                .campus(event.getCampus())
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
                 .eventImageUrl(event.getEventImageUrl())
