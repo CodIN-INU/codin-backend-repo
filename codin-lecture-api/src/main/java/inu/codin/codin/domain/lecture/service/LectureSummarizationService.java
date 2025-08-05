@@ -6,6 +6,7 @@ import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
 import inu.codin.codin.domain.review.entity.Review;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -17,6 +18,7 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LectureSummarizationService {
@@ -29,10 +31,21 @@ public class LectureSummarizationService {
         Lecture lecture = lectureRepository.findLectureWithTagsAndReviewsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
 
+        // 리뷰가 없거나 최소 조건 만족 예외 처리
+        if (lecture.getReviews().isEmpty()) {
+            log.info("강의에 리뷰가 없어 AI 요약을 생략, lectureId:{}", lectureId);
+            return;
+        }
+
         // 리뷰들을 하나의 문자열화
         String reviewsText = lecture.getReviews().stream()
                 .map(Review::getContent)
                 .collect(Collectors.joining("\n"));
+
+        if (reviewsText.trim().isEmpty()) {
+            log.info("유효한 리뷰 내용이 없어 AI 요약을 생략, lectureId:{}", lectureId);
+            return;
+        }
 
         // 강의 태그 메타데이터 문자열화
         String tags = lecture.getTags().stream()
@@ -48,11 +61,20 @@ public class LectureSummarizationService {
         );
 
         // ChatModel 호출 -> AI 요약문 반환
-        ChatResponse response = chatModel.call(prompt);
-        String aiSummary = response.getResult().getOutput().getText();
+        try {
+            ChatResponse response = chatModel.call(prompt);
+            String aiSummary = response.getResult().getOutput().getText();
 
-        // AI 요약문 저장
-        lecture.updateAiSummary(aiSummary);
+            if (aiSummary == null || aiSummary.trim().isEmpty()) {
+                log.warn("강의 ID {}에 대한 AI 요약이 비어있습니다.", lectureId);
+                return;
+            }
+            // AI 요약문 저장
+            lecture.updateAiSummary(aiSummary);
+        } catch (Exception e) {
+            log.error("강의 ID {}의 AI 요약 생성 중 오류 발생", lectureId, e);
+            throw new LectureException(LectureErrorCode.AI_SUMMARY_GENERATION_FAILED);
+        }
     }
 
     private String buildPrompt(Lecture lecture, String reviews, String tags) {
