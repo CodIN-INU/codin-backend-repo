@@ -42,6 +42,16 @@
   - **Campus**: 캠퍼스 구분 (송도캠퍼스, 미추홀캠퍼스)
   - **Department**: 학과 정보 (컴퓨터공학부, 정보통신공학과 등)
 
+## 외부 API 엔드포인트
+
+- CodIN Main API : https://github.com/CodIN-INU/BACKEND
+-  `GET /api/users` : 유저 조회 엔드 포인트
+
+### 티켓팅 참여자 정보 엔드포인트
+
+- `GET /api/users/ticketing-participation` : 유저 티켓팅 참여자 정보 조회
+- `PUT /api/users/ticketing-participation` : 유저 티켓팅 참여자 정보 수정
+
 ## 인증 및 권한
 
 - **JWT 토큰 기반 인증**
