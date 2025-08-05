@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 public class EventResponse {
 
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
-    @NotBlank
+    @NotNull
     private Long eventId;
 
     @Schema(description = "이벤트 제목", example = "컴퓨터 공학부 중간고사 간식나눔")

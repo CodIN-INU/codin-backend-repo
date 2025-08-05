@@ -12,6 +12,7 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepo
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,7 @@ public class EventService {
     private final UserClientService userClientService;
 
     @Transactional(readOnly = true)
-    public EventPageResponse getEventList(@Valid Campus campus, int pageNumber) {
+    public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventPageResponse.of(eventRepository.findByCampus(campus, pageable));
     }
@@ -41,14 +42,14 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public EventParticipationHistoryPageResponse getUserEventList(@NotNull int pageNumber) {
+    public EventParticipationHistoryPageResponse getUserEventList(@PositiveOrZero int pageNumber) {
         String userId = userClientService.fetchUser().getUserId();
         Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationRepository.findHistoryByUserId(userId, pageable));
     }
 
     @Transactional(readOnly = true)
-    public EventParticipationHistoryPageResponse getUserEventListByStatus(@NotNull int pageNumber, ParticipationStatus status) {
+    public EventParticipationHistoryPageResponse getUserEventListByStatus(@PositiveOrZero int pageNumber, @NotNull ParticipationStatus status) {
         String userId = userClientService.fetchUser().getUserId();
         Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationRepository.findHistoryByUserIdAndCanceled(userId, status, pageable));
