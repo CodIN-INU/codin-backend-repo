@@ -1,6 +1,8 @@
 spring:
   application:
     name: codin-ticketing-sse
+  jwt:
+    secret: ${SPRING_JWT_SECRET}
   config:
     import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
   # Redis Configuration
@@ -36,3 +38,11 @@ springdoc:
     operationsSorter: method
     disable-swagger-default-url: true
     display-request-duration: true
+
+# Hibernate Log Level Configuration
+logging:
+  level:
+    root: info
+    sql: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:warn}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_LOG_LEVEL:warn}

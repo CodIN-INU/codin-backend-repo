@@ -1,8 +1,8 @@
-package inu.codin.codinticketingapi.security.util;
+package inu.codin.codinticketingsse.security.util;
 
-import inu.codin.codinticketingapi.security.exception.SecurityErrorCode;
-import inu.codin.codinticketingapi.security.exception.SecurityException;
-import inu.codin.codinticketingapi.security.jwt.TokenUserDetails;
+import inu.codin.codinticketingsse.security.exception.SecurityException;
+import inu.codin.codinticketingsse.security.exception.SecurityErrorCode;
+import inu.codin.codinticketingsse.security.jwt.TokenUserDetails;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
