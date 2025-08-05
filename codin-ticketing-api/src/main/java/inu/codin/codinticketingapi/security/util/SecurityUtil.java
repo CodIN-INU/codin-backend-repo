@@ -67,9 +67,9 @@ public class SecurityUtil {
     /**
      * 현재 사용자와 주어진 사용자 ID가 같은지 검증
      */
-    public static void validateUser(String username) {
-        String currentUsername = getUserId();
-        if (!currentUsername.equals(username)) {
+    public static void validateUser(String userId) {
+        String currentUserId = getUserId();
+        if (!currentUserId.equals(userId)) {
             throw new SecurityException(SecurityErrorCode.ACCESS_DENIED);
         }
     }
@@ -91,7 +91,7 @@ public class SecurityUtil {
         try {
             String currentRole = getCurrentUserRole();
             return role.equals(currentRole);
-        } catch (JwtException e) {
+        } catch (SecurityException e) {
             return false;
         }
     }
