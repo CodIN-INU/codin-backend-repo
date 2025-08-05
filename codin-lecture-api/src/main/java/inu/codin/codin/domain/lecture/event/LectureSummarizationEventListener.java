@@ -25,7 +25,7 @@ public class LectureSummarizationEventListener {
             summarizationService.summarizeLecture(event.lectureId());
             log.info("[onLectureChange] Lecture AI 요약 완료 lectureId: {}", event.lectureId());
         } catch (Exception e) {
-            log.error("[onLectureChange] AI 요약 실패 lectureId: {}, msg: {}", event.lectureId(), e.getMessage());
+            log.error("[onLectureChange] AI 요약 실패 lectureId: {}", event.lectureId(), e);
         }
     }
 }
