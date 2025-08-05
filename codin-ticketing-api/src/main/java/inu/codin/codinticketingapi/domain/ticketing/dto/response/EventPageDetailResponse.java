@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Schema(description = "티켓팅 이벤트 응답 DTO")
-public class EventResponse {
+public class EventPageDetailResponse {
 
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     @NotNull
@@ -41,8 +42,11 @@ public class EventResponse {
     @Schema(description = "이벤트 현재 수량", example = "80")
     private int currentQuantity;
 
-    public static EventResponse of(Event event) {
-        return EventResponse.builder()
+    @Schema(description = "이벤트 상태 enum(UPCOMING, ACTIVE, ENDED)", example = "UPCOMING")
+    private EventStatus eventStatus;
+
+    public static EventPageDetailResponse of(Event event) {
+        return EventPageDetailResponse.builder()
                 .eventId(event.getId())
                 .eventTitle(event.getTitle())
                 .eventImageUrl(event.getEventImageUrl())
@@ -50,6 +54,7 @@ public class EventResponse {
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getStock().getInitialStock())
                 .currentQuantity(event.getStock().getStock())
+                .eventStatus(event.getEventStatus())
                 .build();
     }
 }
