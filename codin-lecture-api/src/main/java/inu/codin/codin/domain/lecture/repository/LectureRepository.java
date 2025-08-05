@@ -35,12 +35,15 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         LEFT JOIN FETCH l.schedule
         WHERE l.id IN :lectureIds
     """)
-    Page<Lecture> findAllWithAssociationsByIds(List<Long> lectureIds);
+    List<Lecture> findAllWithAssociationsByIds(List<Long> lectureIds);
 
     @Query("""
         SELECT l FROM Lecture l
+        LEFT JOIN FETCH l.tags
+        LEFT JOIN FETCH l.reviews
+        LEFT JOIN FETCH l.semester
     """)
-    Page<Lecture> findAllPaged(Pageable pageable);
+    List<Lecture> findAllPaged(Pageable pageable);
 
 
     @Query("""
