@@ -42,11 +42,13 @@ public class LectureStartupIndexer {
             return;
         }
 
-        // todo: 기존 인덱스 존재 여부 확인
-//        if (lectureElasticRepository.count() > 0) {
-//            log.info("ElasticSearch 인덱스가 이미 존재합니다, 인덱싱을 생략합니다.");
-//            return;
-//        }
+        long existingCount = lectureElasticRepository.count();
+        if (existingCount > 0) {
+            log.info("ElasticSearch 인덱스가 이미 존재합니다 ({}개), 전체 재인덱싱을 진행합니다.", existingCount);
+            // 선택적으로 기존 인덱스 삭제 후 재인덱싱
+            lectureElasticRepository.deleteAll();
+            log.info("기존 인덱스를 삭제했습니다.");
+        }
 
         log.info("Starting ElasticSearch Indexing, Lecture Data");
         Pageable pageable = PageRequest.of(0, CHUNK_SIZE);
