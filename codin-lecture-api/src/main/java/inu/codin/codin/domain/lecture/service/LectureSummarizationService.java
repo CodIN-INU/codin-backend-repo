@@ -89,7 +89,7 @@ public class LectureSummarizationService {
                         lecture.getLectureType(),
                         lecture.getEvaluation(),
                         tags.isEmpty() ? "태그 없음" : tags,
-                        lecture.getSyllabus(),
+                        lecture.getSyllabus() == null ? "강의 계획서 없음" : lecture.getSyllabus(),
                         reviews
                 );
     }
