@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.elasticsearch.indexer;
 
+import inu.codin.codin.domain.elasticsearch.convertor.LectureDocumentConverter;
 import inu.codin.codin.domain.elasticsearch.document.LectureDocument;
 import inu.codin.codin.domain.elasticsearch.repository.LectureElasticRepository;
 import inu.codin.codin.domain.lecture.entity.Lecture;
@@ -24,6 +25,8 @@ public class LectureStartupIndexer {
 
     private final LectureElasticRepository lectureElasticRepository;
     private final LectureRepository lectureRepository;
+
+    private final LectureDocumentConverter lectureDocumentConverter;
 
     private final int CHUNK_SIZE = 100;
 
@@ -53,7 +56,7 @@ public class LectureStartupIndexer {
         do {
             page = lectureRepository.findAllPaged(pageable);
             List<LectureDocument> documents = page.getContent().stream()
-                    .map(this::convertToDocument)
+                    .map(lectureDocumentConverter::convertToDocument)
                     .toList();
 
             lectureElasticRepository.saveAll(documents);
@@ -66,26 +69,5 @@ public class LectureStartupIndexer {
         log.info("ElasticSearch 인덱싱 성공. Total Indexed: {}", totalProcessed);
     }
 
-    private LectureDocument convertToDocument(Lecture lecture) {
-        return LectureDocument.builder()
-                .id(lecture.getId())
-                .lectureNm(lecture.getLectureNm())
-                .grade(lecture.getGrade())
-                .department(lecture.getDepartment().name())
-                .starRating(lecture.getStarRating())
-                .likes((long) lecture.getLikes())
-                .hits((long) lecture.getHits())
-                .professor(lecture.getProfessor())
-                .type(lecture.getType().name())
-                .lectureType(lecture.getLectureType())
-                .evaluation(lecture.getEvaluation().name())
-                .preCourses(lecture.getPreCourse() != null ? List.of(lecture.getPreCourse()) : List.of())
-                .tags(lecture.getTags().stream()
-                        .map(tag -> tag.getTag().getTagName())
-                        .toList())
-                .semesters(lecture.getSemester().stream()
-                        .map(ls -> ls.getSemester().getString())
-                        .toList())
-                .build();
-    }
+
 }
