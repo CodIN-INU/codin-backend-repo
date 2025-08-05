@@ -51,7 +51,7 @@ public class LectureStartupIndexer {
         int totalProcessed = 0;
 
         do {
-            page = lectureRepository.findAllWithAssociations(pageable);
+            page = lectureRepository.findAllPaged(pageable);
             List<LectureDocument> documents = page.getContent().stream()
                     .map(this::convertToDocument)
                     .toList();

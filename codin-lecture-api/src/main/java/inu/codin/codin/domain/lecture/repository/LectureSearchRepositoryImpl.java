@@ -46,8 +46,8 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
         }
 
         // JPA로 Lecture 엔티티 Fetch 조회
-        List<Lecture> lectures = lectureRepository.findAllById(ids);
-        log.info("[searchLecturesAtPreview] 강의 조회, size={} ", lectures.size());
+        Page<Lecture> lectures = lectureRepository.findAllWithAssociationsByIds(ids);
+        log.info("[searchLecturesAtPreview] 강의 조회, size={} ", lectures.getTotalElements());
 
         // ES 정렬 순서 유지하며 재정렬
         Map<Long, Lecture> lectureMap = lectures.stream()

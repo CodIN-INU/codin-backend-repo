@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,19 +29,25 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     Optional<Lecture> findLectureWithSemesterAndReviewsById(Long lectureId);
 
     @Query("""
-      SELECT DISTINCT l FROM Lecture l
-      LEFT JOIN FETCH l.tags
-      LEFT JOIN FETCH l.semester
-      LEFT JOIN FETCH l.schedule
+        SELECT DISTINCT l FROM Lecture l
+        LEFT JOIN FETCH l.tags
+        LEFT JOIN FETCH l.semester
+        LEFT JOIN FETCH l.schedule
+        WHERE l.id IN :lectureIds
     """)
-    Page<Lecture> findAllWithAssociations(Pageable pageable);
+    Page<Lecture> findAllWithAssociationsByIds(List<Long> lectureIds);
+
+    @Query("""
+        SELECT l FROM Lecture l
+    """)
+    Page<Lecture> findAllPaged(Pageable pageable);
 
 
     @Query("""
-      SELECT DISTINCT l FROM Lecture l
-      LEFT JOIN FETCH l.tags
-      LEFT JOIN FETCH l.reviews
-      WHERE l.id=:lectureId
+        SELECT DISTINCT l FROM Lecture l
+        LEFT JOIN FETCH l.tags
+        LEFT JOIN FETCH l.reviews
+        WHERE l.id=:lectureId
     """)
     Optional<Lecture> findLectureWithTagsAndReviewsById(Long lectureId);
 }
