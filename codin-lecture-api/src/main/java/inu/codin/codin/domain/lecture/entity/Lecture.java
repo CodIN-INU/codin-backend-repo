@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicUpdate
 public class Lecture {
 
     // todo: 강의계획서 내용, 강의 계획서 AI 요약 컬럼 추가
@@ -40,7 +42,15 @@ public class Lecture {
     private int likes;                                          //좋아요 수
     private int hits;                                           //조회 수
 
-    @OneToOne
+    /** 강의 계획서 */
+    @Column(columnDefinition = "TEXT")
+    private String syllabus;
+
+    /** 교과목 정보 + 강의 계획서 + 리뷰 -> AI 요약 */
+    @Column(columnDefinition = "TEXT")
+    private String aiSummary;
+
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "emotion_id")
     private Emotion emotion;                                    //수강 후기의 평점 분포도
 
@@ -71,5 +81,9 @@ public class Lecture {
 
     public void assignEmotion(Emotion emotion) {
         this.emotion = emotion;
+    }
+
+    public void updateAiSummary(String aiSummary) {
+        this.aiSummary = aiSummary;
     }
 }
