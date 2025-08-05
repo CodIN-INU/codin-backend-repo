@@ -24,7 +24,7 @@ public class LectureUploadController {
     private final LectureUploadService lectureUploadService;
 
     @Operation(
-            summary = "새 학기의 강의 내역 업로드",
+            summary = "새 학기의 강의 내역 엑셀파일 업로드",
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -37,7 +37,7 @@ public class LectureUploadController {
     }
 
     @Operation(
-            summary = "강의실 현황 업데이트",
+            summary = "강의실 현황 엑셀파일 업데이트",
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(value = "/rooms", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

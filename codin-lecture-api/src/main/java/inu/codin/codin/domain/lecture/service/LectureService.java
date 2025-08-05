@@ -19,6 +19,7 @@ import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.review.service.UserReviewStatsService;
 import inu.codin.codin.global.common.entity.Department;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class LectureService {
 
@@ -40,19 +42,20 @@ public class LectureService {
 
     /**
      * 여러 옵션을 선택하여 강의 리스트 반환
-     *
-     * @param keyword
-     * @param department    Department (COMPUTER_SCI, INFO_COMM, EMBEDDED)
-     * @param sortingOption 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
-     * @param like
-     * @param page          페이지 번호
+     * @param keyword 검색 키워드
+     * @param department Department(COMPUTER_SCI, INFO_COMM, EMBEDDED), null 시에 전체 검색
+     * @param sortingOption 정확도 순, 평점 많은 순, 좋아요 많은 순, 조회수 순 중 내림차순 선택
+     * @param like 좋아요 목록 토글
+     * @param page 페이지 번호
      * @return LecturePageResponse
      */
     public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
+        // 조회 유저의 좋아요 목록을 조회해 반환
         List<Long> liked = null;
         if (like != null && like) {
             liked = likeService.getLiked(LikeType.LECTURE).stream()
-                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId())).toList();
+                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId()))
+                    .toList();
         }
 
         Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, liked, PageRequest.of(page, 10));
@@ -79,8 +82,14 @@ public class LectureService {
     private LecturePageResponse getLecturePageResponse(Page<Lecture> lecturePage) {
         return LecturePageResponse.of(lecturePage.stream()
                         .map(lecture -> {
-                                    boolean liked = likeService.isLiked(LikeType.LECTURE, lecture.getId().toString());
-                                    return LecturePreviewResponseDto.of(lecture, liked);
+                            boolean liked = false;
+                            try {
+                                liked = likeService.isLiked(LikeType.LECTURE, lecture.getId().toString());
+                            } catch (Exception e) {
+                                // 좋아요 상태 확인 실패 시 false로 처리
+                                log.warn("Failed to check like status for lecture {}: {}", lecture.getId(), e.getMessage());
+                            }
+                            return LecturePreviewResponseDto.of(lecture, liked);
                         }).toList(),
                 lecturePage.getTotalPages() - 1,
                 lecturePage.hasNext() ? lecturePage.getPageable().getPageNumber() + 1 : -1);
@@ -94,11 +103,7 @@ public class LectureService {
      * @return List<LectureSearchListResponseDto> 검색 결과 리스트 반환
      */
     public List<LectureSearchListResponseDto> searchLecturesToReview(Department department, Integer grade, String semester) {
-        Semester semesterEntity = (semester != null)
-                        ? semesterService.getSemester(semester)
-                                .orElseThrow(() -> new SemesterException(SemesterErrorCode.SEMESTER_NOT_FOUND))
-                        : null;
-
+        Semester semesterEntity = (semester != null) ? semesterService.getSemester(semester).orElseThrow(() -> new SemesterException(SemesterErrorCode.SEMESTER_NOT_FOUND)) : null;
         List<Lecture> lectures = lectureSearchRepository.searchLecturesAtReview(department, grade, semesterEntity);
 
         return (semesterEntity != null)

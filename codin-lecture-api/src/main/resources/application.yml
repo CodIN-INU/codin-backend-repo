@@ -19,9 +19,44 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+  ai:
+    model:
+      chat: openai
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4.1-mini
+          temperature: 0.7
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URL:http://localhost:9200}
+    indices:
+      lectures:
+        settings:
+          analysis:
+            tokenizer:
+              nori_tokenizer:
+                type: nori_tokenizer
+                decompound_mode: mixed
+            filter:
+              nori_readingform:
+                type: nori_readingform
+              nori_hanja_readingform:
+                type: nori_hanja_readingform
+              autocomplete_filter:
+                type: edge_ngram
+                min_gram: 1
+                max_gram: 20
+            analyzer:
+              nori:
+                type: custom
+                tokenizer: nori_tokenizer
+                filter: [ nori_readingform, nori_hanja_readingform, lowercase ]
+              nori_autocomplete:
+                type: custom
+                tokenizer: nori_tokenizer
+                filter: [ nori_readingform, autocomplete_filter, lowercase ]
 
 lecture:
   python:
@@ -39,5 +74,5 @@ server:
 logging:
   level:
     root: info
-    sql: info
+    sql: debug
     org.hibernate.sql: info

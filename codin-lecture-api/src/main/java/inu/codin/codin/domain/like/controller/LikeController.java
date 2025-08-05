@@ -37,15 +37,17 @@ public class LikeController {
 
     @Hidden
     @GetMapping
-    public Integer getLikeCount(@RequestParam("likeType") LikeType likeType,
-                                                          @RequestParam("id") String id) {
+    public Integer getLikeCount(
+            @RequestParam("likeType") LikeType likeType,
+            @RequestParam("id") String id) {
         return likeFeignClient.getLikeCount(likeType, id);
     }
 
     @Hidden
     @GetMapping("/user")
-    public Boolean isUserLiked(@RequestParam("likeType") LikeType likeType,
-                                                         @RequestParam("id") String id) {
+    public Boolean isUserLiked(
+            @RequestParam("likeType") LikeType likeType,
+            @RequestParam("id") String id) {
         return likeService.isLiked(likeType, id);
     }
 

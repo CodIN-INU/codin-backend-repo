@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 public class ReviewException extends GlobalException {
     private final ReviewErrorCode errorCode;
+
     public ReviewException(ReviewErrorCode errorCode) {
         super(errorCode);
         this.errorCode = errorCode;

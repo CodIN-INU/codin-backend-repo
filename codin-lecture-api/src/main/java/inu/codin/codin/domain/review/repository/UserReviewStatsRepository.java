@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface UserReviewStatsRepository extends JpaRepository<UserReviewStats, Long> {
-
     Optional<UserReviewStats> findByUserId(String userId);
 }
