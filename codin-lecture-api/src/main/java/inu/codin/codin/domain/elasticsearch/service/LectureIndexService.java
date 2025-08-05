@@ -38,6 +38,6 @@ public class LectureIndexService {
      */
     @TransactionalEventListener(classes = {LectureDeletedEvent.class})
     public void handleLectureDeleted(LectureDeletedEvent event) {
-        lectureElasticRepository.deleteById(event.getLectureId());
+        lectureElasticRepository.deleteById(event.lectureId());
     }
 }

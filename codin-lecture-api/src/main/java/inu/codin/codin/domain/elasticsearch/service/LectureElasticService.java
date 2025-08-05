@@ -47,7 +47,7 @@ public class LectureElasticService {
             int pageNumber,
             int size
     ) {
-        log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIds={}, pageNumber={}, size={}", keyword, department, sortOption, likedIds, pageNumber, size);
+        log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIdsCount={}, pageNumber={}, size={}", keyword, department, sortOption, likedIds != null ? likedIds.size() : 0, pageNumber, size);
 
         Query boolQuery = QueryBuilders.bool(b -> {
             if (keyword != null && !keyword.isBlank()) {
