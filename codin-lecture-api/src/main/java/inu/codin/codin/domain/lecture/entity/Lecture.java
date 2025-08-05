@@ -50,7 +50,7 @@ public class Lecture {
     @Column(columnDefinition = "TEXT")
     private String aiSummary;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "emotion_id")
     private Emotion emotion;                                    //수강 후기의 평점 분포도
 
