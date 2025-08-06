@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Schema(description = "이벤트 페이지 목록 응답 DTO")
 public class EventPageResponse {
