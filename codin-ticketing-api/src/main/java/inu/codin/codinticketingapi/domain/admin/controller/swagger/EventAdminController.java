@@ -18,7 +18,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +30,7 @@ public interface EventAdminController {
             @ApiResponse(responseCode = "201", description = "티켓팅 이벤트 생성 성공")
     })
     ResponseEntity<SingleResponse<EventResponse>> createEvent(
-            @RequestPart("eventContent") @Valid @RequestBody(required = true) EventCreateRequest eventCreateRequest,
+            @RequestPart("eventContent") @Valid EventCreateRequest eventCreateRequest,
             @RequestPart(value = "eventImage", required = false) @Parameter(description = "이벤트 이미지 파일", content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)) MultipartFile eventImage);
 
 
@@ -40,7 +39,7 @@ public interface EventAdminController {
             @ApiResponse(responseCode = "200", description = "[티켓팅 관리자] 이벤트 게시물 리스트 반환 성공")
     })
     ResponseEntity<SingleResponse<EventPageResponse>> getEventListByManager(
-            @Parameter(description = "이벤트 상태 (예: all, upcoming, open, ended)", example = "OPEN", required = true) @RequestParam String status,
+            @Parameter(description = "이벤트 상태 (예: all, upcoming, open, ended)", example = "open", required = true) @RequestParam String status,
             @Parameter(description = "페이지 번호", example = "1", required = true) @RequestParam("page") @NotNull int pageNumber);
 
 
@@ -50,7 +49,7 @@ public interface EventAdminController {
     })
     ResponseEntity<SingleResponse<EventResponse>> updateEvent(
             @Parameter(description = "수정할 이벤트 ID", example = "1", required = true) @PathVariable Long eventId,
-            @RequestBody(required = true) EventUpdateRequest eventUpdateRequest,
+            @RequestPart("eventUpdateRequest") @Valid EventUpdateRequest eventUpdateRequest,
             @RequestPart(value = "eventImage", required = false) @Parameter(description = "새로운 이벤트 이미지 파일 (선택 사항)", content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)) MultipartFile eventImage);
 
 
@@ -84,7 +83,7 @@ public interface EventAdminController {
     })
     ResponseEntity<SingleResponse<EventParticipationProfilePageResponse>> getEventPart(
             @Parameter(description = "이벤트 ID", example = "1", required = true) @PathVariable Long eventId,
-            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0", required = true) @RequestParam("page") @NotNull int pageNumber);
+            @Parameter(description = "페이지 번호", example = "1", required = true) @RequestParam("page") @NotNull int pageNumber);
 
 
     @Operation(summary = "사용자 티켓 수령 상태 변경", description = "관리자가 특정 사용자의 티켓 수령 상태를 변경합니다 (예: 수령 완료). 관리자/매니저 권한이 필요합니다.")
