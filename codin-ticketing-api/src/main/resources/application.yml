@@ -45,7 +45,7 @@ redis:
       key: ${STOCK_REDIS_STREAM_KEY:"event-stock-stream"}
 
 server:
-  domain: https://codin.inu.ac.kr
+  domain: ${SERVER_DOMAIN}
   forward-headers-strategy: framework
   port: ${SERVER_PORT}
 
