@@ -16,8 +16,7 @@ import java.util.List;
 public class EventPageResponse {
 
     @Schema(description = "이벤트 목록")
-    private List<EventResponse> eventList = new ArrayList<>();
-
+    private List<EventPageDetailResponse> eventList = new ArrayList<>();
 
     @Schema(description = "마지막 페이지 인덱스", example = "0")
     private long lastPage;
@@ -25,19 +24,19 @@ public class EventPageResponse {
     @Schema(description = "다음 페이지 인덱스", example = "-1")
     private long nextPage;
 
-    public EventPageResponse(List<EventResponse> eventList, long lastPage, long nextPage) {
+    public EventPageResponse(List<EventPageDetailResponse> eventList, long lastPage, long nextPage) {
         this.eventList = eventList;
         this.lastPage = lastPage;
         this.nextPage = nextPage;
     }
 
-    public static EventPageResponse of(List<EventResponse> eventList, long lastPage, long nextPage) {
+    public static EventPageResponse of(List<EventPageDetailResponse> eventList, long lastPage, long nextPage) {
         return new EventPageResponse(eventList, lastPage, nextPage);
     }
 
     public static EventPageResponse of(Page<Event> page) {
-        List<EventResponse> eventList = page.getContent().stream()
-                .map(EventResponse::of)
+        List<EventPageDetailResponse> eventList = page.getContent().stream()
+                .map(EventPageDetailResponse::of)
                 .toList();
 
         return new EventPageResponse(

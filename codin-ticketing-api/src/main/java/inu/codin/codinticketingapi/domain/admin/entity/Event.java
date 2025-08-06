@@ -89,7 +89,8 @@ public class Event extends BaseEntity {
     private EventStatus eventStatus;
 
     @Builder
-    public Event(String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink) {
+    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
+        this.id = id;
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
@@ -103,6 +104,7 @@ public class Event extends BaseEntity {
         this.promotionLink = promotionLink;
         this.eventPassword = generateEventPassword();
         this.eventStatus = EventStatus.UPCOMING;
+        this.stock = stock;
     }
 
     public void setStock(Stock stock) {
