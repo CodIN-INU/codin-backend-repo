@@ -36,8 +36,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
     private boolean openKeyword;
 
-    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes) {
-        super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes);
+    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes, double starRating) {
+        super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes, starRating);
         this.college = college.getDescription();
         this.evaluation = evaluation;
         this.lectureType = lectureType;
@@ -66,7 +66,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getPreCourse(),
                 emotion.changeToPercentage(),
                 openKeyword,
-                lecture.getLikes()
+                lecture.getLikes(),
+                lecture.getStarRating()
         );
     }
     

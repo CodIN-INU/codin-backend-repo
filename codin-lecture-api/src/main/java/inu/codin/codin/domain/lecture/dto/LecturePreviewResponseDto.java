@@ -46,9 +46,11 @@ public class LecturePreviewResponseDto {
     @Schema(description = "좋아요 수", example = "3")
     private int likes;
 
+    @Schema(description = "평점")
+    private double starRating;
 
     @Builder
-    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes) {
+    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes, double starRating) {
         this.id = id;
         this.title = title;
         this.professor = professor;
@@ -59,6 +61,7 @@ public class LecturePreviewResponseDto {
         this.liked = liked;
         this.department = department;
         this.likes = likes;
+        this.starRating = starRating;
     }
 
     public static LecturePreviewResponseDto of(Lecture lecture, boolean liked){
@@ -73,6 +76,7 @@ public class LecturePreviewResponseDto {
                 .liked(liked)
                 .department(lecture.getDepartment().getDescription())
                 .likes(lecture.getLikes())
+                .starRating(lecture.getStarRating())
                 .build();
     }
 
