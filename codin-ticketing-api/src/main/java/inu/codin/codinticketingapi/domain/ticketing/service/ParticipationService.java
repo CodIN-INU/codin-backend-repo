@@ -45,7 +45,7 @@ public class ParticipationService {
     public ParticipationCreateResponse saveParticipation(Long eventId) {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         // 유저 티켓팅 정보가 존재하는지 검증
-        if (userInfoResponse.getName() == null || userInfoResponse.getDepartment() == null || userInfoResponse.getStudentId() == null) {
+        if (userInfoResponse.getDepartment() == null || userInfoResponse.getStudentId() == null) {
             throw new UserException(UserErrorCode.NOT_EXIST_PARTICIPATION_DATA);
         }
 

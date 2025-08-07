@@ -43,7 +43,7 @@ public class EventService {
     public EventDetailResponse getEventDetail(Long eventId) {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         // 유저 티켓팅 정보가 존재하는지 검증
-        boolean isExistParticipationData = userInfoResponse.getName() != null && userInfoResponse.getDepartment() != null && userInfoResponse.getStudentId() != null;
+        boolean isExistParticipationData = userInfoResponse.getDepartment() != null && userInfoResponse.getStudentId() != null;
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
