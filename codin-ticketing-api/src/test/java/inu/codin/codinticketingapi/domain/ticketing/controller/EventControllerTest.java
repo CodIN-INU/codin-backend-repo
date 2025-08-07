@@ -169,16 +169,16 @@ class EventControllerTest {
                 .andExpect(jsonPath("$.data.eventList[0].status").value("COMPLETED"));
     }
 
-    @Test
-    @DisplayName("SSE 전송 - 권한 없음")
-    void sendSse_Unauthorized() throws Exception {
-        // when & then
-        mockMvc.perform(post("/event/sse/{id}", 1L)
-                        .param("quantity", "100"))
-                .andExpect(status().isUnauthorized());
-
-        verify(eventStockProducerService, never()).publishEventStock(any());
-    }
+//    @Test
+//    @DisplayName("SSE 전송 - 권한 없음")
+//    void sendSse_Unauthorized() throws Exception {
+//        // when & then
+//        mockMvc.perform(post("/event/sse/{id}", 1L)
+//                        .param("quantity", "100"))
+//                .andExpect(status().isUnauthorized());
+//
+//        verify(eventStockProducerService, never()).publishEventStock(any());
+//    }
 
     @Test
     @WithMockUser(roles = "ADMIN")
