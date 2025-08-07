@@ -74,4 +74,11 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     Optional<String> findSignatureImgUrlByEventIdAndUserId(@Param("eventId") Long eventId, @Param("userId") String userId);
 
     Optional<Participation> findByEvent_IdAndUserId(Long eventId, String profileUserId);
+
+    @Query("""
+        SELECT p
+        FROM Participation p
+        WHERE p.userId = :userId AND p.event = :event
+        """)
+    Optional<Participation> findByUserIdAndEvent(String userId, Event event);
 }
