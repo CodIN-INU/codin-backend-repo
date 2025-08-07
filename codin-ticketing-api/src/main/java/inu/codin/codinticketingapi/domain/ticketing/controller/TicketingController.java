@@ -24,14 +24,14 @@ public class TicketingController {
     private final ParticipationService participationService;
 
     /** 특정 티켓팅 이벤트의 참여 상태(교환권) 조회 */
-    @GetMapping("{evenId}")
+    @GetMapping("{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트의 참여 상태(교환권) 조회")
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 상태 조회 성공")
     public ResponseEntity<SingleResponse<ParticipationResponse>> findParticipationByEvent(
-            @PathVariable Long evenId
+            @PathVariable Long eventId
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 참여 상태 조회 성공",
-                participationService.findParticipationByEvent(evenId)));
+                participationService.findParticipationByEvent(eventId)));
     }
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */

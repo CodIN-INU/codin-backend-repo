@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
                 e.getClass().getSimpleName(),
                 e.getMessage(),
                 e.getStackTrace()[0].toString());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @ExceptionHandler(GlobalException.class)
@@ -72,8 +72,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("[AccessDeniedException] Error Message : {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
