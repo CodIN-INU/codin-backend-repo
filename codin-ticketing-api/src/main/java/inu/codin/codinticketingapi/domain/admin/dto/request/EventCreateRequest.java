@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
@@ -48,11 +49,13 @@ public class EventCreateRequest {
     @NotNull(message = "이벤트 시작 시간은 필수입니다")
     @Future(message = "이벤트 시작 시간은 현재 시간보다 나중이어야 합니다")
     @Schema(description = "이벤트 시작 시간", example = "2025-07-25T10:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime eventTime;
 
     @NotNull(message = "이벤트 마감 시간은 필수입니다")
     @Future(message = "이벤트 마감 시간은 현재 시간보다 나중이어야 합니다")
     @Schema(description = "이벤트 종료 시간", example = "2025-07-25T12:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime eventEndTime;
 
     @Pattern(regexp = "\\d{2,3}-\\d{3,4}-\\d{4}", message = "올바른 전화번호 형식이 아닙니다")
