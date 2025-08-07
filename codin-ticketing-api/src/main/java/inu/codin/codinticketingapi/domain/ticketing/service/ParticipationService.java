@@ -26,20 +26,9 @@ public class ParticipationService {
 
     private final TicketingService ticketingService;
     private final UserClientService userClientService;
+
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<EventParticipationHistoryDto> getUserEventHistory(String userId, Pageable pageable) {
-        return participationRepository.findHistoryByUserId(userId, pageable);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<EventParticipationHistoryDto> getUserEventHistoryByCanceled(String userId, ParticipationStatus status, Pageable pageable) {
-        return participationRepository.findHistoryByUserIdAndCanceled(userId, status, pageable);
-    }
 
     @Transactional
     public ParticipationCreateResponse saveParticipation(Long eventId) {
