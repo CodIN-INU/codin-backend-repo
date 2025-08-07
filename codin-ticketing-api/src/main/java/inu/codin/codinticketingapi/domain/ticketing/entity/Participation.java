@@ -27,7 +27,7 @@ public class Participation extends BaseEntity {
     @Column(name = "user_id", nullable = false, length = 24)
     private String userId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
     @Enumerated(EnumType.STRING)

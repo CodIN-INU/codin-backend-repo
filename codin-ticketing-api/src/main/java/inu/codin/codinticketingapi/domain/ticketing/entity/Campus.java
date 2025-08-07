@@ -21,7 +21,7 @@ public enum Campus {
                 return campus;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Unknown Campus: " + description);
     }
 
     @JsonValue
