@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import inu.codin.codinticketingapi.common.response.SingleResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.service.ParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,11 +23,22 @@ public class TicketingController {
     private final TicketingService ticketingService;
     private final ParticipationService participationService;
 
+    /** 특정 티켓팅 이벤트의 참여 상태(교환권) 조회 */
+    @GetMapping("{evenId}")
+    @Operation(summary = "특정 티켓팅 이벤트의 참여 상태(교환권) 조회")
+    @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 상태 조회 성공")
+    public ResponseEntity<SingleResponse<ParticipationResponse>> findParticipationByEvent(
+            @PathVariable Long evenId
+    ) {
+        return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 참여 상태 조회 성공",
+                participationService.findParticipationByEvent(evenId)));
+    }
+
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/join/{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 및 교환권 부여 성공")
-    public ResponseEntity<SingleResponse<?>> createUserParticipation(
+    public ResponseEntity<SingleResponse<ParticipationResponse>> createUserParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 참여 및 교환권 부여 성공",

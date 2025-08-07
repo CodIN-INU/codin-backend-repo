@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
@@ -89,7 +89,7 @@ class ParticipationServiceTest {
         given(participationRepository.save(any(Participation.class))).willReturn(savedParticipation);
 
         // when
-        ParticipationCreateResponse result = participationService.saveParticipation(TEST_EVENT_ID);
+        ParticipationResponse result = participationService.saveParticipation(TEST_EVENT_ID);
 
         // then
         assertThat(result).isNotNull();

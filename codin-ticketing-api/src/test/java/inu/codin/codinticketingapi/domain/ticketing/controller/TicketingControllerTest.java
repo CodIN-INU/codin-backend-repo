@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.service.ParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
@@ -62,7 +62,7 @@ class TicketingControllerTest {
     void createUserParticipation_Success() throws Exception {
         // given
         Long eventId = 1L;
-        ParticipationCreateResponse response = ParticipationCreateResponse.builder()
+        ParticipationResponse response = ParticipationResponse.builder()
                 .status(ParticipationStatus.WAITING)
                 .ticketNumber(1)
                 .signatureImgUrl(null)

@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
@@ -109,7 +109,7 @@ public class ParticipationIntegrationTest {
         given(userClientService.fetchUser()).willReturn(testUser);
 
         // when
-        ParticipationCreateResponse response = participationService.saveParticipation(testEvent.getId());
+        ParticipationResponse response = participationService.saveParticipation(testEvent.getId());
 
         // then
         assertThat(response).isNotNull();
@@ -218,7 +218,7 @@ public class ParticipationIntegrationTest {
         given(userClientService.fetchUser()).willReturn(testUser);
 
         // when
-        ParticipationCreateResponse response = participationService.saveParticipation(testEvent.getId());
+        ParticipationResponse response = participationService.saveParticipation(testEvent.getId());
 
         // then
         // 100 - 98 + 1 = 3번째 티켓

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -48,6 +49,8 @@ class TicketingServiceTest {
     private UserClientService userClientService;
     @Mock
     private ImageService imageService;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private MultipartFile signatureImage;
