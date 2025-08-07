@@ -56,7 +56,7 @@ public class EventAdminControllerImpl implements EventAdminController {
     @PutMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<EventResponse>> updateEvent(
             @PathVariable Long eventId,
-            @RequestBody EventUpdateRequest eventUpdateRequest,
+            @RequestPart("eventUpdateRequest") @Valid EventUpdateRequest eventUpdateRequest,
             @RequestPart(value = "eventImage", required = false) MultipartFile eventImage) {
 
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 수정 성공",
