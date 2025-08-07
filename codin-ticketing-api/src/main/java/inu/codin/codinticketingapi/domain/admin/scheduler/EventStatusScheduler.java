@@ -61,10 +61,11 @@ public class EventStatusScheduler implements ApplicationRunner {
     }
 
     private void scheduleUpcomingEvents() {
-        List<Event> upcomingEvents = eventRepository.findByEventStatusAndEventTimeAfter(EventStatus.UPCOMING, LocalDateTime.now());
+        List<Event> upcomingEvents = eventRepository.findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(EventStatus.UPCOMING, LocalDateTime.now());
 
         if (upcomingEvents.isEmpty()) {
             log.info("스케줄링할 UPCOMING 이벤트가 없습니다.");
+
             return;
         }
 
@@ -86,6 +87,7 @@ public class EventStatusScheduler implements ApplicationRunner {
                 log.error("이벤트 스케줄링 중 오류 발생: Event ID = {}", event.getId(), e);
             }
         }
+
         log.info("모든 UPCOMING 이벤트 스케줄링 완료.");
     }
 

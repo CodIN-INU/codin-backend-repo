@@ -6,13 +6,17 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "이벤트 생성 요청 DTO")
 public class EventCreateRequest {
 

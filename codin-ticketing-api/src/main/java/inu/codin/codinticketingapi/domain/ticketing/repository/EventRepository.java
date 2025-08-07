@@ -29,7 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.deletedAt IS NULL AND e.userId = :userId")
     Page<Event> findByCreatedUserId(@Param("userId") String userId, Pageable pageable);
 
-    List<Event> findByEventStatusAndEventTimeAfter(EventStatus eventStatus, LocalDateTime eventTimeAfter);
+    List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime eventTimeAfter);
 
-    Page<Event> findAllByEventStatus(EventStatus eventStatus, Pageable pageable);
+    Page<Event> findAllByEventStatusAndDeletedAtIsNull(EventStatus eventStatus, Pageable pageable);
 }
