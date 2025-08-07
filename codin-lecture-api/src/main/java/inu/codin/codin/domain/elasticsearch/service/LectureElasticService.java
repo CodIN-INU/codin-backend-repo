@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -45,9 +46,14 @@ public class LectureElasticService {
             SortingOption sortOption,
             List<Long> likedIds,
             int pageNumber,
-            int size
+            int size,
+            Boolean like
     ) {
         log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIdsCount={}, pageNumber={}, size={}", keyword, department, sortOption, likedIds != null ? likedIds.size() : 0, pageNumber, size);
+
+        if (like && (likedIds == null || likedIds.isEmpty())) {
+            return new PageImpl<>(new ArrayList<>(), PageRequest.of(pageNumber, size), 0);
+        }
 
         Query boolQuery = QueryBuilders.bool(b -> {
             if (keyword != null && !keyword.isBlank()) {

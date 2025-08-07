@@ -51,14 +51,14 @@ public class LectureService {
      */
     public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
         // 조회 유저의 좋아요 목록을 조회해 반환
-        List<Long> liked = null;
+        List<Long> likeList = null;
         if (like != null && like) {
-            liked = likeService.getLiked(LikeType.LECTURE).stream()
+            likeList = likeService.getLiked(LikeType.LECTURE).stream()
                     .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId()))
                     .toList();
         }
 
-        Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, liked, PageRequest.of(page, 10));
+        Page<Lecture> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, likeList, PageRequest.of(page, 10), like);
         return getLecturePageResponse(lecturePage);
     }
 
