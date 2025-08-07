@@ -2,6 +2,7 @@ package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,7 +47,19 @@ public class EventDetailResponse {
     @Schema(description = "이벤트 부가 설명", example = "이벤트 부가 설명문 ~~")
     private String description;
 
-    public static EventDetailResponse of(Event event) {
+    @Schema(description = "이벤트 담당자 문의 번호", example = "010-1234-5678")
+    private String inquiryNumber;
+
+    @Schema(description = "홍보글 링크", example = "www.example.com")
+    private String promotionLink;
+
+    @Schema(description = "이벤트 상태", example = "UPCOMING, ACTIVE, ENDED")
+    private EventStatus eventStatus;
+
+    @Schema(description = "유저 티켓팅 정보 존재 여부", example = "true, false")
+    private boolean isExistParticipationData;
+
+    public static EventDetailResponse of(Event event,  boolean isExistParticipationData) {
         return EventDetailResponse.builder()
                 .eventId(event.getId())
                 .eventTime(event.getEventTime())
@@ -58,6 +71,10 @@ public class EventDetailResponse {
                 .currentQuantity(event.getStock().getStock())
                 .target(event.getTarget())
                 .description(event.getDescription())
+                .inquiryNumber(event.getInquiryNumber())
+                .promotionLink(event.getPromotionLink())
+                .eventStatus(event.getEventStatus())
+                .isExistParticipationData(isExistParticipationData)
                 .build();
     }
 }

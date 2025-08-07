@@ -11,6 +11,8 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
+import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
+import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,11 @@ public class ParticipationService {
     @Transactional
     public ParticipationCreateResponse saveParticipation(Long eventId) {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
+        // 유저 티켓팅 정보가 존재하는지 검증
+        if (userInfoResponse.getName() == null || userInfoResponse.getDepartment() == null || userInfoResponse.getStudentId() == null) {
+            throw new UserException(UserErrorCode.NOT_EXIST_PARTICIPATION_DATA);
+        }
+
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
         Stock stock = ticketingService.decrement(eventId);
 
