@@ -1,5 +1,6 @@
 package inu.codin.codinticketingsse.sse.controller;
 
+import inu.codin.codinticketingsse.security.util.SecurityUtil;
 import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +26,16 @@ public class SseController {
     public ResponseEntity<SseEmitter> subscribeEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
-        return ResponseEntity.ok(sseService.subscribeEventStock(eventId));
+        return ResponseEntity.ok(sseService.subscribeEventStock(eventId, SecurityUtil.getUserId()));
+    }
+
+    @DeleteMapping("/{eventId}/disconnect")
+    @Operation(summary = "이벤트 SSE 연결 해제")
+    public ResponseEntity<?> disconnect(
+            @Parameter(description = "구독 취소할 이벤트 ID", example = "1111") @PathVariable Long eventId
+    ) {
+        sseService.closeConnection(eventId, SecurityUtil.getUserId());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/{eventId}")
