@@ -31,7 +31,11 @@ public class EventPageDetailResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00:00")
-    private LocalDateTime eventDate;
+    private LocalDateTime eventTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00:00")
+    private LocalDateTime eventEndTime;
 
     @Schema(description = "이벤트 위치 정보", example = "컴퓨터 공학부 과방")
     private String locationInfo;
@@ -50,7 +54,8 @@ public class EventPageDetailResponse {
                 .eventId(event.getId())
                 .eventTitle(event.getTitle())
                 .eventImageUrl(event.getEventImageUrl())
-                .eventDate(event.getEventTime())
+                .eventTime(event.getEventTime())
+                .eventEndTime(event.getEventEndTime())
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getStock().getInitialStock())
                 .currentQuantity(event.getStock().getStock())
