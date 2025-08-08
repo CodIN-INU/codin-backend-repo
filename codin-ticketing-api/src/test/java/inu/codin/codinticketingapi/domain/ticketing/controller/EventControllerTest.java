@@ -10,6 +10,8 @@ import inu.codin.codinticketingapi.security.jwt.TokenUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -169,45 +171,29 @@ class EventControllerTest {
                 .andExpect(jsonPath("$.data.eventList[0].status").value("COMPLETED"));
     }
 
-//    @Test
-//    @DisplayName("SSE 전송 - 권한 없음")
-//    void sendSse_Unauthorized() throws Exception {
-//        // when & then
-//        mockMvc.perform(post("/event/sse/{id}", 1L)
-//                        .param("quantity", "100"))
-//                .andExpect(status().isUnauthorized());
-//
-//        verify(eventStockProducerService, never()).publishEventStock(any());
-//    }
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "MANAGER"})
+    @DisplayName("SSE 전송 - 권한별 성공 테스트")
+    void sendSse_AsManager(String role) throws Exception {
+        TokenUserDetails userDetails = TokenUserDetails.builder()
+                .userId("TEST_USER_ID")
+                .email("testuser@inu.ac.kr")
+                .token("TEST_TOKEN")
+                .role(role)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
+        );
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    @DisplayName("SSE 전송 - 매니저 권한으로 성공")
-    void sendSse_AsManager() throws Exception {
-        String[] roles = {"ADMIN", "MANAGER"};
+        // given
+        doNothing().when(eventStockProducerService).publishEventStock(any());
 
-        for(String curRole : roles) {
-            TokenUserDetails userDetails = TokenUserDetails.builder()
-                    .userId("TEST_USER_ID")
-                    .email("testuser@inu.ac.kr")
-                    .token("TEST_TOKEN")
-                    .role(curRole)
-                    .build();
-            SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
-            );
-
-            // given
-            doNothing().when(eventStockProducerService).publishEventStock(any());
-
-            // when & then
-            mockMvc.perform(post("/event/sse/{id}", 1L)
-                            .param("quantity", "100"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value(200))
-                    .andExpect(jsonPath("$.message").value("SSE 전송 성공"));
-        }
-        // roles의 개수 만큼 실행 검증
-        verify(eventStockProducerService, times(roles.length)).publishEventStock(any());
+        // when & then
+        mockMvc.perform(post("/event/sse/{id}", 1L)
+                        .param("quantity", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("SSE 전송 성공"));
+        verify(eventStockProducerService).publishEventStock(any());
     }
 }
