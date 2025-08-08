@@ -22,9 +22,13 @@ redis:
       consumer: ${STOCK_REDIS_STREAM_CONSUMER:event-stock-consumer}
 
 server:
+  tomcat:
+    connection-timeout: 30m
+    keep-alive-timeout: 30m
+    max-keep-alive-requests: 1000
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
-  port: ${SSE_SERVER_PORT:8082}
+  port: ${SSE_SERVER_PORT:8084}
 
 # Swagger SpringDoc Configuration
 springdoc:
