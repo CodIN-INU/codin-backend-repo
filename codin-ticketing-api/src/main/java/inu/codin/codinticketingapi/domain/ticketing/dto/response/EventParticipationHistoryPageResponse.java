@@ -2,12 +2,14 @@ package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @Schema(description = "티켓팅 이벤트 참여 기록 페이지 응답 DTO")
 public class EventParticipationHistoryPageResponse {
