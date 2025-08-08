@@ -12,6 +12,7 @@ import inu.codin.codinticketingapi.domain.admin.scheduler.EventStatusScheduler;
 import inu.codin.codinticketingapi.domain.image.service.ImageService;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
@@ -125,6 +126,8 @@ public class EventAdminService {
     public EventParticipationProfilePageResponse getParticipationList(Long eventId, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("ticketNumber").descending());
 
+        Event event = findEventById(eventId);
+        Stock stock = event.getStock();
         Page<Participation> participationList = participationRepository.findAllByEvent_Id(eventId, pageable);
         List<EventParticipationProfileResponse> profileList = participationList.stream()
                 .map(EventParticipationProfileResponse::of)
@@ -132,8 +135,9 @@ public class EventAdminService {
 
         int lastPage = getLastPage(participationList.getTotalPages());
         int nextPage = getNextPage(participationList.hasNext(), participationList.getNumber());
+        int waitCount = participationRepository.countByEvent_IdAndStatus(eventId, ParticipationStatus.WAITING);
 
-        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage);
+        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage, event.getTitle(), stock.getStock(), waitCount, event.getEventEndTime());
     }
 
     @Transactional
@@ -180,9 +184,12 @@ public class EventAdminService {
 
         return switch (status) {
             case "all" -> EventPageResponse.of(eventRepository.findAll(pageable));
-            case "upcoming" -> EventPageResponse.of(eventRepository.findAllByEventStatus(EventStatus.UPCOMING, pageable));
-            case "open" -> EventPageResponse.of(eventRepository.findAllByEventStatus(EventStatus.ACTIVE, pageable));
-            case "ended" -> EventPageResponse.of(eventRepository.findAllByEventStatus(EventStatus.ENDED, pageable));
+            case "upcoming" ->
+                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.UPCOMING, pageable));
+            case "open" ->
+                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ACTIVE, pageable));
+            case "ended" ->
+                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ENDED, pageable));
             default -> throw new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND);
         };
     }
