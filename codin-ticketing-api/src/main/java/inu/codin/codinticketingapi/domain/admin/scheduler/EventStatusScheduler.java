@@ -30,6 +30,7 @@ public class EventStatusScheduler implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         scheduleUpcomingEvents();
+        scheduleActiveEvents();
     }
 
     public void scheduleCreateOrUpdatedEvent(Event event) {
@@ -89,6 +90,54 @@ public class EventStatusScheduler implements ApplicationRunner {
         }
 
         log.info("모든 UPCOMING 이벤트 스케줄링 완료.");
+    }
+
+    /**
+     * 이미 ACTIVE 상태인 이벤트들의 StockCheckJob 스케줄링
+     */
+    private void scheduleActiveEvents() {
+        List<Event> activeEvents = eventRepository.findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(EventStatus.ACTIVE, LocalDateTime.now());
+
+        if (activeEvents.isEmpty()) {
+            log.info("스케줄링할 ACTIVE 이벤트가 없습니다.");
+            return;
+        }
+
+        for (Event event : activeEvents) {
+            try {
+                // 종료 Job만 스케줄링 (시작은 이미 지났으므로)
+                JobDetail endJobDetail = createEndJob(event);
+                Trigger endTrigger = createEndTrigger(event);
+                scheduler.scheduleJob(endJobDetail, endTrigger);
+                log.info("ACTIVE 이벤트 종료 Job 스케줄링: Event ID = {}", event.getId());
+
+                // StockCheckJob은 즉시 시작
+                JobDetail stockJob = createStockCheckJob(event);
+                Trigger stockTrigger = createActiveStockCheckTrigger(event);
+                scheduler.scheduleJob(stockJob, stockTrigger);
+                log.info("ACTIVE 이벤트 재고 Job 스케줄링: Event ID = {}", event.getId());
+
+            } catch (SchedulerException e) {
+                log.error("ACTIVE 이벤트 스케줄링 중 오류: Event ID = {}", event.getId(), e);
+            }
+        }
+
+        log.info("모든 ACTIVE 이벤트 스케줄링 완료.");
+    }
+
+    /**
+     * ACTIVE 이벤트용 StockCheck 트리거 (즉시 시작)
+     */
+    private Trigger createActiveStockCheckTrigger(Event event) {
+        return newTrigger()
+                .withIdentity("stockTrigger-" + event.getId(), "stock")
+                .startNow() // 즉시 시작
+                .endAt(Date.from(event.getEventEndTime().atZone(ZoneId.systemDefault()).toInstant()))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInSeconds(1)
+                        .repeatForever()
+                        .withMisfireHandlingInstructionFireNow())
+                .build();
     }
 
     public void deleteOpenEventScheduler(Long eventId) {
