@@ -35,7 +35,7 @@ public class EventController {
     @Operation(summary = "티켓팅 이벤트 목록 조회 (송도 캠퍼스, 미추홀 캠퍼스)")
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 게시물 리스트 조회 성공")
     public ResponseEntity<SingleResponse<EventPageResponse>> getEventList(
-            @Parameter(description = "캠퍼스", example = "SONGDO_CAMPUS, MICHUHOL_CAMPUS") @RequestParam Campus campus,
+            @Parameter(description = "캠퍼스", example = "SONGDO_CAMPUS") @RequestParam Campus campus,
             @Parameter(description = "페이지", example = "0") @RequestParam("page") @NotNull int pageNumber
     ) {
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 게시물 리스트 조회 성공",

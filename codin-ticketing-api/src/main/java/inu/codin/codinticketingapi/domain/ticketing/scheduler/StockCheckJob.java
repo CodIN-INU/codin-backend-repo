@@ -12,6 +12,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +29,7 @@ public class StockCheckJob implements Job {
     private static final Map<Long, Integer> lastStockMap = new ConcurrentHashMap<>();
 
     @Override
+    @Transactional
     public void execute(JobExecutionContext context) throws JobExecutionException {
         Long eventId = context.getJobDetail().getJobDataMap().getLong("eventId");
         try {

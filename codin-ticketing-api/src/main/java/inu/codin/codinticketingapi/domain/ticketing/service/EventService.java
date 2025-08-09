@@ -52,16 +52,16 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public EventParticipationHistoryPageResponse getUserEventList(@PositiveOrZero int pageNumber) {
+    public EventParticipationHistoryPageResponse getUserEventList(int pageNumber) {
         String userId = userClientService.fetchUser().getUserId();
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationRepository.findHistoryByUserId(userId, pageable));
     }
 
     @Transactional(readOnly = true)
-    public EventParticipationHistoryPageResponse getUserEventListByStatus(@PositiveOrZero int pageNumber, @NotNull ParticipationStatus status) {
+    public EventParticipationHistoryPageResponse getUserEventListByStatus(int pageNumber, @NotNull ParticipationStatus status) {
         String userId = userClientService.fetchUser().getUserId();
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
         return EventParticipationHistoryPageResponse.of(participationRepository.findHistoryByUserIdAndCanceled(userId, status, pageable));
     }
 }

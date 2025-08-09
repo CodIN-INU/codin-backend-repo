@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    @Query("SELECT e FROM Event e WHERE e.deletedAt IS NULL AND e.campus = :campus")
+    @Query("SELECT e FROM Event e JOIN FETCH e.stock WHERE e.deletedAt IS NULL AND e.campus = :campus")
     Page<Event> findByCampus(@Param("campus") Campus campus, Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.deletedAt IS NULL")
@@ -32,4 +32,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime eventTimeAfter);
 
     Page<Event> findAllByEventStatusAndDeletedAtIsNull(EventStatus eventStatus, Pageable pageable);
+
+    List<Event> findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime now);
 }
