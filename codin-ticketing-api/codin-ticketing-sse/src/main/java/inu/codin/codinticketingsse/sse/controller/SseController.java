@@ -21,7 +21,7 @@ public class SseController {
         this.sseService = sseService;
     }
 
-    @GetMapping(value = "/{eventId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "subscribe/{eventId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "이벤트 재고상태 SSE 구독")
     public ResponseEntity<SseEmitter> subscribeEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId
@@ -29,7 +29,7 @@ public class SseController {
         return ResponseEntity.ok(sseService.subscribeEventStock(eventId, SecurityUtil.getUserId()));
     }
 
-    @DeleteMapping("/{eventId}/disconnect")
+    @DeleteMapping("disconnect/{eventId}")
     @Operation(summary = "이벤트 SSE 연결 해제")
     public ResponseEntity<?> disconnect(
             @Parameter(description = "구독 취소할 이벤트 ID", example = "1111") @PathVariable Long eventId
@@ -38,7 +38,7 @@ public class SseController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "/{eventId}")
+    @PostMapping(value = "send/{eventId}")
     @Operation(summary = "[테스트] 재고상태 SSE 전송 - MANAGER, ADMIN")
     public ResponseEntity<?> sendQuantityUpdateEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId,
