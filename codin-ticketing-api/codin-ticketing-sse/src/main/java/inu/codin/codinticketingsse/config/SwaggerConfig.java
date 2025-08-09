@@ -20,6 +20,8 @@ public class SwaggerConfig {
 
     @Value("${server.domain}")
     private String BASE_DOMAIN_URL;
+    @Value("${server.port}")
+    private String SERVER_PORT;
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -46,7 +48,7 @@ public class SwaggerConfig {
                 )
                 .servers(List.of(
                         new Server().url(BASE_DOMAIN_URL + "/api/ticketing/sse").description("운영 서버"),
-                        new Server().url("http://localhost:8082").description("로컬 서버")
+                        new Server().url("http://localhost:" + SERVER_PORT).description("로컬 서버")
                 ));
     }
 

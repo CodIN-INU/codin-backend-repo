@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.stream.Consumer;
@@ -42,8 +43,11 @@ public class RedisStreamListenerConfig {
         } catch (Exception e) {
             log.info("Redis Stream 그룹이 이미 존재, group:{}, message:{}", GROUP_NAME, e.getMessage());
         }
+    }
 
-        // ListenerContainer 옵션 설정
+    /** StreamMessageListenerContainer 빈 등록 및 시작 */
+    @Bean
+    public StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamContainer() {
         StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options =
                 StreamMessageListenerContainerOptions.builder()
                     .pollTimeout(Duration.ofMillis(200)) // 저지연성 우선
@@ -62,5 +66,6 @@ public class RedisStreamListenerConfig {
         // 컨테이너 시작
         container.start();
         log.info("Redis Stream Listener 컨테이너 시작, key:{}", STREAM_KEY);
+        return container;
     }
 }
