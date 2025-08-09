@@ -9,6 +9,7 @@ import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.StockRepository;
@@ -29,6 +30,7 @@ public class TicketingService {
 
     private final UserClientService userClientService;
     private final ImageService imageService;
+    private final RedisParticipationService redisParticipationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -79,6 +81,8 @@ public class TicketingService {
 
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
+        // 캐시에 저장
+        redisParticipationService.cacheParticipation(userId, eventId, participation);
     }
 
     /**
@@ -110,5 +114,7 @@ public class TicketingService {
         participation.changeStatusCanceled();
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
+        // 캐시에 저장
+        redisParticipationService.cacheParticipation(userId, eventId, participation);
     }
 }
