@@ -1,10 +1,10 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationCreatedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
-import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
@@ -57,6 +57,11 @@ public class ParticipationService {
         if (existingParticipation.isPresent()) {
             // 이미 참여한 경우 기존 참여 내용 반환
             return ParticipationResponse.of(existingParticipation.get());
+        }
+
+        // 이벤트 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
         }
         // 재고 줄임
         Stock stock = ticketingService.decrement(eventId);
