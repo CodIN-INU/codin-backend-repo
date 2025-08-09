@@ -26,7 +26,10 @@ public class SseController {
     public ResponseEntity<SseEmitter> subscribeEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
-        return ResponseEntity.ok(sseService.subscribeEventStock(eventId, SecurityUtil.getUserId()));
+        SseEmitter emitter = sseService.subscribeEventStock(eventId, SecurityUtil.getUserId());
+        return ResponseEntity.ok()
+                .header("X-Accel-Buffering", "no")
+                .body(emitter);
     }
 
     @DeleteMapping("disconnect/{eventId}")
