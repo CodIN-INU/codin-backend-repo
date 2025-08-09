@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.service;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.image.service.ImageService;
+import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationStatusChangedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
@@ -13,6 +14,7 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepo
 import inu.codin.codinticketingapi.domain.ticketing.repository.StockRepository;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,7 @@ public class TicketingService {
 
     private final UserClientService userClientService;
     private final ImageService imageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Stock decrement(Long eventId) {
@@ -73,6 +76,9 @@ public class TicketingService {
         }
         participation.changeStatusCompleted();
         participation.setSignatureImgUrl(signatureImageUrl);
+
+        // 상태 변경 이벤트 발행
+        eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
     }
 
     /**
@@ -96,12 +102,13 @@ public class TicketingService {
             throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
         }
 
-        // 재고 증가
+        // 재고 증가 - 비관적락
         Stock stock = stockRepository.findByEvent(event)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
         stock.increase();
-        stockRepository.save(stock); // todo: 경쟁 상태, Retryable 로직
 
         participation.changeStatusCanceled();
+        // 상태 변경 이벤트 발행
+        eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
     }
 }

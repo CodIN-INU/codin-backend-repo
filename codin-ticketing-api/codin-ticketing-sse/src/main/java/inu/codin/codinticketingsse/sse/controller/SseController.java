@@ -1,5 +1,6 @@
 package inu.codin.codinticketingsse.sse.controller;
 
+import inu.codin.codinticketingsse.security.util.SecurityUtil;
 import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,15 +21,27 @@ public class SseController {
         this.sseService = sseService;
     }
 
-    @GetMapping(value = "/{eventId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "subscribe/{eventId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "이벤트 재고상태 SSE 구독")
     public ResponseEntity<SseEmitter> subscribeEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
-        return ResponseEntity.ok(sseService.subscribeEventStock(eventId));
+        SseEmitter emitter = sseService.subscribeEventStock(eventId, SecurityUtil.getUserId());
+        return ResponseEntity.ok()
+                .header("X-Accel-Buffering", "no")
+                .body(emitter);
     }
 
-    @PostMapping(value = "/{eventId}")
+    @DeleteMapping("disconnect/{eventId}")
+    @Operation(summary = "이벤트 SSE 연결 해제")
+    public ResponseEntity<?> disconnect(
+            @Parameter(description = "구독 취소할 이벤트 ID", example = "1111") @PathVariable Long eventId
+    ) {
+        sseService.closeConnection(eventId, SecurityUtil.getUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "send/{eventId}")
     @Operation(summary = "[테스트] 재고상태 SSE 전송 - MANAGER, ADMIN")
     public ResponseEntity<?> sendQuantityUpdateEvent(
             @Parameter(description = "구독한 이벤트 ID", example = "1111") @PathVariable Long eventId,

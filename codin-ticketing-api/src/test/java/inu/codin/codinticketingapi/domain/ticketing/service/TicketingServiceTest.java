@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.service;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.image.service.ImageService;
+import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationStatusChangedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -48,6 +50,8 @@ class TicketingServiceTest {
     private UserClientService userClientService;
     @Mock
     private ImageService imageService;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private MultipartFile signatureImage;
@@ -270,11 +274,9 @@ class TicketingServiceTest {
         // given
         UserInfoResponse userInfo = createUserInfo(TEST_USER_ID, TEST_USER_NAME);
         Event mockEvent = createMockEvent(TEST_EVENT_ID, TEST_EVENT_TITLE, EventStatus.ACTIVE);
+
         Participation mockParticipation = createMockParticipation(mockEvent, userInfo, ParticipationStatus.WAITING);
-        Stock mockStock = Stock.builder()
-                .event(mockEvent)
-                .initialStock(INITIAL_STOCK)
-                .build();
+        Stock mockStock = createMockStock(mockEvent, 10);
 
         given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(TEST_EVENT_ID)).willReturn(Optional.of(mockEvent));
@@ -289,8 +291,10 @@ class TicketingServiceTest {
         verify(eventRepository).findById(TEST_EVENT_ID);
         verify(participationRepository).findByEventAndUserId(mockEvent, TEST_USER_ID);
         verify(stockRepository).findByEvent(mockEvent);
-        verify(stockRepository).save(mockStock);
         verify(mockParticipation).changeStatusCanceled();
+        verify(mockStock).increase();
+
+        verify(eventPublisher).publishEvent(any(ParticipationStatusChangedEvent.class));
     }
 
     @Test
@@ -429,5 +433,15 @@ class TicketingServiceTest {
 
         given(participation.getStatus()).willReturn(status);
         return participation;
+    }
+
+    private Stock createMockStock(Event event, int currentStock) {
+        Stock stock = spy(Stock.builder()
+                .event(event)
+                .initialStock(INITIAL_STOCK)
+                .build());
+
+        stock.updateStock(currentStock);
+        return stock;
     }
 }

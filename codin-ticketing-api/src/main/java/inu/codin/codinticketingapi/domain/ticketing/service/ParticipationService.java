@@ -1,22 +1,23 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationCreateResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationCreatedEvent;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import inu.codin.codinticketingapi.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,23 +29,15 @@ public class ParticipationService {
 
     private final TicketingService ticketingService;
     private final UserClientService userClientService;
+
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<EventParticipationHistoryDto> getUserEventHistory(String userId, Pageable pageable) {
-        return participationRepository.findHistoryByUserId(userId, pageable);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<EventParticipationHistoryDto> getUserEventHistoryByCanceled(String userId, ParticipationStatus status, Pageable pageable) {
-        return participationRepository.findHistoryByUserIdAndCanceled(userId, status, pageable);
-    }
+    private final ApplicationEventPublisher eventPublisher;
+    private final RedisParticipationService redisParticipationService;
 
     @Transactional
-    public ParticipationCreateResponse saveParticipation(Long eventId) {
+    public ParticipationResponse saveParticipation(Long eventId) {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         // 유저 티켓팅 정보가 존재하는지 검증
         if (userInfoResponse.getDepartment() == null || userInfoResponse.getStudentId() == null) {
@@ -52,14 +45,20 @@ public class ParticipationService {
         }
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
 
+        // 캐시에서 먼저 조회
+        Optional<ParticipationResponse> cached = redisParticipationService.getCachedParticipation(userInfoResponse.getUserId(), eventId);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
         // 이미 참여한 사용자인지 확인
         Optional<Participation> existingParticipation = participationRepository.findByUserIdAndEvent(userInfoResponse.getUserId(), event);
 
         if (existingParticipation.isPresent()) {
             // 이미 참여한 경우 기존 참여 내용 반환
-            return ParticipationCreateResponse.of(existingParticipation.get());
+            return ParticipationResponse.of(existingParticipation.get());
         }
-
+        // 재고 줄임
         Stock stock = ticketingService.decrement(eventId);
 
         // 사용자 번호표
@@ -71,6 +70,34 @@ public class ParticipationService {
                 .userInfoResponse(userInfoResponse)
                 .build();
 
-        return ParticipationCreateResponse.of(participationRepository.save(participation));
+        Participation savedParticipation = participationRepository.save(participation);
+
+        // 참여 생성 이벤트 발행
+        eventPublisher.publishEvent(new ParticipationCreatedEvent(savedParticipation));
+
+        return ParticipationResponse.of(savedParticipation);
+    }
+
+    @Transactional(readOnly = true)
+    public ParticipationResponse findParticipationByEvent(Long eventId) {
+        String userId = SecurityUtil.getUserId();
+
+        // 캐시에서 먼저 조회
+        Optional<ParticipationResponse> cached = redisParticipationService.getCachedParticipation(userId, eventId);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        // 캐시 미스 시 DB 조회
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+        Participation participation = participationRepository.findByUserIdAndEvent(userId, event)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
+        ParticipationResponse response = ParticipationResponse.of(participation);
+
+        // 캐시에 저장
+        redisParticipationService.cacheParticipation(userId, eventId, participation);
+
+        return response;
     }
 }

@@ -75,6 +75,8 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     Optional<Participation> findByEvent_IdAndUserId(Long eventId, String profileUserId);
 
+    int countByEvent_IdAndStatus(Long eventId, ParticipationStatus status);
+
     @Query("""
         SELECT p
         FROM Participation p

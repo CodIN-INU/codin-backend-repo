@@ -6,6 +6,7 @@ import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageRespon
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryPageResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
@@ -141,7 +142,10 @@ class EventServiceTest {
     void getEventDetail_성공() {
         // given
         Long eventId = 999L;
+        UserInfoResponse userInfo = createUserInfo("testUser", "TEST_USER");
         Event mockEvent = createMockEvent(eventId, TEST_EVENT_TITLE, SONGDO);
+
+        given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(eventId)).willReturn(Optional.of(mockEvent));
 
         // when
@@ -150,6 +154,7 @@ class EventServiceTest {
         // then
         assertThat(result.getEventId()).isEqualTo(eventId);
         assertThat(result.getEventTitle()).isEqualTo(TEST_EVENT_TITLE);
+        verify(userClientService).fetchUser();
         verify(eventRepository).findById(eventId);
     }
 
@@ -158,6 +163,9 @@ class EventServiceTest {
     void getEventDetail_이벤트존재X() {
         // given
         Long eventId = 999L;
+        UserInfoResponse userInfo = createUserInfo("testUser", "TEST_USER");
+
+        given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(eventId)).willReturn(Optional.empty());
 
         // when & then
@@ -165,6 +173,7 @@ class EventServiceTest {
                 .isInstanceOf(TicketingException.class)
                 .hasFieldOrPropertyWithValue("errorCode", TicketingErrorCode.EVENT_NOT_FOUND);
 
+        verify(userClientService).fetchUser();
         verify(eventRepository).findById(eventId);
     }
 
@@ -296,5 +305,14 @@ class EventServiceTest {
         return new EventParticipationHistoryDto(
                 eventId, title, TEST_IMAGE_URL, TEST_LOCATION, START_TIME, END_TIME, status
         );
+    }
+
+    private UserInfoResponse createUserInfo(String userId, String name) {
+        return UserInfoResponse.builder()
+                .userId(userId)
+                .name(name)
+                .studentId("2020123456")
+                .department(Department.COMPUTER_SCI)
+                .build();
     }
 }
