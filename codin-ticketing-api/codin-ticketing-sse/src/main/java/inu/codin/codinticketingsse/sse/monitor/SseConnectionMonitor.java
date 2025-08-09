@@ -2,6 +2,7 @@ package inu.codin.codinticketingsse.sse.monitor;
 
 import inu.codin.codinticketingsse.sse.dto.SseEmitterTimeoutEvent;
 import inu.codin.codinticketingsse.sse.repository.SseEmitterRepository;
+import inu.codin.codinticketingsse.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class SseConnectionMonitor {
 
     private final SseEmitterRepository sseEmitterRepository;
+    private final SseService sseService;
 
     @EventListener
     @Async
@@ -46,23 +48,7 @@ public class SseConnectionMonitor {
     @Scheduled(fixedRate = 300000) // 5분마다 실행
     public void cleanupDeadConnections() {
         log.info("SSE 연결 상태 점검 시작");
-
-        sseEmitterRepository.getAllEmitters().forEach((key, emitter) -> {
-            try {
-                // ping 테스트
-                emitter.send("ping");
-            } catch (Exception e) {
-                // 응답하지 없는 연결 정리
-                String[] keyParts = key.split(":");
-                if (keyParts.length == 2) {
-                    Long eventId = Long.valueOf(keyParts[0]);
-                    String userId = keyParts[1];
-                    sseEmitterRepository.removeEmitter(eventId, userId);
-                    log.info("비활성 SSE 연결 정리: key={}", key);
-                }
-            }
-        });
-
+        sseService.sendHeartbeatAllEmitters();
         log.info("SSE 연결 상태 점검 완료");
     }
 }

@@ -1,6 +1,5 @@
 package inu.codin.codinticketingsse.sse.service;
 
-import inu.codin.codinticketingsse.security.util.SecurityUtil;
 import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.dto.SseEmitterTimeoutEvent;
 import inu.codin.codinticketingsse.sse.dto.SseStockResponse;
@@ -87,7 +86,11 @@ public class SseService {
      * Scheduled 30초
      */
     @Scheduled(fixedRate = 30000)
-    public void sendHeartbeat() {
+    public void deleteDeadConnections() {
+        sendHeartbeatAllEmitters();
+    }
+
+    public void sendHeartbeatAllEmitters() {
         sseEmitterRepository.getAllEmitters().forEach((key, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
