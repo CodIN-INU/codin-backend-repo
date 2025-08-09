@@ -5,8 +5,7 @@ import inu.codin.codinticketingsse.sse.dto.SseEmitterTimeoutEvent;
 import inu.codin.codinticketingsse.sse.dto.SseStockResponse;
 import inu.codin.codinticketingsse.sse.repository.SseEmitterRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,10 +16,10 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SseService {
 
-    private final Logger log = LoggerFactory.getLogger(SseService.class);
     private final Long DEFAULT_TIMEOUT = 10 * 60 * 1000L; // 10분
 
     private final SseEmitterRepository sseEmitterRepository;

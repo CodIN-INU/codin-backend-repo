@@ -3,6 +3,9 @@ spring:
     name: codin-ticketing-sse
   jwt:
     secret: ${SPRING_JWT_SECRET}
+  mvc:
+    async:
+      request-timeout: 0
   config:
     import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
   # Redis Configuration
@@ -22,10 +25,6 @@ redis:
       consumer: ${STOCK_REDIS_STREAM_CONSUMER:event-stock-consumer}
 
 server:
-  tomcat:
-    connection-timeout: 30m
-    keep-alive-timeout: 30m
-    max-keep-alive-requests: 1000
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
   port: ${SSE_SERVER_PORT:8084}
