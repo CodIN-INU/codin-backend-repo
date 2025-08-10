@@ -124,7 +124,7 @@ public class JwtService {
         newAccessToken.setHttpOnly(true);
         newAccessToken.setSecure(true);
         newAccessToken.setPath("/");
-        newAccessToken.setMaxAge(30 * 60); // 10분
+        newAccessToken.setMaxAge(10 * 24 * 60 * 60); // 10일
         newAccessToken.setDomain(BASERURL.split("//")[1]);
         newAccessToken.setAttribute("SameSite", "None");
         response.addCookie(newAccessToken);
