@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class SecurityException extends GlobalException {
+
     private final SecurityErrorCode securityErrorCode;
 
     public SecurityException(SecurityErrorCode errorCode) {
