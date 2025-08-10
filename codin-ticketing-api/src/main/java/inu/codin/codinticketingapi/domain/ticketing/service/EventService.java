@@ -11,10 +11,7 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
-import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
-import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +33,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
-        return EventPageResponse.of(eventRepository.findByCampus(campus, pageable));
+        return EventPageResponse.from(eventRepository.findByCampus(campus, pageable));
     }
 
     @Transactional(readOnly = true)

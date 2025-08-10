@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -36,15 +37,30 @@ public class EventPageResponse {
         return new EventPageResponse(eventList, lastPage, nextPage);
     }
 
-    public static EventPageResponse of(Page<Event> page) {
-        List<EventPageDetailResponse> eventList = page.getContent().stream()
+    public static EventPageResponse from(Page<Event> eventPage) {
+        List<EventPageDetailResponse> eventList = eventPage.getContent().stream()
                 .map(EventPageDetailResponse::of)
                 .toList();
 
         return new EventPageResponse(
                 eventList,
-                page.getTotalPages() - 1, // 0-based index이므로 -1
-                page.hasNext() ? page.getNumber() + 1 : -1 // 다음 페이지가 없으면 -1
+                eventPage.getTotalPages() - 1,
+                eventPage.hasNext() ? eventPage.getNumber() + 1 : -1
+        );
+    }
+
+    public static EventPageResponse from(Page<Event> eventPage, Map<Long, Long> waitingCountMap) {
+        List<EventPageDetailResponse> eventList = eventPage.getContent().stream()
+                .map(event -> EventPageDetailResponse.of(
+                        event,
+                        waitingCountMap.getOrDefault(event.getId(), 0L).intValue()
+                ))
+                .toList();
+
+        return new EventPageResponse(
+                eventList,
+                eventPage.getTotalPages() - 1, // 0-based index이므로 -1
+                eventPage.hasNext() ? eventPage.getNumber() + 1 : -1 // 다음 페이지가 없으면 -1
         );
     }
 }

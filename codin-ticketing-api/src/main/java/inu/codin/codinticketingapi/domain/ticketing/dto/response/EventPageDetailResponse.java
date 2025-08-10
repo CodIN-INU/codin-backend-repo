@@ -46,6 +46,9 @@ public class EventPageDetailResponse {
     @Schema(description = "이벤트 현재 수량", example = "80")
     private int currentQuantity;
 
+    @Schema(description = "이벤트 수령 대기 수량", example = "80")
+    private int waitQuantity;
+
     @Schema(description = "이벤트 상태 enum(UPCOMING, ACTIVE, ENDED)", example = "UPCOMING")
     private EventStatus eventStatus;
 
@@ -59,6 +62,21 @@ public class EventPageDetailResponse {
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getStock().getInitialStock())
                 .currentQuantity(event.getStock().getStock())
+                .eventStatus(event.getEventStatus())
+                .build();
+    }
+
+    public static EventPageDetailResponse of(Event event, int waitQuantity) {
+        return EventPageDetailResponse.builder()
+                .eventId(event.getId())
+                .eventTitle(event.getTitle())
+                .eventImageUrl(event.getEventImageUrl())
+                .eventTime(event.getEventTime())
+                .eventEndTime(event.getEventEndTime())
+                .locationInfo(event.getLocationInfo())
+                .quantity(event.getStock().getInitialStock())
+                .currentQuantity(event.getStock().getStock())
+                .waitQuantity(waitQuantity)
                 .eventStatus(event.getEventStatus())
                 .build();
     }

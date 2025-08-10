@@ -32,7 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,10 +68,12 @@ public class EventAdminService {
         return EventResponse.of(savedEvent);
     }
 
-    public EventPageResponse getEventListByManager(String status, int pageNumber) {
-        findAdminUser();
+    public EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, PAGE_SIZE, Sort.by("createdAt").descending());
+        Page<Event> eventPage = findEventsByStatus(status, pageable);
+        Map<Long, Long> waitingCountMap = getWaitingCountMap(eventPage);
 
-        return eventPageResponseWithStatus(status, pageNumber - 1);
+        return EventPageResponse.from(eventPage, waitingCountMap);
     }
 
     @Transactional
@@ -141,9 +146,11 @@ public class EventAdminService {
     }
 
     @Transactional
-    public boolean changeReceiveStatus(Long eventId, String userId) {
+    public boolean changeReceiveStatus(Long eventId, String userId, MultipartFile image) {
         Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
-        findParticipation.changeStatusCompleted();
+        String imageURL = imageService.handleImageUpload(image);
+
+        findParticipation.changeStatusCompleted(imageURL);
 
         return true;
     }
@@ -179,17 +186,12 @@ public class EventAdminService {
         return true;
     }
 
-    private EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by("createdAt").descending());
-
+    private Page<Event> findEventsByStatus(String status, Pageable pageable) {
         return switch (status) {
-            case "all" -> EventPageResponse.of(eventRepository.findAll(pageable));
-            case "upcoming" ->
-                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.UPCOMING, pageable));
-            case "open" ->
-                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ACTIVE, pageable));
-            case "ended" ->
-                    EventPageResponse.of(eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ENDED, pageable));
+            case "all" -> eventRepository.findAll(pageable);
+            case "upcoming" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.UPCOMING, pageable);
+            case "open" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ACTIVE, pageable);
+            case "ended" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ENDED, pageable);
             default -> throw new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND);
         };
     }
@@ -238,5 +240,23 @@ public class EventAdminService {
     private Participation getParticipationByEventIdAndUserId(Long eventId, String userId) {
 
         return participationRepository.findByEvent_IdAndUserId(eventId, userId).orElseThrow(() -> new UserException(UserErrorCode.USER_VALIDATION_FAILED));
+    }
+
+    private Map<Long, Long> getWaitingCountMap(Page<Event> eventPage) {
+        List<Long> eventIds = eventPage.stream()
+                .map(Event::getId)
+                .toList();
+
+        if (eventIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return participationRepository
+                .countWaitingByEventIds(ParticipationStatus.WAITING, eventIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 }

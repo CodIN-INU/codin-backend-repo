@@ -46,7 +46,6 @@ public class Participation extends BaseEntity {
     @Column(name = "ticket_number", nullable = false)
     private Integer ticketNumber;
 
-    @Setter
     @Column(name = "signature_img_url")
     private String signatureImgUrl;
 
@@ -61,8 +60,9 @@ public class Participation extends BaseEntity {
     }
 
     /** 경품 수령 처리 */
-    public void changeStatusCompleted() {
+    public void changeStatusCompleted(String imageUrl) {
         this.status = ParticipationStatus.COMPLETED;
+        this.signatureImgUrl = imageUrl;
     }
 
     /** 취소 처리 */
