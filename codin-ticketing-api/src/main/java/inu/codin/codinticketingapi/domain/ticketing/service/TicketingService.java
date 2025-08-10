@@ -113,7 +113,7 @@ public class TicketingService {
         participation.changeStatusCanceled();
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
-        // 캐시에 저장
-        redisParticipationService.cacheParticipation(userId, eventId, participation);
+        // 캐시에 삭제
+        redisParticipationService.evictParticipation(userId, eventId);
     }
 }

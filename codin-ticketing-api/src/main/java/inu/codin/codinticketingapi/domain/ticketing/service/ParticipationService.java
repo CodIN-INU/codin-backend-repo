@@ -5,6 +5,7 @@ import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationCreatedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
@@ -55,12 +56,16 @@ public class ParticipationService {
         Optional<Participation> existingParticipation = participationRepository.findByUserIdAndEvent(userInfoResponse.getUserId(), event);
 
         if (existingParticipation.isPresent()) {
-            // 이미 참여한 경우 기존 참여 내용 반환
-            return ParticipationResponse.of(existingParticipation.get());
+            Participation participation = existingParticipation.get();
+            // 취소 상태가 아니면 기존 참여 정보 반환
+            if (participation.getStatus() != ParticipationStatus.CANCELED) {
+                return ParticipationResponse.of(participation);
+            }
+            // CANCELED 상태면 재참여 가능 (아래 이벤트 참여 로직 진행)
         }
 
         // 이벤트 상태 검증
-        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+        if (event.getEventStatus() != EventStatus.ACTIVE) {
             throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
         }
         // 재고 줄임
