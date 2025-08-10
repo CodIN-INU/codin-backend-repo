@@ -46,7 +46,7 @@ public class EventAdminControllerImpl implements EventAdminController {
     public ResponseEntity<SingleResponse<EventPageResponse>> getEventListByManager(@RequestParam String status, @RequestParam("page") @NotNull int pageNumber) {
 
         return ResponseEntity.ok(new SingleResponse<>(200, "[티켓팅 관리자] 이벤트 게시물 리스트 반환 성공",
-                eventAdminService.getEventListByManager(status, pageNumber)));
+                eventAdminService.eventPageResponseWithStatus(status, pageNumber)));
     }
 
     /**
@@ -112,9 +112,9 @@ public class EventAdminControllerImpl implements EventAdminController {
      */
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PutMapping("{eventId}/management/status/{userId}")
-    public ResponseEntity<SingleResponse<Boolean>> changeReceiveStatus(@PathVariable Long eventId, @PathVariable String userId) {
+    public ResponseEntity<SingleResponse<Boolean>> changeReceiveStatus(@PathVariable Long eventId, @PathVariable String userId, @RequestPart(value = "signImage", required = false) MultipartFile eventImage) {
 
-        return ResponseEntity.ok(new SingleResponse<>(200, "수령완료 변경 성공", eventAdminService.changeReceiveStatus(eventId, userId)));
+        return ResponseEntity.ok(new SingleResponse<>(200, "수령완료 변경 성공", eventAdminService.changeReceiveStatus(eventId, userId, eventImage)));
     }
 
     /**

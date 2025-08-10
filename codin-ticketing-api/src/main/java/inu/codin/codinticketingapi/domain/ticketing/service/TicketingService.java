@@ -76,8 +76,7 @@ public class TicketingService {
         if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
             throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
         }
-        participation.changeStatusCompleted();
-        participation.setSignatureImgUrl(signatureImageUrl);
+        participation.changeStatusCompleted(signatureImageUrl);
 
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));

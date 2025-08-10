@@ -83,4 +83,16 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
         WHERE p.userId = :userId AND p.event = :event
         """)
     Optional<Participation> findByUserIdAndEvent(String userId, Event event);
+
+    @Query("""
+                SELECT p.event.id, COUNT(p)
+                FROM Participation p
+                WHERE p.status = :status
+                  AND p.event.id IN :eventIds
+                GROUP BY p.event.id
+            """)
+    List<Object[]> countWaitingByEventIds(
+            @Param("status") ParticipationStatus status,
+            @Param("eventIds") List<Long> eventIds
+    );
 }

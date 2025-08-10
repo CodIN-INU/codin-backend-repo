@@ -10,20 +10,23 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExcelService {
@@ -35,6 +38,8 @@ public class ExcelService {
     private final static String SHEET_NAME_SUFFIX = "_참가자";
     private final static String UNKNOWN = "UNKNOWN";
     private final static String[] HEADERS = {"사용자 ID", "이름", "학과", "학번", "경품 수령 상태", "교환권 번호", "서명"};
+    private final static int SIGN_NUM = 6;
+    private final static int PADDING = 5 * Units.EMU_PER_PIXEL;
 
     @Transactional(readOnly = true)
     public ExcelResponse getExcel(Long eventId) {
@@ -94,12 +99,13 @@ public class ExcelService {
 
     private List<Participation> getParticipation(Long eventId) {
 
-
         return participationRepository.findAllByEvent_Id(eventId);
     }
 
     private void populateDataRows(Sheet sheet, List<Participation> participationList) {
         int rowNum = ROW_START;
+        Workbook workbook = sheet.getWorkbook();
+        Drawing<?> drawing = sheet.createDrawingPatriarch();
 
         if (participationList.isEmpty()) {
             Row row = sheet.createRow(rowNum);
@@ -110,17 +116,55 @@ public class ExcelService {
 
         for (Participation participation : participationList) {
             Row row = sheet.createRow(rowNum++);
+            row.setHeightInPoints(70);
+
             row.createCell(0).setCellValue(participation.getUserId());
             row.createCell(1).setCellValue(participation.getName());
             row.createCell(2).setCellValue(participation.getDepartment() != null ? participation.getDepartment().name() : UNKNOWN);
             row.createCell(3).setCellValue(participation.getStudentId());
             row.createCell(4).setCellValue(participation.getStatus() != null ? participation.getStatus().name() : UNKNOWN);
             row.createCell(5).setCellValue(participation.getTicketNumber());
+            setImage(workbook, drawing, row, participation);
+        }
+    }
+
+    private void setImage(Workbook workbook, Drawing<?> drawing, Row row, Participation participation) {
+        String imageURL = participation.getSignatureImgUrl();
+
+        if (imageURL != null && !imageURL.isBlank()) {
+            try (InputStream is = new URL(imageURL).openStream()) {
+                byte[] bytes = is.readAllBytes();
+                int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+
+                CreationHelper helper = workbook.getCreationHelper();
+                ClientAnchor anchor = helper.createClientAnchor();
+
+                anchor.setCol1(SIGN_NUM);
+                anchor.setRow1(row.getRowNum());
+                anchor.setCol2(SIGN_NUM + 1);
+                anchor.setRow2(row.getRowNum() + 1);
+
+                anchor.setDx1(PADDING);
+                anchor.setDy1(PADDING);
+                anchor.setDx2(-PADDING);
+                anchor.setDy2(-PADDING);
+
+                drawing.createPicture(anchor, pictureIdx);
+            } catch (Exception e) {
+                row.createCell(6).setCellValue("이미지 로드 실패");
+
+                log.error("이미지 로드 실패 URL: {}", imageURL, e);
+            }
         }
     }
 
     private void autoSizeAllColumns(Sheet sheet) {
         for (int i = 0; i < HEADERS.length; i++) {
+            if (i == SIGN_NUM) {
+                sheet.setColumnWidth(i, 25 * 256);
+
+                continue;
+            }
             sheet.autoSizeColumn(i);
         }
     }

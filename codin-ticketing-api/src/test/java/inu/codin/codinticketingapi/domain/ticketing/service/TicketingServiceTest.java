@@ -155,8 +155,7 @@ class TicketingServiceTest {
         verify(eventRepository).findById(TEST_EVENT_ID);
         verify(imageService).handleImageUpload(signatureImage);
         verify(participationRepository).findByEventAndUserId(mockEvent, TEST_USER_ID);
-        verify(mockParticipation).changeStatusCompleted();
-        verify(mockParticipation).setSignatureImgUrl(TEST_SIGNATURE_URL);
+        verify(mockParticipation).changeStatusCompleted(TEST_SIGNATURE_URL);
     }
 
     @Test
@@ -265,7 +264,7 @@ class TicketingServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", TicketingErrorCode.CANNOT_CHANGE_STATUS);
 
         verify(participationRepository).findByEventAndUserId(mockEvent, TEST_USER_ID);
-        verify(mockParticipation, never()).changeStatusCompleted();
+        verify(mockParticipation, never()).changeStatusCompleted(TEST_SIGNATURE_URL);
     }
 
     @Test
