@@ -32,7 +32,8 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, 10);
+
         return EventPageResponse.from(eventRepository.findByCampus(campus, pageable));
     }
 

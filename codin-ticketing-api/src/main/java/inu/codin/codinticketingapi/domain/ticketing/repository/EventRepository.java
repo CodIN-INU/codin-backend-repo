@@ -5,6 +5,7 @@ import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +18,16 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    @Query("SELECT e FROM Event e JOIN FETCH e.stock WHERE e.deletedAt IS NULL AND e.campus = :campus")
+    @EntityGraph(attributePaths = "stock")
+    @Query("""
+            SELECT e
+                 FROM Event e
+                 WHERE e.deletedAt IS NULL AND e.campus = :campus
+                 ORDER BY
+                     CASE WHEN e.eventStatus = 'ENDED' THEN 1 ELSE 0 END ASC,
+                     CASE WHEN e.eventStatus <> 'ENDED' THEN e.eventEndTime END ASC NULLS LAST,
+                     CASE WHEN e.eventStatus = 'ENDED' THEN e.eventEndTime END DESC NULLS LAST
+            """)
     Page<Event> findByCampus(@Param("campus") Campus campus, Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.deletedAt IS NULL")
