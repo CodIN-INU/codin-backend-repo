@@ -44,4 +44,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findAllByEventStatusAndDeletedAtIsNull(EventStatus eventStatus, Pageable pageable);
 
     List<Event> findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime now);
+
+    List<Event> findByEventStatus(EventStatus eventStatus);
+
+    @Query("""
+            SELECT e
+            FROM Event  e
+            WHERE e.eventStatus = :status and :currentTime BETWEEN e.eventTime AND e.eventEndTime
+            """)
+    List<Event> findAllLiveEvent(@Param("status") EventStatus status, @Param("currentTime") LocalDateTime currentTime);
 }

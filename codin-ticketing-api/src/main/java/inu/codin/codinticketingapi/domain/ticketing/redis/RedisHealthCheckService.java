@@ -41,9 +41,11 @@ public class RedisHealthCheckService {
     private void handleSuccess() {
         int currentFailures = consecutiveFailures.get();
 
-        if (currentFailures > 0) {
-            log.info("Redis 연결이 복구되었습니다.");
+        if (currentFailures >= FAILURE_THRESHOLD) {
+            log.info("Redis 연결이 복구되었습니다. 이벤트 상태를 ACTIVE로 복원합니다.");
             eventService.restoreUpcomingEventsToActive();
+        } else if (currentFailures > 0) {
+            log.info("Redis 연결이 복구되었습니다.");
         }
         // 실패 카운트 리셋
         consecutiveFailures.set(0);
