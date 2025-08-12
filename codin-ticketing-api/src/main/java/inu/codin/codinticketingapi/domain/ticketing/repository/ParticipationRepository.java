@@ -19,40 +19,40 @@ import java.util.Optional;
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
 
     @Query("""
-        SELECT new inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto(
-            e.id,
-            e.title,
-            e.eventImageUrl,
-            e.locationInfo,
-            e.eventTime,
-            e.eventEndTime,
-            p.status
-        )
-        FROM Participation p
-        JOIN p.event e
-        WHERE p.userId = :userId
-          AND e.deletedAt IS NULL
-        ORDER BY p.createdAt DESC
-        """)
+            SELECT new inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto(
+                e.id,
+                e.title,
+                e.eventImageUrl,
+                e.locationInfo,
+                e.eventTime,
+                e.eventEndTime,
+                p.status
+            )
+            FROM Participation p
+            JOIN p.event e
+            WHERE p.userId = :userId
+              AND e.deletedAt IS NULL
+            ORDER BY p.createdAt DESC
+            """)
     Page<EventParticipationHistoryDto> findHistoryByUserId(@Param("userId") String userId, Pageable pageable);
 
     @Query("""
-        SELECT new inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto(
-            e.id,
-            e.title,
-            e.eventImageUrl,
-            e.locationInfo,
-            e.eventTime,
-            e.eventEndTime,
-            p.status
-        )
-        FROM Participation p
-        JOIN p.event e
-        WHERE p.userId = :userId
-          AND e.deletedAt IS NULL
-          AND p.status = :status
-        ORDER BY p.createdAt DESC
-        """)
+            SELECT new inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto(
+                e.id,
+                e.title,
+                e.eventImageUrl,
+                e.locationInfo,
+                e.eventTime,
+                e.eventEndTime,
+                p.status
+            )
+            FROM Participation p
+            JOIN p.event e
+            WHERE p.userId = :userId
+              AND e.deletedAt IS NULL
+              AND p.status = :status
+            ORDER BY p.createdAt DESC
+            """)
     Page<EventParticipationHistoryDto> findHistoryByUserIdAndCanceled(
             @Param("userId") String userId,
             @Param("status") ParticipationStatus status,
@@ -78,10 +78,10 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     int countByEvent_IdAndStatus(Long eventId, ParticipationStatus status);
 
     @Query("""
-        SELECT p
-        FROM Participation p
-        WHERE p.userId = :userId AND p.event = :event
-        """)
+            SELECT p
+            FROM Participation p
+            WHERE p.userId = :userId AND p.event = :event
+            """)
     Optional<Participation> findByUserIdAndEvent(String userId, Event event);
 
     @Query("""
@@ -95,4 +95,13 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
             @Param("status") ParticipationStatus status,
             @Param("eventIds") List<Long> eventIds
     );
+
+    @Query("""
+            select p
+            from Participation p
+            where p.event.id = :eventId
+              and p.userId = :userId
+              and p.status <> 'CANCELED'
+            """)
+    Optional<Participation> findByUserIdAndEventIdAndNotCanceled(String userId, Long eventId);
 }
