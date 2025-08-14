@@ -24,7 +24,7 @@ public class LectureUploadService {
     @Value("${lecture.python.path}")
     private String PYTHON_DIR;
 
-    private LectureStartupIndexer indexer;
+    private final LectureStartupIndexer indexer;
 
     private String ROOM_PROGRAM = "dayTimeOfRoom.py";
     private String LECTURE_PROGRAM = "infoOfLecture.py";
@@ -37,15 +37,15 @@ public class LectureUploadService {
             if (exitCode != 0) {
                 log.error("[uploadNewSemesterLectures] {} 업로드 실패", file.getOriginalFilename());
 
-                throw new LectureUploadException(LectureErrorCode.LECTURE_ROOM_UPLOAD_FAIL, exitCode);
+                throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, exitCode);
             }
             log.info("[uploadNewSemesterLectures] {} 학기 강의 정보 업로드 완료", file.getName());
 
             indexer.lectureIndex();
         } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage(), e.getStackTrace()[0]);
+            log.error(e.getMessage(), e);
 
-            throw new LectureUploadException(LectureErrorCode.LECTURE_ROOM_UPLOAD_FAIL, e.getMessage());
+            throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, e.getMessage());
         }
     }
 

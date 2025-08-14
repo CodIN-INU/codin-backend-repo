@@ -52,10 +52,10 @@ public class LectureDocument {
     @Field(type = FieldType.Double)
     private Double starRating;
 
-    @Field(type = FieldType.Long)
+    @Field(type = FieldType.Integer)
     private Integer likes;
 
-    @Field(type = FieldType.Long)
+    @Field(type = FieldType.Integer)
     private Integer hits;
 
     @Field(type = FieldType.Nested)

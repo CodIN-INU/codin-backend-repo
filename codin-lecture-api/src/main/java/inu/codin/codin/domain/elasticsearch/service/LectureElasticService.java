@@ -55,7 +55,7 @@ public class LectureElasticService {
     ) {
         log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIdsCount={}, pageNumber={}, size={}", keyword, department, sortOption, likedIds != null ? likedIds.size() : 0, pageNumber, size);
 
-        if (like && (likedIds == null || likedIds.isEmpty())) {
+        if (Boolean.TRUE.equals(like) && (likedIds == null || likedIds.isEmpty())) {
             return new PageImpl<>(new ArrayList<>(), PageRequest.of(pageNumber, size), 0);
         }
 

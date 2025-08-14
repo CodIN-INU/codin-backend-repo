@@ -61,7 +61,7 @@ public class LectureStartupIndexer {
         log.info("Lecture 문서 색인을 시작합니다.");
 
         int pageNumber = 0;
-        int totalProcessed = 0;
+        long totalProcessed = 0L;
         List<Lecture> lectures;
 
         do {
@@ -81,6 +81,8 @@ public class LectureStartupIndexer {
 
             pageNumber++;
         } while (lectures.size() == CHUNK_SIZE);
+
+        elasticsearchOperations.indexOps(LectureDocument.class).refresh();
 
         return totalProcessed;
     }

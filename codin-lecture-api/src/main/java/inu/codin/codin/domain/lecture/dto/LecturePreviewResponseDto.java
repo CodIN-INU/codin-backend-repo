@@ -68,7 +68,7 @@ public class LecturePreviewResponseDto {
                 .id(lecture.getId())
                 .title(lecture.getLectureNm())
                 .professor(lecture.getProfessor())
-                .type(Type.valueOf(lecture.getType()))
+                .type(lecture.getType() != null ? Type.valueOf(lecture.getType()) : null)
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())
                 .tags((lecture.getTags()))
