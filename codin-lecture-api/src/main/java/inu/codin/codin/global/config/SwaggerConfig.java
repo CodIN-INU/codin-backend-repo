@@ -23,6 +23,9 @@ public class SwaggerConfig {
     @Value("${server.domain}")
     private String BASE_DOMAIN_URL;
 
+    @Value(("${server.port}"))
+    private String BASE_PORT;
+
     @Bean
     public OpenAPI customOpenAPI() {
         Info info = new Info()
@@ -30,7 +33,7 @@ public class SwaggerConfig {
                 .description("CODIN Lecture API 명세서")
                 .version("v1.0.0");
 
-        // Bearer Token Auth 설정 (백업용)
+        // Bearer Token Auth 설정
         SecurityScheme bearerAuth = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
@@ -47,7 +50,7 @@ public class SwaggerConfig {
                         .addSecuritySchemes("bearerAuth", bearerAuth)
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8085").description("Local Server"),
+                        new Server().url("http://localhost:" + BASE_PORT).description("Local Server"),
                         new Server().url(BASE_DOMAIN_URL + "/api/lectures").description("Production Server")
                 ));
     }
