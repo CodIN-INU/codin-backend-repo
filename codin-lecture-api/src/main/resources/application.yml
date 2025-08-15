@@ -28,6 +28,16 @@ spring:
         options:
           model: gpt-4.1-mini
           temperature: 0.7
+  task:
+    scheduling:
+      pool:
+        size: 2
+      thread-name-prefix: scheduled-task-
+    execution:
+      pool:
+        core-size: 2
+        max-size: 4
+        queue-capacity: 100
 
   elasticsearch:
     uris: ${ELASTICSEARCH_URL:http://localhost:9200}
