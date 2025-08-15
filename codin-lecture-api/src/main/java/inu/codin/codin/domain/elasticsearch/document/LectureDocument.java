@@ -1,13 +1,15 @@
 package inu.codin.codin.domain.elasticsearch.document;
 
+import inu.codin.codin.domain.elasticsearch.document.dto.EmotionInfo;
+import inu.codin.codin.domain.elasticsearch.document.dto.ScheduleInfo;
+import inu.codin.codin.domain.elasticsearch.document.dto.SemesterInfo;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.util.List;
 
@@ -16,8 +18,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class LectureDocument {
-
-    // todo: 강의계획서, 강의계획서 AI 요약본 ... 필드가 필요함.
 
     @Id
     private Long id;
@@ -28,20 +28,14 @@ public class LectureDocument {
     @Field(type = FieldType.Integer)
     private Integer grade;
 
-    @Field(type = FieldType.Keyword)
-    private String department;
-
-    @Field(type = FieldType.Double)
-    private Double starRating;
-
-    @Field(type = FieldType.Long)
-    private Long likes;
-
-    @Field(type = FieldType.Long)
-    private Long hits;
+    @Field(type = FieldType.Integer)
+    private Integer credit;
 
     @Field(type = FieldType.Keyword)
     private String professor;
+
+    @Field(type = FieldType.Keyword)
+    private String department;
 
     @Field(type = FieldType.Keyword)
     private String type;
@@ -55,29 +49,46 @@ public class LectureDocument {
     @Field(type = FieldType.Text, analyzer = "nori")
     private List<String> preCourses;
 
+    @Field(type = FieldType.Double)
+    private Double starRating;
+
+    @Field(type = FieldType.Integer)
+    private Integer likes;
+
+    @Field(type = FieldType.Integer)
+    private Integer hits;
+
+    @Field(type = FieldType.Nested)
+    private List<SemesterInfo> semesters;
+
     @Field(type = FieldType.Keyword)
     private List<String> tags;
 
-    @Field(type = FieldType.Keyword)
-    private List<String> semesters;
+    @Field(type = FieldType.Nested)
+    private List<ScheduleInfo> schedule;
+
+    @Field(type = FieldType.Object)
+    private EmotionInfo emotion;
 
     // 강의계획서 전체
-//    @Field(type = FieldType.Text,
-//            analyzer = "nori",
-//            searchAnalyzer = "nori",
-//            indexOptions = IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS,
-//            termVector = TermVector.WITH_POSITIONS_OFFSETS,
-//            fields = {
-//                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-//            })
-//    private String syllabus;  // 강의계획서 전체
+    @MultiField(
+            mainField = @Field(type = FieldType.Text,
+                    analyzer = "nori",
+                    searchAnalyzer = "nori",
+                    indexOptions = IndexOptions.offsets,
+                    termVector = TermVector.with_positions_offsets),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
+    private String syllabus;
 
-    // AI 요약본
-//    @Field(type = FieldType.Text,
-//            analyzer = "standard",
-//            searchAnalyzer = "standard",
-//            indexOptions = IndexOptions.POSITIONS,
-//            termVector = TermVector.NO,
-//            store = true)          // 자주 조회되는 요약본만 store
-//    private String aiSummary;
+    //     AI 요약본
+    @Field(type = FieldType.Text,
+            analyzer = "standard",
+            searchAnalyzer = "standard",
+            indexOptions = IndexOptions.positions,
+            termVector = TermVector.no,
+            store = true)
+    private String aiSummary;
 }
