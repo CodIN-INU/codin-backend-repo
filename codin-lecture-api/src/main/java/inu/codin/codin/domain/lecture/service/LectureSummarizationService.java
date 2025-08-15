@@ -28,24 +28,14 @@ public class LectureSummarizationService {
 
     @Transactional
     public void summarizeLecture(Long lectureId) {
+        log.info("[summarizeLecture] 강의 AI 요약 프롬프트 실행, lectureId: {}", lectureId);
         Lecture lecture = lectureRepository.findLectureWithTagsAndReviewsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
-
-        // 리뷰가 없거나 최소 조건 만족 예외 처리
-        if (lecture.getReviews().isEmpty()) {
-            log.info("강의에 리뷰가 없어 AI 요약을 생략, lectureId:{}", lectureId);
-            return;
-        }
 
         // 리뷰들을 하나의 문자열화
         String reviewsText = lecture.getReviews().stream()
                 .map(Review::getContent)
                 .collect(Collectors.joining("\n"));
-
-        if (reviewsText.trim().isEmpty()) {
-            log.info("유효한 리뷰 내용이 없어 AI 요약을 생략, lectureId:{}", lectureId);
-            return;
-        }
 
         // 강의 태그 메타데이터 문자열화
         String tags = lecture.getTags().stream()
