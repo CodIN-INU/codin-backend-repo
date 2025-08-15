@@ -1,9 +1,8 @@
 package inu.codin.codin.domain.lecture.dto;
 
-import inu.codin.codin.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.elasticsearch.document.LectureDocument;
 import inu.codin.codin.domain.lecture.entity.LectureTag;
 import inu.codin.codin.domain.lecture.entity.Type;
-import inu.codin.codin.global.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,18 +63,17 @@ public class LecturePreviewResponseDto {
         this.starRating = starRating;
     }
 
-    public static LecturePreviewResponseDto of(Lecture lecture, boolean liked){
+    public static LecturePreviewResponseDto of(LectureDocument lecture, int likes){
         return LecturePreviewResponseDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getLectureNm())
                 .professor(lecture.getProfessor())
-                .type(lecture.getType())
+                .type(lecture.getType() != null ? Type.valueOf(lecture.getType()) : null)
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())
-                .tags(getTags(lecture.getTags()))
-                .liked(liked)
-                .department(lecture.getDepartment().getDescription())
-                .likes(lecture.getLikes())
+                .tags((lecture.getTags()))
+                .department(lecture.getDepartment())
+                .likes(likes)
                 .starRating(lecture.getStarRating())
                 .build();
     }
