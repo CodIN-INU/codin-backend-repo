@@ -64,7 +64,7 @@ public class LectureAiSummaryScheduler {
             try {
                 summarizationService.summarizeLecture(lectureId);
                 log.debug("[processLecturesWithoutAiSummary] 강의 ID {} AI 요약 생성 완료", lectureId);
-                Thread.sleep(1000); // API 호출 제한 딜레이
+                Thread.sleep(500); // API 호출 제한 딜레이
             } catch (Exception e) {
                 log.error("[processLecturesWithoutAiSummary] 강의 ID {} AI 요약 생성 실패", lectureId, e);
             }
@@ -83,7 +83,7 @@ public class LectureAiSummaryScheduler {
             try {
                 summarizationService.summarizeLecture(lectureId);
                 log.debug("[processLecturesWithRecentReviews] 강의 ID {} AI 요약 업데이트 완료", lectureId);
-                Thread.sleep(1000); // API 호출 제한 딜레이
+                Thread.sleep(500); // API 호출 제한 딜레이
             } catch (Exception e) {
                 log.error("[processLecturesWithRecentReviews] 강의 ID {} AI 요약 업데이트 실패", lectureId, e);
             }
