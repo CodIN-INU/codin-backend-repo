@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,15 +27,25 @@ public class ParticipationResponse {
     @Schema(description = "서명 이미지 URL", example = "https://codin-s3-bucket.s3.ap-northeast-2.amazonaws.com/signature.jpeg")
     private String signatureImgUrl;
 
+    @Schema(description = "이벤트 종료 시간", example = "2025-07-25T12:00:00")
+    private LocalDateTime eventEndTime;
+
+    @Schema(description = "이벤트 장소 정보", example = "학생회관 301호")
+    private String locationInfo;
+
     @JsonCreator
     public ParticipationResponse(
             @JsonProperty("status") ParticipationStatus status,
             @JsonProperty("ticketNumber") Integer ticketNumber,
-            @JsonProperty("signatureImgUrl") String signatureImgUrl
+            @JsonProperty("signatureImgUrl") String signatureImgUrl,
+            @JsonProperty("eventEndTime") LocalDateTime eventEndTime,
+            @JsonProperty("locationInfo") String locationInfo
     ) {
         this.status = status;
         this.ticketNumber = ticketNumber;
         this.signatureImgUrl = signatureImgUrl;
+        this.eventEndTime = eventEndTime;
+        this.locationInfo = locationInfo;
     }
 
     public static ParticipationResponse of(Participation participation) {
@@ -41,6 +53,8 @@ public class ParticipationResponse {
                 .status(participation.getStatus())
                 .ticketNumber(participation.getTicketNumber())
                 .signatureImgUrl(participation.getSignatureImgUrl())
+                .eventEndTime(participation.getEvent().getEventEndTime())
+                .locationInfo(participation.getEvent().getLocationInfo())
                 .build();
     }
 }

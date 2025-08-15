@@ -93,7 +93,7 @@ public interface EventAdminController {
     ResponseEntity<SingleResponse<Boolean>> changeReceiveStatus(
             @Parameter(description = "이벤트 ID", example = "1", required = true) @PathVariable Long eventId,
             @Parameter(description = "수령 상태를 변경할 사용자 ID", example = "user123", required = true) @PathVariable String userId,
-            @Parameter(description = "서명 이미지", required = true) @RequestPart(value = "eventImage", required = false) MultipartFile eventImage);
+            @RequestPart(value = "eventImage", required = false) @Parameter(description = "서명 이미지", required = true, content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)) MultipartFile eventImage);
 
 
     @Operation(summary = "이벤트 잔여 수량 조회", description = "지정된 이벤트의 티켓/상품 잔여 수량을 조회합니다. 관리자/매니저 권한이 필요합니다.")
