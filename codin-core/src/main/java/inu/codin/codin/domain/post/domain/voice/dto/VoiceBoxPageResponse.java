@@ -21,12 +21,12 @@ public class VoiceBoxPageResponse {
         this.nextPage = nextPage;
     }
 
-    public static VoiceBoxPageResponse of(List<VoiceBoxDetailResponse> postPaging, long totalElements, long nextPage) {
-        return VoiceBoxPageResponse.newPagingHasNext(postPaging, totalElements, nextPage);
+    public static VoiceBoxPageResponse of(List<VoiceBoxDetailResponse> postPaging, long lastPage, long nextPage) {
+        return VoiceBoxPageResponse.newPagingHasNext(postPaging, lastPage, nextPage);
     }
 
-    private static VoiceBoxPageResponse newPagingHasNext(List<VoiceBoxDetailResponse> posts, long totalElements, long nextPage) {
-        return new VoiceBoxPageResponse(posts, totalElements, nextPage);
+    private static VoiceBoxPageResponse newPagingHasNext(List<VoiceBoxDetailResponse> posts, long lastPage, long nextPage) {
+        return new VoiceBoxPageResponse(posts, lastPage, nextPage);
     }
 
 }

@@ -34,8 +34,8 @@ public class VoiceEntity extends BaseTimeEntity {
     @Builder
     public VoiceEntity(Department department, List<ObjectId> positiveVoteIds, List<ObjectId> oppositeVoteIds, String question, String answer) {
         this.department = department;
-        this.positiveVoteIds = positiveVoteIds;
-        this.oppositeVoteIds = oppositeVoteIds;
+        this.positiveVoteIds = positiveVoteIds != null ? positiveVoteIds : new ArrayList<>();;
+        this.oppositeVoteIds = oppositeVoteIds != null ? oppositeVoteIds : new ArrayList<>();;
         this.question = question;
         this.answer = answer;
     }
@@ -45,13 +45,11 @@ public class VoiceEntity extends BaseTimeEntity {
      * @param userId 투표 유저 ObjectId
      */
     public void votePositiveToggle(ObjectId userId) {
-        if (positiveVoteIds.contains(userId)) {
-            positiveVoteIds.remove(userId);
-        } else if (oppositeVoteIds.contains(userId)) {
-            oppositeVoteIds.remove(userId);
-        } else {
-            positiveVoteIds.add(userId);
+        if (positiveVoteIds.remove(userId)) {
+            return;
         }
+        oppositeVoteIds.remove(userId);
+        positiveVoteIds.add(userId);
     }
 
     /**
@@ -59,13 +57,11 @@ public class VoiceEntity extends BaseTimeEntity {
      * @param userId 투표 유저 ObjectId
      */
     public void voteOppositeToggle(ObjectId userId) {
-        if (positiveVoteIds.contains(userId)) {
-            positiveVoteIds.remove(userId);
-        } else if (oppositeVoteIds.contains(userId)) {
-            oppositeVoteIds.remove(userId);
-        } else {
-            oppositeVoteIds.add(userId);
+        if (oppositeVoteIds.remove(userId)) {
+            return;
         }
+        positiveVoteIds.remove(userId);
+        oppositeVoteIds.add(userId);
     }
 
     public void updateAnswer(String answer) {

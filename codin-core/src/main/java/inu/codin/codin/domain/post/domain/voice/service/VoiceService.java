@@ -102,10 +102,10 @@ public class VoiceService {
                 .map(VoiceBoxDetailResponse::of)
                 .collect(Collectors.toList());
 
-        long totalElements = voiceEntityPage.getTotalElements();
+        long lastPage = voiceEntityPage.getTotalPages();
         long nextPage = voiceEntityPage.hasNext() ? pageNumber + 1 : -1;
 
-        return VoiceBoxPageResponse.of(responses, totalElements, nextPage);
+        return VoiceBoxPageResponse.of(responses, lastPage, nextPage);
     }
 }
 

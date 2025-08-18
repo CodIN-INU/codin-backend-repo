@@ -9,6 +9,7 @@ import inu.codin.codin.domain.post.domain.voice.dto.VoiceBoxPageResponse;
 import inu.codin.codin.domain.post.domain.voice.service.VoiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class VoiceController {
     @Operation(summary = "익명 질문 생성")
     @PostMapping
     public ResponseEntity<SingleResponse<VoiceBoxDetailResponse>> createVoiceBox(
-            @RequestBody VoiceBoxCreateRequest request
+            @RequestBody @Valid VoiceBoxCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(new SingleResponse<>(201, "익명 목소리 생성 완료",
                 voiceService.createVoiceBox(request)));
@@ -74,7 +75,7 @@ public class VoiceController {
     @PostMapping("/not-answered/{boxId}")
     public ResponseEntity<SingleResponse<VoiceBoxDetailResponse>> addAnswer(
             @PathVariable("boxId") String boxId,
-            @RequestBody VoiceBoxAnswerRequest request
+            @RequestBody @Valid VoiceBoxAnswerRequest request
             ) {
         return ResponseEntity.ok().body(new SingleResponse<>(200, "[학생회] 답변되지 않은 소리함 내용에 답변 추가",
                 voiceService.addAnswer(boxId, request.getAnswer())));
