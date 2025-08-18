@@ -6,12 +6,8 @@ import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.voice.entity.VoiceEntity;
 import lombok.Builder;
 import lombok.Getter;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -20,10 +16,6 @@ public class VoiceBoxDetailResponse {
     private String boxId;
 
     private Department department;
-
-    private List<String> positiveVoteIds = new ArrayList<>();
-
-    private List<String> oppositeVoteIds = new ArrayList<>();
 
     private String question;
 
@@ -42,8 +34,6 @@ public class VoiceBoxDetailResponse {
         return VoiceBoxDetailResponse.builder()
                 .boxId(voiceEntity.getId().toHexString())
                 .department(voiceEntity.getDepartment())
-                .positiveVoteIds(voiceEntity.getPositiveVoteIds().stream().map(ObjectId::toString).collect(Collectors.toList()))
-                .oppositeVoteIds(voiceEntity.getOppositeVoteIds().stream().map(ObjectId::toString).collect(Collectors.toList()))
                 .question(voiceEntity.getQuestion())
                 .answer(voiceEntity.getAnswer())
                 .isUserInPositive(voiceEntity.getPositiveVoteIds() == null ? null : voiceEntity.getPositiveVoteIds().contains(SecurityUtils.getCurrentUserId()))

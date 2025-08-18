@@ -20,7 +20,7 @@ public interface VoiceRepository extends MongoRepository<VoiceEntity, ObjectId> 
     Page<VoiceEntity> findAnsweredByDepartmentAndNotDeleted(Department department, Pageable pageable);
 
     // 답변이 없는 보이스박스 페이징 조회 (삭제되지 않은 것만)
-    @Query("{'answer': null, 'deletedAt': null}")
+    @Query("{'department': ?0, 'answer': null, 'deletedAt': null}")
     Page<VoiceEntity> findByDepartmentAndAnswerIsNullAndNotDeleted(Department department, Pageable pageable);
 
     // ID로 삭제되지 않은 보이스박스 조회
