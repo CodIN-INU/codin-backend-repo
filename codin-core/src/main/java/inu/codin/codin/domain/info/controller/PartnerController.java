@@ -22,13 +22,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/info/partner")
-@Tag(name = "Partner API", description = "Partner CRUD")
+@Tag(name = "Partner API", description = "제휴업체 API")
 public class PartnerController {
 
     private final PartnerService partnerService;
 
     @Operation(
-            summary = "Partner 썸네일 리스트 반환"
+            summary = "제휴업체 썸네일 리스트 반환"
     )
     @GetMapping
     public ResponseEntity<ListResponse<PartnerListResponseDto>> getPartnerList() {
@@ -37,7 +37,7 @@ public class PartnerController {
     }
 
     @Operation(
-            summary = "Partner 상세 내역 반환"
+            summary = "제휴업체 상세 내역 반환"
     )
     @GetMapping("/{id}")
     public ResponseEntity<SingleResponse<PartnerDetailsResponseDto>> getPartnerDetails(@PathVariable("id") String partnerId) {
@@ -47,7 +47,7 @@ public class PartnerController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(
-            summary = "[ADMIN, MANAGER] Partner 추가"
+            summary = "[ADMIN, MANAGER] 제휴업체 추가"
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPartner(@RequestPart("partnerInfo") @Valid PartnerCreateRequestDto partnerCreateRequestDto,
@@ -60,7 +60,7 @@ public class PartnerController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @Operation(
-            summary = "[ADMIN, MANAGER] Partner 삭제"
+            summary = "[ADMIN, MANAGER] 제휴업체 삭제"
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePartner(@PathVariable("id") String partnerId) {
