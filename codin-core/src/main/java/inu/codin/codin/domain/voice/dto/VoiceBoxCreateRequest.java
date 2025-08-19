@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.voice.dto;
+package inu.codin.codin.domain.voice.dto;
 
 import inu.codin.codin.common.dto.Department;
 import io.swagger.v3.oas.annotations.media.Schema;

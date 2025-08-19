@@ -1,13 +1,13 @@
-package inu.codin.codin.domain.post.domain.voice.service;
+package inu.codin.codin.domain.voice.service;
 
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
-import inu.codin.codin.domain.post.domain.voice.dto.VoiceBoxCreateRequest;
-import inu.codin.codin.domain.post.domain.voice.dto.VoiceBoxDetailResponse;
-import inu.codin.codin.domain.post.domain.voice.dto.VoiceBoxPageResponse;
-import inu.codin.codin.domain.post.domain.voice.entity.VoiceEntity;
-import inu.codin.codin.domain.post.domain.voice.repository.VoiceRepository;
+import inu.codin.codin.domain.voice.dto.VoiceBoxCreateRequest;
+import inu.codin.codin.domain.voice.dto.VoiceBoxDetailResponse;
+import inu.codin.codin.domain.voice.dto.VoiceBoxPageResponse;
+import inu.codin.codin.domain.voice.entity.VoiceEntity;
+import inu.codin.codin.domain.voice.repository.VoiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;

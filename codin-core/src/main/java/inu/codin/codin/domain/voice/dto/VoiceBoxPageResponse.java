@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.voice.dto;
+package inu.codin.codin.domain.voice.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;

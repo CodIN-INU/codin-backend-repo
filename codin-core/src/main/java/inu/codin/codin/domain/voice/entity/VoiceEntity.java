@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.voice.entity;
+package inu.codin.codin.domain.voice.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.common.dto.Department;
