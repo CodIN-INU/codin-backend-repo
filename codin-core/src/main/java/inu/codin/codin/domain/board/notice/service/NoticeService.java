@@ -51,6 +51,7 @@ public class NoticeService {
      * @return NoticePageResponse 공지사항 페이지 응답
      */
     public NoticePageResponse getAllNotices(Department department, int pageNumber) {
+        validateDepartment(department);
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
         List<String> postCategories = List.of(
                 PostCategory.EXTRACURRICULAR_INNER.name(),
@@ -84,6 +85,8 @@ public class NoticeService {
 
         validateUserAndPost(userId);
         UserEntity user = getUserEntity(userId);
+
+        validateDepartment(user.getDepartment());
         String prefixOfTitle = "[" + user.getDepartment().getAbbreviation() + "]"; //작성자의 학과에 따라 title의 prefix를 붙여줌
 
         PostEntity noticeEntity = PostEntity.builder()
@@ -119,12 +122,16 @@ public class NoticeService {
     }
 
     private List<NoticeListResponseDto> getNoticeListResponse(List<PostEntity> content) {
-        return content.stream()
-                .map(post -> {
+        return content.stream().map(post -> {
                     UserEntity user = getUserEntity(post.getUserId());
                     return NoticeListResponseDto.of(post, user.getNickname());
-                })
-                .toList();
+                }).toList();
+    }
+
+    private void validateDepartment(Department department) {
+        if (!(department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.EMBEDDED) || department.equals(Department.IT_COLLEGE))) {
+            throw new NoticeException(NoticeErrorCode.INVALID_DEPARTMENT);
+        }
     }
 
     private NoticeDetailResponseDto getNoticeWithDetail(PostEntity post) {

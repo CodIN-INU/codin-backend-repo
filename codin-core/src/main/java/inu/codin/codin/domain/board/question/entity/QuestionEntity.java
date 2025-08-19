@@ -2,6 +2,7 @@ package inu.codin.codin.domain.board.question.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.common.dto.Department;
+import inu.codin.codin.domain.board.question.dto.request.QuestionCreateUpdateRequestDto;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,15 +32,9 @@ public class QuestionEntity extends BaseTimeEntity {
         this.department = department;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void updateQuestion(QuestionCreateUpdateRequestDto requestDto) {
+        this.answer = requestDto.getAnswer();
+        this.question = requestDto.getQuestion();
+        this.department = requestDto.getDepartment();
     }
 }

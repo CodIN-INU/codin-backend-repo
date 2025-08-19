@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class NoticeException extends GlobalException {
+
     private final NoticeErrorCode errorCode;
     public NoticeException(NoticeErrorCode errorCode) {
         super(errorCode);
