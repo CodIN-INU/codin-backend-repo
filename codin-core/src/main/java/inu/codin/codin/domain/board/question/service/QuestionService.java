@@ -20,11 +20,14 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
 
     public List<QuestionResponseDto> getAllQuestions(Department department) {
+        validateDepartment(department);
         return questionRepository.findAllByDepartment(department)
                 .stream().map(QuestionResponseDto::of).toList();
     }
 
     public void createQuestion(QuestionCreateUpdateRequestDto requestDto) {
+        validateDepartment(requestDto.getDepartment());
+
         QuestionEntity questionEntity = QuestionEntity.builder()
                 .question(requestDto.getQuestion())
                 .answer(requestDto.getAnswer())
@@ -35,19 +38,23 @@ public class QuestionService {
 
 
     public void updateQuestion(String id, QuestionCreateUpdateRequestDto requestDto) {
+        validateDepartment(requestDto.getDepartment());
         QuestionEntity questionEntity = questionRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND));
 
-        questionEntity.setQuestion(requestDto.getQuestion());
-        questionEntity.setAnswer(requestDto.getAnswer());
-
+        questionEntity.updateQuestion(requestDto);
         questionRepository.save(questionEntity);
     }
 
     public void deleteQuestion(String id) {
         QuestionEntity questionEntity = questionRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND));
-
         questionRepository.delete(questionEntity);
+    }
+
+    private void validateDepartment(Department department) {
+        if (!(department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.EMBEDDED) || department.equals(Department.IT_COLLEGE))) {
+            throw new QuestionException(QuestionErrorCode.INVALID_DEPARTMENT);
+        }
     }
 }
