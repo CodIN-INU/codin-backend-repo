@@ -4,6 +4,7 @@ import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.board.notice.dto.request.NoticeCreateUpdateRequestDTO;
 import inu.codin.codin.domain.board.notice.dto.response.NoticeDetailResponseDto;
+import inu.codin.codin.domain.board.notice.dto.response.NoticeListResponseDto;
 import inu.codin.codin.domain.board.notice.dto.response.NoticePageResponse;
 import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;
 import inu.codin.codin.domain.board.notice.exception.NoticeException;
@@ -18,6 +19,7 @@ import inu.codin.codin.domain.user.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NoticeService {
 
@@ -55,7 +58,7 @@ public class NoticeService {
         );
         String regex = "^\\[" + Pattern.quote(department.getAbbreviation()) + "\\]";
         Page<PostEntity> notices = noticeRepository.getNoticesByCategory(regex, postCategories, pageRequest);
-        return NoticePageResponse.of(getNoticeDetailResponse(notices.getContent()), notices.getTotalPages() - 1, notices.hasNext() ? notices.getPageable().getPageNumber() + 1 : -1);
+        return NoticePageResponse.of(getNoticeListResponse(notices.getContent()), notices.getTotalPages() - 1, notices.hasNext() ? notices.getPageable().getPageNumber() + 1 : -1);
     }
 
     /**
@@ -115,9 +118,12 @@ public class NoticeService {
         noticeRepository.save(post);
     }
 
-    private List<NoticeDetailResponseDto> getNoticeDetailResponse(List<PostEntity> content) {
+    private List<NoticeListResponseDto> getNoticeListResponse(List<PostEntity> content) {
         return content.stream()
-                .map(this::getNoticeWithDetail)
+                .map(post -> {
+                    UserEntity user = getUserEntity(post.getUserId());
+                    return NoticeListResponseDto.of(post, user.getNickname());
+                })
                 .toList();
     }
 
