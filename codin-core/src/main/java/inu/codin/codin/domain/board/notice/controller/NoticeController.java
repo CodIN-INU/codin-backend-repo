@@ -87,7 +87,7 @@ public class NoticeController {
             @RequestPart(value = "noticeImages", required = false) List<MultipartFile> noticeImages) {
 
         // postImages가 null이면 빈 리스트로 처리
-        if (noticeImages == null) noticeImages = List.of();
+        if (noticeImages == null || noticeImages.isEmpty()) noticeImages = List.of();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, "공지사항이 작성되었습니다.", noticeService.createNotice(noticeCreateUpdateRequestDTO, noticeImages)));
     }
@@ -97,12 +97,13 @@ public class NoticeController {
             description = "공지사항의 내용 수정, 이미지 추가 가능. <br>"
     )
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    @PatchMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<?>>  updatePostContent(
             @PathVariable String postId,
             @RequestPart("noticeContent") @Valid NoticeCreateUpdateRequestDTO noticeCreateUpdateRequestDTO,
             @RequestPart(value = "noticeImages", required = false) List<MultipartFile> noticeImages) {
 
+        if (noticeImages == null || noticeImages.isEmpty()) noticeImages = List.of();
         noticeService.updateNoticeContent(postId, noticeCreateUpdateRequestDTO, noticeImages);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SingleResponse<>(200, "게시물 내용이 수정되었습니다.", null));
