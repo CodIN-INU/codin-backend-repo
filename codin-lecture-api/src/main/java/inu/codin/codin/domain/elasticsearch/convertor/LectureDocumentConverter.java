@@ -17,7 +17,6 @@ import java.util.Set;
 public class LectureDocumentConverter {
 
     public LectureDocument convertToDocument(Lecture lecture) {
-
         return LectureDocument.builder()
                 .id(lecture.getId())
                 .lectureNm(lecture.getLectureNm())
@@ -36,7 +35,7 @@ public class LectureDocumentConverter {
                 .tags(toTagNames(lecture.getTags()))
                 .schedule(toScheduleInfos(lecture.getSchedule()))
                 .emotion(EmotionInfo.from(lecture.getEmotion()))
-                .syllabus(lecture.getSyllabus())
+                .syllabus(lecture.getSyllabus().getFullText())
                 .aiSummary(lecture.getAiSummary())
                 .build();
     }

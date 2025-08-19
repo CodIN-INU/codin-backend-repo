@@ -14,8 +14,6 @@ import java.util.List;
 @Getter
 public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
-    // todo: 강의 계획서, AI 요약본 반환 데이터 추가
-
     @Schema(description = "단과대", example = "정보기술대학")
     private String college;
 
@@ -36,7 +34,9 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
     private boolean openKeyword;
 
-    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, String preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes, double starRating) {
+    private String aiSummary;
+
+    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, List<String> preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes, double starRating, String aiSummary) {
         super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes, starRating);
         this.college = college.getDescription();
         this.evaluation = evaluation;
@@ -45,6 +45,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
         this.preCourse = preCourse;
         this.emotion = emotion;
         this.openKeyword = openKeyword;
+        this.aiSummary = aiSummary;
     }
 
     public static LectureDetailResponseDto of(Lecture lecture, Emotion emotion, boolean openKeyword){
@@ -67,7 +68,8 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 emotion.changeToPercentage(),
                 openKeyword,
                 lecture.getLikes(),
-                lecture.getStarRating()
+                lecture.getStarRating(),
+                lecture.getAiSummary()
         );
     }
     
