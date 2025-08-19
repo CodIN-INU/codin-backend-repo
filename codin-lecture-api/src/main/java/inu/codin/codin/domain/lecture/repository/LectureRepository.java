@@ -69,4 +69,9 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         WHERE r.createdAt > :since
     """)
     List<Long> findLectureIdsWithRecentReviews(@Param("since") LocalDateTime since);
+
+    @Query("""
+        SELECT l.id FROM Lecture l
+    """)
+    List<Long> findAllLectureIds();
 }
