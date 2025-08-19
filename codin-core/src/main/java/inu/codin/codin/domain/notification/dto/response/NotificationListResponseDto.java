@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.notification.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -11,13 +12,15 @@ import java.time.LocalDateTime;
 @Getter
 public class NotificationListResponseDto {
 
-    @Id
     @NotBlank
     private String id;
     private String targetId;
     private String title;
     private String message;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime dateTime;
+
     private boolean isRead = false;
 
     @Builder
