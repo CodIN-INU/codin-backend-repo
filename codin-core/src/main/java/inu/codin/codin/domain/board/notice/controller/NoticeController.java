@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/notice")
-@Tag(name = "Notice API", description = "[리다지인] 게시판 공지사항 API")
+@Tag(name = "Notice API", description = "[리디자인] 게시판 공지사항 API")
 @RequiredArgsConstructor
 public class NoticeController {
 
@@ -80,7 +80,7 @@ public class NoticeController {
                     "EMBEDDED -> [임베] <br>" +
                     "공지사항 작성 시 이미지 첨부 가능, 이미지가 없으면 빈 리스트로 처리"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<?>> createNotice(
             @RequestPart("noticeContent") @Valid NoticeCreateUpdateRequestDTO noticeCreateUpdateRequestDTO,
@@ -96,7 +96,7 @@ public class NoticeController {
             summary = "공지사항 내용 수정 및 이미지 수정&추가",
             description = "공지사항의 내용 수정, 이미지 추가 가능. <br>"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PatchMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SingleResponse<?>>  updatePostContent(
             @PathVariable String postId,
@@ -111,7 +111,7 @@ public class NoticeController {
     @Operation(
             summary = "공지사항 이미지 삭제"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @DeleteMapping("/{postId}/images")
     public ResponseEntity<SingleResponse<?>> deleteNoticeImage(
             @PathVariable String postId,
@@ -125,7 +125,7 @@ public class NoticeController {
     @Operation(
             summary = "공지사항 삭제 (Soft Delete)"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @DeleteMapping("/{postId}")
     public ResponseEntity<SingleResponse<?>> softDeleteNotice(@PathVariable String postId) {
         postService.softDeletePost(postId);

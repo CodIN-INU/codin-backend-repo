@@ -48,7 +48,7 @@ public class QuestionController {
     @Operation(
             summary = "자주 묻는 질문 작성"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<SingleResponse<?>> createQuestion(@RequestBody QuestionCreateUpdateRequestDto requestDto) {
         questionService.createQuestion(requestDto);
@@ -60,7 +60,7 @@ public class QuestionController {
     @Operation(
             summary = "자주 묻는 질문 수정"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PutMapping("/{questionId}")
     public ResponseEntity<SingleResponse<?>> updateQuestion(@PathVariable("questionId") String id,
                                                             @RequestBody QuestionCreateUpdateRequestDto requestDto) {
@@ -72,7 +72,7 @@ public class QuestionController {
     @Operation(
             summary = "자주 묻는 질문 삭제"
     )
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @DeleteMapping("/{questionId}")
     public ResponseEntity<SingleResponse<?>> deleteQuestion(@PathVariable("questionId") String id) {
         questionService.deleteQuestion(id);

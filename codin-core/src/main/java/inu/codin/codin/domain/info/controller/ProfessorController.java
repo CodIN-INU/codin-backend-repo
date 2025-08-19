@@ -37,7 +37,7 @@ public class ProfessorController {
                 .body(new SingleResponse<>(200, "교수 썸네일 반환 성공", professorService.getProfessorThumbnail(id)));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 새로운 교수 정보 생성")
     @PostMapping
     public ResponseEntity<SingleResponse<?>> createProfessor(@RequestBody @Valid ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
@@ -46,7 +46,7 @@ public class ProfessorController {
                 .body(new SingleResponse<>(200, "새로운 교수 정보 생성 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 교수 정보 수정")
     @PatchMapping(value = "/{id}")
     public ResponseEntity<SingleResponse<?>> updateProfessor(@PathVariable("id") String id, @RequestBody @Valid ProfessorCreateUpdateRequestDto professorCreateUpdateRequestDto){
@@ -55,7 +55,7 @@ public class ProfessorController {
                 .body(new SingleResponse<>(200, "교수 정보 수정 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 교수 정보 삭제")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<SingleResponse<?>> deleteProfessor(@PathVariable("id") String id){
