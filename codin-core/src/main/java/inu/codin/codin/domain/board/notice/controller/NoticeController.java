@@ -94,7 +94,8 @@ public class NoticeController {
 
     @Operation(
             summary = "공지사항 내용 수정 및 이미지 수정&추가",
-            description = "공지사항의 내용 수정, 이미지 추가 가능. <br>"
+            description = "공지사항의 내용 수정, 이미지 추가 가능. <br>" +
+                    "새로 추가된 이미지만 넣어서 API 요청 필수 (없으면 빈 리스트), 삭제의 경우 별도의 API로 처리"
     )
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PutMapping(value = "/{postId}/content", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

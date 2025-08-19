@@ -17,7 +17,7 @@ public class QuestionCreateUpdateRequestDto {
     @NotBlank
     private String answer;
 
-    @Schema(description = "답변 내용", example = "COMPUTER_SCI")
+    @Schema(description = "학과", example = "COMPUTER_SCI")
     @NotNull
     private Department department;
 }

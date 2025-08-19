@@ -8,6 +8,7 @@ import inu.codin.codin.domain.board.question.dto.response.QuestionResponseDto;
 import inu.codin.codin.domain.board.question.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,7 +51,7 @@ public class QuestionController {
     )
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<SingleResponse<?>> createQuestion(@RequestBody QuestionCreateUpdateRequestDto requestDto) {
+    public ResponseEntity<SingleResponse<?>> createQuestion(@RequestBody @Valid QuestionCreateUpdateRequestDto requestDto) {
         questionService.createQuestion(requestDto);
         return ResponseEntity.status(201)
                 .body(new SingleResponse<>(201, "자주 묻는 질문 작성 성공", null));
@@ -63,7 +64,7 @@ public class QuestionController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @PutMapping("/{questionId}")
     public ResponseEntity<SingleResponse<?>> updateQuestion(@PathVariable("questionId") String id,
-                                                            @RequestBody QuestionCreateUpdateRequestDto requestDto) {
+                                                            @RequestBody @Valid QuestionCreateUpdateRequestDto requestDto) {
         questionService.updateQuestion(id, requestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "자주 묻는 질문 수정 성공", null));
