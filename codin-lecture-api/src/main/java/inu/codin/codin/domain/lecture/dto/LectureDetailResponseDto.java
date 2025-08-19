@@ -27,7 +27,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
     private List<Schedule> schedule;
 
     @Schema(description = "선수과목")
-    private String preCourse;
+    private List<String> preCourse;
 
     @Schema(description = "후기 평점들의 범위마다 100분율 계산", example = "hard : 30, ok : 20, best : 50")
     private EmotionResponseDto emotion;

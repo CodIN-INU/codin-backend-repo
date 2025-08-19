@@ -37,6 +37,7 @@ public class Lecture {
     @Convert(converter = EvaluationConverter.class)
     private Evaluation evaluation;                              //평가 방식(상대평가, 절대평가, 이수)
 
+    // Json 형태로 저장
     @Convert(converter = StringListConverter.class)
     private List<String> preCourse;                                   //사전 과목 //todo List로 관리 피룡
     private double starRating;                                  //과목 평점

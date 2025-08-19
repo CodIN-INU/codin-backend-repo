@@ -27,7 +27,7 @@ public class LectureDocumentConverter {
                 .type(lecture.getType() != null ? lecture.getType().name() : null)
                 .lectureType(lecture.getLectureType())
                 .evaluation(lecture.getEvaluation() != null ? lecture.getEvaluation().name() : null)
-                .preCourses(toPreCourses(lecture.getPreCourse()))
+                .preCourses(lecture.getPreCourse())
                 .starRating(lecture.getStarRating())
                 .likes(lecture.getLikes())
                 .hits(lecture.getHits())
