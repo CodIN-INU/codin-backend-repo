@@ -46,12 +46,10 @@ public class NoticeController {
                     "DEPARTMENT_NOTICE는 직접 수기로 작성한 공지사항 <br>"
     )
     @GetMapping("/category")
-    public ResponseEntity<SingleResponse<NoticePageResponse>> getAllNotices(
-            @RequestParam("department") @NotNull Department department,
-            @RequestParam("page") @NotNull int pageNumber) {
-        NoticePageResponse noticepages= noticeService.getAllNotices(department, pageNumber);
+    public ResponseEntity<SingleResponse<NoticePageResponse>> getAllNotices(@RequestParam("department") @NotNull Department department,
+                                                                            @RequestParam("page") @NotNull int pageNumber) {
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "학과별 공지사항 조회 성공", noticepages));
+                .body(new SingleResponse<>(200, "학과별 공지사항 조회 성공", noticeService.getAllNotices(department, pageNumber)));
     }
 
 
