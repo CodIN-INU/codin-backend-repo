@@ -28,7 +28,7 @@ public class AdminController {
     }
 
     @Operation(summary = "모든 교과목 데이터 AI 요약본 재생성")
-    @PostMapping("/es-reindexing")
+    @PostMapping("/ai-re-summarize")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<SingleResponse<?>> reAiSummarize() {
         adminService.reSummarizeAllLectures();
