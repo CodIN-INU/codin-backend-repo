@@ -9,6 +9,7 @@ import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.redis.RedisParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
@@ -28,10 +29,11 @@ public class TicketingService {
     private final ParticipationRepository participationRepository;
     private final StockRepository stockRepository;
 
-    private final UserClientService userClientService;
     private final ImageService imageService;
-    private final RedisParticipationService redisParticipationService;
+    private final UserClientService userClientService;
+    private final RedisEventService redisEventService;
     private final ApplicationEventPublisher eventPublisher;
+    private final RedisParticipationService redisParticipationService;
 
     @Transactional
     public Stock decrement(Long eventId) {
@@ -54,8 +56,7 @@ public class TicketingService {
     @Transactional
     public void processParticipationSuccess(Long eventId, String adminPassword, MultipartFile signatureImage) {
         String userId = userClientService.fetchUser().getUserId();
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+        Event event = findEvent(eventId);
         // 이벤트 활동 상태 검증
         if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
             throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
@@ -69,8 +70,7 @@ public class TicketingService {
         String signatureImageUrl = imageService.handleImageUpload(signatureImage);
 
         // 참여자 정보 조회
-        Participation participation = participationRepository.findByEventAndUserId(event, userId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
+        Participation participation = findParticipation(event, userId);
 
         // 수령 완료 상태로 변경
         if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
@@ -91,15 +91,13 @@ public class TicketingService {
     @Transactional
     public void changeParticipationStatusCanceled(Long eventId) {
         String userId = userClientService.fetchUser().getUserId();
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+        Event event = findEvent(eventId);
         // 이벤트 활동 상태 검증
         if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
             throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
         }
 
-        Participation participation = participationRepository.findByEventAndUserId(event, userId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
+        Participation participation = findParticipation(event, userId);
 
         if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
             throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
@@ -109,11 +107,22 @@ public class TicketingService {
         Stock stock = stockRepository.findByEvent(event)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
         stock.increase();
+        redisEventService.returnTicket(eventId, participation.getTicketNumber());
 
-        participation.changeStatusCanceled();
+        participationRepository.deleteById(participation.getId());
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
         // 캐시에 삭제
         redisParticipationService.evictParticipation(userId, eventId);
+    }
+
+    private Event findEvent(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+    }
+
+    private Participation findParticipation(Event event, String userId) {
+        return participationRepository.findByEventAndUserId(event, userId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
     }
 }

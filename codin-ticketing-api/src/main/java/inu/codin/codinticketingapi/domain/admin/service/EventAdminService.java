@@ -16,6 +16,7 @@ import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
@@ -44,9 +45,10 @@ public class EventAdminService {
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
-    private final static int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 10;
 
     private final ImageService imageService;
+    private final RedisEventService redisEventService;
     private final UserClientService userClientService;
     private final EventStatusScheduler eventStatusScheduler;
 
@@ -64,6 +66,7 @@ public class EventAdminService {
 
         Event savedEvent = eventRepository.save(event);
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(savedEvent);
+        redisEventService.initializeTickets(savedEvent.getId(), stock.getInitialStock());
 
         return EventResponse.of(savedEvent);
     }
@@ -79,31 +82,26 @@ public class EventAdminService {
     @Transactional
     public EventResponse updateEvent(Long eventId, EventUpdateRequest request, MultipartFile eventImage) {
         // 엔티티 조회, 권한 검증
-        Event event = findEventById(eventId);
+        Event findEvent = findEventById(eventId);
         String currentUserId = findAdminUser();
 
         // 입력값 검증
         request.validateEventTimes();
-        validationEvent(event, currentUserId);
-
-        // 수량 변경 대비
-        int oldQuantity = event.getStock().getStock();
+        validationEvent(findEvent, currentUserId);
 
         // 이미지 처리
         if (eventImage != null && !eventImage.isEmpty()) {
             String newUrl = imageService.handleImageUpload(eventImage);
-            event.updateImageUrl(newUrl);
+            findEvent.updateImageUrl(newUrl);
         }
 
         // 엔티티 업데이트
-        event.updateFrom(request);
+        findEvent.updateFrom(request);
 
-        // Redis 동기화 - (수량 변경 시)
-        int newQuantity = event.getStock().getStock();
+        eventStatusScheduler.scheduleCreateOrUpdatedEvent(findEvent);
+        redisEventService.initializeTickets(findEvent.getId(), findEvent.getStock().getInitialStock());
 
-        eventStatusScheduler.scheduleCreateOrUpdatedEvent(event);
-
-        return EventResponse.of(event);
+        return EventResponse.of(findEvent);
     }
 
     @Transactional
@@ -112,6 +110,7 @@ public class EventAdminService {
         event.delete();
 
         eventStatusScheduler.scheduleAllDelete(event);
+        redisEventService.deleteTickets(eventId);
     }
 
     public String getEventPassword(Long eventId) {
@@ -126,8 +125,10 @@ public class EventAdminService {
         Event findEvent = findEventById(eventId);
         findEvent.delete();
         eventStatusScheduler.scheduleAllDelete(findEvent);
+        redisEventService.deleteTickets(eventId);
     }
 
+    @Transactional(readOnly = true)
     public EventParticipationProfilePageResponse getParticipationList(Long eventId, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by("ticketNumber").descending());
 
