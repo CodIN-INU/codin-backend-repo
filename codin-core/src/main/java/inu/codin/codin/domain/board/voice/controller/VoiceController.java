@@ -1,12 +1,12 @@
-package inu.codin.codin.domain.voice.controller;
+package inu.codin.codin.domain.board.voice.controller;
 
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.voice.dto.VoiceBoxAnswerRequest;
-import inu.codin.codin.domain.voice.dto.VoiceBoxCreateRequest;
-import inu.codin.codin.domain.voice.dto.VoiceBoxDetailResponse;
-import inu.codin.codin.domain.voice.dto.VoiceBoxPageResponse;
-import inu.codin.codin.domain.voice.service.VoiceService;
+import inu.codin.codin.domain.board.voice.service.VoiceService;
+import inu.codin.codin.domain.board.voice.dto.VoiceBoxAnswerRequest;
+import inu.codin.codin.domain.board.voice.dto.VoiceBoxCreateRequest;
+import inu.codin.codin.domain.board.voice.dto.VoiceBoxDetailResponse;
+import inu.codin.codin.domain.board.voice.dto.VoiceBoxPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

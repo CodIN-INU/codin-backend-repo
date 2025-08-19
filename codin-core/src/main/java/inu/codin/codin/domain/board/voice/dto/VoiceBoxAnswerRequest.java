@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.voice.dto;
+package inu.codin.codin.domain.board.voice.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
