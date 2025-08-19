@@ -5,6 +5,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -21,7 +22,7 @@ public class NoticeListResponseDto {
     private final String userId;
 
     @Schema(description = "게시물 종류", example = "구해요")
-    @NotBlank
+    @NotNull
     private final PostCategory postCategory;
 
     @Schema(description = "게시물 제목", example = "Example")

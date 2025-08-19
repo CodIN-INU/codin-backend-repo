@@ -23,7 +23,7 @@ public class NoticeDetailResponseDto {
     private final String userId;
 
     @Schema(description = "게시물 종류", example = "구해요")
-    @NotBlank
+    @NotNull
     private final PostCategory postCategory;
 
     @Schema(description = "게시물 제목", example = "Example")

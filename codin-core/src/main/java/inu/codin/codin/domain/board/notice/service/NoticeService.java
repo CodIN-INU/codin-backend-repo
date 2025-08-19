@@ -53,11 +53,11 @@ public class NoticeService {
     public NoticePageResponse getAllNotices(Department department, int pageNumber) {
         validateDepartment(department);
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        List<String> postCategories = List.of(
-                PostCategory.EXTRACURRICULAR_INNER.name(),
-                PostCategory.DEPARTMENT_NOTICE.name()
+        List<PostCategory> postCategories = List.of(
+                PostCategory.EXTRACURRICULAR_INNER,
+                PostCategory.DEPARTMENT_NOTICE
         );
-        String regex = "^\\[" + Pattern.quote(department.getAbbreviation()) + "\\]";
+        Pattern regex = Pattern.compile("^" + Pattern.quote("[" + department.getAbbreviation() + "]"));
         Page<PostEntity> notices = noticeRepository.getNoticesByCategory(regex, postCategories, pageRequest);
         return NoticePageResponse.of(getNoticeListResponse(notices.getContent()), notices.getTotalPages() - 1, notices.hasNext() ? notices.getPageable().getPageNumber() + 1 : -1);
     }
