@@ -25,8 +25,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+        log.warn("[Exception] Class: {}, Error Message : {}, Stack Trace: {}",
+                e.getClass().getSimpleName(),
+                e.getMessage(),
+                e.getStackTrace()[0].toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @ExceptionHandler(GlobalException.class)
