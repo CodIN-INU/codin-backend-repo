@@ -45,7 +45,7 @@ public class PartnerController {
                 .body(new SingleResponse<>(200, "Partner 상세 내열 반환 성공", partnerService.getPartnerDetails(partnerId)));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(
             summary = "[ADMIN, MANAGER] 제휴업체 추가"
     )
@@ -58,7 +58,7 @@ public class PartnerController {
                 .body(new SingleResponse<>(201, "Partner 생성 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(
             summary = "[ADMIN, MANAGER] 제휴업체 삭제"
     )
