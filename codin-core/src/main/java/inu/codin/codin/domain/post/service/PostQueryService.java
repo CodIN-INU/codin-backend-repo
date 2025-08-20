@@ -182,7 +182,7 @@ public class PostQueryService
 
     // [유저 프로필] - 게시물에 대한 유저정보 추출
     private UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
-        return UserInfo.of(
+        return UserInfo.ofPost(
                 likeService.isLiked(LikeType.POST, postId, currentUserId),
                 scrapService.isPostScraped(postId, currentUserId),
                 postUserId.equals(currentUserId)

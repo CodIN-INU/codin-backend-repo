@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.exception.CommentException;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.UserDto;
+import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.service.PostQueryService;
@@ -111,13 +112,12 @@ public class CommentQueryService {
     }
 
 
-    public CommentResponseDTO.UserInfo getUserInfoAboutComment(ObjectId commentId) {
+    public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        return CommentResponseDTO.UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.COMMENT, commentId, userId))
-                .build();
+        return UserInfo.ofComment(
+                likeService.isLiked(LikeType.COMMENT, commentId, userId)
+        );
     }
-
     /**
      *
      * @param commentId
