@@ -4,6 +4,10 @@ import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
+import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;
+import inu.codin.codin.domain.board.notice.exception.NoticeException;
+import inu.codin.codin.domain.board.question.exception.QuestionErrorCode;
+import inu.codin.codin.domain.board.question.exception.QuestionException;
 import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
 import inu.codin.codin.domain.chat.exception.ChatRoomException;
 import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
@@ -111,6 +115,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(QuestionException.class)
+    protected ResponseEntity<ExceptionResponse> handleQuestionException(QuestionException e) {
+        QuestionErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(NoticeException.class)
+    protected ResponseEntity<ExceptionResponse> handleNoticeException(NoticeException e) {
+        NoticeErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
     }
 
 }

@@ -37,7 +37,7 @@ public class LabController {
                 .body(new ListResponse<>(200, "연구실 리스트 반환 성공", labService.getAllLab()));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 새로운 연구실 등록")
     @PostMapping
     public ResponseEntity<SingleResponse<?>> createLab(@RequestBody @Valid LabCreateUpdateRequestDto labCreateUpdateRequestDto){
@@ -46,7 +46,7 @@ public class LabController {
                 .body(new SingleResponse<>(201, "새로운 LAB 등록 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 연구실 정보 수정")
     @PutMapping(value = "/{id}")
     public ResponseEntity<SingleResponse<?>> updateLab(@RequestBody @Valid LabCreateUpdateRequestDto labCreateUpdateRequestDto, @PathVariable("id") String id){
@@ -55,7 +55,7 @@ public class LabController {
                 .body(new SingleResponse<>(200, "LAB 정보 수정 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 연구실 삭제")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<SingleResponse<?>> deleteLab(@PathVariable("id") String id){

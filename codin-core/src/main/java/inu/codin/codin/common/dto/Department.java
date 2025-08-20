@@ -11,15 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public enum Department {
 
-    IT_COLLEGE("정보기술대학"),
-    COMPUTER_SCI("컴퓨터공학부"),
-    COMPUTER_SCI_NIGHT("컴퓨터공학부(야)"),
-    INFO_COMM("정보통신공학과"),
-    EMBEDDED("임베디드시스템공학과"),
-    STAFF("교직원"),
-    OTHERS("타과대");
+    IT_COLLEGE("정보기술대학", "정보대"),
+    COMPUTER_SCI("컴퓨터공학부", "컴공"),
+    COMPUTER_SCI_NIGHT("컴퓨터공학부(야)", "컴공"),
+    INFO_COMM("정보통신공학과", "정통"),
+    EMBEDDED("임베디드시스템공학과", "임베"),
+    STAFF("교직원", "교직원"),
+    OTHERS("타과대", "타대");
 
     private final String description;
+    private final String abbreviation;
 
     @JsonCreator
     public static Department fromDescription(String description) {
