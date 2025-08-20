@@ -150,7 +150,6 @@ public class PostCommandService {
             anonymous.setWriter(userId);
         } else {anonymous.setAnonNumber(userId);
         }
-        postRepository.save(post);
         log.info("익명 번호 할당. PostId: {}, UserId: {}", post.get_id(), userId);
     }
 
