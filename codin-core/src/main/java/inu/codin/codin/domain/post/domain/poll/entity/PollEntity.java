@@ -24,10 +24,9 @@ public class PollEntity extends BaseTimeEntity {
     private ObjectId _id;
 
     private ObjectId postId; // PostEntity와의 관계를 유지하기 위한 필드
-    private List<String> pollOptions = new ArrayList<>(); // 설문조사 선택지
-    private List<Integer> pollVotesCounts = new ArrayList<>(); // 선택지별 투표 수
+    private final List<String> pollOptions; // 설문조사 선택지
+    private final List<Integer> pollVotesCounts; // 선택지별 투표 수
 
-    @JsonFormat(pattern = "yyyy/MM/dd HH:mm", timezone = "Asia/Seoul")  // JSON 직렬화/역직렬화 시 포맷 지정
     private LocalDateTime pollEndTime; // 설문조사 종료 시간
     private boolean multipleChoice; // 복수 선택 가능 여부
 
@@ -36,7 +35,7 @@ public class PollEntity extends BaseTimeEntity {
     public PollEntity(ObjectId postId, List<String> pollOptions,
                       LocalDateTime pollEndTime, boolean multipleChoice) {
         this.postId = postId;
-        this.pollOptions = pollOptions;
+        this.pollOptions = new ArrayList<>(pollOptions);
 
         // pollVotesCounts가 null일 경우, pollOptions의 크기만큼 0으로 초기화
         this.pollVotesCounts = new ArrayList<>(Collections.nCopies(this.pollOptions.size(), 0));
