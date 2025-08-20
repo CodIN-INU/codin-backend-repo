@@ -30,7 +30,7 @@ public class OfficeController {
                 .body(new SingleResponse<>(200, "학과별 사무실 정보 반환 성공", officeService.getOfficeByDepartment(department)));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 학과사무실 정보 수정")
     @PatchMapping(value = "/{department}")
     public ResponseEntity<SingleResponse<?>> updateOffice(@PathVariable("department") Department department, @RequestBody @Valid OfficeUpdateRequestDto officeUpdateRequestDto){
@@ -39,7 +39,7 @@ public class OfficeController {
                 .body(new SingleResponse<>(200, "Office 정보 수정 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 학과사무실 직원 추가")
     @PatchMapping(value = "/{department}/member")
     public ResponseEntity<SingleResponse<?>> createOfficeMember(@PathVariable("department") Department department,
@@ -49,7 +49,7 @@ public class OfficeController {
                 .body(new SingleResponse<>(201, "Office Member 추가 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 학과사무실 직원 정보 수정")
     @PatchMapping(value = "/{department}/member/{num}")
     public ResponseEntity<SingleResponse<?>> updateOfficeMember(@PathVariable("department") Department department, @PathVariable("num")  @Min(0) int num,
@@ -59,7 +59,7 @@ public class OfficeController {
                 .body(new SingleResponse<>(200, "Office Member 정보 수정 완료", null));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @Operation(summary = "[ADMIN, MANAGER] 학과사무실 직원 정보 삭제")
     @DeleteMapping(value = "/{department}/member/{num}")
     public ResponseEntity<?> deleteOfficeMember(@PathVariable("department") Department department, @PathVariable("num") @Min(0) int num){
