@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum PollErrorCode implements GlobalErrorCode {
     POLL_NOT_FOUND(HttpStatus.NOT_FOUND, "투표 정보를 찾을 수 없습니다."),
-    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시물을 찾을 수 없습니다."),
     POLL_FINISHED(HttpStatus.BAD_REQUEST, "이미 종료된 투표입니다."),
     POLL_DUPLICATED(HttpStatus.CONFLICT, "이미 투표하셨습니다."),
     MULTIPLE_CHOICE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "복수 선택이 허용되지 않은 투표입니다."),
