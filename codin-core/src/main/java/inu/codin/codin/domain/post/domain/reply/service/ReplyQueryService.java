@@ -9,6 +9,7 @@ import inu.codin.codin.domain.post.domain.reply.exception.ReplyErrorCode;
 import inu.codin.codin.domain.post.domain.reply.exception.ReplyException;
 import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.dto.UserDto;
+import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -103,11 +104,11 @@ public class ReplyQueryService {
         );
     }
 
-    public CommentResponseDTO.UserInfo getUserInfoAboutReply(ObjectId replyId) {
+    public UserInfo getUserInfoAboutReply(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
-        return CommentResponseDTO.UserInfo.builder()
-                .isLike(likeService.isLiked(LikeType.COMMENT, replyId, userId))
-                .build();
+        return UserInfo.ofComment(
+                likeService.isLiked(LikeType.COMMENT, replyId, userId)
+        );
     }
 
     /**
