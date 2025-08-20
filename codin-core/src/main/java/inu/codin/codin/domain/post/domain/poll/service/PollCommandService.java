@@ -5,14 +5,16 @@ import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
-import inu.codin.codin.domain.post.domain.poll.exception.PollException;
 import inu.codin.codin.domain.post.domain.poll.exception.PollErrorCode;
+import inu.codin.codin.domain.post.domain.poll.exception.PollException;
 import inu.codin.codin.domain.post.domain.poll.repository.PollRepository;
 import inu.codin.codin.domain.post.domain.poll.repository.PollVoteRepository;
-import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -20,16 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PollService {
+public class PollCommandService {
 
-    private final PostRepository postRepository;
     private final PollRepository pollRepository;
     private final PollVoteRepository pollVoteRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public void createPoll(PollCreateRequestDTO pollRequestDTO) {
@@ -66,7 +68,7 @@ public class PollService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> {
                     log.warn("투표 실패 - 게시글 없음 - postId: {}", postId);
-                    return new PollException(PollErrorCode.POST_NOT_FOUND);
+                    return new PostException(PostErrorCode.POST_NOT_FOUND);
                 });
 
         PollEntity poll = pollRepository.findByPostId(post.get_id())
@@ -122,7 +124,7 @@ public class PollService {
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> {
                     log.warn("투표 취소 실패 - 게시글 없음 - postId: {}", postId);
-                    return new PollException(PollErrorCode.POST_NOT_FOUND);
+                    return new PostException(PostErrorCode.POST_NOT_FOUND);
                 });
 
         PollEntity poll = pollRepository.findByPostId(post.get_id())
@@ -150,19 +152,5 @@ public class PollService {
         pollRepository.save(poll);
         pollVoteRepository.delete(pollVote);
         log.info("투표 취소 완료 - pollId: {}, userId: {}", poll.get_id(), userId);
-    }
-
-    public PollInfoResponseDTO getPollInfo(PostEntity post, ObjectId userId) {
-        PollEntity poll = pollRepository.findByPostId(post.get_id())
-                .orElseThrow(() -> new PollException(PollErrorCode.POLL_NOT_FOUND));
-        long totalParticipants = pollVoteRepository.countByPollId(poll.get_id());
-        List<Integer> userVotes = pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)
-                .map(PollVoteEntity::getSelectedOptions)
-                .orElse(Collections.emptyList());
-        boolean pollFinished = poll.getPollEndTime() != null && LocalDateTime.now().isAfter(poll.getPollEndTime());
-        boolean hasUserVoted = pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId);
-        return PollInfoResponseDTO.of(
-                poll.getPollOptions(), poll.getPollEndTime(), poll.isMultipleChoice(),
-                poll.getPollVotesCounts(), userVotes, totalParticipants, hasUserVoted, pollFinished);
     }
 }

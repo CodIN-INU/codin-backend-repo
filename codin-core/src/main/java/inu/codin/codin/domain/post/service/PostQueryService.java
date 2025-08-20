@@ -8,7 +8,7 @@ import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
-import inu.codin.codin.domain.post.domain.poll.service.PollService;
+import inu.codin.codin.domain.post.domain.poll.service.PollQueryService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
@@ -45,7 +45,7 @@ public class PostQueryService
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    private final PollService pollService;
+    private final PollQueryService pollQueryService;
     private final BlockService blockService;
     private final PostInteractionService postInteractionService;
     private final BestService bestService;
@@ -166,7 +166,7 @@ public class PostQueryService
         UserInfo userInfo = getUserInfoAboutPost(userId, post.getUserId(), post.get_id());
         PostDetailResponseDTO postDTO = PostDetailResponseDTO.of(post, userDto, likeCount, scrapCount, hitsCount, commentCount, userInfo);
         if (post.getPostCategory() == PostCategory.POLL) {
-            PollInfoResponseDTO pollInfo = pollService.getPollInfo(post, userId);
+            PollInfoResponseDTO pollInfo = pollQueryService.getPollInfo(post, userId);
             return PostPageItemResponseDTO.of(postDTO, pollInfo);
         } else {
             return PostPageItemResponseDTO.of(postDTO, null);
@@ -181,7 +181,7 @@ public class PostQueryService
     }
 
     // [유저 프로필] - 게시물에 대한 유저정보 추출
-    public UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
+    private UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
         return UserInfo.of(
                 likeService.isLiked(LikeType.POST, postId, currentUserId),
                 scrapService.isPostScraped(postId, currentUserId),

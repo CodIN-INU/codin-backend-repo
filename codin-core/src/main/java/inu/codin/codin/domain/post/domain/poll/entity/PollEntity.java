@@ -2,7 +2,8 @@ package inu.codin.codin.domain.post.domain.poll.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.domain.post.domain.poll.exception.PollOptionChoiceException;
+import inu.codin.codin.domain.post.domain.poll.exception.PollErrorCode;
+import inu.codin.codin.domain.post.domain.poll.exception.PollException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,14 +49,14 @@ public class PollEntity extends BaseTimeEntity {
     //각 옵션의 투표 수 증가
     public void vote(int optionIndex) {
         if (optionIndex < 0 || optionIndex >= this.pollOptions.size()) {
-            throw new PollOptionChoiceException("잘못된 선택지입니다.");
+            throw new PollException(PollErrorCode.INVALID_OPTION);
         }
         this.pollVotesCounts.set(optionIndex, this.pollVotesCounts.get(optionIndex) + 1);
     }
 
     public void deleteVote(int optionIndex){
         if (this.pollVotesCounts.get(optionIndex) - 1 < 0)
-            throw new PollOptionChoiceException("올바르지 않은 선택지입니다.");
+            throw new PollException(PollErrorCode.INVALID_OPTION);
         this.pollVotesCounts.set(optionIndex, this.pollVotesCounts.get(optionIndex) - 1);
     }
 }
