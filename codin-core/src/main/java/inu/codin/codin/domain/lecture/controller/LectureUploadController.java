@@ -28,7 +28,7 @@ public class LectureUploadController {
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(value = "/lectures", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<SingleResponse<?>> uploadNewSemesterLectures(@RequestParam("excelFile") MultipartFile file) {
         lectureUploadService.uploadNewSemesterLectures(file);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -41,7 +41,7 @@ public class LectureUploadController {
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(value = "/rooms", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<?> uploadNewSemesterRooms(@RequestParam("excelFile") MultipartFile file) {
         lectureUploadService.uploadNewSemesterRooms(file);
         return ResponseEntity.status(HttpStatus.CREATED)
