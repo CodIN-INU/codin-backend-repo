@@ -74,7 +74,7 @@ class ReplyQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(3);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(String) any())).willReturn(false);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(ObjectId) any())).willReturn(false);
         
         // When
         List<CommentResponseDTO> result = replyQueryService.getRepliesByCommentId(postAnonymous, commentId);
@@ -122,7 +122,7 @@ class ReplyQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(postAnonymous, userId)).willReturn(3); // 익명 번호
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(2);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(String) any())).willReturn(true);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(ObjectId) any())).willReturn(true);
         
         // When
         List<CommentResponseDTO> result = replyQueryService.getRepliesByCommentId(postAnonymous, commentId);
@@ -220,7 +220,7 @@ class ReplyQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(0);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(String) any())).willReturn(false);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(),(ObjectId) any())).willReturn(false);
         
         // When
         List<CommentResponseDTO> result = replyQueryService.getRepliesByCommentId(postAnonymous, commentId);
