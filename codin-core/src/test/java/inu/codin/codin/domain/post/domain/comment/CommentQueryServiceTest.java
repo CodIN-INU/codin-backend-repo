@@ -80,7 +80,7 @@ class CommentQueryServiceTest {
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(5);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(), any())).willReturn(false);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(), (String) any())).willReturn(false);
         
         // When
         List<CommentResponseDTO> result = commentQueryService.getCommentsByPostId(postId);
@@ -133,7 +133,7 @@ class CommentQueryServiceTest {
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(3);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(), any())).willReturn(true);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(), (String) any())).willReturn(true);
         
         // When
         List<CommentResponseDTO> result = commentQueryService.getCommentsByPostId(postId);
@@ -181,14 +181,14 @@ class CommentQueryServiceTest {
         ObjectId userId = new ObjectId();
         
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(likeService.isLiked(LikeType.COMMENT, commentId, userId)).willReturn(true);
+        given(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)).willReturn(true);
         
         // When
         UserInfo result = commentQueryService.getUserInfoAboutComment(commentId);
         
         // Then
         assertThat(result).isNotNull();
-        verify(likeService).isLiked(LikeType.COMMENT, commentId, userId);
+        verify(likeService).isLiked(LikeType.COMMENT, commentId.toString(), userId);
     }
     
     @Test
@@ -198,14 +198,14 @@ class CommentQueryServiceTest {
         ObjectId userId = new ObjectId();
         
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(likeService.isLiked(LikeType.COMMENT, commentId, userId)).willReturn(false);
+        given(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)).willReturn(false);
         
         // When
         UserInfo result = commentQueryService.getUserInfoAboutComment(commentId);
         
         // Then
         assertThat(result).isNotNull();
-        verify(likeService).isLiked(LikeType.COMMENT, commentId, userId);
+        verify(likeService).isLiked(LikeType.COMMENT, commentId.toString(), userId);
     }
     
     @Test
@@ -233,7 +233,7 @@ class CommentQueryServiceTest {
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(0);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(likeService.isLiked(eq(LikeType.COMMENT), any(), any())).willReturn(false);
+        given(likeService.isLiked(eq(LikeType.COMMENT), any(), (String) any())).willReturn(false);
         
         // When
         List<CommentResponseDTO> result = commentQueryService.getCommentsByPostId(new ObjectId().toString());

@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.email.service;
 
-import inu.codin.codin.domain.email.dto.JoinEmailCheckRequestDto;
-import inu.codin.codin.domain.email.dto.JoinEmailSendRequestDto;
+import inu.codin.codin.domain.email.dto.request.JoinEmailCheckRequestDto;
+import inu.codin.codin.domain.email.dto.request.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.entity.EmailAuthEntity;
 import inu.codin.codin.domain.email.exception.EmailAuthFailException;
 import inu.codin.codin.domain.email.repository.EmailAuthRepository;

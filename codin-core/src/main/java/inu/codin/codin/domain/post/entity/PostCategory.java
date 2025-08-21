@@ -21,6 +21,8 @@ public enum PostCategory {
     EXTRACURRICULAR_OUTER("비교과_교외"),
     EXTRACURRICULAR_INNER("비교과_교내"),
 
+    DEPARTMENT_NOTICE("학과_공지사항"),
+
     POLL("설문조사"),
 
     BOOKS_SELL("중고책_판매중"),

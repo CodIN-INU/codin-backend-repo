@@ -1,7 +1,7 @@
 package inu.codin.codin.infra.fcm.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
+import inu.codin.codin.infra.fcm.dto.request.FcmTokenRequest;
 import inu.codin.codin.infra.fcm.service.FcmService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.reply.dto.request;
 
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

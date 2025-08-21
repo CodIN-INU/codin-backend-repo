@@ -306,14 +306,14 @@ class PostQueryServiceTest {
         PostEntity post = createPostEntity();
         int expectedCount = 5;
         
-        given(likeService.getLikeCount(LikeType.POST, post.get_id())).willReturn(expectedCount);
+        given(likeService.getLikeCount(LikeType.POST, post.get_id().toString())).willReturn(expectedCount);
         
         // When
         int result = postQueryService.getLikeCount(post);
         
         // Then
         assertThat(result).isEqualTo(expectedCount);
-        verify(likeService).getLikeCount(LikeType.POST, post.get_id());
+        verify(likeService).getLikeCount(LikeType.POST, post.get_id().toString());
     }
     
     @Test
@@ -396,7 +396,7 @@ class PostQueryServiceTest {
         given(likeService.getLikeCount(any(), any())).willReturn(0);
         given(scrapService.getScrapCount(any())).willReturn(0);
         given(hitsService.getHitsCount(any())).willReturn(0);
-        given(likeService.isLiked(any(), any(), any())).willReturn(false);
+        given(likeService.isLiked(any(),any(), (ObjectId) any())).willReturn(false);
         given(scrapService.isPostScraped(any(), any())).willReturn(false);
     }
     

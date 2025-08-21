@@ -99,7 +99,7 @@ public class ReplyQueryService {
         return CommentResponseDTO.replyOf(
                 reply,
                 replyUserDto,
-                likeService.getLikeCount(LikeType.REPLY, reply.get_id()),
+                likeService.getLikeCount(LikeType.REPLY, reply.get_id().toString()),
                 getUserInfoAboutReply(reply.get_id())
         );
     }
@@ -107,7 +107,7 @@ public class ReplyQueryService {
     public UserInfo getUserInfoAboutReply(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.ofComment(
-                likeService.isLiked(LikeType.COMMENT, replyId, userId)
+                likeService.isLiked(LikeType.COMMENT, replyId.toString(), userId)
         );
     }
 

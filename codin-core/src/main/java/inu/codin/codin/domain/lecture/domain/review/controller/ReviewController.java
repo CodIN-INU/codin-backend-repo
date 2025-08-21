@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.lecture.domain.review.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.lecture.domain.review.dto.CreateReviewRequestDto;
+import inu.codin.codin.domain.lecture.domain.review.dto.request.CreateReviewRequestDto;
 import inu.codin.codin.domain.lecture.domain.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

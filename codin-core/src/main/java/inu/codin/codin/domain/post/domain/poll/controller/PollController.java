@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.post.domain.poll.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.service.PollCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

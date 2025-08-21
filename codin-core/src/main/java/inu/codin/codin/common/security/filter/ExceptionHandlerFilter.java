@@ -31,8 +31,10 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
+        } catch (IllegalArgumentException e) {
+            log.warn("[doFilterInternal] IllegalArgumentException msg: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("[doFilterInternal] Exception in ExceptionHandlerFilter: ", e);
+            log.warn("[doFilterInternal] Exception in ExceptionHandlerFilter: {}", e.getMessage());
             sendErrorResponse(response, SecurityErrorCode.INVALID_TOKEN);
         }
     }

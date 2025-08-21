@@ -8,7 +8,7 @@ import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
-import inu.codin.codin.infra.fcm.dto.FcmTokenRequest;
+import inu.codin.codin.infra.fcm.dto.request.FcmTokenRequest;
 import inu.codin.codin.infra.fcm.entity.FcmTokenEntity;
 import inu.codin.codin.infra.fcm.exception.FcmTokenNotFoundException;
 import inu.codin.codin.infra.fcm.repository.FcmTokenRepository;

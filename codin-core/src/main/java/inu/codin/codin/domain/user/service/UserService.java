@@ -15,7 +15,9 @@ import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
+import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
@@ -77,7 +79,7 @@ public class UserService {
                 log.info("[좋아요 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
                 List<PostEntity> postUserLike = likePage.getContent().stream()
-                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(likeEntity.getLikeTypeId())
+                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(new ObjectId(likeEntity.getLikeTypeId()))
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
@@ -186,6 +188,32 @@ public class UserService {
         log.info("[프로필 이미지 업데이트 성공] 사용자 ID: {}, 프로필 이미지 URL: {}", userId, profileImageUrl);
     }
 
+    /**
+     * 유저 티켓팅 수령 정보 반환
+     * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
+     */
+    public UserTicketingParticipationInfoResponse getUserTicketingParticipationInfo() {
+        return UserTicketingParticipationInfoResponse.of(
+                userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                        .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다.")));
+    }
+
+    /**
+     * 유저 티켓팅 수령 정보 수정 (생성)
+     * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
+     */
+    public UserTicketingParticipationInfoResponse updateUserTicketingParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
+        UserEntity userEntity = userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
+
+        userEntity.updateParticipationInfo(updateRequest);
+        userEntity = userRepository.save(userEntity);
+        return UserTicketingParticipationInfoResponse.of(userEntity);
+    }
+
+    /**
+     * 유저 도메인 상호작용 조회 Enum Class
+     */
     public enum InteractionType {
         LIKE, SCRAP, COMMENT
     }

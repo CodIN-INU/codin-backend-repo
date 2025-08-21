@@ -4,6 +4,10 @@ import inu.codin.codin.common.response.ExceptionResponse;
 import inu.codin.codin.common.security.exception.JwtException;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
+import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;
+import inu.codin.codin.domain.board.notice.exception.NoticeException;
+import inu.codin.codin.domain.board.question.exception.QuestionErrorCode;
+import inu.codin.codin.domain.board.question.exception.QuestionException;
 import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
 import inu.codin.codin.domain.chat.exception.ChatRoomException;
 import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
@@ -25,8 +29,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+        log.warn("[Exception] Class: {}, Error Message : {}, Stack Trace: {}",
+                e.getClass().getSimpleName(),
+                e.getMessage(),
+                e.getStackTrace()[0].toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @ExceptionHandler(GlobalException.class)
@@ -101,6 +109,26 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ExceptionResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(QuestionException.class)
+    protected ResponseEntity<ExceptionResponse> handleQuestionException(QuestionException e) {
+        QuestionErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(NoticeException.class)
+    protected ResponseEntity<ExceptionResponse> handleNoticeException(NoticeException e) {
+        NoticeErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
     }
 
 }
