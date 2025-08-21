@@ -96,7 +96,7 @@ public class LectureSummarizationService {
                         lecture.getGrade(),
                         lecture.getCredit(),
                         lecture.getProfessor(),
-                        lecture.getDepartment(),
+                        lecture.getDepartment().getDescription(),
                         lecture.getType(),
                         lecture.getLectureType(),
                         lecture.getEvaluation(),

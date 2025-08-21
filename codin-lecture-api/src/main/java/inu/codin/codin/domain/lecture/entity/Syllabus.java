@@ -166,79 +166,75 @@ public class Syllabus {
     @Column(name = "ref_book2_year")
     private String refBook2Year;
 
-    /**
-     * 강의계획서 전체 내용을 하나의 문자열로 합쳐 반환.
-     * null 값은 무시하고 공백으로 구분합니다.
-     */
     public String getFullText() {
         if (fullText == null) {
             StringBuilder sb = new StringBuilder();
 
-            appendIfNotNull(sb, college);
-            appendIfNotNull(sb, departmentName);
-            appendIfNotNull(sb, completionCategory);
-            appendIfNotNull(sb, completionArea);
-            appendIfNotNull(sb, courseCode);
-            appendIfNotNull(sb, timetableText);
-            appendIfNotNull(sb, classDivision);
-            appendIfNotNull(sb, classTypeText);
-            appendIfNotNull(sb, gradingText);
-            appendIfNotNull(sb, foreignLanguage != null && foreignLanguage ? "원어강의" : null);
+            appendIfNotNull(sb, "개설 대학/대학원명", college);
+            appendIfNotNull(sb, "개설 주체 학과(부)", departmentName);
+            appendIfNotNull(sb, "이수구분", completionCategory);
+            appendIfNotNull(sb, "이수영역", completionArea);
+            appendIfNotNull(sb, "학수번호", courseCode);
+            appendIfNotNull(sb, "시간표(교시)", timetableText);
+            appendIfNotNull(sb, "수업구분", classDivision);
+            appendIfNotNull(sb, "수업유형", classTypeText);
+            appendIfNotNull(sb, "성적평가", gradingText);
+            appendIfNotNull(sb, "원어강의 여부", foreignLanguage != null && foreignLanguage ? "원어강의" : null);
 
-            appendIfNotNull(sb, totalHours);
-            appendIfNotNull(sb, theoryHours);
-            appendIfNotNull(sb, practiceHours);
-            appendIfNotNull(sb, experimentHours);
+            appendIfNotNull(sb, "총 시수", totalHours);
+            appendIfNotNull(sb, "이론 시수", theoryHours);
+            appendIfNotNull(sb, "실습 시수", practiceHours);
+            appendIfNotNull(sb, "실험 시수", experimentHours);
 
-            appendIfNotNull(sb, overview);
-            appendIfNotNull(sb, objective);
-            appendIfNotNull(sb, assessmentMethod);
+            appendIfNotNull(sb, "강의 개요", overview);
+            appendIfNotNull(sb, "강의 목표", objective);
+            appendIfNotNull(sb, "평가 방법", assessmentMethod);
 
-            appendIfNotNull(sb, week01);
-            appendIfNotNull(sb, week02);
-            appendIfNotNull(sb, week03);
-            appendIfNotNull(sb, week04);
-            appendIfNotNull(sb, week05);
-            appendIfNotNull(sb, week06);
-            appendIfNotNull(sb, week07);
-            appendIfNotNull(sb, week08);
-            appendIfNotNull(sb, week09);
-            appendIfNotNull(sb, week10);
-            appendIfNotNull(sb, week11);
-            appendIfNotNull(sb, week12);
-            appendIfNotNull(sb, week13);
-            appendIfNotNull(sb, week14);
-            appendIfNotNull(sb, week15);
-            appendIfNotNull(sb, week16);
+            appendIfNotNull(sb, "1주차", week01);
+            appendIfNotNull(sb, "2주차", week02);
+            appendIfNotNull(sb, "3주차", week03);
+            appendIfNotNull(sb, "4주차", week04);
+            appendIfNotNull(sb, "5주차", week05);
+            appendIfNotNull(sb, "6주차", week06);
+            appendIfNotNull(sb, "7주차", week07);
+            appendIfNotNull(sb, "8주차", week08);
+            appendIfNotNull(sb, "9주차", week09);
+            appendIfNotNull(sb, "10주차", week10);
+            appendIfNotNull(sb, "11주차", week11);
+            appendIfNotNull(sb, "12주차", week12);
+            appendIfNotNull(sb, "13주차", week13);
+            appendIfNotNull(sb, "14주차", week14);
+            appendIfNotNull(sb, "15주차", week15);
+            appendIfNotNull(sb, "16주차", week16);
 
-            appendIfNotNull(sb, mainTextbook1Title);
-            appendIfNotNull(sb, mainTextbook1Author);
-            appendIfNotNull(sb, mainTextbook1Publisher);
-            appendIfNotNull(sb, mainTextbook1Year);
+            appendIfNotNull(sb, "주교재1 제목", mainTextbook1Title);
+            appendIfNotNull(sb, "주교재1 저자", mainTextbook1Author);
+            appendIfNotNull(sb, "주교재1 출판사", mainTextbook1Publisher);
+            appendIfNotNull(sb, "주교재1 출판년도", mainTextbook1Year);
 
-            appendIfNotNull(sb, refBook1Title);
-            appendIfNotNull(sb, refBook1Author);
-            appendIfNotNull(sb, refBook1Publisher);
-            appendIfNotNull(sb, refBook1Year);
+            appendIfNotNull(sb, "참고서적1 제목", refBook1Title);
+            appendIfNotNull(sb, "참고서적1 저자", refBook1Author);
+            appendIfNotNull(sb, "참고서적1 출판사", refBook1Publisher);
+            appendIfNotNull(sb, "참고서적1 출판년도", refBook1Year);
 
-            appendIfNotNull(sb, mainTextbook2Title);
-            appendIfNotNull(sb, mainTextbook2Author);
-            appendIfNotNull(sb, mainTextbook2Publisher);
-            appendIfNotNull(sb, mainTextbook2Year);
+            appendIfNotNull(sb, "주교재2 제목", mainTextbook2Title);
+            appendIfNotNull(sb, "주교재2 저자", mainTextbook2Author);
+            appendIfNotNull(sb, "주교재2 출판사", mainTextbook2Publisher);
+            appendIfNotNull(sb, "주교재2 출판년도", mainTextbook2Year);
 
-            appendIfNotNull(sb, refBook2Title);
-            appendIfNotNull(sb, refBook2Author);
-            appendIfNotNull(sb, refBook2Publisher);
-            appendIfNotNull(sb, refBook2Year);
+            appendIfNotNull(sb, "참고서적2 제목", refBook2Title);
+            appendIfNotNull(sb, "참고서적2 저자", refBook2Author);
+            appendIfNotNull(sb, "참고서적2 출판사", refBook2Publisher);
+            appendIfNotNull(sb, "참고서적2 출판년도", refBook2Year);
 
             fullText = sb.toString().trim();
         }
         return fullText;
     }
 
-    private void appendIfNotNull(StringBuilder sb, Object value) {
+    private void appendIfNotNull(StringBuilder sb, String label, Object value) {
         if (value != null) {
-            sb.append(value).append(" ");
+            sb.append(label).append(": ").append(value).append(" ");
         }
     }
 }
