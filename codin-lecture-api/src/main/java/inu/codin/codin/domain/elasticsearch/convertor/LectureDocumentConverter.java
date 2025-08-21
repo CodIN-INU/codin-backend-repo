@@ -35,7 +35,7 @@ public class LectureDocumentConverter {
                 .tags(toTagNames(lecture.getTags()))
                 .schedule(toScheduleInfos(lecture.getSchedule()))
                 .emotion(EmotionInfo.from(lecture.getEmotion()))
-                .syllabus(lecture.getSyllabus().getFullText())
+                .syllabus(lecture.getSyllabus() != null ? lecture.getSyllabus().getFullText() : null)
                 .aiSummary(lecture.getAiSummary())
                 .build();
     }
