@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.post.domain.poll;
 
-import com.mongodb.client.result.UpdateResult;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
@@ -83,15 +82,13 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createActivePollEntity();
         ObjectId userId = new ObjectId();
-        UpdateResult updateResult = mock(UpdateResult.class);
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         given(pollVoteRepository.save(any())).willReturn(createPollVoteEntity());
-        given(updateResult.getModifiedCount()).willReturn(1L);
-        given(pollRepository.incOption(poll.get_id(), 0)).willReturn(updateResult);
+        given(pollRepository.incOption(eq(poll.get_id()), eq(0))).willReturn(1L);
         
         // When & Then
         assertThatCode(() -> pollCommandService.votingPoll(postId, dto)).doesNotThrowAnyException();
@@ -209,14 +206,13 @@ class PollCommandServiceTest {
         
         PollEntity poll = createActivePollEntity();
         PollVoteEntity vote = createPollVoteEntity();
-        UpdateResult updateResult = mock(UpdateResult.class);
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)).willReturn(Optional.of(vote));
-        given(updateResult.getModifiedCount()).willReturn(1L);
-        given(pollRepository.dcrOptionIfPositive(poll.get_id(), 0)).willReturn(updateResult);
+        given(pollRepository.dcrOptionIfPositive(eq(poll.get_id()), eq(0))).willReturn(1L);
+
         doNothing().when(pollVoteRepository).delete(vote);
         
         // When & Then
