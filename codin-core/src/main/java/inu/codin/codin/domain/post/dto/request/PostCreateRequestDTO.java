@@ -7,9 +7,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@NoArgsConstructor
 public class PostCreateRequestDTO {
 
     @Schema(description = "게시물 제목", example = "Example")
@@ -29,13 +30,20 @@ public class PostCreateRequestDTO {
     private PostCategory postCategory;
     //STATUS 필드 - DEFAULT :: ACTIVE
 
+    public PostCreateRequestDTO(String title, String content, boolean anonymous, PostCategory postCategory) {
+        this.title = title;
+        this.content = content;
+        this.anonymous = anonymous;
+        this.postCategory = postCategory;
+    }
+
     public static PostCreateRequestDTO fromPoll(PollCreateRequestDTO pollCreateRequestDTO) {
-        return PostCreateRequestDTO.builder()
-                .postCategory(PostCategory.POLL)
-                .title(pollCreateRequestDTO.getTitle())
-                .content(pollCreateRequestDTO.getContent())
-                .anonymous(pollCreateRequestDTO.isAnonymous())
-                .build();
+        return new PostCreateRequestDTO(
+                pollCreateRequestDTO.getTitle(),
+                pollCreateRequestDTO.getContent(),
+                pollCreateRequestDTO.isAnonymous(),
+                PostCategory.POLL
+        );
     }
 
 }
