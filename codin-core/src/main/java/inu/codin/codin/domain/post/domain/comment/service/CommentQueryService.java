@@ -100,7 +100,7 @@ public class CommentQueryService {
         UserEntity user = userMap.get(comment.getUserId());
 
         // 댓글용 사용자 DTO 생성
-        UserDto commentUserDto = UserDto.ofComment(comment, user, anonNum ,defaultImageUrl);
+        UserDto commentUserDto = UserDto.forComment(comment, user, anonNum ,defaultImageUrl);
 
         return CommentResponseDTO.commentOf(
                 comment,
