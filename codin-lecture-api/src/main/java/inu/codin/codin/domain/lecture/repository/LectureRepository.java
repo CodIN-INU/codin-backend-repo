@@ -51,6 +51,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
         SELECT DISTINCT l FROM Lecture l
         LEFT JOIN FETCH l.tags
         LEFT JOIN FETCH l.reviews
+        LEFT JOIN FETCH l.syllabus
         WHERE l.id=:lectureId
     """)
     Optional<Lecture> findLectureWithTagsAndReviewsById(Long lectureId);
