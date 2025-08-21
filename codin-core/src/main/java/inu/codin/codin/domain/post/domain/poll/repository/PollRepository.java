@@ -17,9 +17,9 @@ public interface PollRepository extends MongoRepository<PollEntity, ObjectId> {
 
     @Query("{ '_id': ?0 }")
     @Update("{ '$inc' : { 'pollVotesCounts.?1' : 1 } }")
-    UpdateResult incOption(ObjectId pollId, int optionIndex);
+    long incOption(ObjectId pollId, int optionIndex);
 
     @Query("{ '_id': ?0, 'pollVotesCounts.?1': { $gte: 1 } }")
     @Update("{ '$inc' : { 'pollVotesCounts.?1' : -1 } }")
-    UpdateResult dcrOptionIfPositive(ObjectId pollId, int optionIndex);
+    long dcrOptionIfPositive(ObjectId pollId, int optionIndex);
 }

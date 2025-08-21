@@ -139,8 +139,8 @@ public class PollCommandService {
         final int size = poll.getPollOptions().size();
         selected.forEach(idx -> {
             validateIndex(size, idx);
-            UpdateResult result = pollRepository.incOption(poll.get_id(), idx);
-            if (result.getModifiedCount() == 0) {
+            long result = pollRepository.incOption(poll.get_id(), idx);
+            if (result == 0) {
                 log.warn("투표 증가 실패 - pollId: {}, optionIndex: {}", poll.get_id(), idx);
                 throw new PollException(PollErrorCode.POLL_VOTE_STATE_CONFLICT);
             }
@@ -151,8 +151,8 @@ public class PollCommandService {
         final int size = poll.getPollOptions().size();
         selected.forEach(idx -> {
             validateIndex(size, idx);
-            UpdateResult result = pollRepository.dcrOptionIfPositive(poll.get_id(), idx);
-            if (result.getModifiedCount() == 0) {
+            long result = pollRepository.dcrOptionIfPositive(poll.get_id(), idx);
+            if (result == 0) {
                 log.warn("투표 감소 실패 - pollId: {}, optionIndex: {}", poll.get_id(), idx);
                 throw new PollException(PollErrorCode.POLL_VOTE_STATE_CONFLICT);
             }
