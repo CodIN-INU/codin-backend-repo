@@ -45,6 +45,13 @@ public class PostCommandService {
         log.info("게시물 성공적으로 생성됨. UserId: {}, PostId: {} ", postEntity.get_id(), userId);
     }
 
+    public ObjectId createPostWithoutImagesAndReturn(PostCreateRequestDTO dto) {
+        ObjectId userId = validateUserAndPost(dto.getPostCategory());
+        PostEntity post = PostEntity.create(userId, dto, List.of());
+        PostEntity saved = postRepository.save(post);
+        return saved.get_id();
+    }
+
     /**
      * 게시글 내용 및 이미지 수정
      */
