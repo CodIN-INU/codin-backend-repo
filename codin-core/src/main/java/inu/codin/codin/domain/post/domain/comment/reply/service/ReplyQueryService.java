@@ -94,7 +94,7 @@ public class ReplyQueryService {
         UserEntity user = userMap.get(userId);
         int anonNum = postQueryService.getUserAnonymousNumber(postAnonymous, reply.getUserId());
 
-        UserDto replyUserDto = UserDto.ofReply(reply, user, anonNum, defaultImageUrl);
+        UserDto replyUserDto = UserDto.forReply(reply, user, anonNum, defaultImageUrl);
 
         return CommentResponseDTO.replyOf(
                 reply,

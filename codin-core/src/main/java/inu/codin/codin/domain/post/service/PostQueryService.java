@@ -177,7 +177,7 @@ public class PostQueryService
     private UserDto resolveUserProfile(PostEntity post) {
         UserEntity user = userRepository.findById(post.getUserId())
                 .orElseThrow(() -> new PostException(PostErrorCode.USER_NOT_FOUND));
-        return UserDto.ofPost(post, user, s3Service.getDefaultProfileImageUrl());
+        return UserDto.forPost(post, user, s3Service.getDefaultProfileImageUrl());
     }
 
     // [유저 프로필] - 게시물에 대한 유저정보 추출
