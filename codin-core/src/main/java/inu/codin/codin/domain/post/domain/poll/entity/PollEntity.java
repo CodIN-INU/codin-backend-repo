@@ -2,9 +2,7 @@ package inu.codin.codin.domain.post.domain.poll.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
