@@ -52,8 +52,6 @@ spring:
             filter:
               nori_readingform:
                 type: nori_readingform
-              nori_hanja_readingform:
-                type: nori_hanja_readingform
               autocomplete_filter:
                 type: edge_ngram
                 min_gram: 1
@@ -62,7 +60,7 @@ spring:
               nori:
                 type: custom
                 tokenizer: nori_tokenizer
-                filter: [ nori_readingform, nori_hanja_readingform, lowercase ]
+                filter: [ nori_readingform, lowercase ]
               nori_autocomplete:
                 type: custom
                 tokenizer: nori_tokenizer
