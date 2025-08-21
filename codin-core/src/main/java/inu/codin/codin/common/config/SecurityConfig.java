@@ -4,10 +4,9 @@ package inu.codin.codin.common.config;
 import inu.codin.codin.common.dto.PermitAllProperties;
 import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
-import inu.codin.codin.common.security.jwt.JwtTokenProvider;
-import inu.codin.codin.common.security.jwt.JwtUtils;
-import inu.codin.codin.common.security.service.AppleOAuth2UserService;
-import inu.codin.codin.common.security.service.CustomOAuth2UserService;
+import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.codin.common.security.service.oauth2.AppleOAuth2UserService;
+import inu.codin.codin.common.security.service.oauth2.CustomOAuth2UserService;
 import inu.codin.codin.common.security.util.*;
 import inu.codin.codin.common.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +51,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -117,7 +115,7 @@ public class SecurityConfig {
 //                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, jwtUtils, permitAllProperties),
+                        new JwtAuthenticationFilter(jwtService, permitAllProperties),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
@@ -170,6 +168,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
         return new HttpSessionOAuth2AuthorizationRequestRepository();
@@ -186,6 +185,7 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 BASEURL,
                 "https://front-end-peach-two.vercel.app",
+                "https://front-end-dun-mu.vercel.app",
                 "https://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "http://e876-2406-5900-1080-882f-b519-f7cf-62b3-4ba4.ngrok-free.app",
                 "https://appleid.apple.com"
@@ -196,7 +196,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "X-Requested-With",
                 "Accept",
-                "Cache-Control"
+                "Cache-Control",
+                "X-Refresh-Token"
         ));
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
@@ -215,10 +216,6 @@ public class SecurityConfig {
     // Admin 권한 URL
     private static final String[] ADMIN_AUTH_PATHS = {
             "/v3/api/test4",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/v3/api-docs",
-            "/swagger-resources/**"
     };
 
     // Manager 권한 URL

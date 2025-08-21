@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.domain.room.service;
 
-import inu.codin.codin.domain.lecture.domain.room.dto.EmptyRoomResponseDto;
+import inu.codin.codin.domain.lecture.domain.room.dto.response.EmptyRoomResponseDto;
 import inu.codin.codin.domain.lecture.domain.room.entity.LectureRoomEntity;
 import inu.codin.codin.domain.lecture.repository.LectureRepositoryCustomImpl;
 import lombok.RequiredArgsConstructor;

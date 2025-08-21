@@ -2,8 +2,8 @@ package inu.codin.codin.domain.post.domain.poll;
 
 import com.mongodb.client.result.UpdateResult;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.poll.dto.PollCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.poll.dto.PollVotingRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
 import inu.codin.codin.domain.post.domain.poll.entity.PollVoteEntity;
 import inu.codin.codin.domain.post.domain.poll.exception.PollException;

@@ -183,7 +183,7 @@ public class PostQueryService
     // [유저 프로필] - 게시물에 대한 유저정보 추출
     private UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId){
         return UserInfo.ofPost(
-                likeService.isLiked(LikeType.POST, postId, currentUserId),
+                likeService.isLiked(LikeType.POST, postId.toString(), currentUserId),
                 scrapService.isPostScraped(postId, currentUserId),
                 postUserId.equals(currentUserId)
         );
@@ -210,7 +210,7 @@ public class PostQueryService
 
     // [likeService] - 게시글 좋아요 수 조회
     public int getLikeCount(PostEntity post) {
-        return likeService.getLikeCount(LikeType.POST, post.get_id());
+        return likeService.getLikeCount(LikeType.POST, post.get_id().toString());
     }
 
     // [ScrapService] - 게시글 스크랩 수 조회

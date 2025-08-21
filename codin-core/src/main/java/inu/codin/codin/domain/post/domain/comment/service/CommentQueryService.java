@@ -106,7 +106,7 @@ public class CommentQueryService {
                 comment,
                 commentUserDto,
                 replyQueryService.getRepliesByCommentId(postAnonymous, comment.get_id()),
-                likeService.getLikeCount(LikeType.COMMENT, comment.get_id()),
+                likeService.getLikeCount(LikeType.COMMENT, comment.get_id().toString()),
                 getUserInfoAboutComment(comment.get_id())
         );
     }
@@ -115,7 +115,7 @@ public class CommentQueryService {
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.ofComment(
-                likeService.isLiked(LikeType.COMMENT, commentId, userId)
+                likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)
         );
     }
     /**

@@ -7,8 +7,11 @@ import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.schedular.exception.SchedulerErrorCode;
 import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,18 +20,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "posts")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class PostEntity extends BaseTimeEntity {
-    @Id @NotBlank
+    @Id @NotNull
     private ObjectId _id;
 
-    private final ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
-    private final String title;
+    @NotNull
+    private ObjectId userId; // User 엔티티와의 관계를 유지하기 위한 필드
+    @NotBlank
+    private String title;
+    @NotBlank
     private String content;
     private List<String> postImageUrls;
     private boolean isAnonymous;
 
-    private final PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
+    @NotNull
+    private PostCategory postCategory; // Enum('구해요', '소통해요', '비교과', ...)
+    @NotNull
     private PostStatus postStatus; // Enum(ACTIVE, DISABLED, SUSPENDED)
 
     private int commentCount = 0; // 댓글 + 대댓글 카운트
@@ -57,6 +66,12 @@ public class PostEntity extends BaseTimeEntity {
                 dto.isAnonymous(),
                 PostStatus.ACTIVE
         );
+    }
+
+    public void updateNotice(String title, String content, List<String> postImageUrls) {
+        this.title = title;
+        this.content = content;
+        this.postImageUrls.addAll(postImageUrls);
     }
 
     public void updatePostContent(String content, List<String> postImageUrls) {

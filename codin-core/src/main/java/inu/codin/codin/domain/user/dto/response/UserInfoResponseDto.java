@@ -11,15 +11,17 @@ import lombok.Setter;
 public class UserInfoResponseDto {
     private String _id;
     private String email;
+    private String studentId;
     private String name;
     private String profileImageUrl;
     private String nickname;
     private Department department;
 
     @Builder
-    public UserInfoResponseDto(String _id, String email, String name, String profileImageUrl, String nickname, Department department) {
+    public UserInfoResponseDto(String _id, String email, String studentId, String name, String profileImageUrl, String nickname, Department department) {
         this._id = _id;
         this.email = email;
+        this.studentId = studentId;
         this.name = name;
         this.profileImageUrl = profileImageUrl;
         this.nickname = nickname;
@@ -30,6 +32,7 @@ public class UserInfoResponseDto {
         return UserInfoResponseDto.builder()
                 ._id(user.get_id().toString())
                 .email(user.getEmail())
+                .studentId(user.getStudentId())
                 .name(user.getName())
                 .profileImageUrl(user.getProfileImageUrl())
                 .nickname(user.getNickname())

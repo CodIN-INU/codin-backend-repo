@@ -3,6 +3,7 @@ package inu.codin.codin.common.security.controller;
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.service.AuthCommonService;
+import inu.codin.codin.common.security.service.AuthSessionService;
 import inu.codin.codin.common.security.service.JwtService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +27,13 @@ public class AuthController {
 
     private final JwtService jwtService;
     private final AuthCommonService authCommonService;
+    private final AuthSessionService authSessionService;
 
     @GetMapping("/google")
-    public ResponseEntity<SingleResponse<?>> googleLogin(HttpServletResponse response) throws IOException {
+    public ResponseEntity<SingleResponse<?>> googleLogin(
+            HttpServletResponse response,
+            @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
+        authSessionService.setSession(redirect_url);
         response.sendRedirect("/api/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
@@ -57,10 +62,9 @@ public class AuthController {
 
     @Operation(summary = "회원 정보 입력 마무리")
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>> completeUserProfile(
-            @RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
-            @RequestPart(value = "userImage", required = false) MultipartFile userImage,
-            HttpServletResponse response) {
+    public ResponseEntity<SingleResponse<?>> completeUserProfile(@RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
+                                                                @RequestPart(value = "userImage", required = false) MultipartFile userImage,
+                                                                HttpServletResponse response) {
         authCommonService.completeUserProfile(userProfileRequestDto, userImage, response);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "회원 정보 입력 마무리 성공", null));
@@ -73,10 +77,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<SingleResponse<?>> portalSignUp(@RequestBody @Valid SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
         authCommonService.login(signUpAndLoginRequestDto, response);
-
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "로그인 성공", "기존 유저 로그인 완료"));
-
     }
 
     @Operation(summary = "로그아웃")
@@ -89,7 +91,7 @@ public class AuthController {
     @Operation(summary = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        jwtService.reissueToken(request, response);
+        jwtService.checkRefreshTokenAndReissue(request, response);
         return ResponseEntity.ok().body(new SingleResponse<>(200, "토큰 재발급 성공", null));
     }
 }
