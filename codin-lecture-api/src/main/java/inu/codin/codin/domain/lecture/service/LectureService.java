@@ -81,7 +81,8 @@ public class LectureService {
         lecture.increaseHits();
         Emotion emotion = emotionService.getOrMakeEmotion(lecture);
 
-        lectureElasticService.incrementHits(lectureId);
+        // type must not be null 오류 발생
+//        lectureElasticService.incrementHits(lectureId);
 
         return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }
