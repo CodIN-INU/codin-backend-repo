@@ -15,6 +15,7 @@ import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -52,7 +53,8 @@ public class LectureStartupIndexer {
         }
 
         log.info("ElasticSearch lectures 인덱스를 생성합니다.");
-        indexOps.create();
+        Map<String, Object> settings = createSetting();
+        indexOps.create(settings);
         indexOps.putMapping(indexOps.createMapping(LectureDocument.class));
         log.info("ElasticSearch lectures 인덱스 및 매핑 생성 완료.");
     }
@@ -85,5 +87,40 @@ public class LectureStartupIndexer {
         elasticsearchOperations.indexOps(LectureDocument.class).refresh();
 
         return totalProcessed;
+    }
+
+    private Map<String, Object> createSetting() {
+        return Map.of(
+                "analysis", Map.of(
+                        "tokenizer", Map.of(
+                                "nori_tokenizer", Map.of(
+                                        "type", "nori_tokenizer",
+                                        "decompound_mode", "mixed"
+                                )
+                        ),
+                        "filter", Map.of(
+                                "nori_readingform", Map.of(
+                                        "type", "nori_readingform"
+                                ),
+                                "autocomplete_filter", Map.of(
+                                        "type", "edge_ngram",
+                                        "min_gram", 1,
+                                        "max_gram", 20
+                                )
+                        ),
+                        "analyzer", Map.of(
+                                "nori", Map.of(
+                                        "type", "custom",
+                                        "tokenizer", "nori_tokenizer",
+                                        "filter", List.of("nori_readingform", "lowercase")
+                                ),
+                                "nori_autocomplete", Map.of(
+                                        "type", "custom",
+                                        "tokenizer", "nori_tokenizer",
+                                        "filter", List.of("nori_readingform", "autocomplete_filter", "lowercase")
+                                )
+                        )
+                )
+        );
     }
 }
