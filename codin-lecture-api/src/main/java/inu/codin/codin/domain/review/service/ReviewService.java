@@ -4,7 +4,6 @@ package inu.codin.codin.domain.review.service;
 import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
-import inu.codin.codin.domain.lecture.event.LectureSummarizationEvent;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
 import inu.codin.codin.domain.lecture.repository.LectureRepository;
@@ -24,7 +23,6 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -47,7 +45,6 @@ public class ReviewService {
     private final UserReviewStatsService userReviewStatsService;
     private final SemesterService semesterService;
 
-    private final ApplicationEventPublisher publisher;
 
     /**
      * 새로운 강의 후기 작성
@@ -71,7 +68,6 @@ public class ReviewService {
         updateRating(lecture, createReviewRequestDto.getStarRating()); //과목의 평점 업데이트
         userReviewStatsService.updateStats(userId); //유저의 리뷰 작성 현황 업데이트
 
-        publisher.publishEvent(new LectureSummarizationEvent(lectureId));
         log.info("새로운 강의 후기 저장 - lectureId : {} userId : {}", lectureId, userId);
     }
 

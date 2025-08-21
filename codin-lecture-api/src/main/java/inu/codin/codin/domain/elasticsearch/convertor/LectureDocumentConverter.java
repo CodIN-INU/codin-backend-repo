@@ -17,7 +17,6 @@ import java.util.Set;
 public class LectureDocumentConverter {
 
     public LectureDocument convertToDocument(Lecture lecture) {
-
         return LectureDocument.builder()
                 .id(lecture.getId())
                 .lectureNm(lecture.getLectureNm())
@@ -28,7 +27,7 @@ public class LectureDocumentConverter {
                 .type(lecture.getType() != null ? lecture.getType().name() : null)
                 .lectureType(lecture.getLectureType())
                 .evaluation(lecture.getEvaluation() != null ? lecture.getEvaluation().name() : null)
-                .preCourses(toPreCourses(lecture.getPreCourse()))
+                .preCourses(lecture.getPreCourse())
                 .starRating(lecture.getStarRating())
                 .likes(lecture.getLikes())
                 .hits(lecture.getHits())
@@ -36,7 +35,7 @@ public class LectureDocumentConverter {
                 .tags(toTagNames(lecture.getTags()))
                 .schedule(toScheduleInfos(lecture.getSchedule()))
                 .emotion(EmotionInfo.from(lecture.getEmotion()))
-                .syllabus(lecture.getSyllabus())
+                .syllabus(lecture.getSyllabus().getFullText())
                 .aiSummary(lecture.getAiSummary())
                 .build();
     }
