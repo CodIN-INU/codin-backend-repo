@@ -1,13 +1,13 @@
-package inu.codin.codin.domain.post.domain.reply;
+package inu.codin.codin.domain.post.domain.comment.reply;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.reply.exception.ReplyException;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyQueryService;
+import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.reply.exception.ReplyException;
+import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.service.PostQueryService;

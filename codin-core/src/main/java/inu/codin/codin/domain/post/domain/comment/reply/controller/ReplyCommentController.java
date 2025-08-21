@@ -1,9 +1,9 @@
-package inu.codin.codin.domain.post.domain.reply.controller;
+package inu.codin.codin.domain.post.domain.comment.reply.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyCommandService;
+import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

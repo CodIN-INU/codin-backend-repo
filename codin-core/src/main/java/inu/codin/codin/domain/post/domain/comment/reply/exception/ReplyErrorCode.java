@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.reply.exception;
+package inu.codin.codin.domain.post.domain.comment.reply.exception;
 
 import inu.codin.codin.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;

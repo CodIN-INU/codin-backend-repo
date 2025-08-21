@@ -6,9 +6,9 @@ import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDT
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyQueryService;
+import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;

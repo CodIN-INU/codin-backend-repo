@@ -9,7 +9,7 @@ import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.exception.CommentErrorCode;
 import inu.codin.codin.domain.post.domain.comment.exception.CommentException;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.reply.service.ReplyQueryService;
+import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.UserDto;
 import inu.codin.codin.domain.post.dto.UserInfo;
 import inu.codin.codin.domain.post.entity.PostAnonymous;

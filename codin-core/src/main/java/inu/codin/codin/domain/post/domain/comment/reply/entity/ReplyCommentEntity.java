@@ -1,8 +1,7 @@
-package inu.codin.codin.domain.post.domain.reply.entity;
+package inu.codin.codin.domain.post.domain.comment.reply.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyCreateRequestDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;

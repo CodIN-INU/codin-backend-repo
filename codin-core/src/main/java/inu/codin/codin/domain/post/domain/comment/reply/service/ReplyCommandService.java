@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.domain.reply.service;
+package inu.codin.codin.domain.post.domain.comment.reply.service;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
@@ -6,10 +6,10 @@ import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyCreateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.dto.request.ReplyUpdateRequestDTO;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyCreateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyUpdateRequestDTO;
+import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
