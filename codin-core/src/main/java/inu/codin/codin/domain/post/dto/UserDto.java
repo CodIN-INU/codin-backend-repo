@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.dto;
 
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
-import inu.codin.codin.domain.post.domain.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import lombok.Builder;
