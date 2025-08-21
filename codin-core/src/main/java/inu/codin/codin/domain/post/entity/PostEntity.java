@@ -32,7 +32,7 @@ public class PostEntity extends BaseTimeEntity {
     private String title;
     @NotBlank
     private String content;
-    private List<String> postImageUrls;
+    private List<String> postImageUrls = new ArrayList<>();
     private boolean isAnonymous;
 
     @NotNull
@@ -62,7 +62,7 @@ public class PostEntity extends BaseTimeEntity {
                 dto.getPostCategory(),
                 dto.getTitle(),
                 dto.getContent(),
-                imageUrls != null ? new ArrayList<>(imageUrls) : new ArrayList<>(),
+                imageUrls,
                 dto.isAnonymous(),
                 PostStatus.ACTIVE
         );
