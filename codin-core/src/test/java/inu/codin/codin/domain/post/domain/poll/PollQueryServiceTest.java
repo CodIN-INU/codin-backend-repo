@@ -9,6 +9,7 @@ import inu.codin.codin.domain.post.domain.poll.service.PollQueryService;
 import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.entity.PostStatus;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -183,98 +184,85 @@ class PollQueryServiceTest {
         PostEntity post = PostEntity.builder()
                 .userId(new ObjectId())
                 .postCategory(PostCategory.POLL)
+                .postStatus(PostStatus.ACTIVE)
+                .isAnonymous(false)
                 .build();
         setIdFieldSafely(post, new ObjectId());
         return post;
     }
     
     private PollEntity createActivePollEntity() {
-        PollEntity poll = PollEntity.builder()
-                .postId(new ObjectId())
-                .pollOptions(Arrays.asList("선택지1", "선택지2", "선택지3"))
-                .pollEndTime(LocalDateTime.now().plusDays(1))
-                .multipleChoice(false)
-                .build();
+        PollEntity poll = new PollEntity(
+                new ObjectId(),
+                Arrays.asList("선택지1", "선택지2", "선택지3"),
+                LocalDateTime.now().plusDays(1),
+                false
+        );
         setIdFieldSafely(poll, new ObjectId());
         
-        // 행위로 상태 만들기 - vote() 메서드로 투표 수 쌓기
-        poll.vote(0); // 선택지1에 2표
-        poll.vote(0);
-        poll.vote(1); // 선택지2에 1표
-        poll.vote(2); // 선택지3에 2표
-        poll.vote(2);
+        // 원자적 연산으로 리팩터링된 PollEntity는 초기 0값으로 생성
         
         return poll;
     }
     
     private PollEntity createExpiredPollEntity() {
-        PollEntity poll = PollEntity.builder()
-                .postId(new ObjectId())
-                .pollOptions(Arrays.asList("선택지1", "선택지2"))
-                .pollEndTime(LocalDateTime.now().minusDays(1)) // 과거 시간
-                .multipleChoice(false)
-                .build();
+        PollEntity poll = new PollEntity(
+                new ObjectId(),
+                Arrays.asList("선택지1", "선택지2"),
+                LocalDateTime.now().minusDays(1), // 과거 시간
+                false
+        );
         setIdFieldSafely(poll, new ObjectId());
         
-        // 행위로 상태 만들기 - vote() 메서드로 투표 수 쌓기
-        for (int i = 0; i < 5; i++) {
-            poll.vote(0); // 선택지1에 5표
-            poll.vote(1); // 선택지2에 5표
-        }
+        // 원자적 연산으로 리팩터링된 PollEntity는 초기 0값으로 생성
         
         return poll;
     }
     
     private PollEntity createMultipleChoicePollEntity() {
-        PollEntity poll = PollEntity.builder()
-                .postId(new ObjectId())
-                .pollOptions(Arrays.asList("옵션1", "옵션2", "옵션3", "옵션4"))
-                .pollEndTime(LocalDateTime.now().plusHours(12))
-                .multipleChoice(true) // 복수 선택 허용
-                .build();
+        PollEntity poll = new PollEntity(
+                new ObjectId(),
+                Arrays.asList("옵션1", "옵션2", "옵션3", "옵션4"),
+                LocalDateTime.now().plusHours(12),
+                true // 복수 선택 허용
+        );
         setIdFieldSafely(poll, new ObjectId());
         
-        // 행위로 상태 만들기 - vote() 메서드로 투표 수 쌓기
-        poll.vote(0); poll.vote(0); poll.vote(0); // 옵션1에 3표
-        poll.vote(1); poll.vote(1);               // 옵션2에 2표
-        poll.vote(2); poll.vote(2); poll.vote(2); poll.vote(2); // 옵션3에 4표
-        poll.vote(3);                             // 옵션4에 1표
+        // 원자적 연산으로 리팩터링된 PollEntity는 초기 0값으로 생성
         
         return poll;
     }
     
     private PollEntity createPollEntityWithoutEndTime() {
-        PollEntity poll = PollEntity.builder()
-                .postId(new ObjectId())
-                .pollOptions(Arrays.asList("A", "B"))
-                .pollEndTime(null) // 종료 시간 없음
-                .multipleChoice(false)
-                .build();
+        PollEntity poll = new PollEntity(
+                new ObjectId(),
+                Arrays.asList("A", "B"),
+                null, // 종료 시간 없음
+                false
+        );
         setIdFieldSafely(poll, new ObjectId());
         
-        // 행위로 상태 만들기 - vote() 메서드로 투표 수 쌓기
-        poll.vote(0); // A에 1표
-        poll.vote(1); // B에 1표
+        // 원자적 연산으로 리팩터링된 PollEntity는 초기 0값으로 생성
         
         return poll;
     }
     
     private PollVoteEntity createPollVoteEntity() {
-        PollVoteEntity vote = PollVoteEntity.builder()
-                .pollId(new ObjectId())
-                .userId(new ObjectId())
-                .selectedOptions(Arrays.asList(0)) // 첫 번째 선택지 선택
-                .build();
+        PollVoteEntity vote = new PollVoteEntity(
+                new ObjectId(),
+                new ObjectId(),
+                Arrays.asList(0) // 첫 번째 선택지 선택
+        );
         setIdFieldSafely(vote, new ObjectId());
         return vote;
     }
     
     private PollVoteEntity createMultipleVoteEntity() {
-        PollVoteEntity vote = PollVoteEntity.builder()
-                .pollId(new ObjectId())
-                .userId(new ObjectId())
-                .selectedOptions(Arrays.asList(0, 2)) // 복수 선택
-                .build();
+        PollVoteEntity vote = new PollVoteEntity(
+                new ObjectId(),
+                new ObjectId(),
+                Arrays.asList(0, 2) // 복수 선택
+        );
         setIdFieldSafely(vote, new ObjectId());
         return vote;
     }
