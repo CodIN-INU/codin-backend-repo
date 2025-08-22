@@ -59,6 +59,9 @@ public class PostsScheduler {
             }
 
         } catch (IOException | InterruptedException e) {
+            // TODO: InterruptedException 발생 시 현재 스레드 인터럽트 플래그 복구 필요
+            //   - Thread.currentThread().interrupt(); 호출 후 적절히 종료 처리
+            //   - 단순히 예외 변환만 하면 종료/재시작 시 스레드가 정상적으로 중단되지 않을 수 있음
             log.error("[PostsScheduler] {} 실행 중 오류: {}", taskName, e.getMessage(), e);
             throw new SchedulerException(SchedulerErrorCode.SCHEDULER_INTERRUPT_ERROR);
         }
