@@ -2,26 +2,20 @@ package inu.codin.codin.domain.post;
 
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
-import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestService;
-import inu.codin.codin.domain.post.domain.hits.service.HitsService;
-import inu.codin.codin.domain.post.domain.poll.service.PollQueryService;
 import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.post.dto.response.PollInfoResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
+import inu.codin.codin.domain.post.entity.PostStatus;
+import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.exception.PostException;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostInteractionService;
 import inu.codin.codin.domain.post.service.PostQueryService;
-import inu.codin.codin.domain.scrap.service.ScrapService;
-import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.s3.S3Service;
+import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,15 +36,10 @@ class PostQueryServiceTest {
     private PostQueryService postQueryService;
     
     @Mock private PostRepository postRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private PollQueryService pollQueryService;
     @Mock private BlockService blockService;
     @Mock private PostInteractionService postInteractionService;
     @Mock private BestService bestService;
-    @Mock private ScrapService scrapService;
-    @Mock private LikeService likeService;
-    @Mock private S3Service s3Service;
-    @Mock private HitsService hitsService;
+    @Mock private PostDtoAssembler postDtoAssembler;
     
     private static AutoCloseable securityUtilsMock;
     
@@ -71,12 +60,11 @@ class PostQueryServiceTest {
         List<PostEntity> posts = Arrays.asList(createPostEntity(), createPostEntity());
         Page<PostEntity> page = new PageImpl<>(posts, PageRequest.of(0, 20), 2);
         
+        List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(createMockPostPageItemResponseDTO(), createMockPostPageItemResponseDTO());
+        
         given(blockService.getBlockedUsers()).willReturn(blockedUsers);
         given(postRepository.getPostsByCategoryWithBlockedUsers(anyString(), anyList(), any(PageRequest.class))).willReturn(page);
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(postDtoAssembler.toPageItemList(posts)).willReturn(mockDtoList);
         
         // When
         PostPageResponse response = postQueryService.getAllPosts(PostCategory.COMMUNICATION, 0);
@@ -85,16 +73,19 @@ class PostQueryServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getContents()).hasSize(2);
         verify(postRepository).getPostsByCategoryWithBlockedUsers(eq("COMMUNICATION"), eq(blockedUsers), any(PageRequest.class));
+        verify(postDtoAssembler).toPageItemList(posts);
     }
     
     @Test
     void getAllPosts_빈결과_빈리스트반환() {
         // Given
         List<ObjectId> blockedUsers = new ArrayList<>();
-        Page<PostEntity> emptyPage = new PageImpl<>(new ArrayList<>(), PageRequest.of(0, 20), 0);
+        List<PostEntity> emptyPosts = new ArrayList<>();
+        Page<PostEntity> emptyPage = new PageImpl<>(emptyPosts, PageRequest.of(0, 20), 0);
         
         given(blockService.getBlockedUsers()).willReturn(blockedUsers);
         given(postRepository.getPostsByCategoryWithBlockedUsers(anyString(), anyList(), any(PageRequest.class))).willReturn(emptyPage);
+        given(postDtoAssembler.toPageItemList(emptyPosts)).willReturn(new ArrayList<>());
         
         // When
         PostPageResponse response = postQueryService.getAllPosts(PostCategory.COMMUNICATION, 0);
@@ -102,6 +93,7 @@ class PostQueryServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response.getContents()).isEmpty();
+        verify(postDtoAssembler).toPageItemList(emptyPosts);
     }
     
     @Test
@@ -110,12 +102,11 @@ class PostQueryServiceTest {
         String postId = new ObjectId().toString();
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
+        PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
         
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
+        given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
         
         // When
@@ -123,8 +114,8 @@ class PostQueryServiceTest {
         
         // Then
         assertThat(response).isNotNull();
-        assertThat(response.getPost()).isNotNull();
         verify(postInteractionService).increaseHits(post, userId);
+        verify(postDtoAssembler).toPageItem(post, userId);
     }
     
     @Test
@@ -145,12 +136,11 @@ class PostQueryServiceTest {
         ObjectId postId = new ObjectId();
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
+        PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
         
         given(postRepository.findByIdAndNotDeleted(postId)).willReturn(Optional.of(post));
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
+        given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
         
         // When
@@ -159,6 +149,7 @@ class PostQueryServiceTest {
         // Then
         assertThat(response).isPresent();
         verify(postInteractionService).increaseHits(post, userId);
+        verify(postDtoAssembler).toPageItem(post, userId);
     }
     
     @Test
@@ -183,13 +174,11 @@ class PostQueryServiceTest {
         List<ObjectId> blockedUsers = new ArrayList<>();
         List<PostEntity> posts = Arrays.asList(createPostEntity());
         Page<PostEntity> page = new PageImpl<>(posts, PageRequest.of(0, 20), 1);
+        List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(createMockPostPageItemResponseDTO());
         
         given(blockService.getBlockedUsers()).willReturn(blockedUsers);
         given(postRepository.findAllByKeywordAndDeletedAtIsNull(anyString(), anyList(), any(PageRequest.class))).willReturn(page);
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(postDtoAssembler.toPageItemList(posts)).willReturn(mockDtoList);
         
         // When
         PostPageResponse response = postQueryService.searchPosts(keyword, 0);
@@ -198,6 +187,7 @@ class PostQueryServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getContents()).hasSize(1);
         verify(postRepository).findAllByKeywordAndDeletedAtIsNull(eq(keyword), eq(blockedUsers), any(PageRequest.class));
+        verify(postDtoAssembler).toPageItemList(posts);
     }
     
     @Test
@@ -208,13 +198,15 @@ class PostQueryServiceTest {
             new ObjectId().toString(),
             new ObjectId().toString()
         );
+        List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(
+            createMockPostPageItemResponseDTO(), 
+            createMockPostPageItemResponseDTO(), 
+            createMockPostPageItemResponseDTO()
+        );
         
         given(bestService.getTop3BestPostIds()).willReturn(bestPostIds);
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(createPostEntity()));
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(postDtoAssembler.toPageItemList(anyList())).willReturn(mockDtoList);
         
         // When
         List<PostPageItemResponseDTO> response = postQueryService.getTop3BestPosts();
@@ -222,6 +214,7 @@ class PostQueryServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response).hasSize(3);
+        verify(postDtoAssembler).toPageItemList(anyList());
     }
     
     @Test
@@ -231,14 +224,13 @@ class PostQueryServiceTest {
         String invalidPostId = new ObjectId().toString();
         List<String> bestPostIds = Arrays.asList(validPostId, invalidPostId);
         
+        List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(createMockPostPageItemResponseDTO());
+        
         given(bestService.getTop3BestPostIds()).willReturn(bestPostIds);
         given(postRepository.findByIdAndNotDeleted(any()))
             .willReturn(Optional.of(createPostEntity()))  // 첫 번째 호출은 성공
             .willReturn(Optional.empty());               // 두 번째 호출은 실패
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(postDtoAssembler.toPageItemList(anyList())).willReturn(mockDtoList);
         doNothing().when(bestService).deleteBestPost(invalidPostId);
         
         // When
@@ -247,6 +239,7 @@ class PostQueryServiceTest {
         // Then
         assertThat(response).hasSize(1);
         verify(bestService).deleteBestPost(invalidPostId);
+        verify(postDtoAssembler).toPageItemList(anyList());
     }
     
     @Test
@@ -256,12 +249,11 @@ class PostQueryServiceTest {
         List<BestEntity> bestEntities = Arrays.asList(createBestEntity(), createBestEntity());
         Page<BestEntity> page = new PageImpl<>(bestEntities, PageRequest.of(0, 20), 2);
         
+        List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(createMockPostPageItemResponseDTO(), createMockPostPageItemResponseDTO());
+        
         given(bestService.getBestEntities(pageNumber)).willReturn(page);
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(createPostEntity()));
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        mockUserInteractionServices();
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(postDtoAssembler.toPageItemList(anyList())).willReturn(mockDtoList);
         
         // When
         PostPageResponse response = postQueryService.getBestPosts(pageNumber);
@@ -270,6 +262,7 @@ class PostQueryServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getContents()).hasSize(2);
         verify(bestService).getBestEntities(pageNumber);
+        verify(postDtoAssembler).toPageItemList(anyList());
     }
     
     @Test
@@ -301,54 +294,6 @@ class PostQueryServiceTest {
     }
     
     @Test
-    void getLikeCount_좋아요수조회_성공() {
-        // Given
-        PostEntity post = createPostEntity();
-        int expectedCount = 5;
-        
-        given(likeService.getLikeCount(LikeType.POST, post.get_id().toString())).willReturn(expectedCount);
-        
-        // When
-        int result = postQueryService.getLikeCount(post);
-        
-        // Then
-        assertThat(result).isEqualTo(expectedCount);
-        verify(likeService).getLikeCount(LikeType.POST, post.get_id().toString());
-    }
-    
-    @Test
-    void getScrapCount_스크랩수조회_성공() {
-        // Given
-        PostEntity post = createPostEntity();
-        int expectedCount = 3;
-        
-        given(scrapService.getScrapCount(post.get_id())).willReturn(expectedCount);
-        
-        // When
-        int result = postQueryService.getScrapCount(post);
-        
-        // Then
-        assertThat(result).isEqualTo(expectedCount);
-        verify(scrapService).getScrapCount(post.get_id());
-    }
-    
-    @Test
-    void getHitsCount_조회수조회_성공() {
-        // Given
-        PostEntity post = createPostEntity();
-        int expectedCount = 10;
-        
-        given(hitsService.getHitsCount(post.get_id())).willReturn(expectedCount);
-        
-        // When
-        int result = postQueryService.getHitsCount(post);
-        
-        // Then
-        assertThat(result).isEqualTo(expectedCount);
-        verify(hitsService).getHitsCount(post.get_id());
-    }
-    
-    @Test
     void getUserAnonymousNumber_익명번호조회_성공() {
         // Given
         ObjectId userId = new ObjectId();
@@ -365,45 +310,19 @@ class PostQueryServiceTest {
         verify(postAnonymous).getAnonNumber(userId);
     }
     
-    @Test
-    void toPageItemDTO_Poll게시물_PollInfo포함() {
-        // Given
-        PostEntity pollPost = PostEntity.builder()
-                .userId(new ObjectId())
-                .postCategory(PostCategory.POLL)
-                .build();
-        setIdField(pollPost, new ObjectId());
-        ObjectId userId = new ObjectId();
-        PollInfoResponseDTO pollInfo = mock(PollInfoResponseDTO.class);
-        
-        given(userRepository.findById(any())).willReturn(Optional.of(createUserEntity()));
-        given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(pollQueryService.getPollInfo(pollPost, userId)).willReturn(pollInfo);
-        mockUserInteractionServices();
-        
-        // When
-        PostPageItemResponseDTO result = postQueryService.getPostListResponseDtos(Arrays.asList(pollPost)).get(0);
-        
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getPoll()).isEqualTo(pollInfo);
-        verify(pollQueryService).getPollInfo(pollPost, userId);
-    }
     
     // Helper methods
-    private void mockUserInteractionServices() {
-        given(likeService.getLikeCount(any(), any())).willReturn(0);
-        given(scrapService.getScrapCount(any())).willReturn(0);
-        given(hitsService.getHitsCount(any())).willReturn(0);
-        given(likeService.isLiked(any(),any(), (ObjectId) any())).willReturn(false);
-        given(scrapService.isPostScraped(any(), any())).willReturn(false);
+    private PostPageItemResponseDTO createMockPostPageItemResponseDTO() {
+        return PostPageItemResponseDTO.of(null, null);
     }
     
     private PostEntity createPostEntity() {
         PostEntity post = PostEntity.builder()
                 .userId(new ObjectId())
                 .postCategory(PostCategory.COMMUNICATION)
+                .title("Test Post")
+                .content("Test Content")
+                .postStatus(PostStatus.ACTIVE)
                 .isAnonymous(false)
                 .build();
         setIdField(post, new ObjectId());
