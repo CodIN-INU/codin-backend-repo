@@ -129,15 +129,6 @@ public class PostQueryService
     }
 
     /**
-     * 게시물 리스트 DTO 변환 (불변 리스트) - 다른 서비스와의 호환성을 위해 유지(userSerice)
-     * @deprecated 내부적으로는 PostDtoAssembler 사용을 권장
-     */
-    @Deprecated
-    public List<PostPageItemResponseDTO> getPostListResponseDtos(List<PostEntity> posts) {
-        return postDtoAssembler.toPageItemList(posts);
-    }
-
-    /**
      * 유저의 익명 번호 조회
      */
     public Integer getUserAnonymousNumber(PostAnonymous postAnonymous, ObjectId userId) {
