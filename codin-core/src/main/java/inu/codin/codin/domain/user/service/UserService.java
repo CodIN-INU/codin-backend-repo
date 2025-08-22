@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
@@ -48,7 +49,7 @@ public class UserService {
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
 
-    private final PostQueryService postQueryService;
+    private final PostDtoAssembler postDtoAssembler;
     private final S3Service s3Service;
     private final JwtService jwtService;
 
@@ -63,7 +64,7 @@ public class UserService {
 
         log.info("[게시글 조회 성공] 조회된 게시글 수: {}, 총 페이지 수: {}", page.getContent().size(), page.getTotalPages());
         return PostPageResponse.of(
-                postQueryService.getPostListResponseDtos(page.getContent()),
+                postDtoAssembler.toPageItemList(page.getContent()),
                 page.getTotalPages() - 1,
                 page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1
         );
@@ -83,7 +84,7 @@ public class UserService {
                                 .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
-                return PostPageResponse.of(postQueryService.getPostListResponseDtos(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
             }
             case SCRAP -> {
                 log.info("[스크랩 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
@@ -93,7 +94,7 @@ public class UserService {
                                 .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
                         .toList();
                 log.info("[스크랩 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", scrapPage.getTotalPages(), scrapPage.hasNext());
-                return PostPageResponse.of(postQueryService.getPostListResponseDtos(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
             }
             case COMMENT -> {
                 log.info("[댓글 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
@@ -112,7 +113,7 @@ public class UserService {
                         .stream()
                         .toList();
                 log.info("[댓글 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", commentPage.getTotalPages(), commentPage.hasNext());
-                return PostPageResponse.of(postQueryService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
             }
             default -> {
                 log.warn("[유효하지 않은 상호작용 타입] 유저 ID: {}, 상호작용 타입: {}", userId, interactionType);
