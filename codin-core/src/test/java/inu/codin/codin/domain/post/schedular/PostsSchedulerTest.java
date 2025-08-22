@@ -30,8 +30,8 @@ class PostsSchedulerTest {
     @Mock
     private Process process;
 
-    private final String TEST_PATH = "/test/path/";
-    private final String TEST_PYTHON_DIR = "/usr/bin/python3";
+    private static final String TEST_PATH = "/test/path/";
+    private static final String TEST_PYTHON_DIR = "/usr/bin/python3";
 
     @BeforeEach
     void setUp() {
