@@ -26,44 +26,40 @@ public class PostsScheduler {
     @Scheduled(cron = "${schedule.department.cron}", zone = "Asia/Seoul")
     @Async
     public void departmentPostsScheduler() {
-        try {
-            String fileName = "department.py";
-            ProcessBuilder processBuilder =
-                    new ProcessBuilder().inheritIO().command(
-                            PYTHON_DIR,
-                            PATH + fileName
-                    );
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-            log.warn("Exited department python with error code" + exitCode);
-            if (exitCode == 0)
-                log.info("[PostsScheduler] 학과 공지사항 업데이트 완료");
-            else log.warn("[PostsScheduler] 학과 공지사항 업데이트 실패");
-        } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage(), e.getStackTrace()[0]);
-            throw new SchedulerException(SchedulerErrorCode.SCHEDULER_INTERRUPT_ERROR);
-        }
-
+        runPythonScript("department.py", "학과 공지사항");
     }
 
     @Scheduled(cron = "${schedule.starinu.cron}", zone = "Asia/Seoul")
     @Async
-    public void starinuPostsScheduler(){
+    public void starinuPostsScheduler() {
+        runPythonScript("starinu.py", "STARINU 공지사항");
+    }
+
+    /**
+     * Python 스크립트 실행 공통 로직
+     *
+     * @param fileName 실행할 python 파일명
+     * @param taskName 로그 출력용 태스크 이름
+     */
+    private void runPythonScript(String fileName, String taskName) {
         try {
-            String fileName = "starinu.py";
             ProcessBuilder processBuilder =
-                    new ProcessBuilder().inheritIO().command(
-                            PYTHON_DIR,
-                            PATH + fileName
-                    );
+                    new ProcessBuilder()
+                            .inheritIO()
+                            .command(PYTHON_DIR, PATH + fileName);
+
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
-            log.warn("Exited starinu python with error code" + exitCode);
-            if (exitCode == 0)
-                log.info("[PostsScheduler] STARINU 공지사항 업데이트 완료");
-            else log.warn("[PostsScheduler] STARINU 공지사항 업데이트 실패");
+
+            log.warn("Exited {} python with error code {}", taskName, exitCode);
+            if (exitCode == 0) {
+                log.info("[PostsScheduler] {} 업데이트 완료", taskName);
+            } else {
+                log.warn("[PostsScheduler] {} 업데이트 실패", taskName);
+            }
+
         } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage(), e.getStackTrace()[0]);
+            log.error("[PostsScheduler] {} 실행 중 오류: {}", taskName, e.getMessage(), e);
             throw new SchedulerException(SchedulerErrorCode.SCHEDULER_INTERRUPT_ERROR);
         }
     }
