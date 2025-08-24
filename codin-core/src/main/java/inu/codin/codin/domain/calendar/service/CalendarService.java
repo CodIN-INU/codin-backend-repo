@@ -70,11 +70,10 @@ public class CalendarService {
     }
 
     public void delete(String id) {
-        try {
-            ObjectId objectId = ObjectIdUtil.toObjectId(id);
-            calendarRepository.deleteById(objectId);
-        } catch (Exception e) {
-            throw new CalendarException(CalendarErrorCode.CALENDAR_EVENT_NOT_FOUND);
-        }
+        ObjectId objectId = ObjectIdUtil.toObjectId(id);
+        CalendarEntity calendar = calendarRepository.findByIdAndNotDeleted(objectId)
+                .orElseThrow(() -> new CalendarException(CalendarErrorCode.CALENDAR_EVENT_NOT_FOUND));
+        calendar.delete();
+        calendarRepository.save(calendar);
     }
 }
