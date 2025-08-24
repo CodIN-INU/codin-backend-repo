@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +26,7 @@ public interface CalendarController {
     })
     ResponseEntity<SingleResponse<CalendarMonthResponse>> getMonth(
             @Parameter(description = "년도", example = "2025") @RequestParam int year,
-            @Parameter(description = "월", example = "8") @RequestParam int month
+            @Parameter(description = "월", example = "8") @RequestParam @Min(1) @Max(12) int month
     );
 
     @Operation(summary = "캘린더 이벤트 생성", description = "새로운 캘린더 이벤트를 생성합니다.")

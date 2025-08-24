@@ -20,6 +20,10 @@ public class CalendarService {
     private final CalendarRepository calendarRepository;
 
     public CalendarMonthResponse getMonth(int year, int month) {
+        if (month < 1 || month > 12) {
+            throw new CalendarException(CalendarErrorCode.DATE_FORMAT_ERROR);
+        }
+
         LocalDate monthStart = LocalDate.of(year, month, 1);
         LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
@@ -58,6 +62,13 @@ public class CalendarService {
     }
 
     public CalendarCreateResponse create(CalendarCreateRequest request) {
+        if (request.getStartDate() == null || request.getEndDate() == null) {
+            throw new CalendarException(CalendarErrorCode.DATE_CANNOT_NULL);
+        }
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new CalendarException(CalendarErrorCode.DATE_FORMAT_ERROR);
+        }
+
         CalendarEntity entity = CalendarEntity.builder()
                 .content(request.getContent())
                 .department(request.getDepartment())
