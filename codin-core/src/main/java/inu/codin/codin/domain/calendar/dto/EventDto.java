@@ -16,7 +16,7 @@ public class EventDto {
     @Schema(description = "이벤트 내용", example = "테스트 이벤트")
     private final String content;
 
-    @Schema(description = "학과", example = "COMPUTER_SCI")
+    @Schema(description = "학과 또는 대학 전체 행사(OTHERS로 지정) ", example = "COMPUTER_SCI")
     private final Department department;
 
     @Builder
