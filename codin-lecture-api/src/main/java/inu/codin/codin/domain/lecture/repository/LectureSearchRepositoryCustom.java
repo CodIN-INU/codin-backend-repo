@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface LectureSearchRepositoryCustom {
-    Page<LectureDocument> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<Long> listList, Pageable pageable, Boolean like);
+    Page<LectureDocument> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<String> likeIdList, Pageable pageable, Boolean like);
 
     List<Lecture> searchLecturesAtReview(Department department, Integer grade, Semester semester);
 }

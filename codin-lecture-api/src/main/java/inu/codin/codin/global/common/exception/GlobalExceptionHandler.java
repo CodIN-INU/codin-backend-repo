@@ -20,10 +20,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
-        log.warn("[Exception] Class: {}, Error Message : {}, Stack Trace: {}",
-                e.getClass().getSimpleName(),
-                e.getMessage(),
-                e.getStackTrace()[0].toString());
+        StackTraceElement stackTraceElement = e.getStackTrace()[0];
+
+        log.warn("[Exception] 발생 위치: {}.{}({}:{}) | 원인: {} - {}",
+                stackTraceElement.getClassName(),      // 클래스 이름
+                stackTraceElement.getMethodName(),     // 메서드 이름
+                stackTraceElement.getFileName(),         // 파일 이름
+                stackTraceElement.getLineNumber(),       // 라인 번호
+                e.getClass().getSimpleName(),            // 예외 타입
+                e.getMessage()                           // 예외 메시지
+        );
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
     }

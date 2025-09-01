@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -55,17 +57,17 @@ public class LectureService {
      */
     public LecturePageResponse sortListOfLectures(String keyword, Department department, SortingOption sortingOption, Boolean like, int page) {
         // 조회 유저의 좋아요 목록을 조회해 반환
-        List<Long> likeList = null;
+        Map<Long, Boolean> likeMap = likeService.getLiked(LikeType.LECTURE).stream()
+                .collect(Collectors.toMap(
+                        likedDto -> Long.valueOf(likedDto.getLikeTypeId()),
+                        likedDto -> true
+                ));
 
-        if (like != null && like) {
-            likeList = likeService.getLiked(LikeType.LECTURE).stream()
-                    .map(likedResponseDto -> Long.valueOf(likedResponseDto.getLikeTypeId()))
-                    .toList();
-        }
+        List<String> likeIdList = getLikeIdList(likeMap);
 
-        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, likeList, PageRequest.of(page, 10), like);
+        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, likeIdList, PageRequest.of(page, 10), like);
 
-        return getLecturePageResponse(lecturePage);
+        return getLecturePageResponse(lecturePage, likeMap);
     }
 
     /**
@@ -79,10 +81,10 @@ public class LectureService {
         Lecture lecture = lectureRepository.findLectureWithScheduleAndTagsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
         lecture.increaseHits();
+
         Emotion emotion = emotionService.getOrMakeEmotion(lecture);
 
-        // type must not be null 오류 발생
-//        lectureElasticService.incrementHits(lectureId);
+        lectureElasticService.incrementHits(lectureId);
 
         return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }
@@ -90,13 +92,13 @@ public class LectureService {
     /**
      * 페이지로 반환된 LectureEntity -> Dto 변환
      */
-    private LecturePageResponse getLecturePageResponse(Page<LectureDocument> lecturePage) {
+    private LecturePageResponse getLecturePageResponse(Page<LectureDocument> lecturePage, Map<Long, Boolean> likeMap) {
 
         return LecturePageResponse.of(lecturePage.stream()
                         .map(lectureDocument -> {
                                     int likeCount = likeService.getLikeCount(LikeType.LECTURE, String.valueOf(lectureDocument.getId()));
 
-                                    return LecturePreviewResponseDto.of(lectureDocument, likeCount);
+                                    return LecturePreviewResponseDto.of(lectureDocument, likeCount, likeMap.getOrDefault(lectureDocument.getId(), false));
                                 }
                         )
                         .toList(),
@@ -126,4 +128,11 @@ public class LectureService {
                 .toList();
     }
 
+    private List<String> getLikeIdList(Map<Long, Boolean> likeMap) {
+        return likeMap.entrySet().stream()
+                .filter(entry -> Boolean.TRUE.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .map(String::valueOf)
+                .toList();
+    }
 }

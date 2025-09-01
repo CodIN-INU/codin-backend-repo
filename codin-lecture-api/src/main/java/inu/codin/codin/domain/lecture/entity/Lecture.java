@@ -1,8 +1,6 @@
 package inu.codin.codin.domain.lecture.entity;
 
-import inu.codin.codin.domain.lecture.converter.EvaluationConverter;
 import inu.codin.codin.domain.lecture.converter.StringListConverter;
-import inu.codin.codin.domain.lecture.converter.TypeConverter;
 import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.global.common.entity.Department;
 import jakarta.persistence.*;
@@ -20,7 +18,8 @@ import java.util.Set;
 @DynamicUpdate
 public class Lecture {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String lectureNm;                                   //교과목명
     private int grade;                                          //학년 (0 : 전학년)
@@ -30,11 +29,11 @@ public class Lecture {
     @Enumerated(EnumType.STRING)
     private Department department;                              //학과 (OTHERS : 교양)
 
-    @Convert(converter = TypeConverter.class)
+    @Enumerated(EnumType.STRING)
     private Type type;                                          //수업 유형(전공핵심, 전공선택..)
     private String lectureType;                                 //수업 방식(강의(이론), 온오프라인혼합형..)
 
-    @Convert(converter = EvaluationConverter.class)
+    @Enumerated(EnumType.STRING)
     private Evaluation evaluation;                              //평가 방식(상대평가, 절대평가, 이수)
 
     // Json 형태로 저장
@@ -44,12 +43,16 @@ public class Lecture {
     private int likes;                                          //좋아요 수
     private int hits;                                           //조회 수
 
-    /** 강의 계획서 */
+    /**
+     * 강의 계획서
+     */
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "syllabus_id")
     private Syllabus syllabus;
 
-    /** 교과목 정보 + 강의 계획서 + 리뷰 -> AI 요약 */
+    /**
+     * 교과목 정보 + 강의 계획서 + 리뷰 -> AI 요약
+     */
     @Column(columnDefinition = "TEXT")
     private String aiSummary;
 
@@ -69,11 +72,15 @@ public class Lecture {
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;                               //수강 후기
 
-    public void increaseLikes() { this.likes++; }
+    public void increaseLikes() {
+        this.likes++;
+    }
 
-    public void decreaseLikes() { this.likes--; }
+    public void decreaseLikes() {
+        this.likes--;
+    }
 
-    public void increaseHits(){
+    public void increaseHits() {
         this.hits++;
     }
 
