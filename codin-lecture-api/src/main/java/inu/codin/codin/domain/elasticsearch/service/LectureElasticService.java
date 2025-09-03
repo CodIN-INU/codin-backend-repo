@@ -119,6 +119,54 @@ public class LectureElasticService {
         log.debug("Incremented hits for lectureId={}", lectureId);
     }
 
+    public void updateStarRating(Long lectureId, Double newRating) {
+        Map<String, Object> params = Map.of("newRating", newRating);
+
+        String script = "ctx._source.starRating = params.newRating";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Updated starRating for lectureId={} to {}", lectureId, newRating);
+    }
+
+    public void incrementLikes(Long lectureId) {
+        Map<String, Object> params = Map.of("inc", 1);
+
+        String script = "ctx._source.likes = (ctx._source.likes != null ? ctx._source.likes : 0) + params.inc";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Incremented likes for lectureId={}", lectureId);
+    }
+
+    public void decrementLikes(Long lectureId) {
+        Map<String, Object> params = Map.of("dec", 1);
+
+        String script = "if (ctx._source.likes != null && ctx._source.likes > 0) { ctx._source.likes -= params.dec; } else { ctx._source.likes = 0; }";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Decremented likes for lectureId={}", lectureId);
+    }
+
     /**
      * SortingOption 이 null 일 경우 score 순 정렬
      * null 아닐 경우 primaryOption 이 가장 앞. 나머지는 enum 선언 순서를 유지.
