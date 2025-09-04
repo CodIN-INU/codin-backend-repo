@@ -17,6 +17,7 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
     @Query("{'_id':  ?0, 'deletedAt': null, 'postStatus':  { $in:  ['ACTIVE'] }}")
     Optional<PostEntity> findByIdAndNotDeleted(ObjectId Id);
 
+    List<PostEntity> findBy_idInAndDeletedAtIsNull(List<ObjectId> ids);
 
     @Query("{'deletedAt': null, 'postStatus':  { $in:  ['ACTIVE'] }, 'userId': ?0 }")
     Page<PostEntity> findAllByUserIdOrderByCreatedAt(ObjectId userId, PageRequest pageRequest);
