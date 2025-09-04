@@ -44,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -132,6 +133,9 @@ public class PostService {
                 post.getPostCategory().toString().split("_")[0].equals("EXTRACURRICULAR")){
             log.error("비교과 게시글에 대한 권한이 없음. PostId: {}", post.get_id());
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
+        } else if (SecurityUtils.getCurrentUserRole().equals(UserRole.ADMIN) || SecurityUtils.getCurrentUserRole().equals(UserRole.MANAGER)) {
+            // 관리자 또는 어드민 계정은 게시글 권한을 가짐 (e.g. 삭제권한)
+            return;
         }
         SecurityUtils.validateUser(post.getUserId());
     }
@@ -283,10 +287,13 @@ public class PostService {
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
         // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
+        log.info("blockedUsersId: {}", blockedUsersId.size());
+
+        String pattern = Pattern.quote(keyword);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, blockedUsersId, pageRequest);
-        log.info("키워드 기반 게시물 검색: {}, Page: {}", keyword, pageNumber);
+        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(pattern, blockedUsersId, pageRequest);
+        log.info("키워드 기반 게시물 검색: {}, Page: {}", pattern, pageNumber);
         return PostPageResponse.of(getPostListResponseDtos(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
