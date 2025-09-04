@@ -32,11 +32,17 @@ public interface PostRepository extends MongoRepository<PostEntity, ObjectId> {
 
 
 
-    @Query("{ '$or': [ "
-            +
-            "{ 'content': { $regex: ?0, $options: 'i' }, 'userId': { $nin: ?1 }  }, "
-            +
-            "{ 'title': { $regex: ?0, $options: 'i' }, 'userId': { $nin: ?1 }  } ] }")
+    @Query("""
+    { $and: [
+        { $or: [ { "deletedAt": null }, { "deletedAt": { $exists: false } } ] },
+        {'postStatus':  { $in:  ['ACTIVE'] }},
+        { "userId":  { $nin: ?1 } },
+        { $or: [
+                { "content": { $regex: ?0, $options: "i" } },
+                { "title":   { $regex: ?0, $options: "i" } }
+        ]}
+    ]}
+    """)
     Page<PostEntity> findAllByKeywordAndDeletedAtIsNull(String keyword, List<ObjectId> blockedUsersId, PageRequest pageRequest);
 
     boolean existsBy_idAndDeletedAtIsNull(ObjectId id);
