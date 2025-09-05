@@ -33,11 +33,12 @@ public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCusto
 
     @Override
     @Transactional(readOnly = true)
-    public Page<LectureDocument> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<Long> listList, Pageable pageable, Boolean like) {
-        log.debug("[searchLecturesAtPreview] 강의 조회, keyword={}, department={}, sortingOption={}, liked={}", keyword, department, sortingOption, listList);
-        Page<LectureDocument> lectureDocumentPage = lectureElasticService.searchLectureDocument(keyword, department, sortingOption, listList, pageable.getPageNumber(), pageable.getPageSize(), like);
+    public Page<LectureDocument> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<String> likeIdList, Pageable pageable, Boolean like) {
+        log.debug("[searchLecturesAtPreview] 강의 조회, keyword={}, department={}, sortingOption={}, liked={}", keyword, department, sortingOption, like);
+        Page<LectureDocument> lectureDocumentPage = lectureElasticService.searchLectureDocument(keyword, department, sortingOption, likeIdList, pageable.getPageNumber(), pageable.getPageSize(), like);
 
         long total = lectureDocumentPage.getTotalElements();
+
         if (lectureDocumentPage.isEmpty()) {
             return new PageImpl<>(List.of(), pageable, total);
         }

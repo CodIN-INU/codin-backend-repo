@@ -39,7 +39,7 @@ public class LectureController {
             @RequestParam(value = "department", required = false) Department department,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "sort", required = false) SortingOption sort,
-            @RequestParam(value = "like", required = false) Boolean like,
+            @RequestParam(value = "like", defaultValue = "false") Boolean like,
             @RequestParam("page") int page)
     {
         return ResponseEntity.ok().body(new SingleResponse<>(200, "과목 리스트 반환 완료",

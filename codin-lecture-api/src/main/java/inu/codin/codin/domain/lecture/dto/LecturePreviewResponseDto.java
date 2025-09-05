@@ -48,8 +48,11 @@ public class LecturePreviewResponseDto {
     @Schema(description = "평점")
     private double starRating;
 
+    @Schema(description = "조회수")
+    private Integer hits;
+
     @Builder
-    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes, double starRating) {
+    public LecturePreviewResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Boolean liked, String department, int likes, double starRating, int hits) {
         this.id = id;
         this.title = title;
         this.professor = professor;
@@ -61,9 +64,10 @@ public class LecturePreviewResponseDto {
         this.department = department;
         this.likes = likes;
         this.starRating = starRating;
+        this.hits = hits;
     }
 
-    public static LecturePreviewResponseDto of(LectureDocument lecture, int likes){
+    public static LecturePreviewResponseDto of(LectureDocument lecture, int likes, boolean liked) {
         return LecturePreviewResponseDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getLectureNm())
@@ -72,9 +76,11 @@ public class LecturePreviewResponseDto {
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())
                 .tags((lecture.getTags()))
+                .liked(liked)
                 .department(lecture.getDepartment())
                 .likes(likes)
                 .starRating(lecture.getStarRating())
+                .hits(lecture.getHits())
                 .build();
     }
 

@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.ScriptType;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class LectureElasticService {
      * @param keyword    키워드 (풀텍스트 검색)
      * @param department 학과 필터 (null 가능)
      * @param sortOption 정렬 옵션 (별점, 좋아요, 조회수)
-     * @param likedIds   사용자가 좋아요 누른 강의 ID 목록 (null 또는 empty 시 무시)
+     * @param likeIdList 사용자가 좋아요 누른 강의 ID 목록 (null 또는 empty 시 무시)
      * @param pageNumber 0-based 페이지 번호
      * @param size       페이지 사이즈
      * @return Page<Long>
@@ -48,14 +49,14 @@ public class LectureElasticService {
             String keyword,
             Department department,
             SortingOption sortOption,
-            List<Long> likedIds,
+            List<String> likeIdList,
             int pageNumber,
             int size,
             Boolean like
     ) {
-        log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIdsCount={}, pageNumber={}, size={}", keyword, department, sortOption, likedIds != null ? likedIds.size() : 0, pageNumber, size);
+        log.info("강의 검색 - keyword={}, Department={}, sortingOption={}, likedIdsCount={}, pageNumber={}, size={}", keyword, department, sortOption, likeIdList != null ? likeIdList.size() : 0, pageNumber, size);
 
-        if (Boolean.TRUE.equals(like) && (likedIds == null || likedIds.isEmpty())) {
+        if (Boolean.TRUE.equals(like) && (likeIdList == null || likeIdList.isEmpty())) {
             return new PageImpl<>(new ArrayList<>(), PageRequest.of(pageNumber, size), 0);
         }
 
@@ -75,10 +76,10 @@ public class LectureElasticService {
                 b.filter(f -> f.term(t -> t.field("department").value(department.name())));
             }
 
-            // 좋아요 id
-            if (likedIds != null && !likedIds.isEmpty()) {
-                b.filter(f -> f.ids(i -> i.values(likedIds.stream().map(String::valueOf).toList())));
+            if (like && likeIdList != null && !likeIdList.isEmpty()) {
+                b.filter(f -> f.ids(i -> i.values(likeIdList)));
             }
+
 
             return b;
         });
@@ -108,6 +109,7 @@ public class LectureElasticService {
         String script = "ctx._source.hits = (ctx._source.hits != null ? ctx._source.hits : 0) + params.inc";
 
         UpdateQuery uq = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
                 .withScript(script)
                 .withLang("painless")
                 .withParams(params)
@@ -115,6 +117,54 @@ public class LectureElasticService {
 
         elasticsearchOperations.update(uq, IndexCoordinates.of("lectures"));
         log.debug("Incremented hits for lectureId={}", lectureId);
+    }
+
+    public void updateStarRating(Long lectureId, Double newRating) {
+        Map<String, Object> params = Map.of("newRating", newRating);
+
+        String script = "ctx._source.starRating = params.newRating";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Updated starRating for lectureId={} to {}", lectureId, newRating);
+    }
+
+    public void incrementLikes(Long lectureId) {
+        Map<String, Object> params = Map.of("inc", 1);
+
+        String script = "ctx._source.likes = (ctx._source.likes != null ? ctx._source.likes : 0) + params.inc";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Incremented likes for lectureId={}", lectureId);
+    }
+
+    public void decrementLikes(Long lectureId) {
+        Map<String, Object> params = Map.of("dec", 1);
+
+        String script = "if (ctx._source.likes != null && ctx._source.likes > 0) { ctx._source.likes -= params.dec; } else { ctx._source.likes = 0; }";
+
+        UpdateQuery updateQuery = UpdateQuery.builder(lectureId.toString())
+                .withScriptType(ScriptType.INLINE)
+                .withScript(script)
+                .withLang("painless")
+                .withParams(params)
+                .build();
+
+        elasticsearchOperations.update(updateQuery, IndexCoordinates.of("lectures"));
+        log.debug("Decremented likes for lectureId={}", lectureId);
     }
 
     /**
@@ -137,7 +187,7 @@ public class LectureElasticService {
 
     private Sort.Order getSortOption(SortingOption sortOption) {
         return switch (sortOption) {
-            case RATING -> Sort.Order.desc("startRating");
+            case RATING -> Sort.Order.desc("starRating");
             case LIKE -> Sort.Order.desc("likes");
             case HIT -> Sort.Order.desc("hits");
         };

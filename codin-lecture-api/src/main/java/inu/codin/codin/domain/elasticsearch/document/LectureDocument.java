@@ -13,9 +13,10 @@ import org.springframework.data.elasticsearch.annotations.*;
 
 import java.util.List;
 
-@Document(indexName = "lectures")
 @Getter
 @Builder
+@Document(indexName = "lectures")
+@Setting(settingPath = "elasticsearch/settings/lecture-settings.json")
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class LectureDocument {
 
