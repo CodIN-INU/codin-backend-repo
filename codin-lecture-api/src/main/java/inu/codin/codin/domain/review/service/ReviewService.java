@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.review.service;
 
 
+import inu.codin.codin.domain.elasticsearch.service.LectureElasticService;
 import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
@@ -39,6 +40,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final LectureRepository lectureRepository;
+    private final LectureElasticService lectureElasticService;
 
     private final EmotionService emotionService;
     private final LikeService likeService;
@@ -91,10 +93,11 @@ public class ReviewService {
      * @param lecture 강의 엔티티
      * @param starRating 별점
      */
-    public void updateRating(Lecture lecture, @NotNull @Digits(integer = 1, fraction = 2) double starRating){
+    private void updateRating(Lecture lecture, @NotNull @Digits(integer = 1, fraction = 2) double starRating){
         double avgOfStarRating = reviewRepository.getAvgOfStarRatingByLecture(lecture);
         Emotion emotion = getEmotion(lecture, starRating);
         lecture.updateReviewRating(avgOfStarRating, emotion);
+        lectureElasticService.updateStarRating(lecture.getId(), avgOfStarRating);
     }
 
     private Emotion getEmotion(Lecture lecture, double starRating) {
