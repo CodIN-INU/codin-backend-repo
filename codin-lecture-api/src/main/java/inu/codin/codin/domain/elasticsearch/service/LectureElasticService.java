@@ -76,7 +76,7 @@ public class LectureElasticService {
                 b.filter(f -> f.term(t -> t.field("department").value(department.name())));
             }
 
-            if (like && likeIdList != null && !likeIdList.isEmpty()) {
+            if (Boolean.TRUE.equals(like) && likeIdList != null && !likeIdList.isEmpty()) {
                 b.filter(f -> f.ids(i -> i.values(likeIdList)));
             }
 
