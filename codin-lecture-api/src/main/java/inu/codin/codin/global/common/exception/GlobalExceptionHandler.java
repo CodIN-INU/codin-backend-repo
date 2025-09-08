@@ -20,19 +20,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
-        StackTraceElement stackTraceElement = e.getStackTrace()[0];
+        StackTraceElement[] stack = e.getStackTrace();
 
-        log.warn("[Exception] 발생 위치: {}.{}({}:{}) | 원인: {} - {}",
-                stackTraceElement.getClassName(),      // 클래스 이름
-                stackTraceElement.getMethodName(),     // 메서드 이름
-                stackTraceElement.getFileName(),         // 파일 이름
-                stackTraceElement.getLineNumber(),       // 라인 번호
-                e.getClass().getSimpleName(),            // 예외 타입
-                e.getMessage()                           // 예외 메시지
-        );
+        if (stack != null && stack.length > 0) {
+            StackTraceElement stackTraceElement = stack[0];
+
+            log.error("[Exception] 발생 위치: {}.{}({}:{}) | 원인: {} - {}",
+                    stackTraceElement.getClassName(),
+                    stackTraceElement.getMethodName(),
+                    stackTraceElement.getFileName(),
+                    stackTraceElement.getLineNumber(),
+                    e.getClass().getSimpleName(),
+                    e.getMessage(),
+                    e);
+        } else {
+            log.error("[Exception] 원인: {} - {}", e.getClass().getSimpleName(), e.getMessage(), e);
+        }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
+                .body(new ExceptionResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."));
     }
 
     @ExceptionHandler(LectureException.class)
