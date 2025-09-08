@@ -19,11 +19,20 @@ public enum Evaluation {
 
     @JsonCreator
     public static Evaluation fromDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+
         for (Evaluation evaluation : Evaluation.values()) {
             if (evaluation.getDescription().equals(description)) {
                 return evaluation;
             }
         }
-        return null;
+
+        try {
+            return Evaluation.valueOf(description);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown evaluation: " + description);
+        }
     }
 }

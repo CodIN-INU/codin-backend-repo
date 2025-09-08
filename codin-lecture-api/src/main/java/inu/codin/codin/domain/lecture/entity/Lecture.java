@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.lecture.entity;
 
+import inu.codin.codin.domain.lecture.converter.EvaluationConverter;
 import inu.codin.codin.domain.lecture.converter.StringListConverter;
 import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.global.common.entity.Department;
@@ -28,17 +29,15 @@ public class Lecture {
 
     @Enumerated(EnumType.STRING)
     private Department department;                              //학과 (OTHERS : 교양)
-
-    @Enumerated(EnumType.STRING)
     private Type type;                                          //수업 유형(전공핵심, 전공선택..)
     private String lectureType;                                 //수업 방식(강의(이론), 온오프라인혼합형..)
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EvaluationConverter.class)
     private Evaluation evaluation;                              //평가 방식(상대평가, 절대평가, 이수)
 
     // Json 형태로 저장
     @Convert(converter = StringListConverter.class)
-    private List<String> preCourse;                                   //사전 과목 //todo List로 관리 피룡
+    private List<String> preCourse;                             //사전 과목
     private double starRating;                                  //과목 평점
     private int likes;                                          //좋아요 수
     private int hits;                                           //조회 수
