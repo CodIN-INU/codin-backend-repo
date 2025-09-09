@@ -1,8 +1,10 @@
 package inu.codin.codin.domain.lecture.controller;
 
+import inu.codin.codin.domain.lecture.dto.MetaMode;
 import inu.codin.codin.domain.lecture.service.LectureUploadService;
 import inu.codin.codin.global.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,27 @@ public class LectureUploadController {
         lectureUploadService.uploadNewSemesterRooms(file);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, file.getOriginalFilename()+"의 강의실 현황 업데이트", null));
+
+    }
+
+    @Operation(
+            summary = "강의 메타(키워드/태그/선수과목) 엑셀 업로드",
+            description = "'단과대약어_연도_학기_meta'로 설정하여 업로드 ex) info_25_2_meta.xlxs. 기본값은 모두 true (즉 전체 처리)."
+    )
+    @PostMapping(value = "/meta", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    public ResponseEntity<SingleResponse<?>> uploadLectureMeta(
+            @Parameter(description = "업로드할 엑셀 파일 (.xlsx)")
+            @RequestParam("excelFile") MultipartFile file,
+
+            @Parameter(description = "처리 모드 (ALL | KEYWORDS | TAGS | PRE_COURSES). 기본값: ALL")
+            @RequestParam(name = "mode", defaultValue = "ALL") MetaMode mode
+    ) {
+        lectureUploadService.uploadLectureMeta(file, mode);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new SingleResponse<>(201,
+                        file.getOriginalFilename()+"의 태그,키워드,선수 과목등 메타데이터 포함 엑셀파일 업데이트",
+                        null));
 
     }
 
