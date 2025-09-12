@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.lecture.service;
 
 import inu.codin.codin.domain.elasticsearch.indexer.LectureStartupIndexer;
+import inu.codin.codin.domain.lecture.dto.MetaMode;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureUploadException;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -28,6 +32,8 @@ public class LectureUploadService {
 
     private String ROOM_PROGRAM = "dayTimeOfRoom.py";
     private String LECTURE_PROGRAM = "infoOfLecture.py";
+    private static final String META_PROGRAM = "load_metadata.py";
+
 
     public void uploadNewSemesterLectures(MultipartFile file){
         try {
@@ -64,6 +70,63 @@ public class LectureUploadService {
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e.getStackTrace()[0]);
 
+            throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, e.getMessage());
+        }
+    }
+
+    public void uploadLectureMeta(MultipartFile file, MetaMode mode) {
+        try {
+            saveFile(file); // 기존 그대로 사용
+            executeMetaLoader(file, mode);
+            log.info("[uploadLectureMeta] {} 메타 업데이트 완료", file.getOriginalFilename());
+
+            try { indexer.lectureIndex(); } catch (Exception e) {
+                log.warn("[uploadLectureMeta] 색인 갱신 경고: {}", e.getMessage());
+            }
+
+        } catch (LectureUploadException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, e.getMessage());
+        }
+    }
+
+
+    /** 메타 로더 실행 헬퍼: load_metadata.py <excel> [--keywords] [--tags] [--pre-courses] | --all */
+    private void executeMetaLoader(MultipartFile file,MetaMode mode) {
+        String scriptPath = Paths.get(UPLOAD_DIR, META_PROGRAM).toString();
+        String excelPath  = Paths.get(UPLOAD_DIR, file.getOriginalFilename()).toString();
+
+        List<String> cmd = new ArrayList<>();
+        cmd.add(PYTHON_DIR);                                 // ex) /usr/bin/python3 or venv/bin/python
+        cmd.add(scriptPath); // load_metadata.py 절대/상대 경로
+        cmd.add(excelPath); // 업로드된 엑셀 파일 경로
+
+        switch (mode) {
+            case ALL -> cmd.add("--all");
+            case KEYWORDS -> cmd.add("--keywords");
+            case TAGS -> cmd.add("--tags");
+            case PRE_COURSES -> cmd.add("--pre-courses");
+        }
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+
+        try {
+            Process p = pb.start();
+            StringBuilder out = new StringBuilder();
+            try (var br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    out.append(line).append('\n');
+                    log.debug("[Python Output] {}", line);
+                }
+            }
+            int exit = p.waitFor();
+            if (exit != 0) {
+                throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, out.toString());
+            }
+        } catch (IOException | InterruptedException e) {
             throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, e.getMessage());
         }
     }
