@@ -61,7 +61,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         switch (result) {
             case LOGIN_SUCCESS -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl + "/main");
+                getRedirectStrategy().sendRedirect(request, response, redirectUrl);
                 log.info("{\"code\":200, \"message\":\"정상 로그인 완료: {}\"}", email);
             }
             case NEW_USER_REGISTERED -> {
