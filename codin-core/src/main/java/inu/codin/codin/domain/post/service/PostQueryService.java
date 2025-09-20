@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -75,9 +76,13 @@ public class PostQueryService
      */
     public PostPageResponse searchPosts(String keyword, int pageNumber) {
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
+        log.info("blockedUsersId: {}", blockedUsersId.size());
+
+        String pattern = Pattern.quote(keyword);
+
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
-        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(keyword, blockedUsersId, pageRequest);
-        log.info("키워드 기반 게시물 검색: {}, Page: {}", keyword, pageNumber);
+        Page<PostEntity> page = postRepository.findAllByKeywordAndDeletedAtIsNull(pattern, blockedUsersId, pageRequest);
+        log.info("키워드 기반 게시물 검색: {}, Page: {}", pattern, pageNumber);
         return PostPageResponse.of(postDtoAssembler.toPageItemList(page.getContent()), page.getTotalPages() - 1, page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1);
     }
 
