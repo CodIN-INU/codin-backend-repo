@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -171,13 +172,18 @@ class PostQueryServiceTest {
     void searchPosts_키워드검색_성공() {
         // Given
         String keyword = "테스트";
+        String quoted = Pattern.quote(keyword);
         List<ObjectId> blockedUsers = new ArrayList<>();
         List<PostEntity> posts = Arrays.asList(createPostEntity());
         Page<PostEntity> page = new PageImpl<>(posts, PageRequest.of(0, 20), 1);
         List<PostPageItemResponseDTO> mockDtoList = Arrays.asList(createMockPostPageItemResponseDTO());
         
         given(blockService.getBlockedUsers()).willReturn(blockedUsers);
-        given(postRepository.findAllByKeywordAndDeletedAtIsNull(anyString(), anyList(), any(PageRequest.class))).willReturn(page);
+        given(postRepository.findAllByKeywordAndDeletedAtIsNull(
+                eq(quoted),
+                eq(blockedUsers),
+                any(PageRequest.class))
+        ).willReturn(page);
         given(postDtoAssembler.toPageItemList(posts)).willReturn(mockDtoList);
         
         // When
@@ -186,7 +192,10 @@ class PostQueryServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response.getContents()).hasSize(1);
-        verify(postRepository).findAllByKeywordAndDeletedAtIsNull(eq(keyword), eq(blockedUsers), any(PageRequest.class));
+        verify(postRepository).findAllByKeywordAndDeletedAtIsNull(
+                eq(quoted),
+                eq(blockedUsers),
+                any(PageRequest.class));
         verify(postDtoAssembler).toPageItemList(posts);
     }
     
