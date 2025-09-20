@@ -52,9 +52,7 @@ public class CommentCommandService {
         ObjectId commentId = ObjectIdUtil.toObjectId(id);
         CommentEntity comment = commentQueryService.findCommentById(commentId);
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        SecurityUtils.validateUser(userId);
-
+        assertOwner(comment.getUserId());
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
@@ -68,7 +66,8 @@ public class CommentCommandService {
         ObjectId commentId = ObjectIdUtil.toObjectId(id);
         CommentEntity comment = commentQueryService.findCommentById(commentId);
 
-        SecurityUtils.validateUser(comment.getUserId());
+        assertOwner(comment.getUserId());
+
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postQueryService.findPostById(postId);
@@ -81,5 +80,10 @@ public class CommentCommandService {
 //        bestService.applyBestScore( postId);
 
         log.info("삭제된 commentId: {}", commentId);
+    }
+
+    private void assertOwner(ObjectId ownerId) {
+        ObjectId currentUserId = SecurityUtils.getCurrentUserId();
+        SecurityUtils.validateOwners(currentUserId, ownerId);
     }
 }
