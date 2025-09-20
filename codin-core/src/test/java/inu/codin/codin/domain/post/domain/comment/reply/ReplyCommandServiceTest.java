@@ -13,6 +13,7 @@ import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyCommandServ
 import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import org.bson.types.ObjectId;
@@ -37,8 +38,7 @@ class ReplyCommandServiceTest {
     @Mock private NotificationService notificationService;
     @Mock private BestService bestService;
     @Mock private CommentQueryService commentQueryService;
-    @Mock private ReplyQueryService replyQueryService;
-    
+    @Mock private OwnershipPolicy ownershipPolicy;
     private static AutoCloseable securityUtilsMock;
     
     @BeforeEach
@@ -162,8 +162,8 @@ class ReplyCommandServiceTest {
         String replyId = new ObjectId().toString();
         ReplyUpdateRequestDTO dto = createReplyUpdateRequestDTO("수정된 대댓글");
         ReplyCommentEntity reply = createReplyEntity();
-        
-        given(replyQueryService.findReplyById(any())).willReturn(reply);
+
+        given(ownershipPolicy.assertReplyOwner(any(ObjectId.class))).willReturn(reply);
         given(replyCommentRepository.save(any())).willReturn(reply);
         
         // When & Then
@@ -179,8 +179,8 @@ class ReplyCommandServiceTest {
         CommentEntity comment = createCommentEntity();
         PostEntity post = createPostEntity();
         ObjectId userId = reply.getUserId();
-        
-        given(replyQueryService.findReplyById(any())).willReturn(reply);
+
+        given(ownershipPolicy.assertReplyOwner(any(ObjectId.class))).willReturn(reply);
         doNothing().when(SecurityUtils.class);
         SecurityUtils.validateUser(userId);
         given(commentQueryService.findCommentById(reply.getCommentId())).willReturn(comment);
