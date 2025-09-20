@@ -9,6 +9,7 @@ import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.domain.best.BestService;
+import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class CommentCommandService {
     private final NotificationService notificationService;
     private final PostCommandService postCommandService;
     private final PostQueryService postQueryService;
-    private final CommentQueryService commentQueryService;
+    private final OwnershipPolicy ownershipPolicy;
     private final BestService bestService;
 
     // 댓글 추가
@@ -46,10 +47,10 @@ public class CommentCommandService {
 
     }
 
-    public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
-        log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", id, requestDTO.getContent());
+    public void updateComment(String commentId, CommentUpdateRequestDTO requestDTO) {
+        log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", commentId, requestDTO.getContent());
 
-        CommentEntity comment = assertCommentOwner(id);
+        CommentEntity comment = ownershipPolicy.assertCommentOwner(ObjectIdUtil.toObjectId(commentId));
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
@@ -59,8 +60,8 @@ public class CommentCommandService {
     }
 
     // 댓글 삭제 (Soft Delete)
-    public void softDeleteComment(String id) {
-        CommentEntity comment = assertCommentOwner(id);
+    public void softDeleteComment(String commentId) {
+        CommentEntity comment = ownershipPolicy.assertCommentOwner(ObjectIdUtil.toObjectId(commentId));
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postQueryService.findPostById(postId);
@@ -75,13 +76,4 @@ public class CommentCommandService {
         log.info("삭제된 commentId: {}", comment.get_id());
     }
 
-    private CommentEntity assertCommentOwner(String commentId) {
-        ObjectId objectId = ObjectIdUtil.toObjectId(commentId);
-        CommentEntity comment = commentQueryService.findCommentById(objectId);
-
-        ObjectId currentUserId = SecurityUtils.getCurrentUserId();
-        SecurityUtils.validateOwners(currentUserId, comment.getUserId());
-
-        return comment;
-    }
 }
