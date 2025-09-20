@@ -22,6 +22,6 @@ public interface LikeRepository extends MongoRepository<LikeEntity, ObjectId> {
     Optional<LikeEntity> findByLikeTypeAndLikeTypeIdAndUserId(LikeType likeType, String likeTypeId, ObjectId userId);
     Page<LikeEntity> findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(ObjectId userId, LikeType likeType, Pageable pageable);
 
-    @Query(value = "{ 'likeType': ?0, 'userId': ?1 }", fields = "{ 'likeTypeId': 1, '_id': 0 }")
+    @Query(value = "{ 'likeType': ?0, 'userId': ?1, 'deletedAt': null }", fields = "{ 'likeTypeId': 1, '_id': 0 }")
     List<LikedResponseDto> findLikeTypeIdByLikeTypeAndUserId(LikeType likeType, ObjectId userId);
 }

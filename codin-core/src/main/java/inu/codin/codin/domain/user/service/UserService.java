@@ -12,7 +12,6 @@ import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostDtoAssembler;
-import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
@@ -36,8 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -79,39 +76,37 @@ public class UserService {
             case LIKE -> {
                 log.info("[좋아요 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<LikeEntity> likePage = likeRepository.findAllByUserIdAndLikeTypeAndDeletedAtIsNullOrderByCreatedAt(userId, LikeType.valueOf("POST"), pageRequest);
-                List<PostEntity> postUserLike = likePage.getContent().stream()
-                        .map(likeEntity -> postRepository.findByIdAndNotDeleted(new ObjectId(likeEntity.getLikeTypeId()))
-                                .orElseThrow(() -> new NotFoundException("유저가 좋아요를 누른 게시글을 찾을 수 없습니다.")))
+
+                List<ObjectId> postIds = likePage.getContent().stream()
+                        .map(likeEntity -> new ObjectId(likeEntity.getLikeTypeId()))
                         .toList();
+                List<PostEntity> postUserLike = postRepository.findBy_idInAndDeletedAtIsNull(postIds);
+
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
                 return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
             }
             case SCRAP -> {
                 log.info("[스크랩 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<ScrapEntity> scrapPage = scrapRepository.findAllByUserIdAndDeletedAtIsNullOrderByCreatedAt(userId, pageRequest);
-                List<PostEntity> postUserScrap = scrapPage.getContent().stream()
-                        .map(scrapEntity -> postRepository.findByIdAndNotDeleted(scrapEntity.getPostId())
-                                .orElseThrow(() -> new NotFoundException("유저가 스크랩한 게시글을 찾을 수 없습니다.")))
+
+                List<ObjectId> postIds = scrapPage.getContent().stream()
+                        .map(ScrapEntity::getPostId)
                         .toList();
+                List<PostEntity> postUserScrap = postRepository.findBy_idInAndDeletedAtIsNull(postIds);
+
                 log.info("[스크랩 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", scrapPage.getTotalPages(), scrapPage.hasNext());
                 return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
             }
             case COMMENT -> {
                 log.info("[댓글 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
                 Page<CommentEntity> commentPage = commentRepository.findAllByUserIdOrderByCreatedAt(userId, pageRequest);
-                List<PostEntity> postUserComment = commentPage.getContent().stream()
-                        .map(commentEntity -> postRepository.findByIdAndNotDeleted(commentEntity.getPostId())
-                                .orElseThrow(() -> new NotFoundException("유저가 작성한 댓글의 게시글을 찾을 수 없습니다.")))
-                        // 중복 필터링 로직
-                        .collect(Collectors.toMap(
-                                PostEntity::get_id, // Key: postId
-                                postEntity -> postEntity, // Value: PostEntity
-                                (existing, replacement) -> existing // 중복 발생 시 기존 값 유지
-                        ))
-                        // 중복 제거된 후 Map에서 PostEntity 추출
-                        .values()
-                        .stream()
+
+                List<ObjectId> commentedPostIds = commentPage.getContent().stream()
+                        .map(CommentEntity::getPostId)
+                        .distinct() // 한 게시글에 여러 댓글을 달았을 경우 중복 제거
                         .toList();
+                List<PostEntity> postUserComment = postRepository.findBy_idInAndDeletedAtIsNull(commentedPostIds);
+
                 log.info("[댓글 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", commentPage.getTotalPages(), commentPage.hasNext());
                 return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
             }
