@@ -38,7 +38,7 @@ public class PollController {
 
         pollCommandService.votingPoll(postId, pollRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SingleResponse<>(200, "투표 실시 완료", null));
+                .body(new SingleResponse<>(201, "투표 실시 완료", null));
     }
 
     @Operation(summary = "투표 취소")
