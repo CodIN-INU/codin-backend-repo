@@ -12,8 +12,8 @@ public enum PollErrorCode implements GlobalErrorCode {
     MULTIPLE_CHOICE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "복수 선택이 허용되지 않은 투표입니다."),
     INVALID_OPTION(HttpStatus.BAD_REQUEST, "잘못된 선택지입니다."),
     POLL_VOTE_STATE_CONFLICT(HttpStatus.CONFLICT, "투표 증감 실패."),
-    POLL_VOTE_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 일치하는 투표 내역이 없습니다.");
-
+    POLL_VOTE_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 사용자의 일치하는 투표 내역이 없습니다."),
+    DUPLICATE_SELECTION(HttpStatus.BAD_REQUEST, "중복 선택입니다.");
     private final HttpStatus httpStatus;
     private final String message;
 
