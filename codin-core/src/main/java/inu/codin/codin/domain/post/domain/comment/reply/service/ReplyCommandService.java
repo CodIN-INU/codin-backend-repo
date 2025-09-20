@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyUpdateR
 import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import jakarta.validation.Valid;
@@ -32,6 +33,7 @@ public class ReplyCommandService {
     private final BestService bestService;
     private final CommentQueryService commentQueryService;
     private final ReplyQueryService replyQueryService;
+    private final OwnershipPolicy ownershipPolicy;
 
     /**
      *Command Method
@@ -52,26 +54,22 @@ public class ReplyCommandService {
 
         log.info("대댓글 추가 완료 - replyId: {}, postId: {}, commentCount: {}",
                 reply.get_id(), post.get_id(), post.getCommentCount());
-        if (!userId.equals(comment.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
+        if (!userId.equals(post.getUserId())) notificationService.sendNotificationMessageByReply(post.getPostCategory(), comment.getUserId(), post.get_id().toString(), reply.getContent());
     }
 
-    public void updateReply(String id, @Valid ReplyUpdateRequestDTO requestDTO) {
-
-        ObjectId replyId = ObjectIdUtil.toObjectId(id);
-        ReplyCommentEntity reply = replyQueryService.findReplyById(replyId);
+    public void updateReply(String replyId, @Valid ReplyUpdateRequestDTO requestDTO) {
+        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(ObjectIdUtil.toObjectId(replyId));
 
         reply.updateReply(requestDTO.getContent());
         replyCommentRepository.save(reply);
 
-        log.info("대댓글 수정 완료 - replyId: {}", replyId);
+        log.info("대댓글 수정 완료 - replyId: {}", reply.get_id());
 
     }
 
     // 대댓글 삭제 (Soft Delete)
-    public void softDeleteReply(String id) {
-        ReplyCommentEntity reply = replyQueryService.findReplyById(ObjectIdUtil.toObjectId(id));
-
-        SecurityUtils.validateUser(reply.getUserId());
+    public void softDeleteReply(String replyId) {
+        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(ObjectIdUtil.toObjectId(replyId));
 
         CommentEntity comment = commentQueryService.findCommentById(reply.getCommentId());
 
