@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.schedular.exception;
+package inu.codin.codin.domain.post.scheduler.exception;
 
 import inu.codin.codin.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;

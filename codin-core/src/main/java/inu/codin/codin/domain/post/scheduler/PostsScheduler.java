@@ -1,7 +1,7 @@
-package inu.codin.codin.domain.post.schedular;
+package inu.codin.codin.domain.post.scheduler;
 
-import inu.codin.codin.domain.post.schedular.exception.SchedulerErrorCode;
-import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
+import inu.codin.codin.domain.post.scheduler.exception.SchedulerErrorCode;
+import inu.codin.codin.domain.post.scheduler.exception.SchedulerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
