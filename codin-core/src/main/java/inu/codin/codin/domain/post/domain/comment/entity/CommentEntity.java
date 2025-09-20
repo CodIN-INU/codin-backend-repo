@@ -31,7 +31,7 @@ public class CommentEntity extends BaseTimeEntity {
     private boolean anonymous;
 
     @Builder
-    public CommentEntity(ObjectId postId, ObjectId userId, String content, Boolean anonymous) {
+    public CommentEntity(ObjectId postId, ObjectId userId, String content, boolean anonymous) {
         this.postId = postId;
         this.userId = userId;
         this.content = content;
