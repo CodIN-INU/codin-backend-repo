@@ -161,6 +161,10 @@ public class PostCommandService {
 
 
     private ObjectId validateUserAndPost(PostCategory postCategory) {
+        if (isPrivileged()) {
+            // ADMIN / MANAGER 는 카테고리/유저 상태 검증을 통과시킴
+            return SecurityUtils.getCurrentUserId();
+        }
         assertCategoryWriteAllowed(postCategory);
 
         ObjectId userId = SecurityUtils.getCurrentUserId();
@@ -180,6 +184,11 @@ public class PostCommandService {
                 postCategory.toString().split("_")[0].equals("EXTRACURRICULAR")) {
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
+    }
+
+    private boolean isPrivileged() {
+        UserRole role = SecurityUtils.getCurrentUserRole();
+        return role == UserRole.ADMIN || role == UserRole.MANAGER;
     }
 
 }
