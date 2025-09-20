@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.post.schedular;
+package inu.codin.codin.domain.post.scheduler;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import inu.codin.codin.domain.post.schedular.exception.SchedulerException;
+import inu.codin.codin.domain.post.scheduler.exception.SchedulerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

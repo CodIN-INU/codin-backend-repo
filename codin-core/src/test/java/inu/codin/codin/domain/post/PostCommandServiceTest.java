@@ -9,6 +9,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostInteractionService;
 import inu.codin.codin.domain.post.service.PostQueryService;
@@ -34,8 +35,8 @@ class PostCommandServiceTest {
     
     @Mock private PostRepository postRepository;
     @Mock private PostInteractionService postInteractionService;
-    @Mock private PostQueryService postQueryService;
-    
+    @Mock private OwnershipPolicy ownershipPolicy;
+
     private static AutoCloseable securityUtilsMock;
     
     @BeforeEach
@@ -93,8 +94,8 @@ class PostCommandServiceTest {
         List<MultipartFile> images = new ArrayList<>();
         PostEntity post = createPostEntity();
         List<String> imageUrls = Arrays.asList("image1.jpg", "image2.jpg");
-        
-        given(postQueryService.findPostById(any())).willReturn(post);
+
+        given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postInteractionService.handleImageUpload(any())).willReturn(imageUrls);
@@ -111,8 +112,8 @@ class PostCommandServiceTest {
         String postId = new ObjectId().toString();
         PostAnonymousUpdateRequestDTO dto = createPostAnonymousUpdateRequestDTO(true);
         PostEntity post = createPostEntity();
-        
-        given(postQueryService.findPostById(any())).willReturn(post);
+
+        given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
@@ -128,8 +129,8 @@ class PostCommandServiceTest {
         String postId = new ObjectId().toString();
         PostStatusUpdateRequestDTO dto = createPostStatusUpdateRequestDTO(PostStatus.ACTIVE);
         PostEntity post = createPostEntity();
-        
-        given(postQueryService.findPostById(any())).willReturn(post);
+
+        given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
@@ -144,8 +145,8 @@ class PostCommandServiceTest {
         // Given
         String postId = new ObjectId().toString();
         PostEntity post = createPostEntity();
-        
-        given(postQueryService.findPostById(any())).willReturn(post);
+
+        given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
@@ -161,8 +162,8 @@ class PostCommandServiceTest {
         String postId = new ObjectId().toString();
         String imageUrl = "test-image.jpg";
         PostEntity post = createPostEntity();
-        
-        given(postQueryService.findPostById(any())).willReturn(post);
+
+        given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
         given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
         given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         doNothing().when(postInteractionService).deletePostImageInternal(any(), any());

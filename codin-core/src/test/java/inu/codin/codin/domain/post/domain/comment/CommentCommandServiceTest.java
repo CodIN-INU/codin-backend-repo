@@ -11,6 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.service.CommentCommandService;
 import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
+import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import org.bson.types.ObjectId;
@@ -35,6 +36,8 @@ class CommentCommandServiceTest {
     @Mock private PostQueryService postQueryService;
     @Mock private CommentQueryService commentQueryService;
     @Mock private BestService bestService;
+
+    @Mock private OwnershipPolicy ownershipPolicy;
     
     private static AutoCloseable securityUtilsMock;
     
@@ -146,8 +149,8 @@ class CommentCommandServiceTest {
         CommentUpdateRequestDTO dto = createCommentUpdateRequestDTO("수정된 내용");
         CommentEntity comment = createCommentEntity();
         ObjectId userId = new ObjectId();
-        
-        given(commentQueryService.findCommentById(any())).willReturn(comment);
+
+        given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
         given(SecurityUtils.getCurrentUserId()).willReturn(userId);
         doNothing().when(SecurityUtils.class);
         SecurityUtils.validateUser(userId);
@@ -165,8 +168,8 @@ class CommentCommandServiceTest {
         CommentEntity comment = createCommentEntity();
         PostEntity post = createPostEntity();
         ObjectId userId = comment.getUserId();
-        
-        given(commentQueryService.findCommentById(any())).willReturn(comment);
+
+        given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
         doNothing().when(SecurityUtils.class);
         SecurityUtils.validateUser(userId);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);

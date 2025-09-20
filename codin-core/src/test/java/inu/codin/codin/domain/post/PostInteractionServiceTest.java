@@ -102,17 +102,19 @@ class PostInteractionServiceTest {
     void deletePostImageInternal_S3삭제실패_예외() {
         // Given
         String imageUrl = "test-image.jpg";
-        PostEntity post = createPostEntityWithImages(Arrays.asList(imageUrl));
+        PostEntity post = createPostEntityWithImages(List.of(imageUrl));
         
-        doThrow(new RuntimeException("S3 삭제 실패")).when(s3Service).deleteFile(imageUrl);
+        doThrow(new RuntimeException("S3 삭제 실패"))
+                .when(s3Service).deleteFile(imageUrl);
         
         // When & Then
         assertThatThrownBy(() -> postInteractionService.deletePostImageInternal(post, imageUrl))
                 .isInstanceOf(ImageRemoveException.class)
                 .hasMessageContaining("이미지 삭제 중 오류 발생");
-        
+
+
+        verify(postRepository, times(1)).save(post);
         verify(s3Service).deleteFile(imageUrl);
-        verify(postRepository, never()).save(any());
     }
     
     @Test
