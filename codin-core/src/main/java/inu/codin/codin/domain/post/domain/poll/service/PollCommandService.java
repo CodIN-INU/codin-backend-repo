@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -109,6 +110,11 @@ public class PollCommandService {
         if (!poll.isMultipleChoice() && selected.size() > 1) {
             log.warn("복수 선택 허용 안됨 - pollId: {}", poll.get_id());
             throw new PollException(PollErrorCode.MULTIPLE_CHOICE_NOT_ALLOWED);
+        }
+        long distinct = selected.stream().filter(Objects::nonNull).distinct().count();
+        if (distinct != selected.size()) {
+            log.warn("중복 선택 금지 - pollId: {}, selections: {}", poll.get_id(), selected);
+            throw new PollException(PollErrorCode.DUPLICATE_SELECTION);
         }
         int size = poll.getPollOptions().size();
         for (Integer idx : selected) {
