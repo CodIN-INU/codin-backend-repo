@@ -49,25 +49,18 @@ public class CommentCommandService {
     public void updateComment(String id, CommentUpdateRequestDTO requestDTO) {
         log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", id, requestDTO.getContent());
 
-        ObjectId commentId = ObjectIdUtil.toObjectId(id);
-        CommentEntity comment = commentQueryService.findCommentById(commentId);
-
-        assertOwner(comment.getUserId());
+        CommentEntity comment = assertCommentOwner(id);
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
 
-        log.info("댓글 업데이트 완료. commentId: {}", commentId);
+        log.info("댓글 업데이트 완료. commentId: {}", comment.get_id());
 
     }
 
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String id) {
-        ObjectId commentId = ObjectIdUtil.toObjectId(id);
-        CommentEntity comment = commentQueryService.findCommentById(commentId);
-
-        assertOwner(comment.getUserId());
-
+        CommentEntity comment = assertCommentOwner(id);
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postQueryService.findPostById(postId);
@@ -79,11 +72,16 @@ public class CommentCommandService {
         postCommandService.decreaseCommentCount(post);
 //        bestService.applyBestScore( postId);
 
-        log.info("삭제된 commentId: {}", commentId);
+        log.info("삭제된 commentId: {}", comment.get_id());
     }
 
-    private void assertOwner(ObjectId ownerId) {
+    private CommentEntity assertCommentOwner(String commentId) {
+        ObjectId objectId = ObjectIdUtil.toObjectId(commentId);
+        CommentEntity comment = commentQueryService.findCommentById(objectId);
+
         ObjectId currentUserId = SecurityUtils.getCurrentUserId();
-        SecurityUtils.validateOwners(currentUserId, ownerId);
+        SecurityUtils.validateOwners(currentUserId, comment.getUserId());
+
+        return comment;
     }
 }
