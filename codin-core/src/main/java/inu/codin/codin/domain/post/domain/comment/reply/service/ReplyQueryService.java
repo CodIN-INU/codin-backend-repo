@@ -107,7 +107,7 @@ public class ReplyQueryService {
     public UserInfo getUserInfoAboutReply(ObjectId replyId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
         return UserInfo.ofComment(
-                likeService.isLiked(LikeType.COMMENT, replyId.toString(), userId)
+                likeService.isLiked(LikeType.REPLY, replyId.toString(), userId)
         );
     }
 
