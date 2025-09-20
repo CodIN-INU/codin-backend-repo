@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,7 +24,10 @@ public class BestService {
     // [BestService] - Top 3 베스트 postId 목록 반환
     public List<String> getTop3BestPostIds() {
         Map<String, Double> bestPosts = redisBestService.getBests();
-        return new ArrayList<>(bestPosts.keySet()); // 빈 리스트 반환 가능
+        return bestPosts.keySet()
+                .stream()
+                .limit(3)
+                .collect(Collectors.toList());
     }
 
     // [BestService] - BestEntity 페이지 반환
