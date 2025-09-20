@@ -41,10 +41,10 @@ public class PostInteractionService {
             throw new PostException(PostErrorCode.POST_NOT_FOUND);
         }
         try {
-            s3Service.deleteFile(imageUrl);
             post.removePostImage(imageUrl);
             postRepository.save(post);
             log.info("이미지 삭제 성공. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl);
+            s3Service.deleteFile(imageUrl);
         } catch (Exception e) {
             log.error("이미지 삭제 중 오류 발생. PostId: {}, ImageUrl: {}", post.get_id(), imageUrl, e);
             throw new ImageRemoveException("이미지 삭제 중 오류 발생: " + imageUrl);
