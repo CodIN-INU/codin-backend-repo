@@ -55,29 +55,42 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter writer = response.getWriter();
 
-        String redirectUrl = (String) request.getSession().getAttribute("redirect_url");
-        if (Objects.equals(redirectUrl, null)) redirectUrl = BASEURL;
-        request.getSession().removeAttribute("redirect_url");
+        String redirectHost = (String) request.getSession().getAttribute("redirect_host");
+        String redirectPath = (String) request.getSession().getAttribute("redirect_path");
+
+        boolean isPathExists = false;
+        if (Objects.nonNull(redirectHost)) {
+            redirectHost = BASEURL;
+        }
+        if (Objects.nonNull(redirectPath)) {
+            isPathExists = true;
+        }
+        request.getSession().removeAttribute("redirect_host");
+        request.getSession().removeAttribute("redirect_path");
 
         switch (result) {
             case LOGIN_SUCCESS -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+                if (isPathExists) {
+                    getRedirectStrategy().sendRedirect(request, response, redirectHost + redirectPath);
+                } else {
+                    getRedirectStrategy().sendRedirect(request, response, redirectHost + "/main");
+                }
                 log.info("{\"code\":200, \"message\":\"정상 로그인 완료: {}\"}", email);
             }
             case NEW_USER_REGISTERED -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl + "/auth/profile?email=" + email);
+                getRedirectStrategy().sendRedirect(request, response, redirectHost + "/auth/profile?email=" + email);
                 log.info("{\"code\":201, \"message\":\"신규 회원 등록 완료: {}\"}", email);
             }
             case PROFILE_INCOMPLETE -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl + "/auth/profile?email=" + email);
+                getRedirectStrategy().sendRedirect(request, response, redirectHost + "/auth/profile?email=" + email);
                 log.info("{\"code\":200, \"message\":\"회원 프로필 설정 미완료: {}\"}", email);
             }
             case SUSPENDED_USER -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl + "/api/suspends");
+                getRedirectStrategy().sendRedirect(request, response, redirectHost + "/api/suspends");
                 log.info("{\"code\":200, \"message\":\"정지된 회원: {}\"}", email);
             }
             default -> {
-                getRedirectStrategy().sendRedirect(request, response, redirectUrl + "/login");
+                getRedirectStrategy().sendRedirect(request, response, redirectHost + "/login");
                 log.info("{\"code\":500, \"message\":\"알 수 없는 오류 발생: {}\"}", email);
             }
         }

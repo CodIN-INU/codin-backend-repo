@@ -32,8 +32,11 @@ public class AuthController {
     @GetMapping("/google")
     public ResponseEntity<SingleResponse<?>> googleLogin(
             HttpServletResponse response,
-            @RequestParam(required = false, value = "redirect_url") String redirect_url) throws IOException {
-        authSessionService.setSession(redirect_url);
+            @RequestParam(required = false, value = "redirect_host") String redirect_host,
+            @RequestParam(required = false, value = "redirect_path") String redirect_path
+    ) throws IOException {
+        authSessionService.setSession(redirect_host);
+        authSessionService.setSession(redirect_path);
         response.sendRedirect("/api/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
