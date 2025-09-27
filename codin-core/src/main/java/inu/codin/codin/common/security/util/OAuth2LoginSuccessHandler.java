@@ -58,12 +58,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String redirectHost = (String) request.getSession().getAttribute("redirect_host");
         String redirectPath = (String) request.getSession().getAttribute("redirect_path");
 
-        boolean isPathExists = false;
-        if (Objects.nonNull(redirectHost)) {
+        boolean isPathExists = true;
+        if (Objects.isNull(redirectHost)) {
             redirectHost = BASEURL;
         }
-        if (Objects.nonNull(redirectPath)) {
-            isPathExists = true;
+        if (Objects.isNull(redirectPath)) {
+            isPathExists = false;
         }
         request.getSession().removeAttribute("redirect_host");
         request.getSession().removeAttribute("redirect_path");
