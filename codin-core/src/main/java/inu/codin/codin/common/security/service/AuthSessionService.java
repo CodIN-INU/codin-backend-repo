@@ -12,7 +12,11 @@ public class AuthSessionService {
 
     private final HttpSession httpSession;
 
-    public void setSession(String redirectUrl) {
-        if (!Objects.equals(redirectUrl, null)) httpSession.setAttribute("redirect_url", redirectUrl);
+    public void setRedirectHostSession(String redirectHost) {
+        if (!Objects.equals(redirectHost, null)) httpSession.setAttribute("redirect_host", redirectHost);
+    }
+
+    public void setRedirectPathSession(String redirectPath) {
+        if (!Objects.equals(redirectPath, null)) httpSession.setAttribute("redirect_path", redirectPath);
     }
 }
