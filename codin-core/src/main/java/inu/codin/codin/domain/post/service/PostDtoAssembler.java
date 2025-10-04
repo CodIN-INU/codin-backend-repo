@@ -24,6 +24,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * PostEntity를 다양한 Response DTO로 변환하는 책임을 담당하는 어셈블러
@@ -69,7 +70,7 @@ public class PostDtoAssembler {
      * PostEntity 리스트를 PostPageItemResponseDTO 리스트로 변환
      */
     public List<PostPageItemResponseDTO> toPageItemList(List<PostEntity> posts) {
-        ObjectId currentUserId = SecurityUtils.getCurrentUserId();
+        ObjectId currentUserId = SecurityUtils.getCurrentUserIdOrNull();
         return posts.stream()
                 .map(post -> toPageItem(post, currentUserId))
                 .toList();
@@ -86,13 +87,13 @@ public class PostDtoAssembler {
 
     /**
      * 현재 사용자의 게시물에 대한 상호작용 정보 조회 (좋아요, 스크랩, 작성자 여부)
+     * - 익명(비로그인)인 경우: liked=false, scraped=false, isOwner=false
      */
     private UserInfo getUserInfoAboutPost(ObjectId currentUserId, ObjectId postUserId, ObjectId postId) {
-        return UserInfo.ofPost(
-                likeService.isLiked(LikeType.POST, postId.toString(), currentUserId),
-                scrapService.isPostScraped(postId, currentUserId),
-                postUserId.equals(currentUserId)
-        );
+        boolean liked   = (currentUserId != null) && likeService.isLiked(LikeType.POST, postId.toString(), currentUserId);
+        boolean scraped = (currentUserId != null) && scrapService.isPostScraped(postId, currentUserId);
+        boolean isOwner = Objects.equals(postUserId, currentUserId);
+        return UserInfo.ofPost(liked, scraped, isOwner);
     }
 
     /**
