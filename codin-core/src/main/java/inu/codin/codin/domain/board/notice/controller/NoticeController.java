@@ -6,7 +6,7 @@ import inu.codin.codin.domain.board.notice.dto.request.NoticeCreateUpdateRequest
 import inu.codin.codin.domain.board.notice.dto.response.NoticeDetailResponseDto;
 import inu.codin.codin.domain.board.notice.dto.response.NoticePageResponse;
 import inu.codin.codin.domain.board.notice.service.NoticeService;
-import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.post.service.PostCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ import java.util.List;
 public class NoticeController {
 
     private final NoticeService noticeService;
-    private final PostService postService;
+    private final PostCommandService postCommandService;
 
     /*
     ===================
@@ -119,7 +119,7 @@ public class NoticeController {
             @PathVariable String postId,
             @RequestParam String imageUrl) {
 
-        postService.deletePostImage(postId, imageUrl);
+        postCommandService.deletePostImage(postId, imageUrl);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "공지사항 이미지가 삭제되었습니다.", null));
     }
@@ -130,7 +130,7 @@ public class NoticeController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @DeleteMapping("/{postId}")
     public ResponseEntity<SingleResponse<?>> softDeleteNotice(@PathVariable String postId) {
-        postService.softDeletePost(postId);
+        postCommandService.softDeletePost(postId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "공지사항이 삭제되었습니다.", null));
     }

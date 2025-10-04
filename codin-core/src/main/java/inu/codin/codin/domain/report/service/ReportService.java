@@ -2,18 +2,18 @@ package inu.codin.codin.domain.report.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.domain.post.domain.comment.domain.reply.entity.ReplyCommentEntity;
-import inu.codin.codin.domain.post.domain.comment.domain.reply.repository.ReplyCommentRepository;
-import inu.codin.codin.domain.post.domain.comment.domain.reply.service.ReplyCommentService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
-import inu.codin.codin.domain.post.domain.comment.service.CommentService;
+import inu.codin.codin.domain.post.domain.comment.service.CommentQueryService;
+import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
+import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
+import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.dto.response.PostDetailResponseDTO;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.report.dto.ReportInfo;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
@@ -40,15 +40,16 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ReportService {
 
-    private final PostService postService;
-    private final CommentService commentService;
-    private final ReplyCommentService replyCommentService;
+    private final PostQueryService postQueryService;
+    private final CommentQueryService commentQueryService;
+    private final ReplyQueryService replyQueryService;
 
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
@@ -322,17 +323,17 @@ public class ReportService {
         ObjectId entityId = new ObjectId(reportInfo.getReportedEntityId());
 
         return switch (reportInfo.getEntityType()) {
-            case POST -> postService.getPostDetailById(entityId) // ✅ PostService 활용
-                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo));
+            case POST -> postQueryService.getPostDetailById(entityId)
+                    .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo));
 
             case COMMENT -> commentRepository.findById(entityId)
-                    .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                            .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo)));
+                    .flatMap(comment -> postQueryService.getPostDetailById(comment.getPostId())
+                            .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo)));
 
             case REPLY -> replyCommentRepository.findById(entityId)
                     .flatMap(reply -> commentRepository.findById(reply.getCommentId())
-                            .flatMap(comment -> postService.getPostDetailById(comment.getPostId())
-                                    .map(postDTO -> ReportListResponseDto.from(postDTO, reportInfo))));
+                            .flatMap(comment -> postQueryService.getPostDetailById(comment.getPostId())
+                                    .map(pageItem -> ReportListResponseDto.from(pageItem.getPost(), reportInfo))));
 
             default -> Optional.empty();
         };
@@ -347,17 +348,16 @@ public class ReportService {
         if (!existsInReportDB) {
             throw new NotFoundException("해당 신고 대상이 존재하지 않습니다. 신고 ID: " + reportedEntityId);
         }
-        PostDetailResponseDTO postDetailResponse = postService.getPostDetailById(entityId)
+        PostDetailResponseDTO postDetailResponse = postQueryService.getPostDetailById(entityId)
+                .map(PostPageItemResponseDTO::getPost)
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
         boolean isReported = entityId.equals(reportTargetId);
-
-
-        return ReportedPostDetailResponseDTO.from(isReported, postDetailResponse);
+        return ReportedPostDetailResponseDTO.from(postDetailResponse, isReported);
     }
 
 
     public List<ReportedCommentDetailResponseDTO> getReportedCommentsByPostId(String postId, String reportedEntityId) {
-        List<CommentResponseDTO> comments = commentService.getCommentsByPostId(postId);
+        List<CommentResponseDTO> comments = commentQueryService.getCommentsByPostId(postId);
         PostEntity post = postRepository.findByIdAndNotDeleted(new ObjectId(postId))
                 .orElseThrow(() -> new NotFoundException("게시물을 찾을 수 없습니다."));
 
@@ -379,7 +379,7 @@ public class ReportService {
 
     public List<ReportedCommentDetailResponseDTO> getReportedRepliesByCommentId(PostAnonymous postAnonymous, String id, String reportedEntityId) {
         ObjectId commentId = new ObjectId(id);
-        List<CommentResponseDTO> replies = replyCommentService.getRepliesByCommentId(postAnonymous, commentId);
+        List<CommentResponseDTO> replies = replyQueryService.getRepliesByCommentId(postAnonymous, commentId);
 
         return replies.stream()
                 .map(reply -> {
