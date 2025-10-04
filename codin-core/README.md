@@ -12,9 +12,6 @@ CodIN 백엔드 Main API 서버 Repository 입니다.
 - [교과목 API 서버](https://github.com/CodIN-INU/codin-lecture-api)
 
 ---
-## 전체 아키텍처
-
-<img width="1411" height="979" alt="image" src="https://github.com/user-attachments/assets/21768a5d-cfa0-46d8-9e16-2502520ad70c" />
 
 ## 주요 화면
 

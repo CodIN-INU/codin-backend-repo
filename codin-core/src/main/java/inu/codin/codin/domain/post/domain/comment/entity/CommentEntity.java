@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.post.domain.comment.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -30,12 +31,20 @@ public class CommentEntity extends BaseTimeEntity {
     private boolean anonymous;
 
     @Builder
-    public CommentEntity(ObjectId _id, ObjectId postId, ObjectId userId, String content, Boolean anonymous) {
-        this._id = _id;
+    public CommentEntity(ObjectId postId, ObjectId userId, String content, boolean anonymous) {
         this.postId = postId;
         this.userId = userId;
         this.content = content;
         this.anonymous = anonymous;
+    }
+
+    public static CommentEntity create(ObjectId postId, ObjectId userId, CommentCreateRequestDTO requestDTO) {
+        return new CommentEntity(
+                postId,
+                userId,
+                requestDTO.getContent(),
+                requestDTO.isAnonymous()
+                );
     }
 
     public void updateComment(String content) {

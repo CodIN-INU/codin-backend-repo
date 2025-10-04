@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.report.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
-import inu.codin.codin.domain.post.domain.comment.service.CommentService;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportPageResponse;
@@ -27,7 +26,6 @@ import java.util.List;
 @Tag(name = "Reoprt API", description = "사용자 신고 기능")
 public class ReportController {
     private final ReportService reportService;
-    private final CommentService commentService;
 
     //(User)신고 작성
     /**

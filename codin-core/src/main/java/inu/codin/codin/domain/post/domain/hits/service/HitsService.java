@@ -2,6 +2,8 @@ package inu.codin.codin.domain.post.domain.hits.service;
 
 import inu.codin.codin.domain.post.domain.hits.entity.HitsEntity;
 import inu.codin.codin.domain.post.domain.hits.repository.HitsRepository;
+import inu.codin.codin.domain.post.domain.hits.exception.HitsException;
+import inu.codin.codin.domain.post.domain.hits.exception.HitsErrorCode;
 import inu.codin.codin.infra.redis.config.RedisHealthChecker;
 import inu.codin.codin.infra.redis.service.RedisHitsService;
 import lombok.RequiredArgsConstructor;

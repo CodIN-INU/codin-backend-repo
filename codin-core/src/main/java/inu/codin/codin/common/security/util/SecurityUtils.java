@@ -46,4 +46,10 @@ public class SecurityUtils {
         }
     }
 
+    public static void validateOwners(ObjectId currentUserId, ObjectId ownerId) {
+    validateUser(currentUserId);
+        if (!ownerId.equals(currentUserId)) {
+            throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "본인 리소스가 아닙니다. ");
+        }
+    }
 }

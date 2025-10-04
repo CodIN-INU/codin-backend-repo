@@ -11,7 +11,7 @@ import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.post.service.PostService;
+import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
@@ -34,12 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -51,7 +46,7 @@ public class UserService {
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
 
-    private final PostService postService;
+    private final PostDtoAssembler postDtoAssembler;
     private final S3Service s3Service;
     private final JwtService jwtService;
 
@@ -66,7 +61,7 @@ public class UserService {
 
         log.info("[게시글 조회 성공] 조회된 게시글 수: {}, 총 페이지 수: {}", page.getContent().size(), page.getTotalPages());
         return PostPageResponse.of(
-                postService.getPostListResponseDtos(page.getContent()),
+                postDtoAssembler.toPageItemList(page.getContent()),
                 page.getTotalPages() - 1,
                 page.hasNext() ? page.getPageable().getPageNumber() + 1 : -1
         );
@@ -88,7 +83,7 @@ public class UserService {
                 List<PostEntity> postUserLike = postRepository.findBy_idInAndDeletedAtIsNull(postIds);
 
                 log.info("[좋아요 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", likePage.getTotalPages(), likePage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserLike), likePage.getTotalPages() - 1, likePage.hasNext() ? likePage.getPageable().getPageNumber() + 1 : -1);
             }
             case SCRAP -> {
                 log.info("[스크랩 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
@@ -100,7 +95,7 @@ public class UserService {
                 List<PostEntity> postUserScrap = postRepository.findBy_idInAndDeletedAtIsNull(postIds);
 
                 log.info("[스크랩 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", scrapPage.getTotalPages(), scrapPage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserScrap), scrapPage.getTotalPages() - 1, scrapPage.hasNext() ? scrapPage.getPageable().getPageNumber() + 1 : -1);
             }
             case COMMENT -> {
                 log.info("[댓글 조회 시작] 유저 ID: {}, 타입: {}", userId, interactionType);
@@ -113,7 +108,7 @@ public class UserService {
                 List<PostEntity> postUserComment = postRepository.findBy_idInAndDeletedAtIsNull(commentedPostIds);
 
                 log.info("[댓글 조회 완료] 총 페이지 수: {}, 다음 페이지 여부: {}", commentPage.getTotalPages(), commentPage.hasNext());
-                return PostPageResponse.of(postService.getPostListResponseDtos(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
+                return PostPageResponse.of(postDtoAssembler.toPageItemList(postUserComment), commentPage.getTotalPages() - 1, commentPage.hasNext() ? commentPage.getPageable().getPageNumber() + 1 : -1);
             }
             default -> {
                 log.warn("[유효하지 않은 상호작용 타입] 유저 ID: {}, 상호작용 타입: {}", userId, interactionType);

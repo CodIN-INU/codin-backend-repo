@@ -1,7 +1,11 @@
 package inu.codin.codin.domain.post.entity;
 
 import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.domain.post.exception.StateUpdateException;
+import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
+import inu.codin.codin.domain.post.exception.PostErrorCode;
+import inu.codin.codin.domain.post.exception.PostException;
+import inu.codin.codin.domain.post.scheduler.exception.SchedulerErrorCode;
+import inu.codin.codin.domain.post.scheduler.exception.SchedulerException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -12,6 +16,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "posts")
@@ -27,7 +32,7 @@ public class PostEntity extends BaseTimeEntity {
     private String title;
     @NotBlank
     private String content;
-    private List<String> postImageUrls;
+    private List<String> postImageUrls = new ArrayList<>();
     private boolean isAnonymous;
 
     @NotNull
@@ -41,15 +46,26 @@ public class PostEntity extends BaseTimeEntity {
     private PostAnonymous anonymous = new PostAnonymous();
 
     @Builder
-    public PostEntity(ObjectId _id, ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {
-        this._id = _id;
+    public PostEntity(ObjectId userId, PostCategory postCategory, String title, String content, List<String> postImageUrls ,boolean isAnonymous, PostStatus postStatus) {
         this.userId = userId;
         this.title = title;
         this.content = content;
-        this.postImageUrls = postImageUrls;
+        this.postImageUrls = postImageUrls != null ? new ArrayList<>(postImageUrls) : new ArrayList<>();
         this.isAnonymous = isAnonymous;
         this.postCategory = postCategory;
         this.postStatus = postStatus;
+    }
+
+    public static PostEntity create(ObjectId userId, PostCreateRequestDTO dto, List<String> imageUrls) {
+        return new PostEntity(
+                userId,
+                dto.getPostCategory(),
+                dto.getTitle(),
+                dto.getContent(),
+                imageUrls,
+                dto.isAnonymous(),
+                PostStatus.ACTIVE
+        );
     }
 
     public void updateNotice(String title, String content, List<String> postImageUrls) {
@@ -60,19 +76,19 @@ public class PostEntity extends BaseTimeEntity {
 
     public void updatePostContent(String content, List<String> postImageUrls) {
         this.content = content;
-        this.postImageUrls = postImageUrls;
+        this.postImageUrls = postImageUrls != null ? new ArrayList<>(postImageUrls) : new ArrayList<>();
     }
 
     public void updatePostAnonymous(boolean isAnonymous) {
         if (this.isAnonymous == isAnonymous) {
-            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new PostException(PostErrorCode.DUPLICATE_ANONYMOUS_STATE);
         }
         this.isAnonymous = isAnonymous;
     }
 
     public void updatePostStatus(PostStatus postStatus) {
         if (this.postStatus == postStatus) {
-            throw new StateUpdateException("현재 상태와 동일한 상태로 변경할 수 없습니다.");
+            throw new SchedulerException(SchedulerErrorCode.DUPLICATE_POST_STATUS);
         }
         this.postStatus = postStatus;
     }
@@ -80,14 +96,26 @@ public class PostEntity extends BaseTimeEntity {
         this.postImageUrls.remove(imageUrl);
     }
 
-    //댓글+대댓글 수 업데이트
+    //댓글+대댓글 수 증가
     public void plusCommentCount() {
         this.commentCount++;
+    }
+
+    //댓글+대댓글 수 감소
+    public void minusCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
     }
 
     //신고 수 업데이트
     public void updateReportCount(int reportCount) {
         this.reportCount=reportCount;
+    }
+
+    //작성자 확인 로직
+    public boolean isWriter(ObjectId userId) {
+        return this.userId.equals(userId);
     }
 
 }
