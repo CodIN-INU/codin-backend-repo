@@ -14,13 +14,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HitsEntity {
 
-    @Id @NotBlank
+    @Id
     private ObjectId _id;
 
-    @NotBlank
     private ObjectId userId;
 
-    @NotBlank
     private ObjectId postId;
 
     @Builder
