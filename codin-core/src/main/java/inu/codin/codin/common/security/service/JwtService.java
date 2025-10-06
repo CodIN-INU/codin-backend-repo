@@ -192,7 +192,6 @@ public class JwtService {
 
     public String getAccessToken(HttpServletRequest request) {
         String accessToken = jwtUtils.getAccessToken(request);
-        log.info("token: {}", accessToken);
 
         if (!StringUtils.hasText(accessToken)) {
             return null;
