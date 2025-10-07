@@ -47,8 +47,9 @@ public class PostInteractionService {
     }
 
     // [HitsService] - 조회수 증가 처리
+    // 비로그인(null) → 무조건 증가, 로그인 → 중복 아닐 때만 증가
     public void increaseHits(PostEntity post, ObjectId userId) {
-        if (!hitsService.validateHits(post.get_id(), userId)) {
+        if (userId==null || !hitsService.validateHits(post.get_id(), userId)) {
             hitsService.addHits(post.get_id(), userId);
             log.info("조회수 업데이트. PostId: {}, UserId: {}", post.get_id(), userId);
         }
