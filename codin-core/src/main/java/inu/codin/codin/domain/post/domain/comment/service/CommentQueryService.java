@@ -114,6 +114,8 @@ public class CommentQueryService {
 
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
         ObjectId userId = SecurityUtils.getCurrentUserId();
+
+        //todo: userId -> NULL isLiked=false 처리
         return UserInfo.ofComment(
                 likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)
         );
