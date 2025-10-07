@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -36,10 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        if (permitAllProperties.getUrls().stream().anyMatch(url -> pathMatcher.match(url, requestURI))) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        final boolean isPermitAll = permitAllProperties.getUrls().stream()
+                .anyMatch(url -> pathMatcher.match(url, requestURI));
 
         String token = null;
         if (Arrays.stream(SWAGGER_AUTH_PATHS).anyMatch(url -> pathMatcher.match(url, requestURI))) {
@@ -49,10 +48,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Access Token이 있는 경우
-        if (token != null) {
+         if (StringUtils.hasText(token)) {
             jwtService.getUserDetailsAndSetAuthentication(token);
         } else {
             SecurityContextHolder.clearContext();
+
+             if (isPermitAll) {
+                 filterChain.doFilter(request, response);
+                 return;
+             }
         }
 
         filterChain.doFilter(request, response);
