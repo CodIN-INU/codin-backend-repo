@@ -78,9 +78,15 @@ public class BlockService {
 
     /**
      * 현재 유저의 차단된 유저 목록 반환
+     * 인증이 없거나 익명이면 빈 리스트 반환
      * @return 차단한 유저 목록 (빈 리스트가 제공될 수 있음)
      */
     public List<ObjectId> getBlockedUsers() {
+        ObjectId currentUserId = SecurityUtils.getCurrentUserIdOrNull();
+        if (currentUserId == null) {
+            return List.of();
+        }
+
         return blockRepository.findByUserId(SecurityUtils.getCurrentUserId())
                 .map(BlockEntity::getBlockedUsers)
                 .orElse(List.of());
