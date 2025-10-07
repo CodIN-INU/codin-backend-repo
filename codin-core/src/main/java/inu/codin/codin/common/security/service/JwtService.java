@@ -142,8 +142,10 @@ public class JwtService {
         log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}", authentication.getName(), newToken.getAccessToken());
     }
 
+
     /**
-     * 로그아웃 - Refresh Token 삭제
+     * 로그아웃 -
+     * Access,Refresh Token 제거/ 서버측 RT 삭제
      */
     public void deleteToken(HttpServletResponse response) {
         // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
@@ -163,6 +165,15 @@ public class JwtService {
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0); // 7일
         response.addCookie(refreshCookie);
+        log.info("[deleteToken] Refresh Cookie 삭제 완료");
+
+        Cookie AccessCookie = new Cookie("x-access-token", "");
+        AccessCookie.setHttpOnly(true);
+        AccessCookie.setSecure(true);
+        AccessCookie.setPath("/");
+        AccessCookie.setMaxAge(0);
+        response.addCookie(AccessCookie);
+        log.info("[deleteToken] Access Cookie 삭제 완료");
     }
 
     public void setAuthentication(HttpServletRequest request){
