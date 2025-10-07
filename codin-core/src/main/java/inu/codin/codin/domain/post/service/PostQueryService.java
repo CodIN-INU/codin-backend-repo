@@ -54,7 +54,7 @@ public class PostQueryService
      */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = findPostById(ObjectIdUtil.toObjectId(postId));
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
         postInteractionService.increaseHits(post, userId);
         return postDtoAssembler.toPageItem(post, userId);
     }

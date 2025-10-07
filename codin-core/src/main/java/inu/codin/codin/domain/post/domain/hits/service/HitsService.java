@@ -44,9 +44,10 @@ public class HitsService {
      * 게시글 조회 여부 판단
      * @param postId 게시글 _id
      * @param userId 유저 _id
-     * @return true : 게시글 조회 유 , false : 게시글 조회 무
+     * @return true : 게시글 조회 유 , false : 게시글 조회 무 / 인증X (비로그인)
      */
     public boolean validateHits(ObjectId postId, ObjectId userId) {
+        if (userId == null) return false;
         return hitsRepository.existsByPostIdAndUserId(postId, userId);
     }
 
