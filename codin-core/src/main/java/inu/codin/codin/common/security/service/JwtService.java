@@ -16,10 +16,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * JWT 토큰 관련 비즈니스 로직을 처리하는 서비스
@@ -192,6 +192,11 @@ public class JwtService {
 
     public String getAccessToken(HttpServletRequest request) {
         String accessToken = jwtUtils.getAccessToken(request);
+
+        if (!StringUtils.hasText(accessToken)) {
+            return null;
+        }
+
         if (!jwtTokenProvider.validType(accessToken, "access")) {
             log.error("[getAccessToken] Access Token이 아닙니다.");
             throw new JwtException(SecurityErrorCode.INVALID_TYPE, "Access Token이 아닙니다.");
