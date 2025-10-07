@@ -1,6 +1,7 @@
 package inu.codin.codin.common.security.filter;
 
 import inu.codin.codin.common.dto.PermitAllProperties;
+import inu.codin.codin.common.dto.PublicApiProperties;
 import inu.codin.codin.common.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final PermitAllProperties permitAllProperties;
+    private final PublicApiProperties publicApiProperties;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final String [] SWAGGER_AUTH_PATHS = {
@@ -40,6 +42,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final boolean isPermitAll = permitAllProperties.getUrls().stream()
                 .anyMatch(url -> pathMatcher.match(url, requestURI));
 
+        final boolean isPublicApi = publicApiProperties.getUrls().stream()
+                .anyMatch(url -> pathMatcher.match(url, requestURI));
+
+        if (isPermitAll) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = null;
         if (Arrays.stream(SWAGGER_AUTH_PATHS).anyMatch(url -> pathMatcher.match(url, requestURI))) {
             token = jwtService.getRefreshToken(request);
@@ -53,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else {
             SecurityContextHolder.clearContext();
 
-             if (isPermitAll) {
+             if (isPublicApi) {
                  filterChain.doFilter(request, response);
                  return;
              }
