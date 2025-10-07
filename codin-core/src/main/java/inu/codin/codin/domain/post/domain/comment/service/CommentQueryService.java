@@ -113,12 +113,14 @@ public class CommentQueryService {
 
 
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
 
-        //todo: userId -> NULL isLiked=false 처리
-        return UserInfo.ofComment(
-                likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)
-        );
+        boolean isLiked = false;
+        if (userId != null) {
+            isLiked = likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId);
+        }
+
+        return UserInfo.ofComment(isLiked);
     }
     /**
      *
