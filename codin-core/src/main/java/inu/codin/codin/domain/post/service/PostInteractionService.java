@@ -1,12 +1,7 @@
 package inu.codin.codin.domain.post.service;
-
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.domain.like.entity.LikeType;
-import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
-import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.codin.infra.s3.exception.ImageRemoveException;
 import inu.codin.codin.domain.post.exception.PostException;
