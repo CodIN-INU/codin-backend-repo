@@ -2,6 +2,7 @@ package inu.codin.codin.common.config;
 
 
 import inu.codin.codin.common.dto.PermitAllProperties;
+import inu.codin.codin.common.dto.PublicApiProperties;
 import inu.codin.codin.common.security.filter.ExceptionHandlerFilter;
 import inu.codin.codin.common.security.filter.JwtAuthenticationFilter;
 import inu.codin.codin.common.security.service.JwtService;
@@ -57,6 +58,7 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final PermitAllProperties permitAllProperties;
+    private final PublicApiProperties publicApiProperties;
 
     private final AppleOAuth2UserService appleOAuth2UserService;
     private final ClientRegistrationRepository clientRegistrationRepository;
@@ -81,6 +83,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(permitAllProperties.getUrls().toArray(new String[0])).permitAll()
+                                .requestMatchers(publicApiProperties.getUrls().toArray(new String[0])).permitAll()
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
                                 .requestMatchers(MANAGER_AUTH_PATHS).hasRole("MANAGER")
                                 .requestMatchers(USER_AUTH_PATHS).hasRole("USER")
@@ -115,7 +118,7 @@ public class SecurityConfig {
 //                .httpBasic(Customizer.withDefaults())
                 // JwtAuthenticationFilter 추가
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtService, permitAllProperties),
+                        new JwtAuthenticationFilter(jwtService, permitAllProperties, publicApiProperties),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
