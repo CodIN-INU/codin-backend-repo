@@ -36,7 +36,7 @@ public class JwtService {
     private final CustomUserDetailsService userDetailsService;
 
     @Value("${server.domain}")
-    private String BASERURL;
+    private String BASEURL;
 
     private final String REFRESH_TOKEN = "x-refresh-token";
     private final String ACCESS_TOKEN = "Authorization";
@@ -125,7 +125,7 @@ public class JwtService {
         newAccessToken.setSecure(true);
         newAccessToken.setPath("/");
         newAccessToken.setMaxAge(10 * 24 * 60 * 60); // 10일
-        newAccessToken.setDomain(BASERURL.split("//")[1]);
+        newAccessToken.setDomain(BASEURL.split("//")[1]);
         newAccessToken.setAttribute("SameSite", "None");
         response.addCookie(newAccessToken);
 
@@ -135,7 +135,7 @@ public class JwtService {
         newRefreshToken.setSecure(true);
         newRefreshToken.setPath("/");
         newRefreshToken.setMaxAge(10 * 24 * 60 * 60); // 10일
-        newRefreshToken.setDomain(BASERURL.split("//")[1]);
+        newRefreshToken.setDomain(BASEURL.split("//")[1]);
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
@@ -159,21 +159,37 @@ public class JwtService {
     }
 
     private void deleteCookie(HttpServletResponse response) {
+
+        String domain = BASEURL.replaceFirst("https?://", "").split(":")[0];
+        log.info("[deleteCookie] BASEURL={}, domain={}", BASEURL, domain);
+
         Cookie refreshCookie = new Cookie(REFRESH_TOKEN, "");
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true);
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(0); // 7일
+        refreshCookie.setDomain(domain);
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setAttribute("SameSite","None");
         response.addCookie(refreshCookie);
-        log.info("[deleteToken] Refresh Cookie 삭제 완료");
 
-        Cookie AccessCookie = new Cookie("x-access-token", "");
-        AccessCookie.setHttpOnly(true);
-        AccessCookie.setSecure(true);
-        AccessCookie.setPath("/");
-        AccessCookie.setMaxAge(0);
-        response.addCookie(AccessCookie);
-        log.info("[deleteToken] Access Cookie 삭제 완료");
+        log.info("[deleteCookie] refreshCookie info => name={}, domain={}, path={}, secure={}, httpOnly={}, maxAge={}, sameSite=None",
+                refreshCookie.getName(), refreshCookie.getDomain(), refreshCookie.getPath(),
+                refreshCookie.getSecure(), refreshCookie.isHttpOnly(), refreshCookie.getMaxAge());
+
+        Cookie accessCookie = new Cookie("x-access-token", "");
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(true);
+        accessCookie.setPath("/");
+        accessCookie.setDomain(domain);
+        accessCookie.setMaxAge(0);
+        refreshCookie.setAttribute("SameSite","None");
+        response.addCookie(accessCookie);
+
+        log.info("[deleteCookie] accessCookie info => name={}, domain={}, path={}, secure={}, httpOnly={}, maxAge={}, sameSite=None",
+                accessCookie.getName(), accessCookie.getDomain(), accessCookie.getPath(),
+                accessCookie.getSecure(), accessCookie.isHttpOnly(), accessCookie.getMaxAge());
+
+        log.info("[deleteToken] Access/Refresh Cookie 삭제 완료");
     }
 
     public void setAuthentication(HttpServletRequest request){
