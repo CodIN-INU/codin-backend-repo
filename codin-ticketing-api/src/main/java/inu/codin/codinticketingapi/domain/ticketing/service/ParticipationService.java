@@ -128,4 +128,10 @@ public class ParticipationService {
         return participationRepository.findByUserIdAndEventIdAndNotCanceled(userId, eventId)
                 .map(ParticipationResponse::of);
     }
+
+    @Transactional(readOnly = true)
+    public Boolean isUserParticipatedInEvent(Long eventId) {
+        String userId = SecurityUtil.getUserId();
+        return participationRepository.findByUserIdAndEventIdAndNotCanceled(userId, eventId).isPresent();
+    }
 }
