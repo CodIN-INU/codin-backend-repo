@@ -42,7 +42,6 @@ public class TicketingController {
     public ResponseEntity<SingleResponse<Boolean>> readParticipationByEvent(
             @PathVariable Long eventId
     ) {
-        participationService.findParticipationByEvent(eventId);
         return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 단순 참여상태 조회 성공",
                 participationService.isUserParticipatedInEvent(eventId)));
     }
