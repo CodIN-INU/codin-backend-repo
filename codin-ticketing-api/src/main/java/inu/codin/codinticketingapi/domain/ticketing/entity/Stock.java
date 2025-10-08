@@ -55,7 +55,7 @@ public class Stock extends BaseEntity {
     }
 
     /**
-     * 재고 차감 (원자적 경쟁 방지)
+     * 재고 차감 (원자적 경쟁 방지) - 테스트에서 사용중
      */
     public boolean decrease() {
         if (remainingStock <= 0) {

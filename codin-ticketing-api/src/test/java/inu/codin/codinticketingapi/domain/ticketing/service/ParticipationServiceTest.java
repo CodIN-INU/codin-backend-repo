@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationCreatedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.*;
@@ -72,9 +73,11 @@ class ParticipationServiceTest {
                 .id(EVENT_ID)
                 .title("테스트 이벤트")
                 .campus(Campus.SONGDO_CAMPUS)
-                .eventTime(LocalDateTime.now().plusDays(1))
+                .eventTime(LocalDateTime.now().minusDays(1))
                 .eventEndTime(LocalDateTime.now().plusDays(1).plusHours(2))
                 .build();
+
+        event.updateStatus(EventStatus.ACTIVE);
 
         Stock stock = Stock.builder()
                 .event(event)
@@ -92,7 +95,6 @@ class ParticipationServiceTest {
         given(eventRepository.findById(EVENT_ID)).willReturn(Optional.of(event));
         given(redisParticipationService.getCachedParticipation(USER_ID, EVENT_ID)).willReturn(Optional.empty());
         given(participationRepository.findByUserIdAndEvent(USER_ID, event)).willReturn(Optional.empty());
-        given(ticketingService.decrement(EVENT_ID)).willReturn(stock);
         given(participationRepository.save(any(Participation.class))).willReturn(participation);
 
         // when
