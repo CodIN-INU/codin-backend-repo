@@ -36,15 +36,9 @@ public class TicketingService {
     private final RedisParticipationService redisParticipationService;
 
     @Transactional
-    public Stock decrement(Long eventId) {
-        Stock stock = stockRepository.findByEvent_Id(eventId)
-                .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
+    public void decrement(Long eventId) {
         // 재고 수량 감소
-        if (!stock.decrease()) {
-            throw new TicketingException(TicketingErrorCode.SOLD_OUT);
-        }
-
-        return stock;
+        stockRepository.decrementStockByEventId(eventId);
     }
 
     /**
