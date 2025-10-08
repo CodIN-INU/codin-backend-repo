@@ -43,7 +43,7 @@ public class EventUpdateRequest {
 
     @Min(value = 1, message = "수량은 1개 이상이어야 합니다")
     @Schema(description = "이벤트 재고 수량", example = "120")
-    private int quantity;
+    private int stock;
 
     @NotNull(message = "이벤트 시작 시간은 필수입니다")
     @Future(message = "이벤트 시작 시간은 현재 시간 이후여야 합니다")

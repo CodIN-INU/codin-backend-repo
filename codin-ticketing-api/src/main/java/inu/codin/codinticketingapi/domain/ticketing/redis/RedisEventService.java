@@ -26,12 +26,31 @@ public class RedisEventService {
         }
     }
 
+    public void updateTickets(Long eventId, int totalStock, int prevStock) {
+        String key = generateKey(eventId);
+        Long remainStock = eventRedisTemplate.opsForZSet().size(key);
+
+        if (remainStock == null) {
+            throw new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND);
+        }
+
+        if (remainStock < totalStock) {
+            increaseStock(key, prevStock, totalStock);
+
+            return;
+        }
+
+        if (remainStock > totalStock) {
+            decreaseStock(key, prevStock, totalStock);
+        }
+    }
+
     // 티켓 번호 하나를 가져오는 메서드
     public Integer getTicket(Long eventId) {
         String key = generateKey(eventId);
         ZSetOperations.TypedTuple<String> ticketNumber = eventRedisTemplate.opsForZSet().popMin(key);
 
-        if (ticketNumber == null || ticketNumber.getValue() == null) {
+        if (ticketNumber == null || ticketNumber.getValue() == null || ticketNumber.getValue().equals("-1")) {
 
             throw new TicketingException(TicketingErrorCode.SOLD_OUT);
         }
@@ -56,4 +75,13 @@ public class RedisEventService {
         return String.format(AVAILABLE_TICKETS_KEY_PREFIX, eventId);
     }
 
+    private void increaseStock(String key, int prevStock, int totalStock) {
+        for (int i = prevStock + 1; i <= totalStock; i++) {
+            eventRedisTemplate.opsForZSet().add(key, String.valueOf(i), i);
+        }
+    }
+
+    private void decreaseStock(String key, int prevStock, int totalStock) {
+        eventRedisTemplate.opsForZSet().removeRangeByScore(key, totalStock + 1, prevStock);
+    }
 }

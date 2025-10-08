@@ -37,7 +37,7 @@ public class StockCheckJob implements Job {
             Stock stock = stockRepository.findByEvent_Id(eventId)
                     .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
 
-            final int current = stock.getStock();
+            final int current = stock.getRemainingStock();
 
             lastStockMap.compute(eventId, (id, prev) -> {
                 // 최초 등록 시에는 prev == null

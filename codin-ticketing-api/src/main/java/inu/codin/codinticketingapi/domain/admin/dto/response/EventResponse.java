@@ -51,7 +51,7 @@ public class EventResponse {
                 .eventImageUrl(event.getEventImageUrl())
                 .title(event.getTitle())
                 .locationInfo(event.getLocationInfo())
-                .stock(event.getStock().getStock())
+                .stock(event.getStock().getRemainingStock())
                 .target(event.getTarget())
                 .description(event.getDescription())
                 .inquiryNumber(event.getInquiryNumber())

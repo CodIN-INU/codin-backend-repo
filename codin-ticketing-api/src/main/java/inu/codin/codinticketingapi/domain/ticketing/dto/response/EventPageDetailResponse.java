@@ -60,8 +60,8 @@ public class EventPageDetailResponse {
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getStock().getInitialStock())
-                .currentQuantity(event.getStock().getStock())
+                .quantity(event.getStock().getCurrentTotalStock())
+                .currentQuantity(event.getStock().getRemainingStock())
                 .eventStatus(event.getEventStatus())
                 .build();
     }
@@ -74,8 +74,8 @@ public class EventPageDetailResponse {
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
                 .locationInfo(event.getLocationInfo())
-                .quantity(event.getStock().getInitialStock())
-                .currentQuantity(event.getStock().getStock())
+                .quantity(event.getStock().getCurrentTotalStock())
+                .currentQuantity(event.getStock().getRemainingStock())
                 .waitQuantity(waitQuantity)
                 .eventStatus(event.getEventStatus())
                 .build();

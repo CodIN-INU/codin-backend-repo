@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -92,6 +91,7 @@ public class ParticipationIntegrationTest {
                 .build();
 
         savedTestEvent = eventRepository.saveAndFlush(testEvent);
+        redisEventService.initializeTickets(savedTestEvent.getId(), savedTestEvent.getStock().getCurrentTotalStock());
 
         // 테스트 유저 정보
         testUser = UserInfoResponse.builder()
@@ -112,22 +112,22 @@ public class ParticipationIntegrationTest {
         stockRepository.deleteAllInBatch();
         eventRepository.deleteAllInBatch();
 
-        participationRedisTemplate.getConnectionFactory().getConnection().flushAll();
+        participationRedisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
     }
 
     @Test
     @DisplayName("티켓 번호 순차 증가 검증")
     void 티켓번호_순차증가_검증() throws ExecutionException, InterruptedException {
+        // given
         int threadCount = 15; // 재고보다 많은 스레드
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
         CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount);
         List<CompletableFuture<Void>> tasks = new ArrayList<>();
-
         AtomicInteger userIndexCounter = new AtomicInteger(0);
 
-        when(userClientService.fetchUser()).thenAnswer(invocation -> {
+        given(userClientService.fetchUser()).willAnswer(invocation -> {
             int userIndex = userIndexCounter.getAndIncrement();
 
             return UserInfoResponse.builder()
@@ -138,6 +138,7 @@ public class ParticipationIntegrationTest {
                     .build();
         });
 
+        // when
         for (int i = 1; i <= threadCount; i++) {
             tasks.add(CompletableFuture.runAsync(() -> {
                 try {
@@ -163,16 +164,16 @@ public class ParticipationIntegrationTest {
 
         log.info("성공 회수 : {}", successCount);
         log.info("실패 회수 : {}", failCount);
-        // 검증
-        assertThat(successCount.get()).isEqualTo(10); // 재고만큼만 성공
-        assertThat(failCount.get()).isEqualTo(5);     // 나머지는 재고 부족으로 실패
 
         // 티켓 번호 중복 검사
-        List<Participation> participations = participationRepository.findAllByEvent_Id(testEvent.getId());
-        Set<Integer> ticketNumbers = participations.stream()
+        List<Participation> participationList = participationRepository.findAllByEvent_Id(testEvent.getId());
+        Set<Integer> ticketNumbers = participationList.stream()
                 .map(Participation::getTicketNumber)
                 .collect(Collectors.toSet());
 
+        // then
+        assertThat(successCount.get()).isEqualTo(10); // 재고만큼만 성공
+        assertThat(failCount.get()).isEqualTo(5);     // 나머지는 재고 부족으로 실패
         assertThat(ticketNumbers).hasSize(10); // 모든 티켓 번호가 고유해야 함
         assertThat(ticketNumbers).containsExactlyInAnyOrder(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
@@ -181,6 +182,7 @@ public class ParticipationIntegrationTest {
     @DisplayName("재고 부족 시 예외 발생")
     @Transactional
     void 재고부족시_예외발생() {
+        // given
         Event event = Event.builder()
                 .title("Test Event")
                 .userId("userId")
@@ -200,6 +202,7 @@ public class ParticipationIntegrationTest {
         stock.decrease();
         stockRepository.save(stock);
 
+        // when & then
         // 참여 시도 시 예외 발생 확인
         assertThatThrownBy(() -> participationService.saveParticipation(savedEvent.getId()))
                 .isInstanceOf(TicketingException.class)
@@ -210,12 +213,13 @@ public class ParticipationIntegrationTest {
     @DisplayName("중복 참여 시 기존 참여 내용 반환")
     @Transactional
     void 중복_참여_시_기존_참여_내용_반환() {
+        // given & when
         // 첫 번째 참여
         ParticipationResponse firstResponse = participationService.saveParticipation(testEvent.getId());
-
         // 같은 사용자가 다시 참여 시도
         ParticipationResponse secondResponse = participationService.saveParticipation(testEvent.getId());
 
+        // then
         // 같은 참여 내용이 반환되는지 확인
         assertThat(firstResponse.getTicketNumber()).isEqualTo(secondResponse.getTicketNumber());
     }

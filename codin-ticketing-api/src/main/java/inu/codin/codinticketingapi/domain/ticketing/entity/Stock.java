@@ -2,6 +2,8 @@ package inu.codin.codinticketingapi.domain.ticketing.entity;
 
 import inu.codin.codinticketingapi.common.entity.BaseEntity;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
+import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -31,44 +33,62 @@ public class Stock extends BaseEntity {
     )
     private Event event;
 
-    /** 남은 재고 수 */
+    /**
+     * 남은 재고 수
+     */
     @Column(name = "stock", nullable = false)
-    private int stock;
+    private int remainingStock;
 
     // 초기 재고 수
     @Column(name = "initial_stock", nullable = false)
-    private int initialStock;
+    private int currentTotalStock;
 
     @Builder
     public Stock(Event event, int initialStock) {
         this.event = event;
-        this.stock = initialStock;
-        this.initialStock = initialStock;
+        this.remainingStock = initialStock;
+        this.currentTotalStock = initialStock;
 
         if (event != null && event.getStock() != this) {
             event.setStock(this);
         }
     }
 
-    /** 재고 차감 (원자적 경쟁 방지) */
+    /**
+     * 재고 차감 (원자적 경쟁 방지)
+     */
     public boolean decrease() {
-        if (stock <= 0) {
+        if (remainingStock <= 0) {
             return false;
         }
-        stock--;
+        remainingStock--;
         return true;
     }
 
-    /** 재고 증가 - 티켓팅 취소시 */
+    /**
+     * 재고 증가 - 티켓팅 취소시
+     */
     public boolean increase() {
-        if (stock >= initialStock) {
+        if (remainingStock >= currentTotalStock) {
             return false;
         }
-        stock++;
+        remainingStock++;
         return true;
     }
 
-    public void updateStock(int stock) {
-        this.stock = stock;
+    public void updateStock(int updateStock) {
+        this.remainingStock = updateStock;
+        this.currentTotalStock = updateStock;
+    }
+
+    public void stockUpdateForEventInProgress(int updateStock) {
+        if (this.remainingStock > updateStock) {
+            throw new TicketingException(TicketingErrorCode.INSUFFICIENT_TOTAL_STOCK);
+        }
+
+        int stockDelta = updateStock - this.currentTotalStock;
+
+        this.remainingStock += stockDelta;
+        this.currentTotalStock = updateStock;
     }
 }
