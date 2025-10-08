@@ -4,7 +4,6 @@ import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationCreatedEvent;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
-import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
@@ -48,11 +47,13 @@ public class ParticipationService {
 
         // 유저 정보가 존재하는지 검증
         if (userInfoResponse.getDepartment() == null || userInfoResponse.getStudentId() == null) {
+
             throw new UserException(UserErrorCode.NOT_EXIST_PARTICIPATION_DATA);
         }
 
         // 이벤트 상태 검증
         if (findEvent.getEventStatus() != EventStatus.ACTIVE) {
+
             throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
         }
 
@@ -90,8 +91,8 @@ public class ParticipationService {
     private ParticipationResponse createParticipation(Event event, UserInfoResponse userInfoResponse) {
         try {
             // 재고 줄임
-            ticketingService.decrement(event.getId());
             Integer ticketNumber = redisEventService.getTicket(event.getId());
+            ticketingService.decrement(event.getId());
             log.info("ticketNumber: {}", ticketNumber);
 
             Participation participation = Participation.builder()
@@ -104,7 +105,7 @@ public class ParticipationService {
 
             // 참여 생성 이벤트 발행
             eventPublisher.publishEvent(new ParticipationCreatedEvent(savedParticipation));
-            log.info("새로운 참가자 : {}", event.getId());
+
             return ParticipationResponse.of(savedParticipation);
         } catch (DataIntegrityViolationException dup) {
 
@@ -117,7 +118,6 @@ public class ParticipationService {
     private Optional<ParticipationResponse> findParticipationResponse(String userId, Long eventId) {
         // 1. 캐시에서 먼저 조회
         Optional<ParticipationResponse> cached = redisParticipationService.getCachedParticipation(userId, eventId);
-        log.info("cache hit : {}", eventId);
 
         if (cached.isPresent()) {
 

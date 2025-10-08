@@ -18,7 +18,8 @@ public enum TicketingErrorCode implements GlobalErrorCode {
     SOLD_OUT(HttpStatus.BAD_REQUEST, "티켓팅이 마감되었습니다."),
     PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "관리자 비밀번호가 맞지 않습니다."),
     UNAUTHORIZED_EVENT_UPDATE(HttpStatus.UNAUTHORIZED, "인증되지 않은 이벤트 업데이트 입니다."),
-    EVENT_ALREADY_STARTED(HttpStatus.BAD_REQUEST, "이미 이벤트가 시작했습니다.");
+    EVENT_ALREADY_STARTED(HttpStatus.BAD_REQUEST, "이미 이벤트가 시작했습니다."),
+    INSUFFICIENT_TOTAL_STOCK(HttpStatus.BAD_REQUEST, "변경하려는 재고는 남은 재고보다 적을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

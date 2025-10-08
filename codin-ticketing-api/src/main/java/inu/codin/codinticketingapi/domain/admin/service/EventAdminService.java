@@ -66,7 +66,7 @@ public class EventAdminService {
 
         Event savedEvent = eventRepository.save(event);
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(savedEvent);
-        redisEventService.initializeTickets(savedEvent.getId(), stock.getInitialStock());
+        redisEventService.initializeTickets(savedEvent.getId(), stock.getCurrentTotalStock());
 
         return EventResponse.of(savedEvent);
     }
@@ -84,6 +84,7 @@ public class EventAdminService {
         // 엔티티 조회, 권한 검증
         Event findEvent = findEventById(eventId);
         String currentUserId = findAdminUser();
+        int prevStock = findEvent.getStock().getCurrentTotalStock();
 
         // 입력값 검증
         request.validateEventTimes();
@@ -99,7 +100,7 @@ public class EventAdminService {
         findEvent.updateFrom(request);
 
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(findEvent);
-        redisEventService.initializeTickets(findEvent.getId(), findEvent.getStock().getInitialStock());
+        redisEventService.updateTickets(findEvent.getId(), findEvent.getStock().getCurrentTotalStock(), prevStock);
 
         return EventResponse.of(findEvent);
     }
@@ -143,7 +144,7 @@ public class EventAdminService {
         int nextPage = getNextPage(participationList.hasNext(), participationList.getNumber());
         int waitCount = participationRepository.countByEvent_IdAndStatus(eventId, ParticipationStatus.WAITING);
 
-        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage, event.getTitle(), stock.getStock(), waitCount, event.getEventEndTime());
+        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage, event.getTitle(), stock.getRemainingStock(), waitCount, event.getEventEndTime());
     }
 
     @Transactional
@@ -161,7 +162,7 @@ public class EventAdminService {
         Event findEvent = findEventById(eventId);
         Stock stock = findEvent.getStock();
 
-        return EventStockResponse.of(stock.getStock());
+        return EventStockResponse.of(stock.getRemainingStock());
     }
 
     @Transactional

@@ -92,7 +92,7 @@ class TicketingServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getStock()).isEqualTo(CURRENT_STOCK_50 - 1);
+        assertThat(result.getRemainingStock()).isEqualTo(CURRENT_STOCK_50 - 1);
         verify(stockRepository).findByEvent_Id(TEST_EVENT_ID);
     }
 

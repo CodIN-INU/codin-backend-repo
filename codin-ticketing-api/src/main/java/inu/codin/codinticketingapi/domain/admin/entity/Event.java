@@ -122,8 +122,12 @@ public class Event extends BaseEntity {
         this.inquiryNumber = dto.getInquiryNumber();
         this.promotionLink = dto.getPromotionLink();
 
-        if (this.stock != null) {
-            this.stock.updateStock(dto.getQuantity());
+        if (this.stock != null && this.eventStatus == EventStatus.UPCOMING) {
+            this.stock.updateStock(dto.getStock());
+        }
+
+        if (this.stock != null && this.eventStatus == EventStatus.ACTIVE) {
+            this.stock.stockUpdateForEventInProgress(dto.getStock());
         }
     }
 

@@ -103,7 +103,6 @@ public class TicketingService {
             throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
         }
 
-        // 재고 증가 - 비관적락
         Stock stock = stockRepository.findByEvent(event)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
         stock.increase();

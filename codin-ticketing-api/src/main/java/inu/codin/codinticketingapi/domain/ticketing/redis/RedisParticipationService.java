@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RedisParticipationService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, ParticipationResponse> participationRedisTemplate;
 
     private static final String CACHE_KEY_PREFIX = "participation:";
     private static final Duration CACHE_TTL = Duration.ofHours(3);
@@ -29,7 +29,7 @@ public class RedisParticipationService {
     public void cacheParticipation(String userId, Long eventId, Participation participation) {
         String cacheKey = generateCacheKey(userId, eventId);
         ParticipationResponse response = ParticipationResponse.of(participation);
-        redisTemplate.opsForValue().set(cacheKey, response, CACHE_TTL);
+        participationRedisTemplate.opsForValue().set(cacheKey, response, CACHE_TTL);
         log.debug("participation Cached participation: userId={}, eventId={}", userId, eventId);
     }
 
@@ -39,7 +39,7 @@ public class RedisParticipationService {
     public Optional<ParticipationResponse> getCachedParticipation(String userId, Long eventId) {
         String cacheKey = generateCacheKey(userId, eventId);
         try {
-            ParticipationResponse cached = (ParticipationResponse) redisTemplate.opsForValue().get(cacheKey);
+            ParticipationResponse cached = participationRedisTemplate.opsForValue().get(cacheKey);
             if (cached != null) {
                 log.debug("participation Cache hit: userId={}, eventId={}", userId, eventId);
                 return Optional.of(cached);
@@ -56,7 +56,7 @@ public class RedisParticipationService {
      */
     public void evictParticipation(String userId, Long eventId) {
         String cacheKey = generateCacheKey(userId, eventId);
-        redisTemplate.delete(cacheKey);
+        participationRedisTemplate.delete(cacheKey);
         log.debug("participation Evicted cache: userId={}, eventId={}", userId, eventId);
     }
 
