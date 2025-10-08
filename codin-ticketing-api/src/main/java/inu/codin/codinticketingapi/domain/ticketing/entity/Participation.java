@@ -10,7 +10,7 @@ import lombok.*;
 @Table(
         name = "ticketing_participation",
         indexes = {
-                @Index(name = "idx_event_profile", columnList = "event_id, profile_id", unique = true)
+                @Index(name = "idx_event_profile", columnList = "event_id, user_id", unique = true)
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
