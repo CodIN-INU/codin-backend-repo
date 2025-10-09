@@ -35,6 +35,7 @@ public class EventService {
     private final ParticipationRepository participationRepository;
 
     private final UserClientService userClientService;
+    private final ParticipationService participationService;
 
     @Transactional(readOnly = true)
     public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
@@ -48,11 +49,12 @@ public class EventService {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         // 유저 티켓팅 정보가 존재하는지 검증
         boolean isExistParticipationData = userInfoResponse.getDepartment() != null && userInfoResponse.getStudentId() != null;
+        boolean isUserParticipatedInEvent = participationService.isUserParticipatedInEvent(eventId);
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
 
-        return EventDetailResponse.of(event, isExistParticipationData);
+        return EventDetailResponse.of(event, isExistParticipationData, isUserParticipatedInEvent);
     }
 
     @Transactional(readOnly = true)
