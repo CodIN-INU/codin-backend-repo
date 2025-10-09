@@ -56,10 +56,13 @@ public class EventDetailResponse {
     @Schema(description = "이벤트 상태", example = "UPCOMING, ACTIVE, ENDED")
     private EventStatus eventStatus;
 
-    @Schema(description = "유저 티켓팅 정보 존재 여부", example = "true, false")
+    @Schema(description = "유저 티켓팅 참여 정보 존재 여부", example = "true, false")
     private boolean isExistParticipationData;
 
-    public static EventDetailResponse of(Event event,  boolean isExistParticipationData) {
+    @Schema(description = "유저의 특정 이벤트 티켓팅 단순 참여 상태(Boolean) 반환 - (참여, 서명 상태 -> true / 미참여, 취소 -> false)", example = "true, false")
+    private boolean isUserParticipatedInEvent;
+
+    public static EventDetailResponse of(Event event,  boolean isExistParticipationData, boolean isUserParticipatedInEvent) {
         return EventDetailResponse.builder()
                 .eventId(event.getId())
                 .eventTime(event.getEventTime())
@@ -75,6 +78,7 @@ public class EventDetailResponse {
                 .promotionLink(event.getPromotionLink())
                 .eventStatus(event.getEventStatus())
                 .isExistParticipationData(isExistParticipationData)
+                .isUserParticipatedInEvent(isUserParticipatedInEvent)
                 .build();
     }
 }

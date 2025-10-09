@@ -34,18 +34,6 @@ public class TicketingController {
                 participationService.findParticipationByEvent(eventId)));
     }
 
-
-    /** 유저의 특정 이벤트 티켓팅 단순 참여 상태(Boolean) 반환 */
-    @GetMapping("/participation/check/{eventId}")
-    @Operation(summary = "유저의 특정 이벤트 티켓팅 단순 참여 상태(Boolean) 반환 - (참여, 서명 상태 -> true / 미참여, 취소 -> false)")
-    @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 단순 참여 상태 조회 성공")
-    public ResponseEntity<SingleResponse<Boolean>> readParticipationByEvent(
-            @PathVariable Long eventId
-    ) {
-        return ResponseEntity.ok(new SingleResponse<>(200, "티켓팅 이벤트 단순 참여상태 조회 성공",
-                participationService.isUserParticipatedInEvent(eventId)));
-    }
-
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/join/{eventId}")
     @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
