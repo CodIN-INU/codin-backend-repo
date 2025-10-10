@@ -2,6 +2,7 @@ package inu.codin.codin.domain.user.dto.response;
 
 import inu.codin.codin.common.dto.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.entity.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +17,10 @@ public class UserInfoResponseDto {
     private String profileImageUrl;
     private String nickname;
     private Department department;
+    private UserRole userRole;
 
     @Builder
-    public UserInfoResponseDto(String _id, String email, String studentId, String name, String profileImageUrl, String nickname, Department department) {
+    public UserInfoResponseDto(String _id, String email, String studentId, String name, String profileImageUrl, String nickname, Department department, UserRole userRole) {
         this._id = _id;
         this.email = email;
         this.studentId = studentId;
@@ -26,6 +28,7 @@ public class UserInfoResponseDto {
         this.profileImageUrl = profileImageUrl;
         this.nickname = nickname;
         this.department = department;
+        this.userRole = userRole;
     }
 
     public static UserInfoResponseDto of(UserEntity user) {
@@ -37,6 +40,7 @@ public class UserInfoResponseDto {
                 .profileImageUrl(user.getProfileImageUrl())
                 .nickname(user.getNickname())
                 .department(user.getDepartment())
+                .userRole(user.getRole())
                 .build();
     }
 }
