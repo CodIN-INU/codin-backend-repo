@@ -107,7 +107,6 @@ public class UserEntity extends BaseTimeEntity {
      */
     public void updateParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
         this.studentId = updateRequest.getStudentId();
-        this.name = updateRequest.getName();
         this.department = updateRequest.getDepartment();
     }
 }

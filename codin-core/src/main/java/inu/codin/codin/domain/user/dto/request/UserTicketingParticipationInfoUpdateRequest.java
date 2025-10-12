@@ -12,6 +12,5 @@ public class UserTicketingParticipationInfoUpdateRequest {
 
     private Department department;
     private String studentId;
-    private String name;
 
 }
