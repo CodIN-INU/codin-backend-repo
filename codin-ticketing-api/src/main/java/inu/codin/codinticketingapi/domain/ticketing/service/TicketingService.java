@@ -112,9 +112,8 @@ public class TicketingService {
         stock.increase();
         redisEventService.returnTicket(eventId, participation.getTicketNumber());
 
-        participation.delete();
-        // 상태 변경 이벤트 발행
-        eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
+        // todo: SoftDelete가 적용되지 않음 단순히 적용하면 안되고 연관된 쿼리문 전부 바꿔야함
+        participationRepository.deleteById(participation.getId());
         // 캐시에 삭제
         redisParticipationService.evictParticipation(userId, eventId);
     }
