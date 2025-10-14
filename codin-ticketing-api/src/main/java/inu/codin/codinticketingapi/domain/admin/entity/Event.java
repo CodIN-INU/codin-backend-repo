@@ -117,10 +117,13 @@ public class Event extends BaseEntity {
         this.stock = stock;
     }
 
+    // todo: eventTime을 바꾸면 EventStatusScheduler 부분이 꼬일 수 있음 수정 필요
     public void updateFrom(EventUpdateRequest dto) {
         this.campus = dto.getCampus();
         this.eventTime = dto.getEventTime();
         this.eventEndTime = dto.getEventEndTime();
+        this.eventReceivedStartTime = dto.getEventReceivedStartTime();
+        this.eventReceivedEndTime = dto.getEventReceivedEndTime();
         this.title = dto.getTitle();
         this.locationInfo = dto.getLocationInfo();
         this.target = dto.getTarget();
@@ -128,6 +131,7 @@ public class Event extends BaseEntity {
         this.inquiryNumber = dto.getInquiryNumber();
         this.promotionLink = dto.getPromotionLink();
 
+        // todo: stock을 업데이트 하고 Redis ZSET 수량 조절도 필요함
         if (this.stock != null && this.eventStatus == EventStatus.UPCOMING) {
             this.stock.updateStock(dto.getStock());
         }

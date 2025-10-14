@@ -109,7 +109,6 @@ public class EventAdminService {
     public void deleteEvent(Long eventId) {
         Event event = findEventById(eventId);
         event.delete();
-
         eventStatusScheduler.scheduleAllDelete(event);
         redisEventService.deleteTickets(eventId);
     }
@@ -124,7 +123,6 @@ public class EventAdminService {
     @Transactional
     public void closeEvent(Long eventId) {
         Event findEvent = findEventById(eventId);
-        findEvent.delete();
         eventStatusScheduler.scheduleAllDelete(findEvent);
         redisEventService.deleteTickets(eventId);
     }
@@ -144,7 +142,7 @@ public class EventAdminService {
         int nextPage = getNextPage(participationList.hasNext(), participationList.getNumber());
         int waitCount = participationRepository.countByEvent_IdAndStatus(eventId, ParticipationStatus.WAITING);
 
-        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage, event.getTitle(), stock.getRemainingStock(), waitCount, event.getEventEndTime());
+        return EventParticipationProfilePageResponse.from(event, stock, profileList, lastPage, nextPage, waitCount);
     }
 
     @Transactional
@@ -162,14 +160,13 @@ public class EventAdminService {
         Event findEvent = findEventById(eventId);
         Stock stock = findEvent.getStock();
 
-        return EventStockResponse.of(stock.getRemainingStock());
+        return EventStockResponse.from(stock.getRemainingStock());
     }
 
     @Transactional
     public Boolean cancelTicket(Long eventId, String userId) {
         Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
         findParticipation.changeStatusCanceled();
-
         return true;
     }
 
