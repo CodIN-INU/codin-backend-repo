@@ -29,7 +29,6 @@ public class RedisHealthCheckService {
             // 가장 간단한 PING 명령으로 연결 상태 확인
             pingRedisTemplate.getConnectionFactory().getConnection().ping();
             handleSuccess();
-            log.info("redis 정상 연결 중");
         } catch (RedisConnectionFailureException e) {
             handleFailure();
         } catch (Exception e) {
