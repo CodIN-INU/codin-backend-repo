@@ -65,9 +65,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
 
     Optional<Participation> findByEventAndUserId(Event event, String userId);
 
-    @Query("""
-               
-            """)
+    @Query("SELECT p FROM Participation p WHERE p.event.id = :eventId AND p.status <> 'CANCELED'")
     Page<Participation> findAllByEvent_Id(Long eventId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"event"})

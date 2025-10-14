@@ -19,6 +19,7 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException
 import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
+import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
@@ -51,6 +52,7 @@ public class EventAdminService {
     private final RedisEventService redisEventService;
     private final UserClientService userClientService;
     private final EventStatusScheduler eventStatusScheduler;
+    private final TicketingService ticketingService;
 
     @Transactional
     public EventResponse createEvent(EventCreateRequest request, MultipartFile eventImage) {
@@ -164,10 +166,8 @@ public class EventAdminService {
     }
 
     @Transactional
-    public Boolean cancelTicket(Long eventId, String userId) {
-        Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
-        findParticipation.changeStatusCanceled();
-        return true;
+    public void cancelTicket(Long eventId, String userId) {
+        ticketingService.cancelParticipation(eventId, userId);
     }
 
     @Transactional
