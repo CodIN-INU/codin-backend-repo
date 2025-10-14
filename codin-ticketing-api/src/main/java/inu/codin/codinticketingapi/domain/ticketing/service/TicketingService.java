@@ -102,7 +102,7 @@ public class TicketingService {
         stock.increase();
         redisEventService.returnTicket(eventId, participation.getTicketNumber());
 
-        participationRepository.deleteById(participation.getId());
+        participation.delete();
         // 상태 변경 이벤트 발행
         eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
         // 캐시에 삭제

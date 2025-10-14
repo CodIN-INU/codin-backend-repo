@@ -68,7 +68,7 @@ public class EventAdminService {
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(savedEvent);
         redisEventService.initializeTickets(savedEvent.getId(), stock.getCurrentTotalStock());
 
-        return EventResponse.of(savedEvent);
+        return EventResponse.from(savedEvent);
     }
 
     public EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
@@ -102,7 +102,7 @@ public class EventAdminService {
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(findEvent);
         redisEventService.updateTickets(findEvent.getId(), findEvent.getStock().getCurrentTotalStock(), prevStock);
 
-        return EventResponse.of(findEvent);
+        return EventResponse.from(findEvent);
     }
 
     @Transactional

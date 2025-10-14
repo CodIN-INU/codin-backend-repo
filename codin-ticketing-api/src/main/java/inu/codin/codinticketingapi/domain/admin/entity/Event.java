@@ -39,13 +39,21 @@ public class Event extends BaseEntity {
     @Column(name = "campus", nullable = false)
     private Campus campus;
 
-    /** 이벤트 시작 시간 */
+    /** 티켓팅 시작 시간 */
     @Column(name = "event_time", nullable = false)
     private LocalDateTime eventTime;
 
-    /** 이벤트 종료 시간 */
+    /** 티켓팅 종료 시간 */
     @Column(name = "event_end_time", nullable = false)
     private LocalDateTime eventEndTime;
+
+    /** 티켓팅 상품 수령 시작 시간 */
+    @Column(name = "event_received_start_time", nullable = false)
+    private LocalDateTime eventReceivedStartTime;
+
+    /** 티켓팅 상품 수령 종료 시간 */
+    @Column(name = "event_received_end_time", nullable = false)
+    private LocalDateTime eventReceivedEndTime;
 
     /** 이제 단일 이미지 URL */
     @Column(name = "event_image_url")
@@ -89,12 +97,14 @@ public class Event extends BaseEntity {
     private EventStatus eventStatus;
 
     @Builder
-    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
+    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, LocalDateTime eventReceivedStartTime, LocalDateTime eventReceivedEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
         this.id = id;
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
         this.eventEndTime = eventEndTime;
+        this.eventReceivedStartTime = eventReceivedStartTime;
+        this.eventReceivedEndTime = eventReceivedEndTime;
         this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
@@ -104,10 +114,6 @@ public class Event extends BaseEntity {
         this.promotionLink = promotionLink;
         this.eventPassword = generateEventPassword();
         this.eventStatus = EventStatus.UPCOMING;
-        this.stock = stock;
-    }
-
-    public void setStock(Stock stock) {
         this.stock = stock;
     }
 
@@ -142,6 +148,10 @@ public class Event extends BaseEntity {
     public void closeEvent() {
         this.eventStatus = EventStatus.ENDED;
         this.eventEndTime = LocalDateTime.now();
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     /** 이벤트 비밀번호 생성 (무작위 4자리 숫자) */
