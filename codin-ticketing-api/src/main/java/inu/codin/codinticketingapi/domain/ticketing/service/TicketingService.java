@@ -79,12 +79,22 @@ public class TicketingService {
     }
 
     /**
-     * 티켓팅 이벤트 유저 참여 상태를 취소로 변경
+     * 티켓팅 이벤트 참여 유저가 자신의 티켓팅 참여 상태를 취소로 변경
      * @param eventId 유저가 참여한 이벤트
      */
     @Transactional
     public void changeParticipationStatusCanceled(Long eventId) {
         String userId = userClientService.fetchUser().getUserId();
+        cancelParticipation(eventId, userId);
+    }
+
+    /**
+     *  티켓팅 이벤트 참여 유저참여 상태를 취소로 변경
+     * @param eventId 유저가 참여한 이벤트
+     * @param userId 유저 MongoDB ObjectId
+     */
+    @Transactional
+    public void cancelParticipation(Long eventId, String userId) {
         Event event = findEvent(eventId);
         // 이벤트 활동 상태 검증
         if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {

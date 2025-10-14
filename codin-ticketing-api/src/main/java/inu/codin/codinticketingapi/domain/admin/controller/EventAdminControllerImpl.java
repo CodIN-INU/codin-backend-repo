@@ -133,8 +133,8 @@ public class EventAdminControllerImpl implements EventAdminController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     @DeleteMapping("{eventId}/management/cancel/{userId}")
     public ResponseEntity<SingleResponse<Boolean>> cancelTicket(@PathVariable Long eventId, @PathVariable String userId) {
-
-        return ResponseEntity.ok(new SingleResponse<>(200, "사용자 티켓 취소 성공", eventAdminService.cancelTicket(eventId, userId)));
+        eventAdminService.cancelTicket(eventId, userId);
+        return ResponseEntity.ok(new SingleResponse<>(200, "사용자 티켓 취소 성공", null));
     }
 
     /**
