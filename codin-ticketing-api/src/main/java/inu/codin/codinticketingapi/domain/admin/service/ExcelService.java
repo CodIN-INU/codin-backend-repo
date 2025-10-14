@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class ExcelService {
 
     private final static int ROW_START = 1;
     private final static String NO_PARTICIPANTS = "현재 이벤트에 참가자가 존재하지 않습니다.";
-    private final static String SHEET_NAME_SUFFIX = "CODIN_티켓팅_이벤트_";
+    private final static String SHEET_NAME_PREFIX = "CODIN_티켓팅_이벤트_";
     private final static String UNKNOWN = "UNKNOWN";
     private final static String[] HEADERS = {"사용자 ID", "이름", "학과", "학번", "경품 수령 상태", "교환권 번호", "서명"};
     private final static int SIGN_NUM = 6;
@@ -56,7 +55,7 @@ public class ExcelService {
 
     private String createSheet(Workbook workbook, Long eventId) {
         Event event = getEvent(eventId);
-        String fileName = SHEET_NAME_SUFFIX + DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String fileName = SHEET_NAME_PREFIX + DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         Sheet sheet = workbook.createSheet(fileName);
 
         createHeaderRow(sheet);
