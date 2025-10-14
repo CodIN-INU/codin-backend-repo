@@ -13,7 +13,7 @@ public class EventStockResponse {
     @Schema(description = "이벤트 잔여 수량", example = "50")
     private int eventStock;
 
-    public static EventStockResponse of(int eventStock) {
+    public static EventStockResponse from(int eventStock) {
         return EventStockResponse.builder()
                 .eventStock(eventStock)
                 .build();

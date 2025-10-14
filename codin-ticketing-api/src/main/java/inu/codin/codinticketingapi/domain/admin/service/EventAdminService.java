@@ -19,6 +19,7 @@ import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException
 import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
+import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
@@ -51,6 +52,7 @@ public class EventAdminService {
     private final RedisEventService redisEventService;
     private final UserClientService userClientService;
     private final EventStatusScheduler eventStatusScheduler;
+    private final TicketingService ticketingService;
 
     @Transactional
     public EventResponse createEvent(EventCreateRequest request, MultipartFile eventImage) {
@@ -68,7 +70,7 @@ public class EventAdminService {
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(savedEvent);
         redisEventService.initializeTickets(savedEvent.getId(), stock.getCurrentTotalStock());
 
-        return EventResponse.of(savedEvent);
+        return EventResponse.from(savedEvent);
     }
 
     public EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
@@ -102,14 +104,13 @@ public class EventAdminService {
         eventStatusScheduler.scheduleCreateOrUpdatedEvent(findEvent);
         redisEventService.updateTickets(findEvent.getId(), findEvent.getStock().getCurrentTotalStock(), prevStock);
 
-        return EventResponse.of(findEvent);
+        return EventResponse.from(findEvent);
     }
 
     @Transactional
     public void deleteEvent(Long eventId) {
         Event event = findEventById(eventId);
         event.delete();
-
         eventStatusScheduler.scheduleAllDelete(event);
         redisEventService.deleteTickets(eventId);
     }
@@ -124,7 +125,6 @@ public class EventAdminService {
     @Transactional
     public void closeEvent(Long eventId) {
         Event findEvent = findEventById(eventId);
-        findEvent.delete();
         eventStatusScheduler.scheduleAllDelete(findEvent);
         redisEventService.deleteTickets(eventId);
     }
@@ -144,7 +144,7 @@ public class EventAdminService {
         int nextPage = getNextPage(participationList.hasNext(), participationList.getNumber());
         int waitCount = participationRepository.countByEvent_IdAndStatus(eventId, ParticipationStatus.WAITING);
 
-        return new EventParticipationProfilePageResponse(profileList, lastPage, nextPage, event.getTitle(), stock.getRemainingStock(), waitCount, event.getEventEndTime());
+        return EventParticipationProfilePageResponse.from(event, stock, profileList, lastPage, nextPage, waitCount);
     }
 
     @Transactional
@@ -162,15 +162,12 @@ public class EventAdminService {
         Event findEvent = findEventById(eventId);
         Stock stock = findEvent.getStock();
 
-        return EventStockResponse.of(stock.getRemainingStock());
+        return EventStockResponse.from(stock.getRemainingStock());
     }
 
     @Transactional
-    public Boolean cancelTicket(Long eventId, String userId) {
-        Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
-        findParticipation.changeStatusCanceled();
-
-        return true;
+    public void cancelTicket(Long eventId, String userId) {
+        ticketingService.cancelParticipation(eventId, userId);
     }
 
     @Transactional

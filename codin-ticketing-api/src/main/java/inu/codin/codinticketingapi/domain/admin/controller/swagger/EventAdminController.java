@@ -108,7 +108,7 @@ public interface EventAdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "사용자 티켓 취소 성공")
     })
-    ResponseEntity<SingleResponse<Boolean>> cancelTicket(
+    ResponseEntity<SingleResponse<?>> cancelTicket(
             @Parameter(description = "이벤트 ID", example = "1", required = true) @PathVariable Long eventId,
             @Parameter(description = "티켓팅을 취소할 사용자 ID", example = "1", required = true) @PathVariable String userId);
 

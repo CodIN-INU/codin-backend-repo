@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
@@ -19,10 +20,6 @@ public class EventResponse {
     private Long id;
     @Schema(description = "이벤트가 진행되는 캠퍼스", example = "송도 캠퍼스")
     private Campus campus;
-    @Schema(description = "이벤트 시작 시간", example = "2025-07-25T10:00:00")
-    private LocalDateTime eventTime;
-    @Schema(description = "이벤트 종료 시간", example = "2025-07-25T12:00:00")
-    private LocalDateTime eventEndTime;
     @Schema(description = "이벤트 이미지 URL", example = "https://example.com/image.jpg")
     private String eventImageUrl;
     @Schema(description = "이벤트 제목", example = "새내기 환영회")
@@ -42,12 +39,23 @@ public class EventResponse {
     @Schema(description = "이벤트 상태", example = "UPCOMING")
     private EventStatus status;
 
-    public static EventResponse of(Event event) {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventEndTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventReceivedStartTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventReceivedEndTime;
+
+    public static EventResponse from(Event event) {
         return EventResponse.builder()
                 .id(event.getId())
                 .campus(event.getCampus())
-                .eventTime(event.getEventTime())
-                .eventEndTime(event.getEventEndTime())
                 .eventImageUrl(event.getEventImageUrl())
                 .title(event.getTitle())
                 .locationInfo(event.getLocationInfo())
@@ -57,6 +65,10 @@ public class EventResponse {
                 .inquiryNumber(event.getInquiryNumber())
                 .promotionLink(event.getPromotionLink())
                 .status(event.getEventStatus())
+                .eventTime(event.getEventTime())
+                .eventEndTime(event.getEventEndTime())
+                .eventReceivedStartTime(event.getEventReceivedStartTime())
+                .eventReceivedEndTime(event.getEventReceivedEndTime())
                 .build();
     }
 }

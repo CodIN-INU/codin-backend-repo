@@ -57,6 +57,16 @@ public class EventUpdateRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime eventEndTime;
 
+    @NotNull(message = "티켓팅 상품 수령 시작 시간은 필수입니다")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025-07-02 16:00")
+    private LocalDateTime eventReceivedStartTime;
+
+    @NotNull(message = "티켓팅 상품 수령 종료 시간은 필수입니다")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025-07-02 16:00")
+    private LocalDateTime eventReceivedEndTime;
+
     @Pattern(regexp = "\\d{2,3}-\\d{3,4}-\\d{4}", message = "올바른 전화번호 형식이 아닙니다")
     @Schema(description = "문의 전화번호", example = "02-9876-5432")
     private String inquiryNumber;

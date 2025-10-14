@@ -25,13 +25,18 @@ public class EventParticipationHistoryDto {
     @Schema(description = "이벤트 위치 정보", example = "정보기술대학 514호")
     private String locationInfo;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 진행 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventTime;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 마감 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventEndTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventReceivedStartTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventReceivedEndTime;
 
     @Schema(description = "참여 상태")
     private ParticipationStatus status;

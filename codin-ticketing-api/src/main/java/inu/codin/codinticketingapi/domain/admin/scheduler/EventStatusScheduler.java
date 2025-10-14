@@ -44,10 +44,10 @@ public class EventStatusScheduler implements ApplicationRunner {
                 scheduler.scheduleJob(startJobDetail, startTrigger);
                 log.info("새/업데이트 이벤트 시작 Job 스케줄링: ID = {}", event.getId());
 
-                JobDetail endJobDetail = createEndJob(event);
-                Trigger endTrigger = createEndTrigger(event);
-                scheduler.scheduleJob(endJobDetail, endTrigger);
-                log.info("새/업데이트 이벤트 종료 Job 스케줄링: ID = {}", event.getId());
+//                JobDetail endJobDetail = createEndJob(event);
+//                Trigger endTrigger = createEndTrigger(event);
+//                scheduler.scheduleJob(endJobDetail, endTrigger);
+//                log.info("새/업데이트 이벤트 종료 Job 스케줄링: ID = {}", event.getId());
 
                 JobDetail stockJob = createStockCheckJob(event);
                 Trigger stockTrigger = createStockCheckTrigger(event);
@@ -78,11 +78,11 @@ public class EventStatusScheduler implements ApplicationRunner {
                 scheduler.scheduleJob(startJobDetail, startTrigger);
                 log.info("이벤트 시작 Job 스케줄링 완료: Event ID = {}, 시작 시간 = {}", event.getId(), event.getEventTime());
 
-                JobDetail endJobDetail = createEndJob(event);
-                Trigger endTrigger = createEndTrigger(event);
-
-                scheduler.scheduleJob(endJobDetail, endTrigger);
-                log.info("이벤트 종료 Job 스케줄링 완료: Event ID = {}, 종료 시간 = {}", event.getId(), event.getEventEndTime());
+//                JobDetail endJobDetail = createEndJob(event);
+//                Trigger endTrigger = createEndTrigger(event);
+//
+//                scheduler.scheduleJob(endJobDetail, endTrigger);
+//                log.info("이벤트 종료 Job 스케줄링 완료: Event ID = {}, 종료 시간 = {}", event.getId(), event.getEventEndTime());
 
             } catch (SchedulerException e) {
                 log.error("이벤트 스케줄링 중 오류 발생: Event ID = {}", event.getId(), e);
@@ -105,11 +105,11 @@ public class EventStatusScheduler implements ApplicationRunner {
 
         for (Event event : activeEvents) {
             try {
-                // 종료 Job만 스케줄링 (시작은 이미 지났으므로)
-                JobDetail endJobDetail = createEndJob(event);
-                Trigger endTrigger = createEndTrigger(event);
-                scheduler.scheduleJob(endJobDetail, endTrigger);
-                log.info("ACTIVE 이벤트 종료 Job 스케줄링: Event ID = {}", event.getId());
+//                // 종료 Job만 스케줄링 (시작은 이미 지났으므로)
+//                JobDetail endJobDetail = createEndJob(event);
+//                Trigger endTrigger = createEndTrigger(event);
+//                scheduler.scheduleJob(endJobDetail, endTrigger);
+//                log.info("ACTIVE 이벤트 종료 Job 스케줄링: Event ID = {}", event.getId());
 
                 // StockCheckJob은 즉시 시작
                 JobDetail stockJob = createStockCheckJob(event);
@@ -174,6 +174,7 @@ public class EventStatusScheduler implements ApplicationRunner {
                 .build();
     }
 
+    // 이벤트 종료를 수동으로 조작
     private JobDetail createEndJob(Event event) {
         return newJob(EventEndJob.class)
                 .withIdentity("endJob-" + event.getId(), "event-status")
@@ -181,6 +182,7 @@ public class EventStatusScheduler implements ApplicationRunner {
                 .build();
     }
 
+    // 이벤트 종료를 수동으로 조작
     private Trigger createEndTrigger(Event event) {
         return newTrigger()
                 .withIdentity("endTrigger-" + event.getId(), "event-status")

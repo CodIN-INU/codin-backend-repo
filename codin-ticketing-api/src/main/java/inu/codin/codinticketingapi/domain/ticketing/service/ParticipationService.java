@@ -120,7 +120,6 @@ public class ParticipationService {
         Optional<ParticipationResponse> cached = redisParticipationService.getCachedParticipation(userId, eventId);
 
         if (cached.isPresent()) {
-
             return cached;
         }
 
