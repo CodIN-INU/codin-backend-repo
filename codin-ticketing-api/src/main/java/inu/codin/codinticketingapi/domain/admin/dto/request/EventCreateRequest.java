@@ -48,23 +48,23 @@ public class EventCreateRequest {
 
     @NotNull(message = "티켓팅 이벤트 시작 시간은 필수입니다")
     @Future(message = "티켓팅 이벤트 시작 시간은 현재 시간보다 나중이어야 합니다")
-    @Schema(description = "티켓팅 이벤트 시작 시간", example = "2025-07-25T10:00:00")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 이벤트 시작 시간", example = "2025-07-25T10:00:00")
     private LocalDateTime eventTime;
 
     @NotNull(message = "티켓팅 이벤트 종료 시간은 필수입니다")
     @Future(message = "티켓팅 이벤트 종료 시간은 현재 시간보다 나중이어야 합니다")
-    @Schema(description = "티켓팅 이벤트 종료 시간", example = "2025-07-25T12:00:00")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 이벤트 종료 시간", example = "2025-07-25T12:00:00")
     private LocalDateTime eventEndTime;
 
     @NotNull(message = "티켓팅 상품 수령 시작 시간은 필수입니다")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025-07-02 16:00")
     private LocalDateTime eventReceivedStartTime;
 
     @NotNull(message = "티켓팅 상품 수령 종료 시간은 필수입니다")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025-07-02 16:00")
     private LocalDateTime eventReceivedEndTime;
 
@@ -82,6 +82,8 @@ public class EventCreateRequest {
                 .campus(this.campus)
                 .eventTime(this.eventTime)
                 .eventEndTime(this.eventEndTime)
+                .eventReceivedStartTime(this.eventReceivedStartTime)
+                .eventReceivedEndTime(this.eventReceivedEndTime)
                 .eventImageUrl(eventImageUrl)
                 .title(this.title)
                 .locationInfo(this.locationInfo)

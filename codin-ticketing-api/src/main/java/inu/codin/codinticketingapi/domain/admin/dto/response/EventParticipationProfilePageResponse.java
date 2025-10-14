@@ -1,5 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,13 +29,17 @@ public class EventParticipationProfilePageResponse {
     @Schema(description = "수령 대기", example = "100")
     private long waitNum;
 
-    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025-07-25T12:00:00")
-    private LocalDateTime eventStartTime;
-    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025-07-25T12:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
+    private LocalDateTime eventTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventEndTime;
-    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025-07-25T12:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventReceivedStartTime;
-    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025-07-25T12:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventReceivedEndTime;
 
     public static EventParticipationProfilePageResponse from(Event event, Stock stock, List<EventParticipationProfileResponse> list, int lastPage, int nextPage, long waitNum) {
@@ -45,7 +50,7 @@ public class EventParticipationProfilePageResponse {
                 .title(event.getTitle())
                 .stock(stock.getRemainingStock())
                 .waitNum(waitNum)
-                .eventStartTime(event.getEventTime())
+                .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
                 .eventReceivedStartTime(event.getEventReceivedStartTime())
                 .eventReceivedEndTime(event.getEventReceivedEndTime())

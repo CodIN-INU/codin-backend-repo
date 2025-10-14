@@ -42,17 +42,17 @@ public class EventDetailResponse {
     @Schema(description = "유저의 특정 이벤트 티켓팅 단순 참여 상태(Boolean) 반환 - (참여, 서명 상태 -> true / 미참여, 취소 -> false)", example = "true, false")
     private boolean isUserParticipatedInEvent;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventEndTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventReceivedStartTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025-07-02 16:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventReceivedEndTime;
 
     public static EventDetailResponse of(Event event,  boolean isExistParticipationData, boolean isUserParticipatedInEvent) {
