@@ -105,10 +105,15 @@ public class ReplyQueryService {
     }
 
     public UserInfo getUserInfoAboutReply(ObjectId replyId) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        return UserInfo.ofComment(
-                likeService.isLiked(LikeType.REPLY, replyId.toString(), userId)
-        );
+        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
+
+        boolean isLiked = false;
+
+        if (userId != null) {
+            isLiked = likeService.isLiked(LikeType.REPLY, replyId.toString(), userId);
+        }
+
+        return UserInfo.ofComment(isLiked);
     }
 
     /**
