@@ -93,10 +93,14 @@ public class EventCreateRequest {
     }
 
     /** 이벤트 시간 검증
-     *  - 이벤트 종료 시간은 시작 시간 이후
+     *  - 티켓팅 종료 시간은 시작 시간 이후
+     *  - 티켓팅 상품 수령 마감 시간은 시작 시간 이후
      * */
     public void validateEventTimes() {
         if (eventEndTime != null && eventTime != null && !eventEndTime.isAfter(eventTime)) {
+            throw new TicketingException(TicketingErrorCode.ILLEGAL_ARGUMENT);
+        }
+        if (eventReceivedStartTime != null && eventReceivedEndTime != null && !eventReceivedEndTime.isAfter(eventReceivedStartTime)) {
             throw new TicketingException(TicketingErrorCode.ILLEGAL_ARGUMENT);
         }
     }

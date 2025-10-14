@@ -5,10 +5,7 @@ import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(
@@ -31,6 +28,7 @@ public class Stock extends BaseEntity {
             name = "event_id", nullable = false, unique = true,
             foreignKey = @ForeignKey(name = "fk_stock_event")
     )
+    @Setter
     private Event event;
 
     /**

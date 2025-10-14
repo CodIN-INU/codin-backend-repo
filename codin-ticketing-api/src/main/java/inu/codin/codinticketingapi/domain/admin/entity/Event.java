@@ -48,11 +48,11 @@ public class Event extends BaseEntity {
     private LocalDateTime eventEndTime;
 
     /** 티켓팅 상품 수령 시작 시간 */
-    @Column(name = "event_received_start_time", nullable = false)
+    @Column(name = "event_received_start_time")
     private LocalDateTime eventReceivedStartTime;
 
     /** 티켓팅 상품 수령 종료 시간 */
-    @Column(name = "event_received_end_time", nullable = false)
+    @Column(name = "event_received_end_time")
     private LocalDateTime eventReceivedEndTime;
 
     /** 이제 단일 이미지 URL */
@@ -156,6 +156,9 @@ public class Event extends BaseEntity {
 
     public void setStock(Stock stock) {
         this.stock = stock;
+        if (stock != null && stock.getEvent() != this) {
+            stock.setEvent(this); // 소유자 쪽 동기화
+        }
     }
 
     /** 이벤트 비밀번호 생성 (무작위 4자리 숫자) */

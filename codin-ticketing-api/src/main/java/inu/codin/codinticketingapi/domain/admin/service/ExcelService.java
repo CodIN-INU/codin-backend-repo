@@ -56,7 +56,7 @@ public class ExcelService {
 
     private String createSheet(Workbook workbook, Long eventId) {
         Event event = getEvent(eventId);
-        String fileName = SHEET_NAME_SUFFIX + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String fileName = SHEET_NAME_SUFFIX + DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         Sheet sheet = workbook.createSheet(fileName);
 
         createHeaderRow(sheet);

@@ -42,6 +42,8 @@ public class EventParticipationProfilePageResponse {
                 .eventParticipationProfileResponseList(list)
                 .lastPage(lastPage)
                 .nextPage(nextPage)
+                .title(event.getTitle())
+                .stock(stock.getRemainingStock())
                 .waitNum(waitNum)
                 .eventStartTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
