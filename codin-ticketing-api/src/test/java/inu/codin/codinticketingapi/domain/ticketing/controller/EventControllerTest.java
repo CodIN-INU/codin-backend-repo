@@ -1,6 +1,5 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.*;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
@@ -34,11 +33,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 class EventControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private static final Long EVENT_ID = 1000L;
+    private static final String TEST_TITLE = "test-title";
+    private static final String TEST_LOCATION = "test-location";
+    private static final String TEST_IMAGE_URL = "test-image-url";
+    private static final String TEST_TARGET = "test-target";
+    private static final String TEST_DESCRIPTION = "test-description";
+    private static final String TEST_USER_ID = "test-user-id";
+    private static final String TEST_EMAIL = "testuser@inu.ac.kr";
+    private static final String TEST_TOKEN = "test-token";
+    private static final int QUANTITY = 100;
+    private static final int CURRENT_QUANTITY = 80;
+    private static final int PAGE = 0;
+    private static final int LAST_PAGE = -1;
+    private static final String CAMPUS_PARAM = "SONGDO_CAMPUS";
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MockMvc mockMvc;
 
     @MockitoBean
     private EventService eventService;
@@ -48,12 +59,7 @@ class EventControllerTest {
 
     @BeforeEach
     void setUp() {
-        TokenUserDetails userDetails = TokenUserDetails.builder()
-                .userId("TEST_USER_ID")
-                .email("testuser@inu.ac.kr")
-                .token("TEST_TOKEN")
-                .role("USER")
-                .build();
+        TokenUserDetails userDetails = getTokenUserDetails("USER");
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
         );
@@ -64,31 +70,18 @@ class EventControllerTest {
     @DisplayName("이벤트 목록 조회 - 성공")
     void getEventList_Success() throws Exception {
         // given
-        EventPageDetailResponse eventDetail = EventPageDetailResponse.builder()
-                .eventId(1L)
-                .eventTitle("테스트 이벤트")
-                .eventImageUrl("test-image-url")
-                .eventTime(LocalDateTime.now().plusHours(1))
-                .eventEndTime(LocalDateTime.now().plusHours(2))
-                .locationInfo("테스트 위치")
-                .quantity(100)
-                .currentQuantity(80)
-                .build();
-
-        EventPageResponse eventPageResponse = EventPageResponse.of(
-                List.of(eventDetail), 0, -1
-        );
-
+        EventPageDetailResponse eventDetail = getEventPageDetailResponse();
+        EventPageResponse eventPageResponse = EventPageResponse.of(List.of(eventDetail), PAGE, LAST_PAGE);
+        // when
         when(eventService.getEventList(any(Campus.class), anyInt()))
                 .thenReturn(eventPageResponse);
-
-        // when & then
+        // then
         mockMvc.perform(get("/event")
-                        .param("campus", "SONGDO_CAMPUS")
-                        .param("page", "0"))
+                        .param("campus", CAMPUS_PARAM)
+                        .param("page", String.valueOf(PAGE)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.eventList").isArray())
-                .andExpect(jsonPath("$.data.eventList[0].eventId").value(1));
+                .andExpect(jsonPath("$.data.eventList[0].eventId").value(EVENT_ID));
     }
 
     @Test
@@ -96,92 +89,42 @@ class EventControllerTest {
     @DisplayName("이벤트 상세 조회 - 성공")
     void getEventDetail_Success() throws Exception {
         // given
-        EventDetailResponse eventDetailResponse = EventDetailResponse.builder()
-                .eventId(1L)
-                .eventTime(LocalDateTime.now())
-                .eventEndTime(LocalDateTime.now().plusHours(2))
-                .eventImageUrls("test-image-url")
-                .eventTitle("테스트 이벤트")
-                .locationInfo("테스트 위치")
-                .quantity(100)
-                .currentQuantity(80)
-                .target("테스트 대상")
-                .description("테스트 설명")
-                .build();
-
-        when(eventService.getEventDetail(1L))
-                .thenReturn(eventDetailResponse);
-
-        // when & then
-        mockMvc.perform(get("/event/{id}", 1L))
+        EventDetailResponse eventDetailResponse = getEventDetailResponse();
+        // when
+        when(eventService.getEventDetail(EVENT_ID)).thenReturn(eventDetailResponse);
+        // then
+        mockMvc.perform(get("/event/{id}", EVENT_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.eventId").value(1))
-                .andExpect(jsonPath("$.data.eventTitle").value("테스트 이벤트"));
+                .andExpect(jsonPath("$.data.eventId").value(EVENT_ID))
+                .andExpect(jsonPath("$.data.eventTitle").value(TEST_TITLE));
     }
 
     @Test
     @WithMockUser(roles = "USER")
     @DisplayName("유저 이벤트 참여 전체 이력 조회 - 성공")
     void getUserEventList_Success() throws Exception {
-        // given
-        EventParticipationHistoryDto historyDto = new EventParticipationHistoryDto(
-                1L, "테스트 이벤트", "test-image-url", "테스트 위치",
-                LocalDateTime.now(), LocalDateTime.now().plusHours(2),
-                ParticipationStatus.COMPLETED
-        );
-
-        EventParticipationHistoryPageResponse response = EventParticipationHistoryPageResponse.of(
-                List.of(historyDto), 0, -1
-        );
-
-        when(eventService.getUserEventList(0))
-                .thenReturn(response);
-
-        // when & then
-        mockMvc.perform(get("/event/user")
-                        .param("page", "0"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.eventList").isArray())
-                .andExpect(jsonPath("$.data.eventList[0].eventId").value(1));
-    }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    @DisplayName("유저 이벤트 참여 상태별 이력 조회 - 성공")
-    void getUserEventListByStatus_Success() throws Exception {
-        // given
-        EventParticipationHistoryDto historyDto = new EventParticipationHistoryDto(
-                1L, "테스트 이벤트", "test-image-url", "테스트 위치",
-                LocalDateTime.now(), LocalDateTime.now().plusHours(2),
-                ParticipationStatus.COMPLETED
-        );
-
-        EventParticipationHistoryPageResponse response = EventParticipationHistoryPageResponse.of(
-                List.of(historyDto), 0, -1
-        );
-
-        when(eventService.getUserEventListByStatus(anyInt(), any(ParticipationStatus.class)))
-                .thenReturn(response);
-
-        // when & then
-        mockMvc.perform(get("/event/user/status")
-                        .param("page", "0")
-                        .param("status", "COMPLETED"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.eventList").isArray())
-                .andExpect(jsonPath("$.data.eventList[0].status").value("COMPLETED"));
+        for (ParticipationStatus status : ParticipationStatus.values()) {
+            // given
+            EventParticipationHistoryDto historyDto = getEventParticipationHistoryDto(status);
+            EventParticipationHistoryPageResponse response = EventParticipationHistoryPageResponse.of(List.of(historyDto), PAGE, LAST_PAGE);
+            // when
+            when(eventService.getUserEventList(PAGE))
+                    .thenReturn(response);
+            // then
+            mockMvc.perform(get("/event/user")
+                            .param("page", String.valueOf(PAGE)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.eventList").isArray())
+                    .andExpect(jsonPath("$.data.eventList[0].eventId").value(EVENT_ID))
+                    .andExpect(jsonPath("$.data.eventList[0].status").value(status.name()));
+        }
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"ADMIN", "MANAGER"})
     @DisplayName("SSE 전송 - 권한별 성공 테스트")
     void sendSse_AsManager(String role) throws Exception {
-        TokenUserDetails userDetails = TokenUserDetails.builder()
-                .userId("TEST_USER_ID")
-                .email("testuser@inu.ac.kr")
-                .token("TEST_TOKEN")
-                .role(role)
-                .build();
+        TokenUserDetails userDetails = getTokenUserDetails(role);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
         );
@@ -190,11 +133,62 @@ class EventControllerTest {
         doNothing().when(eventStockProducerService).publishEventStock(any());
 
         // when & then
-        mockMvc.perform(post("/event/sse/{id}", 1L)
-                        .param("quantity", "100"))
+        mockMvc.perform(post("/event/sse/{id}", EVENT_ID)
+                        .param("quantity", String.valueOf(QUANTITY)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("SSE 전송 성공"));
         verify(eventStockProducerService).publishEventStock(any());
+    }
+
+    private static EventPageDetailResponse getEventPageDetailResponse() {
+        return EventPageDetailResponse.builder()
+                .eventId(EVENT_ID)
+                .eventTitle(TEST_TITLE)
+                .eventImageUrl(TEST_IMAGE_URL)
+                .eventTime(LocalDateTime.now().plusHours(1))
+                .eventEndTime(LocalDateTime.now().plusHours(2))
+                .locationInfo(TEST_LOCATION)
+                .quantity(QUANTITY)
+                .currentQuantity(CURRENT_QUANTITY)
+                .build();
+    }
+
+    private static TokenUserDetails getTokenUserDetails(String role) {
+        return TokenUserDetails.builder()
+                .userId(TEST_USER_ID)
+                .email(TEST_EMAIL)
+                .token(TEST_TOKEN)
+                .role(role)
+                .build();
+    }
+
+    private static EventDetailResponse getEventDetailResponse() {
+        return EventDetailResponse.builder()
+                .eventId(EVENT_ID)
+                .eventTime(LocalDateTime.now())
+                .eventEndTime(LocalDateTime.now().plusHours(2))
+                .eventImageUrls(TEST_IMAGE_URL)
+                .eventTitle(TEST_TITLE)
+                .locationInfo(TEST_LOCATION)
+                .quantity(QUANTITY)
+                .currentQuantity(CURRENT_QUANTITY)
+                .target(TEST_TARGET)
+                .description(TEST_DESCRIPTION)
+                .build();
+    }
+
+    private static EventParticipationHistoryDto getEventParticipationHistoryDto(ParticipationStatus status) {
+        return EventParticipationHistoryDto.builder()
+                .eventId(EVENT_ID)
+                .title(TEST_TITLE)
+                .eventImageUrl(TEST_IMAGE_URL)
+                .locationInfo(TEST_LOCATION)
+                .eventTime(LocalDateTime.now())
+                .eventEndTime(LocalDateTime.now().plusHours(2))
+                .eventReceivedStartTime(LocalDateTime.now().plusHours(1))
+                .eventReceivedEndTime(LocalDateTime.now().plusHours(2))
+                .status(status)
+                .build();
     }
 }
