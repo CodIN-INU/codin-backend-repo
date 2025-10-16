@@ -14,6 +14,7 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
@@ -184,6 +185,38 @@ public class UserService {
         log.info("[프로필 이미지 업데이트 성공] 사용자 ID: {}, 프로필 이미지 URL: {}", userId, profileImageUrl);
     }
 
+    public void updateUserName(@Valid UserNameUpdateRequestDto request){
+        ObjectId userId = SecurityUtils.getCurrentUserId();
+        log.info("[유저 실명 수정] 현재 사용자 ID: {}, 요청 이름: {}", userId, request.getName());
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.info("[유저 실명 수정 실패] 유저 정보를 찾을 수 없음. 사용자 ID: {}", userId);
+                    return new NotFoundException("유저 정보를 찾을 수 없습니다.");
+                });
+
+        String newName = request.getName().trim();
+
+            if (newName.isEmpty()) {
+            throw new IllegalArgumentException("이름은 비어 있을 수 없습니다.");
+        }
+            if (newName.length() > 10) {
+            throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
+        }
+            if (!newName.matches("^[가-힣a-zA-Z]+$")) {
+            throw new IllegalArgumentException("이름은 한글 또는 영어만 입력 가능합니다.");
+        }
+
+            if (newName.equals(user.getName())) {
+            log.info("[유저 실명 수정] 변경 사항 없음. 사용자 ID: {}", userId);
+            return;
+        }
+
+            user.updateName(newName);
+            userRepository.save(user);
+
+            log.info("[유저 실명 수정 성공] 사용자 ID: {}, 변경 이름: {}", userId, newName);
+    }
     /**
      * 유저 티켓팅 수령 정보 반환
      * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환

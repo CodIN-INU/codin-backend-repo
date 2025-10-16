@@ -2,6 +2,7 @@ package inu.codin.codin.domain.user.controller;
 
 import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
@@ -102,6 +103,16 @@ public class UserController {
         userService.updateUserProfile(profileImage);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 사진 수정 완료", null));
+    }
+
+    @Operation(
+            summary = "유저 이름 수정"
+    )
+    @PutMapping("/name")
+    public ResponseEntity<SingleResponse<?>> updateUserName(@RequestBody @Valid UserNameUpdateRequestDto userUpdateRequestDto){
+        userService.updateUserName(userUpdateRequestDto);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 이름 수정 완료", null));
     }
 
     @Operation(

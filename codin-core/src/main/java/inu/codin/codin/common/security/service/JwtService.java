@@ -119,13 +119,15 @@ public class JwtService {
         // Authorization 헤더에 Access Token 추가
         response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
 
+        String domain = BASEURL.replaceFirst("https?://", "").split(":")[0];
+
         // todo: x-access-token 쿠키에 Access Token 추가 - 추후 제거
         Cookie newAccessToken = new Cookie("x-access-token", newToken.getAccessToken());
         newAccessToken.setHttpOnly(true);
         newAccessToken.setSecure(true);
         newAccessToken.setPath("/");
         newAccessToken.setMaxAge(10 * 24 * 60 * 60); // 10일
-        newAccessToken.setDomain(BASEURL.split("//")[1]);
+        newAccessToken.setDomain(domain);
         newAccessToken.setAttribute("SameSite", "None");
         response.addCookie(newAccessToken);
 
@@ -135,7 +137,7 @@ public class JwtService {
         newRefreshToken.setSecure(true);
         newRefreshToken.setPath("/");
         newRefreshToken.setMaxAge(10 * 24 * 60 * 60); // 10일
-        newRefreshToken.setDomain(BASEURL.split("//")[1]);
+        newRefreshToken.setDomain(domain);
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
