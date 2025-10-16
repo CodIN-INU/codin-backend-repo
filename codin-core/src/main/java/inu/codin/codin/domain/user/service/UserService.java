@@ -30,7 +30,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -149,8 +148,9 @@ public class UserService {
         return UserInfoResponseDto.of(user);
     }
     public void updateUserInfo(@Valid UserNicknameRequestDto userNicknameRequestDto) {
-        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(SecurityUtils.getCurrentUserId(), userNicknameRequestDto.getNickname());
-        if (nickNameDuplicate.isPresent()) {
+
+        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
+        if (nickNameDuplicate.isPresent()){
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
