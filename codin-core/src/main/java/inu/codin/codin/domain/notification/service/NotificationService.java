@@ -3,6 +3,7 @@ package inu.codin.codin.domain.notification.service;
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
+import inu.codin.codin.domain.notification.dto.request.OneCharNameRequestDto;
 import inu.codin.codin.domain.notification.dto.response.NotificationListResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationEntity;
 import inu.codin.codin.domain.notification.repository.NotificationRepository;
@@ -13,6 +14,7 @@ import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentR
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
+import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.fcm.dto.FcmMessageTopicDto;
 import inu.codin.codin.infra.fcm.dto.FcmMessageUserDto;
@@ -111,7 +113,12 @@ public class NotificationService {
                 .userId(msgDto.getUserId())
                 .title(msgDto.getTitle())
                 .message(msgDto.getBody())
-                .targetId(new ObjectId(data.get("id")))
+                // id가 존재하고 비어있지 않으면 ObjectId로 변환, 아니면 null
+                .targetId(
+                        (data != null && data.get("id") != null && !data.get("id").isBlank())
+                                ? new ObjectId(data.get("id"))
+                                : null
+                )
                 .type("push")
                 .priority("high")
                 .build();
@@ -211,5 +218,65 @@ public class NotificationService {
         return notifications.stream()
                 .map(NotificationListResponseDto::of)
                 .toList();
+    }
+
+    public int sendOneCharNameFix(OneCharNameRequestDto oneCharNameRequestDto) {
+        final String title = oneCharNameRequestDto.getTitle().trim();
+        final String body  = oneCharNameRequestDto.getBody().trim();
+
+        List<UserEntity> targets = userRepository.findActiveUsersWithOneCharName();
+        if (targets.isEmpty()) {
+            log.info("[이름 1글자 알림] 대상 없음");
+            return 0;
+        }
+
+        Map<String, String> data = new HashMap<>();
+        data.put("route", "/mypage/edit"); // 클릭 시 이동 경로(프론트에서 처리)
+
+        int success = 0;
+        for (UserEntity u : targets) {
+            try {
+                sendFcmMessageToUser(title, body, data, u.get_id());
+                success++;
+            } catch (Exception e) {
+                log.info("[이름 1글자 알림] 전송 실패 userId={}", u.get_id(), e);
+            }
+        }
+        log.info("[이름 1글자 알림] 전송 완료: total={}, success={}", targets.size(), success);
+        return success;
+    }
+
+    public int sendOneCharNameFixTest(OneCharNameRequestDto oneCharNameRequestDto) {
+        final String title = oneCharNameRequestDto.getTitle().trim();
+        final String body  = oneCharNameRequestDto.getBody().trim();
+
+        //이름 1글자 유저 (로그용)
+        List<UserEntity> oneCharTargets = userRepository.findActiveUsersWithOneCharName();
+        log.info("[이름 1글자 알림 테스트] 1글자 이름 유저 수: {}", oneCharTargets.size());
+        for (UserEntity u : oneCharTargets) {
+            log.info(" - 대상 후보 (한글자): name={}, userId={}", u.getName(), u.get_id());
+        }
+
+        // 실제 발송 대상: ADMIN
+        List<UserEntity> adminTargets = userRepository.findActiveAdmins();
+        if (adminTargets.isEmpty()) {
+            log.info("[이름 1글자 알림 테스트] ADMIN 대상 없음");
+            return 0;
+        }
+
+        Map<String, String> data = new HashMap<>();
+        data.put("route", "/mypage/edit"); // 클릭 시 이동 경로(프론트에서 처리)
+
+        int success = 0;
+        for (UserEntity u : adminTargets) {
+            try {
+                sendFcmMessageToUser(title, body, data, u.get_id());
+                success++;
+            } catch (Exception e) {
+                log.info("[이름 1글자 알림] 전송 실패 userId={}", u.get_id(), e);
+            }
+        }
+        log.info("[이름 1글자 알림] 전송 완료: total={}, success={}", adminTargets.size(), success);
+        return success;
     }
 }
