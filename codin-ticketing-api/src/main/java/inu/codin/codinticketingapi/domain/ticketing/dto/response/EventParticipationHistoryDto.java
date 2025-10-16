@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@Builder
 @Schema(description = "티켓팅 이벤트 참여 기록 응답 DTO")
 public class EventParticipationHistoryDto {
 
