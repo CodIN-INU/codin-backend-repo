@@ -137,7 +137,7 @@ public class JwtService {
         newRefreshToken.setSecure(true);
         newRefreshToken.setPath("/");
         newRefreshToken.setMaxAge(10 * 24 * 60 * 60); // 10일
-        newRefreshToken.setDomain(BASEURL.split("//")[1]);
+        newRefreshToken.setDomain(domain);
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
