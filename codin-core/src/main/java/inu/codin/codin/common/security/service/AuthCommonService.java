@@ -2,7 +2,6 @@ package inu.codin.codin.common.security.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
-import inu.codin.codin.common.security.util.SecurityUtils;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
@@ -34,7 +33,7 @@ public class AuthCommonService extends AbstractAuthService {
     }
 
     public void completeUserProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage, HttpServletResponse response) {
-        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(SecurityUtils.getCurrentUserId(), userProfileRequestDto.getNickname());
+        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userProfileRequestDto.getNickname());
         if (nickNameDuplicate.isPresent()){
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
