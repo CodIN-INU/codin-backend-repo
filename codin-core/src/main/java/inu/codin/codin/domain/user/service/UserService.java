@@ -150,7 +150,7 @@ public class UserService {
     }
     public void updateUserInfo(@Valid UserNicknameRequestDto userNicknameRequestDto) {
         Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(SecurityUtils.getCurrentUserId(), userNicknameRequestDto.getNickname());
-        if (nickNameDuplicate.isPresent() && nickNameDuplicate.get().getNickname().equals( SecurityContextHolder.getContext().getAuthentication().getName())) {
+        if (nickNameDuplicate.isPresent()) {
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
