@@ -19,7 +19,7 @@ public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
     Optional<UserEntity> findByEmail(String email);
 
     @Query("{'_id': {$ne: ?0}, 'nickname': ?1, 'deletedAt': null}")
-    Optional<UserEntity> findByNicknameAndDeletedAtIsNull(ObjectId useId, String nickname);
+    Optional<UserEntity> findByNicknameAndDeletedAtIsNull(ObjectId userId, String nickname);
 
     @Query("{'email':  ?0, 'deletedAt': null, 'status':  { $in:  ['DISABLED'] }}")
     Optional<UserEntity> findByEmailAndDisabled(String email);
