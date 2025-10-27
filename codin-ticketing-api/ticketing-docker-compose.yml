@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  codin-ticketing-api:
+    image: codin-ticketing-api:latest
+    container_name: codin-ticketing-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SERVER_PORT: ${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - codin-docker_default
+
+  codin-ticketing-sse:
+    image: codin-ticketing-sse:latest
+    container_name: codin-ticketing-sse
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SERVER_PORT: ${SSE_SERVER_PORT}
+    ports:
+      - "${SSE_SERVER_PORT}:${SSE_SERVER_PORT}"
+    networks:
+      - codin-docker_default
+
+networks:
+  codin-docker_default:
+    external: true

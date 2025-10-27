@@ -1,0 +1,130 @@
+package inu.codin.codinticketingapi.domain.ticketing.service;
+
+import inu.codin.codinticketingapi.domain.admin.entity.Event;
+import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
+import inu.codin.codinticketingapi.domain.image.service.ImageService;
+import inu.codin.codinticketingapi.domain.ticketing.dto.event.ParticipationStatusChangedEvent;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
+import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
+import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisParticipationService;
+import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
+import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
+import inu.codin.codinticketingapi.domain.ticketing.repository.StockRepository;
+import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+@RequiredArgsConstructor
+public class TicketingService {
+
+    private final EventRepository eventRepository;
+    private final ParticipationRepository participationRepository;
+    private final StockRepository stockRepository;
+
+    private final ImageService imageService;
+    private final UserClientService userClientService;
+    private final RedisEventService redisEventService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final RedisParticipationService redisParticipationService;
+
+    @Transactional
+    public void decrement(Long eventId) {
+        // 재고 수량 감소
+        stockRepository.decrementStockByEventId(eventId);
+    }
+
+    /**
+     * 티켓팅 이벤트 유저 참여 상태를 수령으로 변경
+     * @param eventId 유저가 참여한 이벤트
+     * @param adminPassword 수령 상태 확인을 위한 관리자 비밀번호
+     * @param signatureImage 수령 확인 서명 이미지 파일
+     */
+    @Transactional
+    public void processParticipationSuccess(Long eventId, String adminPassword, MultipartFile signatureImage) {
+        String userId = userClientService.fetchUser().getUserId();
+        Event event = findEvent(eventId);
+        // 이벤트 활동 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
+
+        // 비밀번호 확인
+        if (!adminPassword.equals(event.getEventPassword())) {
+            throw new TicketingException(TicketingErrorCode.PASSWORD_INVALID);
+        }
+        // 서명 이미지 업로드(MultipartFile) 및 url 저장
+        String signatureImageUrl = imageService.handleImageUpload(signatureImage);
+
+        // 참여자 정보 조회
+        Participation participation = findParticipation(event, userId);
+
+        // 수령 완료 상태로 변경
+        if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
+            throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
+        }
+        participation.changeStatusCompleted(signatureImageUrl);
+
+        // 상태 변경 이벤트 발행
+        eventPublisher.publishEvent(new ParticipationStatusChangedEvent(participation));
+        // 캐시에 저장
+        redisParticipationService.cacheParticipation(userId, eventId, participation);
+    }
+
+    /**
+     * 티켓팅 이벤트 참여 유저가 자신의 티켓팅 참여 상태를 취소로 변경
+     * @param eventId 유저가 참여한 이벤트
+     */
+    @Transactional
+    public void changeParticipationStatusCanceled(Long eventId) {
+        String userId = userClientService.fetchUser().getUserId();
+        cancelParticipation(eventId, userId);
+    }
+
+    /**
+     *  티켓팅 이벤트 참여 유저참여 상태를 취소로 변경
+     * @param eventId 유저가 참여한 이벤트
+     * @param userId 유저 MongoDB ObjectId
+     */
+    @Transactional
+    public void cancelParticipation(Long eventId, String userId) {
+        Event event = findEvent(eventId);
+        // 이벤트 활동 상태 검증
+        if (!event.getEventStatus().equals(EventStatus.ACTIVE)) {
+            throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
+
+        Participation participation = findParticipation(event, userId);
+
+        if (!participation.getStatus().equals(ParticipationStatus.WAITING)) {
+            throw new TicketingException(TicketingErrorCode.CANNOT_CHANGE_STATUS);
+        }
+
+        Stock stock = stockRepository.findByEvent(event)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.STOCK_NOT_FOUND));
+        stock.increase();
+        redisEventService.returnTicket(eventId, participation.getTicketNumber());
+
+        // todo: SoftDelete가 적용되지 않음 단순히 적용하면 안되고 연관된 쿼리문 전부 바꿔야함
+        participationRepository.deleteById(participation.getId());
+        // 캐시에 삭제
+        redisParticipationService.evictParticipation(userId, eventId);
+    }
+
+    private Event findEvent(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND));
+    }
+
+    private Participation findParticipation(Event event, String userId) {
+        return participationRepository.findByEventAndUserId(event, userId)
+                .orElseThrow(() -> new TicketingException(TicketingErrorCode.PARTICIPATION_NOT_FOUND));
+    }
+}
