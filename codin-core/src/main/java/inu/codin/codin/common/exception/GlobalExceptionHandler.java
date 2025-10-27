@@ -1,0 +1,134 @@
+package inu.codin.codin.common.exception;
+
+import inu.codin.codin.common.response.ExceptionResponse;
+import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.codin.domain.block.exception.BlockErrorCode;
+import inu.codin.codin.domain.block.exception.BlockException;
+import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;
+import inu.codin.codin.domain.board.notice.exception.NoticeException;
+import inu.codin.codin.domain.board.question.exception.QuestionErrorCode;
+import inu.codin.codin.domain.board.question.exception.QuestionException;
+import inu.codin.codin.domain.chat.exception.ChatRoomErrorCode;
+import inu.codin.codin.domain.chat.exception.ChatRoomException;
+import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
+import inu.codin.codin.domain.chat.exception.ChattingException;
+import inu.codin.codin.domain.info.exception.InfoErrorCode;
+import inu.codin.codin.domain.info.exception.InfoException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisSystemException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<ExceptionResponse> handleException(Exception e) {
+        log.warn("[Exception] Class: {}, Error Message : {}, Stack Trace: {}",
+                e.getClass().getSimpleName(),
+                e.getMessage(),
+                e.getStackTrace()[0].toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
+    }
+
+    @ExceptionHandler(GlobalException.class)
+    protected ResponseEntity<ExceptionResponse> handleGlobalException(GlobalException e) {
+        GlobalErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(BlockException.class)
+    protected ResponseEntity<ExceptionResponse> handleBlockException(BlockException e) {
+        BlockErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(ChatRoomException.class)
+    protected ResponseEntity<ExceptionResponse> handleChatRoomException(ChatRoomException e) {
+        ChatRoomErrorCode code = e.getErrorCode();
+        String message = code.message();
+//        if (e instanceof ChatRoomExistedException existedException) //client 측에서 303 상태 코드 확인 후 message의 chatRoomId로 리다이렉션
+//            message = message + "/" + existedException.getChatRoomId();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(message, code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(ChattingException.class)
+    protected ResponseEntity<ExceptionResponse> handleChattingException(ChattingException e) {
+        ChattingErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(InfoException.class)
+    protected ResponseEntity<ExceptionResponse> handleInfoException(InfoException e) {
+        InfoErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    protected ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
+    }
+
+    @ExceptionHandler(JwtException.class)
+    protected ResponseEntity<ExceptionResponse> handleJwtException(JwtException e) {
+        if (e.getErrorCode().getErrorCode().equals("SEC_005")){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getBindingResult().getFieldErrors().get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST.value()));    }
+
+
+
+    @ExceptionHandler(RedisSystemException.class)
+    public ResponseEntity<ExceptionResponse> handleRedisSystemException(RedisSystemException e){
+        log.error(e.getMessage(), e.getStackTrace()[0]);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    protected ResponseEntity<ExceptionResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(QuestionException.class)
+    protected ResponseEntity<ExceptionResponse> handleQuestionException(QuestionException e) {
+        QuestionErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+    @ExceptionHandler(NoticeException.class)
+    protected ResponseEntity<ExceptionResponse> handleNoticeException(NoticeException e) {
+        NoticeErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.httpStatus())
+                .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
+    }
+
+}
