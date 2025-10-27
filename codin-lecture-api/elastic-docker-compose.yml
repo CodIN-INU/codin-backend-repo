@@ -1,0 +1,22 @@
+services:
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile.es
+    container_name: elastic-search
+    environment:
+      - discovery.type=single-node # 싱글 노드 모드
+      - xpack.security.enabled=false # 보안 기능(인증/인가) 끄기
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # JVM 힙 사이즈 조정 (메모리 여유에 따라 변경)
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+volumes:
+  esdata:
