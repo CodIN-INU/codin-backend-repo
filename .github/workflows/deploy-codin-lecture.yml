@@ -1,11 +1,11 @@
-name: deploy CI/CD on branch 'main'
+name: deploy codin-lecture on branch 'main'
 on:
   push:
-    branches: [ main ]
+    branches: [ tmpmain ]
 
 jobs:
   # Lecture API Module CI
-  build-lecture-api:
+  build-codin-lecture-api:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -38,8 +38,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-lecture-api:latest
 
   # Lecture API Module CD
-  deploy:
-    needs: [build-lecture-api]
+  deploy-codin-lecture:
+    needs: [build-codin-lecture-api]
     runs-on: ubuntu-22.04
     steps:
       - name: Deploy to server via SSH

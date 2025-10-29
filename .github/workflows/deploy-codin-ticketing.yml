@@ -1,11 +1,11 @@
-name: deploy CI/CD on branch 'main'
+name: deploy codin-ticketing on branch 'main'
 on:
   push:
-    branches: [ main ]
+    branches: [ tmpmain ]
 
 jobs:
   # Ticketing API Module CI
-  build-api-module:
+  build-codin-ticketing-api:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -35,7 +35,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-ticketing-api:latest
 
   # Ticketing SSE Module CI
-  build-sse-module:
+  build-codin-ticketing-sse:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -66,8 +66,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-ticketing-sse:latest
 
   # Ticketing (API + SSE) CD
-  deploy:
-    needs: [build-api-module, build-sse-module]
+  deploy-codin-ticketing:
+    needs: [build-codin-ticketing-api, build-codin-ticketing-sse]
     runs-on: ubuntu-22.04
     steps:
       - name: Deploy to server via SSH

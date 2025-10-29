@@ -1,10 +1,10 @@
-name: Deploy CI/CD on branch 'main'
+name: deploy codin-core on branch 'main'
 on:
   push:
-    branches:
-      - main
+    branches: [ tmpmain ]
+
 jobs:
-  build:
+  build-codin-core:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -43,6 +43,10 @@ jobs:
           cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
 
+  deploy-codin-core:
+    needs: [build-codin-core]
+    runs-on: ubuntu-22.04
+    steps:
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:

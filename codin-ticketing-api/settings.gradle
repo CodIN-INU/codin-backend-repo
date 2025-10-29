@@ -1,2 +1,1 @@
 rootProject.name = 'codin-ticketing-api'
-include 'codin-ticketing-sse'

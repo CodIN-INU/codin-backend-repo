@@ -1,0 +1,6 @@
+rootProject.name = 'codin-backend-repo'
+
+include 'codin-core'
+include 'codin-ticketing-api'
+include 'codin-ticketing-sse'
+include 'codin-lecture-api'

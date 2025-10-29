@@ -8,7 +8,7 @@ body:
       description: 버그에 대한 설명을 작성해 주세요. 발생 위치, 증상, 재현방법
       placeholder: 자세히 적을수록 좋습니다!
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: 🙋🏻 Reference
