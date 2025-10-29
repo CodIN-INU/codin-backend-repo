@@ -39,9 +39,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-          cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:cache,image-manifest=true,oci-mediatypes=true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:latest
+          cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:cache,image-manifest=true,oci-mediatypes=true
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:cache,image-manifest=true,oci-mediatypes=true
 
   deploy-codin-core:
     needs: [build-codin-core]
@@ -58,12 +58,12 @@ jobs:
           script: |
             echo ${{ secrets.PASSWORD }} | sudo -S su -c "
               docker ps -a
-              docker rm -f codin-backend || true
-              docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest
-              docker run -d --net codin-docker_default -p 8080:8080 --name codin-backend \
+              docker rm -f codin-core-api || true
+              docker pull ${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:latest
+              docker run -d --net codin-docker_default -p 8080:8080 --name codin-core-api \
                 -v /opt/project/backend-data/:/opt/project/backend-data/ \
                 -e SPRING_PROFILES_ACTIVE=dev \
-                ${{ secrets.DOCKERHUB_USERNAME }}/codin-backend:latest              
+                ${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:latest              
               docker images -f "dangling=true" -q | xargs sudo docker rmi || true
               docker ps -a
             "
