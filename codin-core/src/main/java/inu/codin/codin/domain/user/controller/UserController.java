@@ -129,7 +129,7 @@ public class UserController {
     )
     @PutMapping("/ticketing-participation")
     public ResponseEntity<SingleResponse<UserTicketingParticipationInfoResponse>> updateUserTicketingParticipationInfo(
-            @RequestBody UserTicketingParticipationInfoUpdateRequest updateRequest
+            @Valid @RequestBody UserTicketingParticipationInfoUpdateRequest updateRequest
     ) {
         return ResponseEntity.ok().body(new SingleResponse<>(200, "유저 티켓팅 수령 정보 수정 완료",
                 userService.updateUserTicketingParticipationInfo(updateRequest)));
