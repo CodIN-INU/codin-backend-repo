@@ -237,6 +237,7 @@ public class UserService {
 
         userEntity.updateParticipationInfo(updateRequest);
         userEntity = userRepository.save(userEntity);
+        log.info("User Ticketing Participation Update: Email: {}, Name:{}", userEntity.getEmail(),userEntity.getName());
         return UserTicketingParticipationInfoResponse.of(userEntity);
     }
 
