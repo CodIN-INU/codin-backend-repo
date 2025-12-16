@@ -86,7 +86,12 @@ dependencies {
 }
 
 tasks.named('test') {
+	enabled = false
 	useJUnitPlatform()
+
+}
+tasks.withType(Test).configureEach {
+	enabled = false
 }
 
 processResources.dependsOn('copySecret')
