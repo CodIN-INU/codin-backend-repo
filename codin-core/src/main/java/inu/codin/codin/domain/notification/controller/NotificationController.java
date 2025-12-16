@@ -2,15 +2,17 @@ package inu.codin.codin.domain.notification.controller;
 
 import inu.codin.codin.common.response.ListResponse;
 import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.codin.domain.notification.dto.request.OneCharNameRequestDto;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/notification")
@@ -36,6 +38,28 @@ public class NotificationController {
         notificationService.readNotification(notificationId);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "알림 읽기 완료", null));
+    }
+
+    @Operation(summary = "이름 1글자 대상 1회성 알림 발송 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/onceCharName")
+    public ResponseEntity<SingleResponse<?>> sendNameFix(
+            @RequestBody @Valid OneCharNameRequestDto request) {
+
+        int sent = notificationService.sendOneCharNameFix(request);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "1회성 알림 발송 완료", Map.of("sent", sent)));
+    }
+
+    @Operation(summary = "이름 1글자 대상 1회성 알림 발송 테스트 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/test")
+    public ResponseEntity<SingleResponse<?>> sendNameFixTest(
+            @RequestBody @Valid OneCharNameRequestDto request) {
+
+        int sent = notificationService.sendOneCharNameFixTest(request);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "1회성 알림 발송 완료", Map.of("sent", sent)));
     }
 
 }

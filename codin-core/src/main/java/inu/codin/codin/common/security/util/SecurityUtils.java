@@ -23,9 +23,7 @@ public class SecurityUtils {
      * @throws JwtException 인증 정보가 없는 경우 예외 발생
      */
     public static ObjectId getCurrentUserId() {
-        log.info("getCurrentUserId.");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("auth={} / principalClass={}", authentication, (authentication!=null ? authentication.getPrincipal().getClass() : null));
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED);
         }

@@ -32,15 +32,21 @@ public class GoogleAuthService extends AbstractAuthService implements Oauth2Auth
     public AuthResultStatus oauthLogin(OAuth2User oAuth2User, HttpServletResponse response) {
         // Google에서는 email, family_name, given_name 등 제공됨.
         Map<String, Object> attributes = oAuth2User.getAttributes();
+        log.info("OAuth2User attributes: {}", attributes);
+
         String email = (String) attributes.get("email");
-        String name = (String) attributes.get("family_name");
-        if (name == null || name.isEmpty()) {
-            name = (String) attributes.get("name");
-        }
-        String department = (String) attributes.get("given_name");
-        if (department == null) {
-            department = "";
-        }
+        String familyName = (String) attributes.get("family_name");
+        String givenName = (String) attributes.get("given_name");
+        String fullName = (String) attributes.get("name");
+
+        String name = (familyName != null && !familyName.isEmpty())
+                ? familyName
+                : (fullName != null ? fullName : "");
+
+        String department = (givenName != null) ? givenName : "";
+
+        log.info("OAuth2 login parsed values -> email={}, family_name={}, given_name={}, name={}, department={}",
+                email, familyName, givenName, fullName, department);
 
         log.info("OAuth2 login: email={}, name={}, department={}",
                 email, name, department);
