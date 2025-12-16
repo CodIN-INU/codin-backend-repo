@@ -1,0 +1,14 @@
+spring:
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail.smtp.debug: ${SPRING_MAIL_PROPERTIES_SMTP_DEBUG}
+      mail.smtp.connectiontimeout: ${SPRING_MAIL_PROPERTIES_SMTP_CONNECTIONTIMEOUT} #1초
+      mail.starttls.enable: ${SPRING_MAIL_PROPERTIES_STARTTLS_ENABLE}
+      mail.smtp.auth: ${SPRING_MAIL_PROPERTIES_SMTP_AUTH}
+
+    access:
+      domain: ${SPRING_MAIL_ACCESS_DOMAIN}

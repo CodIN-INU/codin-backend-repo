@@ -4,27 +4,29 @@
 spring:
   application:
     name: codin-core
+  config:
+    import: optional:file:./.env[.properties], optional:file:./.env.core[.properties]
   profiles:
     include: jwt, aws, email, oauth
   servlet:
     multipart:
-      max-request-size: 5MB
-      max-file-size: 5MB
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE}
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE}
   data:
     redis: # [Redis] 설정
-      host: localhost
-      port: 6379
-      password: 1234
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
     mongodb: # [MongoDB] 설정
-      host: localhost
-      port: 27017
-      database: codin
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DATABASE}
 
 
 google:
   firebase:
-    project-id:
-    key-path:
+    project-id: ${GOOGLE_FIREBASE_PROJECT_ID}
+    key-path: ${GOOGLE_FIREBASE_KEY_PATH}
 
 server:
   servlet:
@@ -38,7 +40,7 @@ server:
 
 springdoc:
   api-docs:
-    enabled: true
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED}
   swagger-ui:
     groups-order: DESC
     doc-expansion: list
@@ -48,19 +50,22 @@ springdoc:
     display-request-duration: true
 
 schedule:
-  path :
+  path: ${SCHEDULE_PATH}
   department:
-    cron:
+    cron: ${SCHEDULE_DEPARTMENT_CRON:0 00 4 * * *}
   starinu:
-    cron:
+    cron: ${SCHEDULE_STARINU_CRON:0 30 4 * * *}
 
 lecture:
   python:
-    path:
+    path: ${LECTURE_PYTHON_PATH}
   file:
-    path:
+    path: ${LECTURE_FILE_PATH}
 
 security:
   #투표 이벤트 공개 API
   public-api:
     urls:
+      - "/posts/category"
+      - "/posts/{postId}"
+      - "/comments/post/{postId}"

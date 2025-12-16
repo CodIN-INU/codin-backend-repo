@@ -2,7 +2,7 @@
 # JWT 설정 파일
 spring:
   jwt:
-    secret:
-      expiration:
-      access:
-      refresh:
+    secret: ${SPRING_JWT_SECRET}
+    expiration:
+      access: ${SPRING_JWT_EXPIRATION_ACCESS}
+      refresh: ${SPRING_JWT_EXPIRATION_REFRESH}

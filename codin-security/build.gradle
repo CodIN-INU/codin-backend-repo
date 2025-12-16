@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     // Codin Common 의존성 (공통 응답, 예외 클래스)
-    //api project(':codin-common')
+    api project(':codin-common')
 
     // Spring Boot Security
     api 'org.springframework.boot:spring-boot-starter-security'

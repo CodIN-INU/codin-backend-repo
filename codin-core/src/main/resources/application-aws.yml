@@ -3,10 +3,10 @@
 cloud:
   aws:
     s3:
-      defaultProfileImageUrl:
-      bucket:
-    stack.auto: false
-    region.static: ap-northeast-2
+      defaultProfileImageUrl: ${AWS_S3_DEFAULT_PROFILE_IMAGE_URL}
+      bucket: ${AWS_S3_BUCKET}
+    stack.auto: ${AWS_STACK_AUTO}
+    region.static: ${AWS_REGION_STATIC}
     credentials:
-      accessKey:
-      secretKey:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_KEY}

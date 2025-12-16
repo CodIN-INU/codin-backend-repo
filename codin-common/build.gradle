@@ -1,7 +1,55 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'inu.codin'
+version = '1.0.0'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    //todo : 의존성 추가
+    // Spring Boot Core
+    api 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Data MongoDB (for BaseTimeEntity)
+    api 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // Rate Limiting (for RateLimitInterceptor)
+    api 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+
+    // Configuration Properties
+    api 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Jackson for JSON processing
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Disable Spring Boot plugin's jar task since this is a library
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+// Disable the bootJar task since this is a library
+bootJar {
+    enabled = false
 }
