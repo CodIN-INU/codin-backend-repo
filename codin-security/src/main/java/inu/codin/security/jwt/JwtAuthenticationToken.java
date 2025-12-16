@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.jwt;
+package inu.codin.security.jwt;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

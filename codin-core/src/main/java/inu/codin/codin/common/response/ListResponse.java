@@ -1,5 +1,6 @@
 package inu.codin.codin.common.response;
 
+import inu.codin.security.response.CommonResponse;
 import lombok.Builder;
 import lombok.Getter;
 

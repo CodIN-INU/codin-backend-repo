@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;

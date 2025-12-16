@@ -2,6 +2,7 @@ rootProject.name = 'codin-backend-repo'
 
 include 'codin-core'
 include 'codin-auth'
+include 'codin-security'
 include 'codin-ticketing-api'
 include 'codin-ticketing-sse'
 include 'codin-lecture-api'

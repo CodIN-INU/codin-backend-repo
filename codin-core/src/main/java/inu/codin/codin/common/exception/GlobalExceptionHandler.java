@@ -1,7 +1,7 @@
 package inu.codin.codin.common.exception;
 
-import inu.codin.codin.common.response.ExceptionResponse;
-import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.security.response.ExceptionResponse;
+import inu.codin.security.exception.JwtException;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;

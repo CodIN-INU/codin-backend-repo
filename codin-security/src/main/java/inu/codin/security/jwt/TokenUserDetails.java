@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.security.jwt;
+package inu.codin.security.jwt;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;

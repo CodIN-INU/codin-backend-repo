@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.lecture.domain.review.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.lecture.domain.review.dto.request.CreateReviewRequestDto;
 import inu.codin.codin.domain.lecture.domain.review.dto.response.ReviewListResposneDto;
 import inu.codin.codin.domain.lecture.domain.review.dto.response.ReviewPageResponse;

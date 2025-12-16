@@ -2,7 +2,7 @@ package inu.codin.codin.infra.fcm.service;
 
 import com.google.firebase.messaging.*;
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.repository.UserRepository;

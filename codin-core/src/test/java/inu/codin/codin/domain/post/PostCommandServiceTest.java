@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.post;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.dto.request.*;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostCategory;

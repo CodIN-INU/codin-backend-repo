@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.user.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.service.JwtService;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.service.JwtService;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;

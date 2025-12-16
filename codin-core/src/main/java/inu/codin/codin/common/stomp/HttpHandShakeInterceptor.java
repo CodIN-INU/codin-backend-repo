@@ -1,8 +1,8 @@
 package inu.codin.codin.common.stomp;
 
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
+import inu.codin.security.service.JwtService;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;

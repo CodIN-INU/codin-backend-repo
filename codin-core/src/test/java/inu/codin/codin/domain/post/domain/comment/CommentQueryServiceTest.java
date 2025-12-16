@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;

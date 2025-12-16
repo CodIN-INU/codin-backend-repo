@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.like.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.dto.request.LikeRequestDto;

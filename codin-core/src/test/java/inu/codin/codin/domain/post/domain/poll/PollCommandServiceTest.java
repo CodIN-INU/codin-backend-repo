@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;

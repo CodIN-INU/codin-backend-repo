@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.board.voice.service;
 
 import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxCreateRequest;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxDetailResponse;

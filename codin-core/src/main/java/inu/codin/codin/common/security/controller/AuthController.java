@@ -4,7 +4,7 @@ import inu.codin.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.service.AuthCommonService;
 import inu.codin.codin.common.security.service.AuthSessionService;
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.security.service.JwtService;
 import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

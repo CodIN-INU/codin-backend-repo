@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.block.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;

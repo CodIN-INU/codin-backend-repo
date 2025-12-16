@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.exception;
+package inu.codin.security.exception;
 
 import lombok.Getter;
 
@@ -17,3 +17,4 @@ public class JwtException extends RuntimeException {
         this.errorCode = errorCode;
     }
 }
+ 

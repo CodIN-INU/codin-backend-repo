@@ -1,8 +1,8 @@
-package inu.codin.codinticketingapi.security.filter;
+package inu.codin.security.filter;
 
-import inu.codin.codinticketingapi.security.jwt.JwtTokenValidator;
-import inu.codin.codinticketingapi.security.jwt.TokenUserDetails;
-import inu.codin.codinticketingapi.security.util.TokenUtil;
+import inu.codin.security.jwt.JwtTokenValidator;
+import inu.codin.security.jwt.TokenUserDetails;
+import inu.codin.security.util.TokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

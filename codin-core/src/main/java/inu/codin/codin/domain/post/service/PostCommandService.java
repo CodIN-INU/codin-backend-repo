@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;

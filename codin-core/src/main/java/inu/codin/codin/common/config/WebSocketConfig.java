@@ -1,6 +1,6 @@
 package inu.codin.codin.common.config;
 
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.security.service.JwtService;
 import inu.codin.codin.common.stomp.HttpHandShakeInterceptor;
 import inu.codin.codin.common.stomp.StompMessageProcessor;
 import lombok.RequiredArgsConstructor;

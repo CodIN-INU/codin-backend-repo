@@ -1,7 +1,7 @@
-package inu.codin.codinticketingapi.security.jwt;
+package inu.codin.security.jwt;
 
-import inu.codin.codinticketingapi.security.exception.SecurityErrorCode;
-import inu.codin.codinticketingapi.security.exception.SecurityException;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,7 +32,7 @@ public class JwtTokenValidator {
      * 토큰 유효성 검사 (토큰 변조, 만료)
      * @param accessToken
      * @return true: 유효한 토큰
-     * @throws SecurityException: 토큰 만료, 유효하지 않은 토큰
+     * @throws JwtException: 토큰 만료, 유효하지 않은 토큰
      */
     public boolean validateAccessToken(String accessToken) {
         try {
@@ -44,10 +44,10 @@ public class JwtTokenValidator {
             return true;
         } catch (ExpiredJwtException e) { // 토큰 만료
             log.error("[validateAccessToken] 토큰 만료 : {}", e.getMessage());
-            throw new SecurityException(SecurityErrorCode.EXPIRED_TOKEN);
+            throw new JwtException(SecurityErrorCode.EXPIRED_TOKEN);
         } catch (Exception e) { // 토큰 변조
             log.error("[validateAccessToken] 유효하지 않은 토큰 : {}", e.getMessage());
-            throw new SecurityException(SecurityErrorCode.INVALID_TOKEN);
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN);
         }
     }
 

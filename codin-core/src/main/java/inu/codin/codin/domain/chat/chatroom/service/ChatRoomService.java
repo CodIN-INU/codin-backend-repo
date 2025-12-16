@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.chat.chatroom.service;
 
 import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.chat.chatroom.dto.request.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.response.ChatRoomListResponseDto;

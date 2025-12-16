@@ -1,7 +1,7 @@
 package inu.codin.codin.common.security.jwt;
 
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
 import inu.codin.codin.domain.user.security.CustomUserDetails;
 import inu.codin.codin.infra.redis.RedisStorageService;
 import io.jsonwebtoken.Claims;

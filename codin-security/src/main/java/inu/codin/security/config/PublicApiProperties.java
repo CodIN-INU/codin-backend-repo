@@ -1,4 +1,4 @@
-package inu.codin.codin.common.dto;
+package inu.codin.security.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "security.permit-all")
-public class PermitAllProperties {
+@ConfigurationProperties(prefix = "security.public-api")
+public class PublicApiProperties {
     private List<String> urls;
 }

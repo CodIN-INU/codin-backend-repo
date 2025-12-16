@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.security;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtils;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;

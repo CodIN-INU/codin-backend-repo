@@ -1,8 +1,8 @@
 package inu.codin.codin.common.security.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codin.common.response.ExceptionResponse;
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.security.response.ExceptionResponse;
+import inu.codin.security.service.JwtService;
 import inu.codin.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

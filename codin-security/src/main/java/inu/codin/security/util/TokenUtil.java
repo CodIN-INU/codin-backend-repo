@@ -1,4 +1,4 @@
-package inu.codin.codinticketingapi.security.util;
+package inu.codin.security.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

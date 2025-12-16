@@ -1,4 +1,4 @@
-package inu.codin.codin.common.security.jwt;
+package inu.codin.security.jwt;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
