@@ -7,6 +7,8 @@ spring:
   config:
     import: optional:file:./.env[.properties], optional:file:./.env.core[.properties]
   profiles:
+    active:
+      local
     include: jwt, aws, email, oauth
   servlet:
     multipart:
@@ -62,10 +64,6 @@ lecture:
   file:
     path: ${LECTURE_FILE_PATH}
 
-security:
-  #투표 이벤트 공개 API
-  public-api:
-    urls:
-      - "/posts/category"
-      - "/posts/{postId}"
-      - "/comments/post/{postId}"
+logging:
+  level:
+    org.springframework.security: DEBUG
