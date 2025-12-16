@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import inu.codin.codin.common.security.service.oauth2.AbstractAuthService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

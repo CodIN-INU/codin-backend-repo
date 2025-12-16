@@ -1,4 +1,4 @@
-package inu.codin.security.response;
+package inu.codin.codin.common.response;
 
 import lombok.Getter;
 
