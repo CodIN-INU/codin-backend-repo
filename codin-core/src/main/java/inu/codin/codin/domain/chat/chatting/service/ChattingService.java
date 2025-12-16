@@ -30,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -72,7 +74,7 @@ public class ChattingService {
     }
 
     public ChattingAndUserIdResponseDto getAllMessage(String id, int page) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         ChatRoom chatRoom = chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> {
                     log.warn("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);

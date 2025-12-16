@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -209,7 +211,7 @@ public class NotificationService {
 
     public List<NotificationListResponseDto> getNotification() {
         //todo 유저에게 맞는 토픽 알림들도 반환
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         userRepository.findById(userId)
                         .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다"));
 

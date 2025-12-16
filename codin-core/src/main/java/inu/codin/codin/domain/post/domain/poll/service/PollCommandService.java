@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -53,7 +55,7 @@ public class PollCommandService {
         log.info("투표 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
 
         PollEntity poll = getActivePollByPostId(postId);
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
 
         ensureNotDuplicatedVote(poll.get_id(), userId);
 
@@ -74,7 +76,7 @@ public class PollCommandService {
         log.info("투표 취소 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
 
         PollEntity poll = getActivePollByPostId(postId);
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
 
         PollVoteEntity vote = requireUserVote(poll.get_id(), userId);
 

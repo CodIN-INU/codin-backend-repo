@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -44,7 +46,7 @@ public class ReviewService {
             log.warn("잘못된 평점입니다. 0.25 ~ 5.0 사이의 점수를 입력해주세요");
             throw new WrongRatingException("잘못된 평점입니다. 0.25 ~ 5.0 사이의 점수를 입력해주세요.");
         }
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         Optional<ReviewEntity> review = reviewRepository.findByLectureIdAndUserIdAndDeletedAtIsNull(lectureId, userId);
         if (review.isPresent()) {
             log.error("이미 유저가 작성한 후기가 존재합니다. userId: {}, lectureId: {}", userId, lectureId);
@@ -82,7 +84,7 @@ public class ReviewService {
         PageRequest pageRequest = PageRequest.of(page, 10, Sort.by("created_at").descending());
         Page<ReviewEntity> reviewPage = reviewRepository.getAvgRatingByLectureId(new ObjectId(lectureId), pageRequest);
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         return ReviewPageResponse.of(reviewPage.stream()
                         .map(review -> ReviewListResposneDto.of(review,
                                 likeService.isLiked(LikeType.REVIEW, review.get_id().toString(), userId),

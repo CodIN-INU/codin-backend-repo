@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -40,7 +42,7 @@ public class LikeService {
 
     public LikeResponseType toggleLike(LikeRequestDto likeRequestDto) {
         String likeId = likeRequestDto.getLikeTypeId();
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         isEntityNotDeleted(likeRequestDto); // 해당 entity가 삭제되었는지 확인
 
         // 이미 좋아요를 눌렀으면 취소, 그렇지 않으면 추가

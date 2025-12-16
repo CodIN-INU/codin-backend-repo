@@ -26,6 +26,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,7 +56,7 @@ public class PostQueryService
      */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = findPostById(ObjectIdUtil.toObjectId(postId));
-        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
         postInteractionService.increaseHits(post, userId);
         return postDtoAssembler.toPageItem(post, userId);
     }
@@ -65,7 +67,7 @@ public class PostQueryService
     public Optional<PostPageItemResponseDTO> getPostDetailById(ObjectId postId) {
         return postRepository.findByIdAndNotDeleted(postId)
                 .map(post -> {
-                    ObjectId userId = SecurityUtils.getCurrentUserId();
+                    ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
                     postInteractionService.increaseHits(post, userId);
                     return postDtoAssembler.toPageItem(post, userId);
                 });

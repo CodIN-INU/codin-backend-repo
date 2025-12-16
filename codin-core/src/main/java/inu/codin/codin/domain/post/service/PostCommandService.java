@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -163,13 +165,13 @@ public class PostCommandService {
     private ObjectId validateUserAndPost(PostCategory postCategory) {
         if (isPrivileged()) {
             // ADMIN / MANAGER 는 카테고리/유저 상태 검증을 통과시킴
-            return SecurityUtils.getCurrentUserId();
+            return toObjectId(SecurityUtils.getCurrentUserId());
         }
         assertCategoryWriteAllowed(postCategory);
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        String userId = SecurityUtils.getCurrentUserId();
         SecurityUtils.validateUser(userId);
-        return userId;
+        return toObjectId(userId);
     }
 
     private PostEntity assertPostOwner(ObjectId postId){
@@ -187,7 +189,7 @@ public class PostCommandService {
     }
 
     private boolean isPrivileged() {
-        UserRole role = SecurityUtils.getCurrentUserRole();
+        UserRole role = UserRole.valueOf(SecurityUtils.getCurrentUserRole());
         return role == UserRole.ADMIN || role == UserRole.MANAGER;
     }
 

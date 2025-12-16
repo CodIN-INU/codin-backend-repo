@@ -26,6 +26,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 /**
  * PostEntity를 다양한 Response DTO로 변환하는 책임을 담당하는 어셈블러
  * CQRS의 Query 측면에서 DTO 조립 로직을 분리하여 단일 책임 원칙을 준수
@@ -70,7 +72,7 @@ public class PostDtoAssembler {
      * PostEntity 리스트를 PostPageItemResponseDTO 리스트로 변환
      */
     public List<PostPageItemResponseDTO> toPageItemList(List<PostEntity> posts) {
-        ObjectId currentUserId = SecurityUtils.getCurrentUserIdOrNull();
+        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
         return posts.stream()
                 .map(post -> toPageItem(post, currentUserId))
                 .toList();

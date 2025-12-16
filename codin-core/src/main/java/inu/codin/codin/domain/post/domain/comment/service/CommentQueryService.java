@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -113,7 +115,7 @@ public class CommentQueryService {
 
 
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
-        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
 
         boolean isLiked = false;
         if (userId != null) {

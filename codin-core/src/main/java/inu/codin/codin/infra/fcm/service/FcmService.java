@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class FcmService {
      */
     public void saveFcmToken(@Valid FcmTokenRequest fcmTokenRequest) {
         // 유저의 FCM 토큰이 존재하는지 확인
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         Optional<FcmTokenEntity> fcmToken = fcmTokenRepository.findByUserId(userId);
 
         if (fcmToken.isPresent()) { // 이미 존재하는 유저라면 토큰 추가
@@ -159,7 +161,7 @@ public class FcmService {
      * @param topic 구독할 토픽 이름
      */
     public void subscribeTopic(String topic) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 
@@ -178,7 +180,7 @@ public class FcmService {
      * @param topic 구독 해제할 토픽 이름
      */
     public void unsubscribeTopic(String topic) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         FcmTokenEntity fcmTokenEntity = fcmTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new FcmTokenNotFoundException("유저의 FCM 토큰이 존재하지 않습니다."));
 

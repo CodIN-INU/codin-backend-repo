@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,7 +32,7 @@ public class ScrapService {
     public String toggleScrap(String id) {
         log.info("스크랩 토글 요청 - postId: {}", id);
         ObjectId postId = new ObjectId(id);
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
 
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> {

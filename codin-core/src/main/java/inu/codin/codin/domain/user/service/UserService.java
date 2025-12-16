@@ -36,6 +36,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,7 +57,7 @@ public class UserService {
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllUserPosts(int pageNumber) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[게시글 조회] 유저 ID: {}, 페이지 번호: {}", userId, pageNumber);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
@@ -69,7 +72,7 @@ public class UserService {
     }
 
     public PostPageResponse getPostUserInteraction(int pageNumber, InteractionType interactionType) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[유저 상호작용 조회] 유저 ID: {}, 타입: {}, 페이지 번호: {}", userId, interactionType, pageNumber);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
@@ -119,7 +122,7 @@ public class UserService {
     }
 
     public void deleteUser(HttpServletResponse response) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
 
         UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
@@ -136,7 +139,7 @@ public class UserService {
     }
 
     public UserInfoResponseDto getUserInfo() {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[유저 정보 조회] 유저 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -155,7 +158,7 @@ public class UserService {
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -170,7 +173,7 @@ public class UserService {
     }
 
     public void updateUserProfile(MultipartFile profileImage) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[프로필 이미지 업데이트] 현재 사용자 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -186,7 +189,7 @@ public class UserService {
     }
 
     public void updateUserName(@Valid UserNameUpdateRequestDto request){
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         log.info("[유저 실명 수정] 현재 사용자 ID: {}, 요청 이름: {}", userId, request.getName());
 
         UserEntity user = userRepository.findById(userId)
@@ -223,7 +226,7 @@ public class UserService {
      */
     public UserTicketingParticipationInfoResponse getUserTicketingParticipationInfo() {
         return UserTicketingParticipationInfoResponse.of(
-                userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                userRepository.findByUserId(toObjectId(SecurityUtils.getCurrentUserId()))
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다.")));
     }
 
@@ -232,7 +235,7 @@ public class UserService {
      * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
      */
     public UserTicketingParticipationInfoResponse updateUserTicketingParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
-        UserEntity userEntity = userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+        UserEntity userEntity = userRepository.findByUserId(toObjectId(SecurityUtils.getCurrentUserId()))
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
 
         userEntity.updateParticipationInfo(updateRequest);

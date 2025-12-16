@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class BlockService {
      * @param strBlockedUserId
      */
     public void blockUser(String strBlockedUserId) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
@@ -55,7 +57,7 @@ public class BlockService {
      * @param strBlockedUserId 차단 해제할 유저
      */
     public void unblockUser(String strBlockedUserId) {
-        ObjectId userId    = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
@@ -82,12 +84,12 @@ public class BlockService {
      * @return 차단한 유저 목록 (빈 리스트가 제공될 수 있음)
      */
     public List<ObjectId> getBlockedUsers() {
-        ObjectId currentUserId = SecurityUtils.getCurrentUserIdOrNull();
+        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
         if (currentUserId == null) {
             return List.of();
         }
 
-        return blockRepository.findByUserId(SecurityUtils.getCurrentUserId())
+        return blockRepository.findByUserId(toObjectId(SecurityUtils.getCurrentUserId()))
                 .map(BlockEntity::getBlockedUsers)
                 .orElse(List.of());
     }

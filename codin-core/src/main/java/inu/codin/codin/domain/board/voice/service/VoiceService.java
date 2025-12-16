@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 public class VoiceService {
@@ -51,7 +53,7 @@ public class VoiceService {
         VoiceEntity voiceEntity = voiceRepository.findByIdAndNotDeleted(objectId)
                 .orElseThrow(() -> new IllegalArgumentException("익명의 소리함 질문을 찾을 수 없습니다."));
 
-        ObjectId currentUserId = SecurityUtils.getCurrentUserId();
+        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserId());
 
         if (positive) {
             voiceEntity.votePositiveToggle(currentUserId);
