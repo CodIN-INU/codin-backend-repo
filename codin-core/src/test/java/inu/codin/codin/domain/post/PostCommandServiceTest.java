@@ -12,7 +12,6 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostInteractionService;
-import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.user.entity.UserRole;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;

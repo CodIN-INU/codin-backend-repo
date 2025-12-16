@@ -1,0 +1,8 @@
+# 이름 : applicatino-jwt.yml
+# JWT 설정 파일
+spring:
+  jwt:
+    secret:
+      expiration:
+      access:
+      refresh:

@@ -6,7 +6,6 @@ import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
-import inu.codin.codin.common.security.service.AbstractAuthService;
 import inu.codin.security.service.JwtService;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
