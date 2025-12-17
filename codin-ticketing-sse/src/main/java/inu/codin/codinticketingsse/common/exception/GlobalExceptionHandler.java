@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<ExceptionResponse> handleSecurityException(SecurityException e) {
         log.warn("[SecurityException] Class: {}, Error Message : {}",  e.getClass().getSimpleName(), e.getMessage());
-        SecurityErrorCode code = e.getSecurityErrorCode();
+        SecurityErrorCode code = e.getErrorCode();
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(e.getMessage(), code.httpStatus().value()));
     }

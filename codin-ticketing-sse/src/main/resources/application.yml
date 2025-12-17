@@ -1,6 +1,9 @@
 spring:
   application:
     name: codin-ticketing-sse
+  profiles:
+    active:
+      local
   jwt:
     secret: ${SPRING_JWT_SECRET}
   mvc:

@@ -1,0 +1,8 @@
+# 이름 : application-prod.yml
+
+security:
+  #공개 API
+  public-api:
+    urls:
+      #Sse 구독 엔드포인트 허용
+      "/subscribe/**""
