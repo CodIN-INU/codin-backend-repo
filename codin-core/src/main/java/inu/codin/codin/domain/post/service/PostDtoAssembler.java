@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 /**
  * PostEntity를 다양한 Response DTO로 변환하는 책임을 담당하는 어셈블러
@@ -72,7 +72,7 @@ public class PostDtoAssembler {
      * PostEntity 리스트를 PostPageItemResponseDTO 리스트로 변환
      */
     public List<PostPageItemResponseDTO> toPageItemList(List<PostEntity> posts) {
-        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
+        ObjectId currentUserId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
         return posts.stream()
                 .map(post -> toPageItem(post, currentUserId))
                 .toList();

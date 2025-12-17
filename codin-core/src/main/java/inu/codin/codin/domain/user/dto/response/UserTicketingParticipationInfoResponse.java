@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.user.dto.response;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.dto.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

@@ -23,7 +23,8 @@ import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
-import inu.codin.codinticketingapi.security.util.SecurityUtil;
+
+import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

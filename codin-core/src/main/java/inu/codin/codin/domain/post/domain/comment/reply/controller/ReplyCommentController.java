@@ -1,7 +1,7 @@
 
 package inu.codin.codin.domain.post.domain.comment.reply.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyUpdateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyCommandService;

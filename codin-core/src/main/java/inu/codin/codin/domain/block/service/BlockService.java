@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.block.service;
 
-import inu.codin.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @Slf4j
@@ -29,7 +29,7 @@ public class BlockService {
      * @param strBlockedUserId
      */
     public void blockUser(String strBlockedUserId) {
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
@@ -57,7 +57,7 @@ public class BlockService {
      * @param strBlockedUserId 차단 해제할 유저
      */
     public void unblockUser(String strBlockedUserId) {
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         ObjectId blockedId = ObjectIdUtil.toObjectId(strBlockedUserId);
 
         if (userId.equals(blockedId)) {
@@ -84,12 +84,12 @@ public class BlockService {
      * @return 차단한 유저 목록 (빈 리스트가 제공될 수 있음)
      */
     public List<ObjectId> getBlockedUsers() {
-        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserIdOrNull());
+        ObjectId currentUserId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
         if (currentUserId == null) {
             return List.of();
         }
 
-        return blockRepository.findByUserId(toObjectId(SecurityUtils.getCurrentUserId()))
+        return blockRepository.findByUserId(toObjectId(SecurityUtil.getCurrentUserId()))
                 .map(BlockEntity::getBlockedUsers)
                 .orElse(List.of());
     }

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.user.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
 import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestService;
@@ -46,7 +46,7 @@ class PostQueryServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -106,7 +106,7 @@ class PostQueryServiceTest {
         PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
         
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
         
@@ -140,7 +140,7 @@ class PostQueryServiceTest {
         PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
         
         given(postRepository.findByIdAndNotDeleted(postId)).willReturn(Optional.of(post));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
         

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.question.service;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.dto.Department;
 import inu.codin.codin.domain.board.question.dto.request.QuestionCreateUpdateRequestDto;
 import inu.codin.codin.domain.board.question.dto.response.QuestionResponseDto;
 import inu.codin.codin.domain.board.question.entity.QuestionEntity;

@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.board.notice.service;
 
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.util.ObjectIdUtil;
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.common.dto.Department;
+import inu.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.board.notice.dto.request.NoticeCreateUpdateRequestDTO;
 import inu.codin.codin.domain.board.notice.dto.response.NoticeDetailResponseDto;
 import inu.codin.codin.domain.board.notice.dto.response.NoticeListResponseDto;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @Slf4j
@@ -84,7 +84,7 @@ public class NoticeService {
      */
     public Map<String, String> createNotice(NoticeCreateUpdateRequestDTO noticeCreateUpdateRequestDTO, List<MultipartFile> noticeImages) {
         List<String> imageUrls = s3Service.handleImageUpload(noticeImages);
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         validateUserAndPost(userId);
         UserEntity user = getUserEntity(userId);
@@ -152,7 +152,7 @@ public class NoticeService {
     }
 
     private NoticeDetailResponseDto.UserInfo getUserInfoAboutNotice(ObjectId postUserId, ObjectId postId){
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         return NoticeDetailResponseDto.UserInfo.builder()
                 .isScrap(scrapService.isPostScraped(postId, userId))
                 .isMine(postUserId.equals(userId))
@@ -160,9 +160,9 @@ public class NoticeService {
     }
 
     private void validateUserAndPost(ObjectId postUserId) {
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER)) {
+        if (SecurityUtil.getCurrentUserRole().equals(UserRole.USER)) {
             throw new NoticeException(NoticeErrorCode.NOTICE_ACCESS_DENIED);
         }
-        SecurityUtils.validateUser(ObjectIdUtil.toString(postUserId));
+        SecurityUtil.validateUser(ObjectIdUtil.toString(postUserId));
     }
 }

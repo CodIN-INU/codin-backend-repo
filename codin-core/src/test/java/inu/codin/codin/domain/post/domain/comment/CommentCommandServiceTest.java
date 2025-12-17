@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
@@ -43,7 +43,7 @@ class CommentCommandServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -60,7 +60,7 @@ class CommentCommandServiceTest {
         ObjectId userId = new ObjectId();
         
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -90,7 +90,7 @@ class CommentCommandServiceTest {
         setIdField(post, new ObjectId());
         
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -120,7 +120,7 @@ class CommentCommandServiceTest {
         setIdField(post, new ObjectId());
         
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -151,9 +151,9 @@ class CommentCommandServiceTest {
         ObjectId userId = new ObjectId();
 
         given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        doNothing().when(SecurityUtils.class);
-        SecurityUtils.validateUser(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        doNothing().when(SecurityUtil.class);
+        SecurityUtil.validateUser(userId);
         given(commentRepository.save(any())).willReturn(comment);
         
         // When & Then
@@ -170,8 +170,8 @@ class CommentCommandServiceTest {
         ObjectId userId = comment.getUserId();
 
         given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
-        doNothing().when(SecurityUtils.class);
-        SecurityUtils.validateUser(userId);
+        doNothing().when(SecurityUtil.class);
+        SecurityUtil.validateUser(userId);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
         given(commentRepository.save(any())).willReturn(comment);
         doNothing().when(postCommandService).decreaseCommentCount(any());

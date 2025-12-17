@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.dto.Department;
 import inu.codin.codin.domain.info.entity.Partner;
 import inu.codin.codin.domain.info.entity.PartnerImg;
 import io.swagger.v3.oas.annotations.media.Schema;

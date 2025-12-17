@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.exception;
 
-import inu.codin.codinticketingapi.common.exception.GlobalException;
+import inu.codin.common.exception.GlobalException;
 import lombok.Getter;
 
 @Getter

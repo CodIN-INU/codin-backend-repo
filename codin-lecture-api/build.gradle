@@ -31,6 +31,9 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation project(':codin-security')
+    implementation project(':codin-common')
+
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'

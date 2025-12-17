@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.calendar.entity;
 
-import inu.codin.codin.common.dto.BaseTimeEntity;
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.dto.Department;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

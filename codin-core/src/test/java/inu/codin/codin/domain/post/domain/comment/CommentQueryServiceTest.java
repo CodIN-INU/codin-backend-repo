@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
@@ -46,7 +46,7 @@ class CommentQueryServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -79,7 +79,7 @@ class CommentQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(5);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
         given(likeService.isLiked(eq(LikeType.COMMENT), any(), (ObjectId) any())).willReturn(false);
         
         // When
@@ -132,7 +132,7 @@ class CommentQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(2); // 익명 번호
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(3);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
         given(likeService.isLiked(eq(LikeType.COMMENT), any(), (ObjectId) any())).willReturn(true);
         
         // When
@@ -180,7 +180,7 @@ class CommentQueryServiceTest {
         ObjectId commentId = new ObjectId();
         ObjectId userId = new ObjectId();
         
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)).willReturn(true);
         
         // When
@@ -197,7 +197,7 @@ class CommentQueryServiceTest {
         ObjectId commentId = new ObjectId();
         ObjectId userId = new ObjectId();
         
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId)).willReturn(false);
         
         // When
@@ -232,7 +232,7 @@ class CommentQueryServiceTest {
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(replyQueryService.getRepliesByCommentId(any(), any())).willReturn(replies);
         given(likeService.getLikeCount(eq(LikeType.COMMENT), any())).willReturn(0);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
         given(likeService.isLiked(eq(LikeType.COMMENT), any(), (ObjectId) any())).willReturn(false);
         
         // When

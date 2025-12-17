@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.board.voice.service;
 
-import inu.codin.codin.common.dto.Department;
-import inu.codin.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.common.dto.Department;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxCreateRequest;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxDetailResponse;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxPageResponse;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class VoiceService {
         VoiceEntity voiceEntity = voiceRepository.findByIdAndNotDeleted(objectId)
                 .orElseThrow(() -> new IllegalArgumentException("익명의 소리함 질문을 찾을 수 없습니다."));
 
-        ObjectId currentUserId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId currentUserId = toObjectId(SecurityUtil.getCurrentUserId());
 
         if (positive) {
             voiceEntity.votePositiveToggle(currentUserId);

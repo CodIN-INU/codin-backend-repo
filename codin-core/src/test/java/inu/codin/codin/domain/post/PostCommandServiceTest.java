@@ -1,8 +1,7 @@
 package inu.codin.codin.domain.post;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.security.exception.JwtException;
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.post.dto.request.*;
 import inu.codin.codin.domain.post.entity.PostAnonymous;
 import inu.codin.codin.domain.post.entity.PostCategory;
@@ -40,7 +39,7 @@ class PostCommandServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -55,8 +54,8 @@ class PostCommandServiceTest {
         List<MultipartFile> images = new ArrayList<>();
         ObjectId userId = new ObjectId();
         
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postInteractionService.handleImageUpload(any())).willReturn(new ArrayList<>());
         given(postRepository.save(any())).willAnswer(inv -> {
             PostEntity entity = inv.getArgument(0);
@@ -76,8 +75,8 @@ class PostCommandServiceTest {
         List<MultipartFile> images = new ArrayList<>();
         ObjectId userId = new ObjectId();
         
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.USER);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.USER);
         
         // When & Then
         assertThatThrownBy(() -> postCommandService.createPost(dto, images))
@@ -95,8 +94,8 @@ class PostCommandServiceTest {
         List<String> imageUrls = Arrays.asList("image1.jpg", "image2.jpg");
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postInteractionService.handleImageUpload(any())).willReturn(imageUrls);
         given(postRepository.save(any())).willReturn(post);
         
@@ -113,8 +112,8 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
         // When & Then
@@ -130,8 +129,8 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
         // When & Then
@@ -146,8 +145,8 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
         // When & Then
@@ -163,8 +162,8 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
-        given(SecurityUtils.getCurrentUserRole()).willReturn(UserRole.ADMIN);
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         doNothing().when(postInteractionService).deletePostImageInternal(any(), any());
         
         // When & Then

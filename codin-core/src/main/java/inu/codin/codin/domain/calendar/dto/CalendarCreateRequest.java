@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.calendar.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.dto.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

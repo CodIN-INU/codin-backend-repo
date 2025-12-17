@@ -1,6 +1,5 @@
 package inu.codin.codin.domain.user.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;

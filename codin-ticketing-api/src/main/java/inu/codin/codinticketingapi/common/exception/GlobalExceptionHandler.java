@@ -1,6 +1,8 @@
 package inu.codin.codinticketingapi.common.exception;
 
-import inu.codin.codinticketingapi.common.response.ExceptionResponse;
+import inu.codin.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalException;
+import inu.codin.common.response.ExceptionResponse;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;

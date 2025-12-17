@@ -1,6 +1,6 @@
 package inu.codin.codinticketingsse.sse.exception;
 
-import inu.codin.codinticketingsse.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 

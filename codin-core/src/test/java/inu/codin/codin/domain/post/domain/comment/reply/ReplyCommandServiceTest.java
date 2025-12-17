@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.reply;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -10,7 +10,6 @@ import inu.codin.codin.domain.post.domain.comment.reply.dto.request.ReplyUpdateR
 import inu.codin.codin.domain.post.domain.comment.reply.entity.ReplyCommentEntity;
 import inu.codin.codin.domain.post.domain.comment.reply.repository.ReplyCommentRepository;
 import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyCommandService;
-import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryService;
 import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.security.OwnershipPolicy;
@@ -43,7 +42,7 @@ class ReplyCommandServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -63,7 +62,7 @@ class ReplyCommandServiceTest {
         
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -95,7 +94,7 @@ class ReplyCommandServiceTest {
         
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -134,7 +133,7 @@ class ReplyCommandServiceTest {
         
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -181,8 +180,8 @@ class ReplyCommandServiceTest {
         ObjectId userId = reply.getUserId();
 
         given(ownershipPolicy.assertReplyOwner(any(ObjectId.class))).willReturn(reply);
-        doNothing().when(SecurityUtils.class);
-        SecurityUtils.validateUser(userId);
+        doNothing().when(SecurityUtil.class);
+        SecurityUtil.validateUser(userId);
         given(commentQueryService.findCommentById(reply.getCommentId())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
         given(replyCommentRepository.save(any())).willReturn(reply);

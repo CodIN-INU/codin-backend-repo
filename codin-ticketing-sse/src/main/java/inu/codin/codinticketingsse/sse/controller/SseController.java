@@ -1,6 +1,6 @@
 package inu.codin.codinticketingsse.sse.controller;
 
-import inu.codin.codinticketingsse.security.util.SecurityUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;

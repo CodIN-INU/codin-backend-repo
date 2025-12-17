@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.chat.chatroom.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.chat.chatroom.dto.request.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.response.ChatRoomListResponseDto;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class ChatRoomService {
 
 
     public Map<String, String> createChatRoom(ChatRoomCreateRequestDto chatRoomCreateRequestDto) {
-        ObjectId senderId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId senderId = toObjectId(SecurityUtil.getCurrentUserId());
         isValidated(chatRoomCreateRequestDto, senderId); //유효성 검사
 
         log.info("[채팅방 생성 요청] 송신자 ID: {}, 수신자 ID: {}", senderId, chatRoomCreateRequestDto.getReceiverId());
@@ -78,7 +78,7 @@ public class ChatRoomService {
     }
 
     public List<ChatRoomListResponseDto> getAllChatRoomByUser() {
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저의 채팅방 조회] 유저 ID: {}", userId);
         // 차단 목록 조회
         List<ObjectId> blockedUsersId = blockService.getBlockedUsers();
@@ -94,7 +94,7 @@ public class ChatRoomService {
     }
 
     public void leaveChatRoom(String chatRoomId) {
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[채팅방 나가기 요청] 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -124,7 +124,7 @@ public class ChatRoomService {
         }
 
     public void setNotificationChatRoom(String chatRoomId) {
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[알림 설정 요청] 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)

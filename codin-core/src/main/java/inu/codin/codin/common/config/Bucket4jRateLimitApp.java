@@ -1,7 +1,5 @@
 package inu.codin.codin.common.config;
 
-import inu.codin.codin.common.ratelimit.RateLimitInterceptor;
-
 // Lecture API - 좋아요 개수 Feign 요청으로 인한 RateLimiting 에러로 주석화
 //@Configuration
 //@RequiredArgsConstructor

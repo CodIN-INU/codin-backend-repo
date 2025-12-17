@@ -1,6 +1,6 @@
 package inu.codin.codin.common.security.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.common.security.dto.SignUpAndLoginRequestDto;
 import inu.codin.codin.common.security.service.AuthCommonService;
 import inu.codin.codin.common.security.service.AuthSessionService;

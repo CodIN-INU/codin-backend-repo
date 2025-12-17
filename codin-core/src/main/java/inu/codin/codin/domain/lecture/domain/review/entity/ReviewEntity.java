@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.domain.review.entity;
 
-import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.dto.BaseTimeEntity;
 import inu.codin.codin.domain.lecture.domain.review.dto.request.CreateReviewRequestDto;
 import lombok.AccessLevel;
 import lombok.Builder;

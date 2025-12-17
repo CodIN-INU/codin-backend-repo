@@ -1,7 +1,7 @@
 package inu.codin.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import inu.codin.codin.common.response.ExceptionResponse;
+import inu.codin.common.response.ExceptionResponse;
 import inu.codin.security.exception.SecurityErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,6 +35,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             log.warn("[doFilterInternal] Exception in ExceptionHandlerFilter: {}", e.getMessage());
             sendErrorResponse(response, SecurityErrorCode.INVALID_TOKEN);
         }
+
     }
 
     private void sendErrorResponse(HttpServletResponse response, SecurityErrorCode code) throws IOException {

@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.board.voice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.common.dto.Department;
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.common.dto.Department;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.board.voice.entity.VoiceEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,8 +36,8 @@ public class VoiceBoxDetailResponse {
                 .department(voiceEntity.getDepartment())
                 .question(voiceEntity.getQuestion())
                 .answer(voiceEntity.getAnswer())
-                .isUserInPositive(voiceEntity.getPositiveVoteIds() == null ? null : voiceEntity.getPositiveVoteIds().contains(SecurityUtils.getCurrentUserId()))
-                .isUserInOpposite(voiceEntity.getOppositeVoteIds() == null ? null : voiceEntity.getOppositeVoteIds().contains(SecurityUtils.getCurrentUserId()))
+                .isUserInPositive(voiceEntity.getPositiveVoteIds() == null ? null : voiceEntity.getPositiveVoteIds().contains(SecurityUtil.getCurrentUserId()))
+                .isUserInOpposite(voiceEntity.getOppositeVoteIds() == null ? null : voiceEntity.getOppositeVoteIds().contains(SecurityUtil.getCurrentUserId()))
                 .userCountPositive(voiceEntity.getPositiveVoteIds() == null ? null : voiceEntity.getPositiveVoteIds().size())
                 .userCountOpposite(voiceEntity.getOppositeVoteIds() == null ? null : voiceEntity.getOppositeVoteIds().size())
                 .createdAt(voiceEntity.getCreatedAt())

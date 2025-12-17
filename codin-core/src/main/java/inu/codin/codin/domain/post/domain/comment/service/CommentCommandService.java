@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.service;
 
-import inu.codin.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
@@ -17,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class CommentCommandService {
         ObjectId postId = toObjectId(id);
         PostEntity post = postQueryService.findPostById(postId);
 
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         CommentEntity comment = CommentEntity.create(postId, userId, requestDTO);
         commentRepository.save(comment);

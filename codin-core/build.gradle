@@ -35,6 +35,7 @@ dependencyManagement {
 dependencies {
 	// Security - codin-security 공통 모듈 사용
 	implementation project(':codin-security')
+	implementation project(':codin-common')
 	
 	// FCM
 	implementation 'com.google.firebase:firebase-admin:7.3.0'

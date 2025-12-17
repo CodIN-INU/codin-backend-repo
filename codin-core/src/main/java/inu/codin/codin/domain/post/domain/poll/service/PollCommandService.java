@@ -1,8 +1,7 @@
 package inu.codin.codin.domain.post.domain.poll.service;
 
-import com.mongodb.client.result.UpdateResult;
-import inu.codin.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
@@ -26,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -52,10 +51,10 @@ public class PollCommandService {
     }
 
     public void votingPoll(String postId, PollVotingRequestDTO pollRequestDTO) {
-        log.info("투표 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
+        log.info("투표 요청 - postId: {}, userId: {}", postId, SecurityUtil.getCurrentUserId());
 
         PollEntity poll = getActivePollByPostId(postId);
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         ensureNotDuplicatedVote(poll.get_id(), userId);
 
@@ -73,10 +72,10 @@ public class PollCommandService {
     }
 
     public void deleteVoting(String postId) {
-        log.info("투표 취소 요청 - postId: {}, userId: {}", postId, SecurityUtils.getCurrentUserId());
+        log.info("투표 취소 요청 - postId: {}, userId: {}", postId, SecurityUtil.getCurrentUserId());
 
         PollEntity poll = getActivePollByPostId(postId);
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         PollVoteEntity vote = requireUserVote(poll.get_id(), userId);
 

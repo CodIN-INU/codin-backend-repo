@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll;
 
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.entity.PollEntity;
@@ -43,7 +43,7 @@ class PollCommandServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -85,7 +85,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         given(pollVoteRepository.save(any())).willReturn(createPollVoteEntity());
         given(pollRepository.incOption(eq(poll.get_id()), eq(0))).willReturn(1L);
@@ -151,7 +151,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(true);
         
         // When & Then
@@ -170,7 +170,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         
         // When & Then
@@ -189,7 +189,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         
         // When & Then
@@ -209,7 +209,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)).willReturn(Optional.of(vote));
         given(pollRepository.dcrOptionIfPositive(eq(poll.get_id()), eq(0))).willReturn(1L);
 
@@ -231,7 +231,7 @@ class PollCommandServiceTest {
         
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)).willReturn(Optional.empty());
         
         // When & Then

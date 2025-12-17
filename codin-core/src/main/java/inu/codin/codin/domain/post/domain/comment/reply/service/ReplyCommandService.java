@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.reply.service;
 
-import inu.codin.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -20,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class ReplyCommandService {
 
         CommentEntity comment = commentQueryService.findCommentById(toObjectId(id));
         PostEntity post = postQueryService.findPostById(comment.getPostId());
-        ObjectId userId = toObjectId(SecurityUtils.getCurrentUserId());
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
 
         ReplyCommentEntity reply = ReplyCommentEntity.create(comment.get_id(), userId, requestDTO);

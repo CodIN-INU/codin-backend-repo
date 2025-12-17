@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.notification.controller;
 
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.notification.dto.request.OneCharNameRequestDto;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;

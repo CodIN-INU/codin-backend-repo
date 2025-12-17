@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.security;
 
-import inu.codin.codin.common.util.ObjectIdUtil;
-import inu.codin.security.util.SecurityUtils;
+import inu.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.service.PostQueryService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -11,8 +11,6 @@ import inu.codin.codin.domain.post.domain.comment.reply.service.ReplyQueryServic
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
-
-import static inu.codin.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +40,7 @@ public class OwnershipPolicy {
     }
 
     private void validateOwner(ObjectId ownerId) {
-        String current = SecurityUtils.getCurrentUserId();
-        SecurityUtils.validateOwners(current, ObjectIdUtil.toString(ownerId)); // 불일치 시 예외
+        String current = SecurityUtil.getCurrentUserId();
+        SecurityUtil.validateOwners(current, ObjectIdUtil.toString(ownerId)); // 불일치 시 예외
     }
 }
