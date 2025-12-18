@@ -1,17 +1,13 @@
 package inu.codin.auth.service;
 
 import inu.codin.auth.dto.user.*;
+import inu.codin.auth.exception.AuthException;
 import inu.codin.auth.feign.UserInternalAuthClient;
 import inu.codin.auth.jwt.JwtTokenIssuer;
-import inu.codin.common.exception.NotFoundException;
 import inu.codin.auth.dto.SignUpAndLoginRequestDto;
 import inu.codin.auth.dto.user.UserProfileRequestDto;
-import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.exception.UserCreateFailException;
-import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -19,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import inu.codin.auth.service.oauth2.AbstractAuthService;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import static inu.codin.auth.exception.AuthErrorCode.INVALID_CREDENTIALS;
 
 @Service
 @Slf4j
@@ -51,7 +46,7 @@ public class AuthCommonService extends AbstractAuthService {
         if (passwordEncoder.matches(signUpAndLoginRequestDto.getPassword(), adminLoginMaterial.encodedPassword())) {
             issueJwtToken(adminLoginMaterial.email(), response);
         } else {
-            throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+            throw new AuthException(INVALID_CREDENTIALS);
         }
     }
 
