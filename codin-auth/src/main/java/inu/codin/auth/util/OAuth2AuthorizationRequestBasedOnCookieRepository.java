@@ -1,6 +1,6 @@
 package inu.codin.auth.util;
 
-import inu.codin.codin.common.util.CookieUtil;
+import inu.codin.common.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package inu.codin.codin.infra.redis;
+package inu.codin.auth.infra;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

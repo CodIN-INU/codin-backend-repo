@@ -3,7 +3,7 @@ package inu.codin.auth.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.auth.jwt.JwtTokenIssuer;
 import inu.codin.common.response.ExceptionResponse;
-import inu.codin.codin.common.util.CookieUtil;
+import inu.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

@@ -28,11 +28,11 @@ package inu.codin.auth.config;
 
 import inu.codin.auth.service.oauth2.AppleOAuth2UserService;
 import inu.codin.auth.service.oauth2.CustomOAuth2UserService;
+import inu.codin.auth.util.CustomAuthorizationRequestResolver;
 import inu.codin.auth.util.CustomOAuth2AccessTokenResponseClient;
 import inu.codin.auth.util.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import inu.codin.auth.handler.OAuth2LoginFailureHandler;
 import inu.codin.auth.handler.OAuth2LoginSuccessHandler;
-import inu.codin.codin.common.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;

@@ -1,8 +1,7 @@
 package inu.codin.auth.jwt;
 
 
-import inu.codin.codin.domain.user.security.CustomUserDetailsService;
-import inu.codin.codin.infra.redis.RedisStorageService;
+import inu.codin.auth.infra.RedisStorageService;
 import inu.codin.security.exception.JwtException;
 import inu.codin.security.exception.SecurityErrorCode;
 import inu.codin.security.jwt.JwtAuthenticationToken;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,7 +31,6 @@ public class JwtTokenIssuer {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
     private final JwtTokenValidator jwtTokenValidator;
-    private final CustomUserDetailsService userDetailsService;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -43,7 +40,7 @@ public class JwtTokenIssuer {
     private final String ACCESS_TOKEN_PREFIX = "Bearer ";
 
     /**
-     * 최초 로그인 시 Access Token, Refresh Token 발급
+     * 로그인 성공 시: subject(email) 기반으로 Access/Refresh 발급
      * @param response
      */
     public void createToken(HttpServletResponse response) {
@@ -52,7 +49,10 @@ public class JwtTokenIssuer {
     }
 
     /**
-     * Refresh Token을 이용하여 Access Token, Refresh Token 재발급
+     * Refresh Token 기반 재발급
+     * userDetails 로딩 없음
+     * SecurityContext 세팅 없음
+     * refreshToken에서 subject를 뽑아서 토큰 재발급
      * @param request
      * @param response
      */
@@ -65,14 +65,8 @@ public class JwtTokenIssuer {
 
         String username = jwtTokenProvider.getRefreshTokenUsername(refreshToken);
         validateRefreshTokenWithAccessToken(request, username);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        // 토큰이 유효하고, SecurityContext에 Authentication 객체가 없는 경우
-        if (userDetails != null) {
-            // Authentication 객체 생성 후 SecurityContext에 저장 (인증 완료)
-            JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+        // userDetails 로딩/인증 세팅 제거 바로 재발급만 수행
 
         reissueToken(refreshToken, response);
     }

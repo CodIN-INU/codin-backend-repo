@@ -1,4 +1,4 @@
-package inu.codin.codin.common.util;
+package inu.codin.auth.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

@@ -37,9 +37,6 @@ dependencies {
     implementation project(':codin-security')  // JWT 검증 재사용
     implementation project(':codin-common')    // 공통 기능
 
-    // User 도메인 공유를 위한 codin-core 의존성
-    implementation project(':codin-core')      // UserEntity, UserRepository 사용
-
     // Authorization Server 전용
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -47,6 +44,7 @@ dependencies {
 
     // Spring Data MongoDB (for BaseTimeEntity)
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 
     // Swagger
