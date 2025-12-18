@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableFeignClients(basePackageClasses = AppleAuthClient.class)
+@EnableFeignClients(basePackageClasses = {AppleAuthClient.class, UserInternalClient.class})
 public class CodinAuthApplication {
     public static void main(String[] args) {
         SpringApplication.run(CodinAuthApplication.class, args);

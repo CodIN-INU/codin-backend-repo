@@ -27,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final PublicApiProperties publicApiProperties;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    //todo: Prod 상에서도 스웨거 열려있는 상황 -> 제거
     private final String [] SWAGGER_AUTH_PATHS = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -61,6 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 2. JWT 토큰 검증 및 인증 설정
+        // 토큰 추출 자체를 JwtService 내부(TokenUtil.extractToken)로 통일
+        // 인증 로직 UserDetails 조회 기반 -> Claim 기반
         boolean isAuthenticated = jwtService.validateAndSetAuthentication(request);
         
         // 3. 인증 실패 시 PublicApi 경로는 통과, 나머지는 차단

@@ -6,7 +6,7 @@ import inu.codin.auth.service.AuthSessionService;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.auth.dto.SignUpAndLoginRequestDto;
 
-import inu.codin.codin.domain.user.dto.request.UserProfileRequestDto;
+import inu.codin.auth.dto.user.UserProfileRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;

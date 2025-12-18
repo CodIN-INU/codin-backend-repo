@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.dto.request;
+package inu.codin.auth.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

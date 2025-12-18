@@ -1,4 +1,3 @@
 package inu.codin.auth.dto.user;
 
-public class CompleteProfileRequest {
-}
+public record CompleteProfileRequest(String email, String nickname) {}

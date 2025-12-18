@@ -1,4 +1,3 @@
 package inu.codin.auth.dto.user;
 
-public class CompleteProfileResponse {
-}
+public record CompleteProfileResponse(String email) {}
