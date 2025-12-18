@@ -1,0 +1,46 @@
+# 이름 : application-oauth.yml
+# oauth2 설정을 위한 파일
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "${baseUrl}/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            scope:
+              - email
+              - profile
+          apple:
+            client-id: ${APPLE_CLIENT_ID}
+            client-secret: ${APPLE_CLIENT_SECRET}  # 동적으로 생성된 애플 client-secret
+            redirect-uri: "${baseUrl}/login/oauth2/code/apple"
+            authorization-grant-type: authorization_code
+            clientAuthenticationMethod: POST
+            clientName: Apple
+            scope:
+              - email
+              - name
+        provider:
+#          google:
+#            authorization-uri: "https://accounts.google.com/o/oauth2/auth?prompt=consent"
+          apple:
+            authorization-uri: ${APPLE_AUTHORIZATION_URI}
+            token-uri: ${APPLE_TOKEN_URI}
+            jwk-set-uri: ${APPLE_JWK_SET_URI}
+            user-name-attribute: sub
+            user-info-uri: ${APPLE_USER_INFO_URI}
+
+apple:
+  auth:
+    token-url: ${APPLE_AUTH_TOKEN_URL}
+    public-key-url: ${APPLE_AUTH_PUBLIC_KEY_URL}
+  redirect-uri: ${APPLE_REDIRECT_URI}
+  iss: ${APPLE_ISS}
+  aud: ${APPLE_AUD}
+  team-id: ${APPLE_TEAM_ID}
+  key:
+    id: ${APPLE_KEY_ID}
+    path: ${APPLE_KEY_PATH}

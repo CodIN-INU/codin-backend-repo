@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.user.entity;
 
+import inu.codin.common.contract.PortalLoginResponseDto;
 import inu.codin.common.dto.BaseTimeEntity;
 import inu.codin.common.dto.Department;
-import inu.codin.codin.common.security.dto.PortalLoginResponseDto;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import jakarta.validation.constraints.NotBlank;

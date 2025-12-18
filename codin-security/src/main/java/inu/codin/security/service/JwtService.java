@@ -104,8 +104,4 @@ public class JwtService {
         return token != null && isValidToken(token);
     }
 
-    //todo: 임시 메서드 생성 : pahse 2 에서 auth 에서 분리구현 예정
-    public void deleteToken(HttpServletResponse response) {}
-    public void checkRefreshTokenAndReissue(HttpServletRequest request, HttpServletResponse response) {}
-    public void setAuthentication(HttpServletRequest servletRequest) {}
 }

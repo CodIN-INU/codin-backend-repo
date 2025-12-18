@@ -1,0 +1,9 @@
+# 이름 : application-prod.yml
+
+security:
+  #투표 이벤트 공개 API
+  public-api:
+    urls:
+      - "/posts/category"
+      - "/posts/{postId}"
+      - "/comments/post/{postId}"
