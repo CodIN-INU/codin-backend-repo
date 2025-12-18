@@ -1,11 +1,11 @@
-package inu.codin.codin.domain.user.internal;
+package inu.codin.codin.domain.user.internal.inbound;
 
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 
-import inu.codin.codin.domain.user.internal.dto.CompleteProfileRequest;
-import inu.codin.codin.domain.user.internal.dto.AdminLoginMaterialResponse;
-import inu.codin.codin.domain.user.internal.dto.CompleteProfileResponse;
+import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileRequest;
+import inu.codin.codin.domain.user.internal.inbound.dto.AdminLoginMaterialResponse;
+import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
