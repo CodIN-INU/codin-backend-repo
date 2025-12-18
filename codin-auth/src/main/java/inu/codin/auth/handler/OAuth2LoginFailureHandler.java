@@ -1,8 +1,8 @@
 package inu.codin.auth.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.auth.jwt.JwtTokenIssuer;
 import inu.codin.common.response.ExceptionResponse;
-import inu.codin.security.service.JwtService;
 import inu.codin.codin.common.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final JwtService jwtService;
+    private final JwtTokenIssuer jwtTokenIssuer;
     private final HttpSession httpSession;
 
     @Value("${server.domain}")
@@ -83,6 +83,6 @@ public class OAuth2LoginFailureHandler extends SimpleUrlAuthenticationFailureHan
 
     private void removeAllToken(HttpServletRequest request, HttpServletResponse response) {
         CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
-        jwtService.deleteToken(response);
+        jwtTokenIssuer.deleteToken(response);
     }
 }

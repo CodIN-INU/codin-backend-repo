@@ -16,8 +16,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class AbstractAuthService {
-//    protected final UserRepository userRepository;
-//    protected final S3Service s3Service;
     protected final JwtTokenIssuer jwtTokenIssuer;
     protected final UserDetailsService userDetailsService;
 
