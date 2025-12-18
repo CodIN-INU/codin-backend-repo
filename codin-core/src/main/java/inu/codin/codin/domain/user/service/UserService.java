@@ -1,6 +1,7 @@
 package inu.codin.codin.domain.user.service;
 
 import inu.codin.common.exception.NotFoundException;
+import inu.codin.common.util.CookieUtil;
 import inu.codin.security.service.JwtService;
 import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeEntity;
@@ -23,6 +24,7 @@ import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -121,7 +123,7 @@ public class UserService {
         }
     }
 
-    public void deleteUser(HttpServletResponse response) {
+    public void deleteUser(HttpServletRequest request, HttpServletResponse response) {
         ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         UserEntity user = userRepository.findByUserId(userId)
@@ -134,7 +136,9 @@ public class UserService {
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
 
-        jwtService.deleteToken(response);
+        CookieUtil.deleteCookie(request, response, "ACCESS_TOKEN");
+        CookieUtil.deleteCookie(request, response, "REFRESH_TOKEN");
+
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
 
