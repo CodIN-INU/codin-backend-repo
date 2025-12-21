@@ -90,6 +90,7 @@ public class ResourceServerSecurityConfig {
                 // 요청별 권한 설정 - Resource Server의 핵심 기능
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
+                                .requestMatchers("/internal/**").permitAll() // 내부 feign 호출 : 추후 Internal Token Filter 로 develop
                                 .requestMatchers(permitAllProperties.getUrls().toArray(new String[0])).permitAll()
                                 .requestMatchers(publicApiProperties.getUrls().toArray(new String[0])).permitAll()
                                 .requestMatchers(ADMIN_AUTH_PATHS).hasRole("ADMIN")
