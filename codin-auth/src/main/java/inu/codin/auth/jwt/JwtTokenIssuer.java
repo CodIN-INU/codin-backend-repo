@@ -2,12 +2,11 @@ package inu.codin.auth.jwt;
 
 
 import inu.codin.auth.infra.RedisStorageService;
+import inu.codin.auth.feign.UserInternalAuthClient;
+import inu.codin.auth.dto.user.UserTokenInfo;
 import inu.codin.security.exception.JwtException;
 import inu.codin.security.exception.SecurityErrorCode;
-import inu.codin.security.jwt.JwtAuthenticationToken;
 import inu.codin.security.jwt.JwtUtils;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,8 +28,7 @@ public class JwtTokenIssuer {
     private final RedisStorageService redisStorageService;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
-    // TODO: Auth/Resource 분리 - Resource Server 컴포넌트 의존성 제거
-    // private final JwtTokenValidator jwtTokenValidator;
+    private final UserInternalAuthClient userInternalAuthClient;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -40,12 +38,24 @@ public class JwtTokenIssuer {
     private final String ACCESS_TOKEN_PREFIX = "Bearer ";
 
     /**
-     * 로그인 성공 시: subject(email) 기반으로 Access/Refresh 발급
-     * @param response
+     * OAuth 로그인 성공 시: 이미 받은 사용자 정보로 토큰 발급
+     * Feign 통신 없이 바로 토큰 생성 (성능 최적화)
      */
-    public void createToken(HttpServletResponse response) {
-        createBothToken(response);
-        log.info("[createToken] Access Token, Refresh Token 발급 완료");
+    public void createTokenForOAuth(String email, String userId, String authorities, HttpServletResponse response) {
+        createBothToken(email, userId, authorities, response);
+        log.info("[createTokenForOAuth] OAuth 로그인 토큰 발급 완료: email={}", email);
+    }
+
+    /**
+     * Refresh Token 재발급 시: Feign 통신을 통해 사용자 정보 조회 후 토큰 발급
+     * Phase 2/3: SecurityContext 의존성 제거 완료 (파라미터화)
+     */
+    public void createTokenForRefresh(String email, HttpServletResponse response) {
+        // Feign 통신을 통해 사용자 정보 조회
+        UserTokenInfo userInfo = getUserTokenInfo(email);
+        
+        createBothToken(userInfo.email(), userInfo.userId(), userInfo.authorities(), response);
+        log.info("[createTokenForRefresh] 재발급 토큰 발급 완료: email={}", email);
     }
 
     /**
@@ -108,20 +118,28 @@ public class JwtTokenIssuer {
             throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Refresh Token이 유효하지 않습니다.");
         }
 
-        createBothToken(response);
+        // 기존 구조에 맞춰 수정: Refresh Token에서 email만 추출, 나머지는 Feign 통신
+        String email = jwtTokenProvider.getRefreshTokenUsername(refreshToken);
+        
+        // 재발급 전용 메서드 사용 (Feign 통신 포함)
+        createTokenForRefresh(email, response);
         log.info("[reissueToken] Access Token, Refresh Token 재발급 완료");
     }
 
     /**
      * Access Token, Refresh Token 생성
-     * TODO: Phase 2 - SecurityContext 의존성 제거 필요
-     * TODO: 재발급은 Access 만료 상태에서 수행되는 것이 일반적
+     * Phase 2: SecurityContext 의존성 제거됨
      */
+    private void createBothToken(String email, String userId, String authorities, HttpServletResponse response) {
+        // Phase 2: 파라미터로 필요 정보 전달하는 방식으로 변경됨
+        JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(email, userId, authorities);
+
+    // TODO: Phase 2 - 기존 SecurityContext 의존 방식 (제거 예정)
+    /*
     private void createBothToken(HttpServletResponse response) {
-        // TODO: Phase 2에서 파라미터로 필요 정보 전달하는 방식으로 변경
-        // 새로운 Access Token 발급
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
+    */
 
         // Authorization 헤더에 Access Token 추가
         response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
@@ -148,7 +166,7 @@ public class JwtTokenIssuer {
         newRefreshToken.setAttribute("SameSite", "None");
         response.addCookie(newRefreshToken);
 
-        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}", authentication.getName(), newToken.getAccessToken());
+        log.info("[createBothToken] Access Token, Refresh Token 발급 완료, email = {}, Access: {}", email, newToken.getAccessToken());
     }
 
 
@@ -218,5 +236,18 @@ public class JwtTokenIssuer {
             throw new JwtException(SecurityErrorCode.INVALID_TYPE, "Refresh Token이 아닙니다.");
         }
         return refreshToken;
+    }
+
+    /**
+     * Phase 3: Feign 통신을 통한 사용자 정보 조회
+     * Auth 서버의 도메인 의존성 완전 분리
+     */
+    private UserTokenInfo getUserTokenInfo(String email) {
+        try {
+            return userInternalAuthClient.getUserTokenInfo(email);
+        } catch (Exception e) {
+            log.error("[getUserTokenInfo] 사용자 정보 조회 실패: email={}, error={}", email, e.getMessage());
+            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "사용자 정보를 찾을 수 없습니다.");
+        }
     }
 }

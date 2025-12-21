@@ -29,7 +29,11 @@ public interface UserInternalAuthClient {
     @GetMapping("/adminLogin-material")
     AdminLoginMaterial getLoginMaterial(@RequestParam("email") String email);
 
-    @PostMapping("/internal/auth/oauth/decision")
+    @PostMapping("/oauth/decision")
     UserOAuthDecision oauthDecision(@RequestBody UserOAuthDecisionRequest request);
+
+    //  토큰 재발급을 위한 사용자 정보 조회
+    @GetMapping("/user-info")
+    UserTokenInfo getUserTokenInfo(@RequestParam("email") String email);
 
 }

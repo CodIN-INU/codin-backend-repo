@@ -23,15 +23,16 @@ public class AuthCommonService extends AbstractAuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthCommonService(JwtTokenIssuer jwtTokenIssuer, UserDetailsService userDetailsService, UserInternalAuthClient userInternalAuthClient, PasswordEncoder passwordEncoder) {
-        super(jwtTokenIssuer, userDetailsService, userInternalAuthClient);
+    public AuthCommonService(JwtTokenIssuer jwtTokenIssuer, UserInternalAuthClient userInternalAuthClient, PasswordEncoder passwordEncoder) {
+        super(jwtTokenIssuer, userInternalAuthClient);
         this.passwordEncoder = passwordEncoder;
     }
 
     public void completeUserProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage, HttpServletResponse response) {
         // User 에게 책임 분리 (auth -> user API 호출)
         CompleteProfileResponse completeProfileResponse = callUserCompleteProfile(userProfileRequestDto, userImage);
-        issueJwtToken(completeProfileResponse.email(), response);
+        
+        issueJwtToken(completeProfileResponse.toTokenDecision(), response);
     }
 
     public LocalDateTime getSuspensionEndDate(OAuth2User oAuth2User){
@@ -44,7 +45,7 @@ public class AuthCommonService extends AbstractAuthService {
 
         // auth 책임 : 비밀번호 검증
         if (passwordEncoder.matches(signUpAndLoginRequestDto.getPassword(), adminLoginMaterial.encodedPassword())) {
-            issueJwtToken(adminLoginMaterial.email(), response);
+            issueJwtToken(adminLoginMaterial.toTokenDecision(), response);
         } else {
             throw new AuthException(INVALID_CREDENTIALS);
         }

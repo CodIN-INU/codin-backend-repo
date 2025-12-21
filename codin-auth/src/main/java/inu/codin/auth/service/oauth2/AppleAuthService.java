@@ -1,12 +1,12 @@
 package inu.codin.auth.service.oauth2;
 
+import inu.codin.auth.dto.user.TokenIssuanceDecision;
 import inu.codin.auth.dto.user.UserOAuthDecision;
 import inu.codin.auth.feign.UserInternalAuthClient;
 import inu.codin.auth.jwt.JwtTokenIssuer;
 import inu.codin.auth.enums.AuthResultStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,8 @@ import java.util.Map;
 @Slf4j
 public class AppleAuthService extends AbstractAuthService implements Oauth2AuthService {
 
-    public AppleAuthService(JwtTokenIssuer jwtTokenIssuer, UserDetailsService userDetailsService, UserInternalAuthClient userInternalAuthClient) {
-        super(jwtTokenIssuer, userDetailsService, userInternalAuthClient);
+    public AppleAuthService(JwtTokenIssuer jwtTokenIssuer, UserInternalAuthClient userInternalAuthClient) {
+        super(jwtTokenIssuer, userInternalAuthClient);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class AppleAuthService extends AbstractAuthService implements Oauth2AuthS
         AuthResultStatus status = mapToAuthResultStatus(decision);
 
         if (shouldIssueToken(decision)) {
-            issueJwtToken(decision.tokenSubject(), response);
+            issueJwtToken(decision.toTokenDecision(), response);
         }
         // AUTH: 최종 응답 상태 반환
         return status;

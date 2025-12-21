@@ -50,8 +50,50 @@ public class JwtTokenProvider {
         SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // TODO: Phase 3 - CustomUserDetails 의존성 제거 필요
-    // TODO: Authentication 객체 대신 필요한 정보만 파라미터로 받도록 변경 필요
+    // Phase 2: 파라미터화된 토큰 생성 메서드 추가
+    public TokenDto createToken(String email, String userId, String authorities) {
+        // 토큰 만료시간 설정
+        Date now = new Date();
+        Date accessTokenExpiration = new Date(now.getTime() + Long.parseLong(this.ACCESS_TOKEN_EXPIRATION) * 1000);
+        Date refreshTokenExpiration = new Date(now.getTime() + Long.parseLong(this.REFRESH_TOKEN_EXPIRATION) * 1000);
+
+        // 토큰 생성
+        String accessToken = Jwts.builder()
+                .setSubject(email)
+                .claim("userId", userId)
+                .claim("auth", authorities)
+                .claim("type", "access")
+                .setIssuedAt(now)
+                .setExpiration(accessTokenExpiration)
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .compact();
+
+        String refreshToken = Jwts.builder()
+                .setSubject(email)
+                .claim("type", "refresh")
+                .setIssuedAt(now)
+                .setExpiration(refreshTokenExpiration)
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .compact();
+
+        // Redis에 기존에 저장된 RefreshToken 삭제
+        String beforeRefreshToken = redisStorageService.getStoredRefreshToken(email);
+        if (beforeRefreshToken != null) {
+            redisStorageService.deleteRefreshToken(email);
+        }
+
+        // Redis에 Refresh Token 저장
+        redisStorageService.saveRefreshToken(email, refreshToken, Long.parseLong(this.REFRESH_TOKEN_EXPIRATION));
+
+        return TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    // TODO: Phase 3 - CustomUserDetails 의존성 제거됨 (기존 메서드 주석처리)
+    // TODO: 새로운 파라미터화된 createToken 메서드 사용으로 대체
+    /*
     public TokenDto createToken(Authentication authentication) {
         // 권한을 authorities에 담아서 String으로 변환
         String authorities = authentication.getAuthorities().stream()
@@ -105,6 +147,7 @@ public class JwtTokenProvider {
                 .refreshToken(refreshToken)
                 .build();
     }
+    */
 
     //  토큰 검증 로직 제거됨 - codin-security/JwtTokenValidator로 이동
     // Authorization Server는 토큰 생성만 담당, 검증은 Resource Server에서 처리
@@ -150,6 +193,19 @@ public class JwtTokenProvider {
     public String getRefreshTokenUsername(String refreshToken) {
         return getClaims(refreshToken).getSubject();
     }
+
+    // TODO: Refresh Token 클레임 최소화로 인해 사용하지 않음 (기존 구조 복원)
+    /*
+    // Phase 2: Refresh Token에서 userId 추출
+    public String getRefreshTokenUserId(String refreshToken) {
+        return getClaims(refreshToken).get("userId", String.class);
+    }
+
+    // Phase 2: Refresh Token에서 authorities 추출  
+    public String getRefreshTokenAuthorities(String refreshToken) {
+        return getClaims(refreshToken).get("auth", String.class);
+    }
+    */
 
     public String getType(String token) {
         return getClaims(token).get("type", String.class);

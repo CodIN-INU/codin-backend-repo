@@ -1,5 +1,6 @@
 package inu.codin.auth.service.oauth2;
 
+import inu.codin.auth.dto.user.TokenIssuanceDecision;
 import inu.codin.auth.dto.user.UserOAuthDecision;
 import inu.codin.auth.feign.UserInternalAuthClient;
 import inu.codin.auth.jwt.JwtTokenIssuer;
@@ -16,8 +17,8 @@ import java.util.Map;
 @Slf4j
 public class GoogleAuthService extends AbstractAuthService implements Oauth2AuthService {
 
-    public GoogleAuthService(JwtTokenIssuer jwtTokenIssuer, UserDetailsService userDetailsService, UserInternalAuthClient userInternalAuthClient) {
-        super(jwtTokenIssuer, userDetailsService, userInternalAuthClient);
+    public GoogleAuthService(JwtTokenIssuer jwtTokenIssuer, UserInternalAuthClient userInternalAuthClient) {
+        super(jwtTokenIssuer, userInternalAuthClient);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class GoogleAuthService extends AbstractAuthService implements Oauth2Auth
         AuthResultStatus status = mapToAuthResultStatus(decision);
 
         if (shouldIssueToken(decision)) {
-            issueJwtToken(decision.tokenSubject(), response);
+            issueJwtToken(decision.toTokenDecision(), response);
         }
 
         return status;
