@@ -36,7 +36,9 @@ public class UserOauthLoginDecisionService {
                             user.getStatus().name(),
                             false,
                             user.getStatus() == UserStatus.ACTIVE,
-                            identifier
+                            identifier,
+                            user.get_id().toString(),
+                            user.getRole().name()
                     );
                 })
                 .orElseGet(() -> {
@@ -55,7 +57,14 @@ public class UserOauthLoginDecisionService {
 
                     log.info("[USER] 신규 Apple 회원 저장 완료: identifier={}, status=DISABLED", identifier);
 
-                    return new OauthDecisionResponse("DISABLED", true, false, identifier);
+                    return new OauthDecisionResponse(
+                            "DISABLED", 
+                            true, 
+                            false, 
+                            identifier,
+                            newUser.get_id().toString(),
+                            newUser.getRole().name()
+                    );
                 });
     }
 
@@ -67,7 +76,9 @@ public class UserOauthLoginDecisionService {
                             user.getStatus().name(),
                             false,
                             user.getStatus() == UserStatus.ACTIVE,
-                            identifier
+                            identifier,
+                            user.get_id().toString(),
+                            user.getRole().name()
                     );
                 })
                 .orElseGet(() -> {
@@ -89,7 +100,14 @@ public class UserOauthLoginDecisionService {
 
                     log.info("[USER] 신규 Google 회원 저장 완료: identifier={}, status=DISABLED", identifier);
 
-                    return new OauthDecisionResponse("DISABLED", true, false, identifier);
+                    return new OauthDecisionResponse(
+                            "DISABLED", 
+                            true, 
+                            false, 
+                            identifier,
+                            newUser.get_id().toString(),
+                            newUser.getRole().name()
+                    );
                 });
     }
 }

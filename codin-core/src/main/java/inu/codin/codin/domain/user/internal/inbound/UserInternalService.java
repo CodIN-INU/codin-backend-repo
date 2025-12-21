@@ -59,7 +59,11 @@ public class UserInternalService {
         userRepository.save(user);
 
         log.info("[USER] completeProfile done: email={}", user.getEmail());
-        return new CompleteProfileResponse(user.getEmail());
+        return new CompleteProfileResponse(
+            user.getEmail(),
+            user.get_id().toString(),
+            user.getRole().name()
+        );
     }
 
     /**
@@ -84,6 +88,11 @@ public class UserInternalService {
             throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
         }
 
-        return new AdminLoginMaterialResponse(user.getEmail(), user.getPassword());
+        return new AdminLoginMaterialResponse(
+            user.getEmail(),
+            user.getPassword(),
+            user.get_id().toString(),
+            user.getRole().name()
+        );
     }
 }

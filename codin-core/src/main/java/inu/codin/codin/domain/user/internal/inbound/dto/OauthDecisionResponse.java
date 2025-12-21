@@ -4,5 +4,7 @@ public record OauthDecisionResponse(
     String userStatus,
     boolean isNewUser,
     boolean profileCompleted,
-    String tokenSubject
+    String tokenSubject,
+    String userId,
+    String authorities
 ) {}

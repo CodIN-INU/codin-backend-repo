@@ -2,5 +2,7 @@ package inu.codin.codin.domain.user.internal.inbound.dto;
 
 public record AdminLoginMaterialResponse(
         String email,
-        String encodedPassword
+        String encodedPassword,
+        String userId,
+        String authorities
 ) {}
