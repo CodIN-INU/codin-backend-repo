@@ -6,7 +6,6 @@ import inu.codin.security.exception.JwtException;
 import inu.codin.security.exception.SecurityErrorCode;
 import inu.codin.security.jwt.JwtAuthenticationToken;
 import inu.codin.security.jwt.JwtUtils;
-import inu.codin.security.jwt.JwtTokenValidator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -30,7 +29,8 @@ public class JwtTokenIssuer {
     private final RedisStorageService redisStorageService;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
-    private final JwtTokenValidator jwtTokenValidator;
+    // TODO: Auth/Resource 분리 - Resource Server 컴포넌트 의존성 제거
+    // private final JwtTokenValidator jwtTokenValidator;
 
     @Value("${server.domain}")
     private String BASEURL;
@@ -64,13 +64,17 @@ public class JwtTokenIssuer {
         }
 
         String username = jwtTokenProvider.getRefreshTokenUsername(refreshToken);
-        validateRefreshTokenWithAccessToken(request, username);
+        // TODO: Auth/Resource 분리 - Access Token 검증 단계 제거 (Refresh Token 검증만으로 충분)
+        // validateRefreshTokenWithAccessToken(request, username);
 
         // userDetails 로딩/인증 세팅 제거 바로 재발급만 수행
 
         reissueToken(refreshToken, response);
     }
 
+    // TODO: Auth/Resource 분리 - Auth 서버가 Access Token 검증을 수행하는 것은 책임 경계 위반
+    // TODO: Refresh Token 검증만으로 충분함, Access Token 추가 검증은 중복 방어
+    /*
     //만료된 accessToken과 username을 비교
     private void validateRefreshTokenWithAccessToken(HttpServletRequest request, String username) {
         String accessToken = getAccessToken(request);
@@ -91,6 +95,7 @@ public class JwtTokenIssuer {
             throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Access Token의 username과 Refresh Token가 일치하지 않습니다.");
         }
     }
+    */
 
     /**
      * Refresh Token을 이용하여 Access Token, Refresh Token 재발급
@@ -109,8 +114,11 @@ public class JwtTokenIssuer {
 
     /**
      * Access Token, Refresh Token 생성
+     * TODO: Phase 2 - SecurityContext 의존성 제거 필요
+     * TODO: 재발급은 Access 만료 상태에서 수행되는 것이 일반적
      */
     private void createBothToken(HttpServletResponse response) {
+        // TODO: Phase 2에서 파라미터로 필요 정보 전달하는 방식으로 변경
         // 새로운 Access Token 발급
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
@@ -149,6 +157,7 @@ public class JwtTokenIssuer {
      * Access,Refresh Token 제거/ 서버측 RT 삭제
      */
     public void deleteToken(HttpServletResponse response) {
+        // TODO: Phase 2 - 로그아웃도 SecurityContext 의존성 제거 고려
         // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
         // SecurityContext에 Authentication 객체가 없는 경우는 없다.
         var authentication = SecurityContextHolder.getContext().getAuthentication();

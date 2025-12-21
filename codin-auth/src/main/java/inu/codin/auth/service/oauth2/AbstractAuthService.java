@@ -11,18 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+// TODO: Phase 3 - UserDetailsService 의존성 제거 필요
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 @RequiredArgsConstructor
 @Slf4j
 public abstract class AbstractAuthService {
     protected final JwtTokenIssuer jwtTokenIssuer;
+    // TODO: Phase 3 - Auth 서버가 User 도메인 서비스에 의존하는 것은 책임 경계 위반
     protected final UserDetailsService userDetailsService;
     protected final UserInternalAuthClient userInternalAuthClient;
 
     protected void issueJwtToken(String identifier, HttpServletResponse response) {
-        // TODO: Phase 2에서 codin-auth로 이동 예정
-        // 토큰 발급 기능은 Authorization Server에서 담당
+        // TODO: Phase 2 - SecurityContext 의존성 제거 필요
+        // TODO: Phase 3 - UserDetailsService 의존성 제거 필요
         jwtTokenIssuer.deleteToken(response);
          UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
          UsernamePasswordAuthenticationToken authToken =

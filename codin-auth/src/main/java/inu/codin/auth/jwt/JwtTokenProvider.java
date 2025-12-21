@@ -50,6 +50,8 @@ public class JwtTokenProvider {
         SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    // TODO: Phase 3 - CustomUserDetails 의존성 제거 필요
+    // TODO: Authentication 객체 대신 필요한 정보만 파라미터로 받도록 변경 필요
     public TokenDto createToken(Authentication authentication) {
         // 권한을 authorities에 담아서 String으로 변환
         String authorities = authentication.getAuthorities().stream()
@@ -57,6 +59,7 @@ public class JwtTokenProvider {
                 .reduce((auth1, auth2) -> auth1 + "," + auth2)
                 .orElse("");
 
+        // TODO: Phase 3에서 CustomUserDetails 의존성 제거
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String userId = userDetails.getId().toHexString();
 
