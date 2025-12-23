@@ -8,7 +8,6 @@ import inu.codin.auth.dto.SignUpAndLoginRequestDto;
 import inu.codin.auth.dto.user.UserProfileRequestDto;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -43,7 +42,6 @@ public class AuthCommonService extends AbstractAuthService {
     public void login(SignUpAndLoginRequestDto signUpAndLoginRequestDto, HttpServletResponse response) {
         AdminLoginMaterial adminLoginMaterial = userInternalAuthClient.getLoginMaterial(signUpAndLoginRequestDto.getEmail());
 
-        // auth 책임 : 비밀번호 검증
         if (passwordEncoder.matches(signUpAndLoginRequestDto.getPassword(), adminLoginMaterial.encodedPassword())) {
             issueJwtToken(adminLoginMaterial.toTokenDecision(), response);
         } else {
@@ -52,10 +50,7 @@ public class AuthCommonService extends AbstractAuthService {
     }
 
     private CompleteProfileResponse callUserCompleteProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage) {
-        CompleteProfileRequest request = new CompleteProfileRequest(
-                userProfileRequestDto.getEmail(), userProfileRequestDto.getNickname()
-        );
-        return userInternalAuthClient.completeProfile(request, userImage);
+        return userInternalAuthClient.completeProfile(userProfileRequestDto.getEmail(),userProfileRequestDto.getNickname(), userImage);
     }
 
 }

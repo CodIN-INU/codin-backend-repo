@@ -8,7 +8,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: "${baseUrl}/login/oauth2/code/google"
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
             scope:
               - email
@@ -16,7 +16,7 @@ spring:
           apple:
             client-id: ${APPLE_CLIENT_ID}
             client-secret: ${APPLE_CLIENT_SECRET}  # 동적으로 생성된 애플 client-secret
-            redirect-uri: "${baseUrl}/login/oauth2/code/apple"
+            redirect-uri: "{baseUrl}/login/oauth2/code/apple"
             authorization-grant-type: authorization_code
             clientAuthenticationMethod: POST
             clientName: Apple

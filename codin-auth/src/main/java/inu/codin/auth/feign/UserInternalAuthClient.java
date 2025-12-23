@@ -19,8 +19,9 @@ public interface UserInternalAuthClient {
 
     @PostMapping(value = "/complete-profile", consumes = "multipart/form-data")
     CompleteProfileResponse completeProfile(
-            @RequestPart("completeProfileRequest") CompleteProfileRequest completeProfileRequest,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestParam String email,
+            @RequestParam String nickname,
+            @RequestPart(value = "userImage", required = false) MultipartFile userImage
     );
 
     @GetMapping("/suspension-end-date")

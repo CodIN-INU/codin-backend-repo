@@ -21,12 +21,13 @@ public class InternalAuthController {
         return userOauthLoginDecisionService.decideOauthAction(request);
     }
 
-    @PostMapping(value = "/complete-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value="/complete-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CompleteProfileResponse completeProfile(
-            @RequestPart("data") CompleteProfileRequest data,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestParam String email,
+            @RequestParam String nickname,
+            @RequestPart(value = "userImage", required = false) MultipartFile userImage
     ) {
-        return userInternalService.completeProfile(data, image);
+        return userInternalService.completeProfile(email, nickname, userImage);
     }
 
     @GetMapping("/suspension-end-date")
@@ -37,5 +38,10 @@ public class InternalAuthController {
     @GetMapping("/adminLogin-material")
     public AdminLoginMaterialResponse getAdminLoginMaterial(@RequestParam("email") String email) {
         return userInternalService.getAdminLoginMaterial(email);
+    }
+
+    @GetMapping("/user-info")
+    public UserTokenInfoResponse getUserInfo(@RequestParam("email") String email) {
+        return userInternalService.getUserTokenInfo(email);
     }
 }

@@ -1,6 +1,5 @@
 package inu.codin.auth.service.oauth2;
 
-import inu.codin.auth.dto.user.TokenIssuanceDecision;
 import inu.codin.auth.dto.user.UserOAuthDecision;
 import inu.codin.auth.feign.UserInternalAuthClient;
 import inu.codin.auth.jwt.JwtTokenIssuer;

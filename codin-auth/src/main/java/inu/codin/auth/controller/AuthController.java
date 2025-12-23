@@ -45,7 +45,7 @@ public class AuthController {
 
     @GetMapping("/dev/google")
     public ResponseEntity<SingleResponse<?>> devGoogleLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/dev/oauth2/authorization/google");
+        response.sendRedirect("/oauth2/authorization/google");
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "google OAuth2 Login Redirect",null));
     }
@@ -66,7 +66,7 @@ public class AuthController {
 
     @Operation(summary = "회원 정보 입력 마무리")
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SingleResponse<?>> completeUserProfile(@RequestPart @Valid UserProfileRequestDto userProfileRequestDto,
+    public ResponseEntity<SingleResponse<?>> completeUserProfile(@RequestPart("userProfileRequestDto") @Valid UserProfileRequestDto userProfileRequestDto,
                                                                 @RequestPart(value = "userImage", required = false) MultipartFile userImage,
                                                                 HttpServletResponse response) {
         authCommonService.completeUserProfile(userProfileRequestDto, userImage, response);

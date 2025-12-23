@@ -1,9 +1,10 @@
 package inu.codin.codin.domain.user.internal.inbound;
 
+import inu.codin.codin.domain.user.exception.UserNotFoundException;
+import inu.codin.codin.domain.user.internal.inbound.dto.UserTokenInfoResponse;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 
-import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileRequest;
 import inu.codin.codin.domain.user.internal.inbound.dto.AdminLoginMaterialResponse;
 import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
@@ -27,33 +28,32 @@ public class UserInternalService {
     /**
      * USER 책임: 프로필 완성 (닉네임 중복 체크 + 이미지 업로드 + 활성화)
      */
-    public CompleteProfileResponse completeProfile(CompleteProfileRequest req, MultipartFile image) {
-
+    public CompleteProfileResponse completeProfile(String email, String nickname, MultipartFile userImage) {
         // 닉네임 중복 체크
-        boolean duplicated = userRepository.findByNicknameAndDeletedAtIsNull(req.nickname()).isPresent();
+        boolean duplicated = userRepository.findByNicknameAndDeletedAtIsNull(nickname).isPresent();
         if (duplicated) {
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
         // 비활성 사용자 조회
-        UserEntity user = userRepository.findByEmailAndDisabled(req.email())
+        UserEntity user = userRepository.findByEmailAndDisabled(email)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        log.info("[USER] completeProfile user found: email={}", req.email());
+        log.info("[USER] completeProfile user found: email={}", email);
 
         // 이미지 처리
         String imageUrl = null;
-        if (image != null && !image.isEmpty()) {
-            log.info("[USER] profile image upload start: email={}", req.email());
-            imageUrl = s3Service.handleImageUpload(java.util.List.of(image)).get(0);
-            log.info("[USER] profile image upload done: email={}, url={}", req.email(), imageUrl);
+        if (userImage != null && !userImage.isEmpty()) {
+            log.info("[USER] profile image upload start: email={}",email);
+            imageUrl = s3Service.handleImageUpload(java.util.List.of(userImage)).get(0);
+            log.info("[USER] profile image upload done: email={}, url={}", email, imageUrl);
         }
         if (imageUrl == null) {
             imageUrl = s3Service.getDefaultProfileImageUrl();
         }
 
         // 업데이트 + 활성화 + 저장
-        user.updateNickname(req.nickname());
+        user.updateNickname(nickname);
         user.updateProfileImageUrl(imageUrl);
         user.activation();
         userRepository.save(user);
@@ -93,6 +93,17 @@ public class UserInternalService {
             user.getPassword(),
             user.get_id().toString(),
             user.getRole().name()
+        );
+    }
+
+    public UserTokenInfoResponse getUserTokenInfo(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+        return new UserTokenInfoResponse(
+                user.getEmail(),
+                user.get_id().toString(),
+                user.getRole().name()
         );
     }
 }
