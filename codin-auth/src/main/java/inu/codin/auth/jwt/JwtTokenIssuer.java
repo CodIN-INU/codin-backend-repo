@@ -48,7 +48,6 @@ public class JwtTokenIssuer {
 
     /**
      * Refresh Token 재발급 시: Feign 통신을 통해 사용자 정보 조회 후 토큰 발급
-     * Phase 2/3: SecurityContext 의존성 제거 완료 (파라미터화)
      */
     public void createTokenForRefresh(String email, HttpServletResponse response) {
         // Feign 통신을 통해 사용자 정보 조회
@@ -73,39 +72,8 @@ public class JwtTokenIssuer {
             throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Refresh Token이 없습니다.");
         }
 
-        String username = jwtTokenProvider.getRefreshTokenUsername(refreshToken);
-        // TODO: Auth/Resource 분리 - Access Token 검증 단계 제거 (Refresh Token 검증만으로 충분)
-        // validateRefreshTokenWithAccessToken(request, username);
-
-        // userDetails 로딩/인증 세팅 제거 바로 재발급만 수행
-
         reissueToken(refreshToken, response);
     }
-
-    // TODO: Auth/Resource 분리 - Auth 서버가 Access Token 검증을 수행하는 것은 책임 경계 위반
-    // TODO: Refresh Token 검증만으로 충분함, Access Token 추가 검증은 중복 방어
-    /*
-    //만료된 accessToken과 username을 비교
-    private void validateRefreshTokenWithAccessToken(HttpServletRequest request, String username) {
-        String accessToken = getAccessToken(request);
-        String accessUsername;
-        try {
-            // codin-security의 JwtTokenValidator 사용
-            accessUsername = jwtTokenValidator.getUsername(accessToken);
-        } catch (ExpiredJwtException e) {
-            Claims expiredClaims = e.getClaims();
-            accessUsername = expiredClaims.getSubject();
-        } catch (Exception e) {
-            log.error("[validateRefreshTokenWithAccessToken] Access Token에서 사용자명 추출 실패: {}", e.getMessage());
-            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Access Token이 유효하지 않습니다.");
-        }
-        
-        if (!accessUsername.equals(username)) {
-            log.error("[reissueToken] Access Token의 username과 Refresh Token가 일치하지 않습니다.");
-            throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "Access Token의 username과 Refresh Token가 일치하지 않습니다.");
-        }
-    }
-    */
 
     /**
      * Refresh Token을 이용하여 Access Token, Refresh Token 재발급
@@ -128,18 +96,9 @@ public class JwtTokenIssuer {
 
     /**
      * Access Token, Refresh Token 생성
-     * Phase 2: SecurityContext 의존성 제거됨
      */
     private void createBothToken(String email, String userId, String authorities, HttpServletResponse response) {
-        // Phase 2: 파라미터로 필요 정보 전달하는 방식으로 변경됨
         JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(email, userId, authorities);
-
-    // TODO: Phase 2 - 기존 SecurityContext 의존 방식 (제거 예정)
-    /*
-    private void createBothToken(HttpServletResponse response) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtTokenProvider.TokenDto newToken = jwtTokenProvider.createToken(authentication);
-    */
 
         // Authorization 헤더에 Access Token 추가
         response.setHeader(ACCESS_TOKEN, ACCESS_TOKEN_PREFIX + newToken.getAccessToken());
@@ -175,9 +134,7 @@ public class JwtTokenIssuer {
      * Access,Refresh Token 제거/ 서버측 RT 삭제
      */
     public void deleteToken(HttpServletResponse response) {
-        // TODO: Phase 2 - 로그아웃도 SecurityContext 의존성 제거 고려
-        // 어차피 JwtAuthenticationFilter 단에서 토큰을 검증하여 인증을 처리하므로
-        // SecurityContext에 Authentication 객체가 없는 경우는 없다.
+        // TODO: 로그아웃도 SecurityContext 의존성 제거 고려
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getName()!=null){
             redisStorageService.deleteRefreshToken(authentication.getName());
@@ -220,15 +177,6 @@ public class JwtTokenIssuer {
         log.info("[deleteToken] Access/Refresh Cookie 삭제 완료");
     }
 
-    // 제거됨: setAuthentication(), getUserDetailsAndSetAuthentication(), getAccessToken()
-    // 이 기능들은 Resource Server(codin-security)의 역할
-    // Authorization Server는 토큰 발급/갱신/무효화만 담당
-    
-
-    private String getAccessToken(HttpServletRequest request) {
-        return jwtUtils.getAccessToken(request);
-    }
-
     public String getRefreshToken(HttpServletRequest request) {
         String refreshToken = jwtUtils.getRefreshToken(request);
         if (!jwtTokenProvider.validType(refreshToken, "refresh")) {
@@ -239,8 +187,8 @@ public class JwtTokenIssuer {
     }
 
     /**
-     * Phase 3: Feign 통신을 통한 사용자 정보 조회
-     * Auth 서버의 도메인 의존성 완전 분리
+     * Feign 통신을 통한 사용자 정보 조회
+     * Todo: Auth 서버의 도메인 의존성 완전 분리
      */
     private UserTokenInfo getUserTokenInfo(String email) {
         try {
