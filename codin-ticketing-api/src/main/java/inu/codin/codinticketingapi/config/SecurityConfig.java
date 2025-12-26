@@ -1,6 +1,6 @@
 //package inu.codin.codinticketingapi.config;
 //
-//import inu.codin.security.exception.CustomAccessDeniedHandler;
+//import inu.codin.security.handler.CustomAccessDeniedHandler;
 //import inu.codin.codinticketingapi.security.filter.SecurityExceptionHandlerFilter;
 //import inu.codin.security.filter.TokenValidationFilter;
 //

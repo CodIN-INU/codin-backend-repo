@@ -15,8 +15,9 @@ import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.domain.review.exception.ReviewErrorCode;
 import inu.codin.codin.domain.review.exception.ReviewException;
 import inu.codin.codin.domain.review.repository.ReviewRepository;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+
 import inu.codin.codin.global.infra.redis.config.RedisHealthChecker;
+import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class LikeService {
     }
 
     public Boolean isLiked(LikeType likeType, String id) {
-        String userId = SecurityUtils.getUserId();
+        String userId = SecurityUtil.getUserId();
         return likeFeignClient.isUserLiked(likeType, id, userId);
     }
 
@@ -106,7 +107,7 @@ public class LikeService {
     }
 
     public List<LikedResponseDto> getLiked(LikeType likeType) {
-        String userId = SecurityUtils.getUserId();
+        String userId = SecurityUtil.getUserId();
         return likeFeignClient.getLiked(likeType, userId);
     }
 }

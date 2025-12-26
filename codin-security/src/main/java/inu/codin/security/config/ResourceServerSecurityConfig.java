@@ -19,6 +19,7 @@ package inu.codin.security.config;
 
 import inu.codin.security.filter.ExceptionHandlerFilter;
 import inu.codin.security.filter.JwtAuthenticationFilter;
+import inu.codin.security.handler.CustomAccessDeniedHandler;
 import inu.codin.security.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,7 @@ public class ResourceServerSecurityConfig {
     private final JwtService jwtService;
     private final PermitAllProperties permitAllProperties;
     private final PublicApiProperties publicApiProperties;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Value("${server.domain:http://localhost:8080}")
     private String BASEURL;
@@ -109,7 +111,11 @@ public class ResourceServerSecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 // 예외 처리 필터 추가
-                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class);
+                .addFilterBefore(new ExceptionHandlerFilter(), LogoutFilter.class)
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.accessDeniedHandler(customAccessDeniedHandler)
+                );
+
         return http.build();
     }
 
