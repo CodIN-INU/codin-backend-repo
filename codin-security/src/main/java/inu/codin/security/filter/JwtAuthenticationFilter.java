@@ -56,10 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final boolean isPublicApi = publicApiProperties.getUrls().stream()
                 .anyMatch(url -> pathMatcher.match(url, requestURI));
 
-        if (isPermitAll) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if (isPermitAll) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         // 2. JWT 토큰 검증 및 인증 설정
         // 토큰 추출 자체를 JwtService 내부(TokenUtil.extractToken)로 통일
