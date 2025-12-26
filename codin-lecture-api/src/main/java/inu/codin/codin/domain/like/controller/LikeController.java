@@ -5,7 +5,7 @@ import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikeType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.service.LikeService;
-import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

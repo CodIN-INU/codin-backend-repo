@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.dto.response;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.info.entity.Lab;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

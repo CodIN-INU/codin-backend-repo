@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import inu.codin.codin.domain.elasticsearch.document.LectureDocument;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

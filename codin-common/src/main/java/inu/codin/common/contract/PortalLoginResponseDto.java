@@ -1,6 +1,6 @@
 package inu.codin.common.contract;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

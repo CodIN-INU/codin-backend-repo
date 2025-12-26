@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatroom.entity;
 
-import inu.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

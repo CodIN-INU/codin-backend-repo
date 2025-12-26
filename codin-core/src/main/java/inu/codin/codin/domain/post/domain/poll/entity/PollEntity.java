@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll.entity;
 
-import inu.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import lombok.AccessLevel;
 import lombok.Getter;

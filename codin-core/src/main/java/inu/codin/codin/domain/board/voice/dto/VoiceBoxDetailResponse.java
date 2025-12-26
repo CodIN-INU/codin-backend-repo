@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.board.voice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.board.voice.entity.VoiceEntity;
 import lombok.Builder;

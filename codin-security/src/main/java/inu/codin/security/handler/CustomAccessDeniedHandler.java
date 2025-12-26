@@ -1,7 +1,8 @@
-package inu.codin.security.exception;
+package inu.codin.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inu.codin.common.response.ExceptionResponse;
+import inu.codin.security.exception.SecurityErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

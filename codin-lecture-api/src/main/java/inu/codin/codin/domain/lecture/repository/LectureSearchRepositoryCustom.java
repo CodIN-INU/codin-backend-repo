@@ -4,7 +4,7 @@ import inu.codin.codin.domain.elasticsearch.document.LectureDocument;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

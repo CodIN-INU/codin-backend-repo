@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.entity;
 
-import inu.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
 import inu.codin.codin.domain.post.exception.PostErrorCode;
 import inu.codin.codin.domain.post.exception.PostException;

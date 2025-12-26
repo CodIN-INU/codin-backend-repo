@@ -4,7 +4,7 @@ import inu.codin.codin.domain.lecture.entity.Emotion;
 import inu.codin.codin.domain.lecture.entity.Lecture;
 import inu.codin.codin.domain.lecture.entity.LectureSchedule;
 import inu.codin.codin.domain.lecture.entity.Type;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 

@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.admin.controller;
 
 import inu.codin.codin.domain.admin.service.AdminService;
-import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

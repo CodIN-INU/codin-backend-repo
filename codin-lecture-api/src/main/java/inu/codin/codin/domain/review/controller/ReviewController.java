@@ -2,7 +2,7 @@ package inu.codin.codin.domain.review.controller;
 
 import inu.codin.codin.domain.review.dto.CreateReviewRequestDto;
 import inu.codin.codin.domain.review.service.ReviewService;
-import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

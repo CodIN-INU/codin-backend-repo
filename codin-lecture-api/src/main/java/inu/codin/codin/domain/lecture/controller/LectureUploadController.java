@@ -2,7 +2,7 @@ package inu.codin.codin.domain.lecture.controller;
 
 import inu.codin.codin.domain.lecture.dto.MetaMode;
 import inu.codin.codin.domain.lecture.service.LectureUploadService;
-import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

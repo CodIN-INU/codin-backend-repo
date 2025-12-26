@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.board.question.entity;
 
-import inu.codin.common.dto.BaseTimeEntity;
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.BaseTimeEntity;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.board.question.dto.request.QuestionCreateUpdateRequestDto;
 import lombok.AccessLevel;
 import lombok.Builder;

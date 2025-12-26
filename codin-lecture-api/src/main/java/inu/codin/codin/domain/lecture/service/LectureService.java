@@ -19,7 +19,7 @@ import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
 import inu.codin.codin.domain.like.dto.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.review.service.UserReviewStatsService;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

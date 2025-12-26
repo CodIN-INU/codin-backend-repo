@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.entity;
 
-import inu.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import inu.codin.codin.domain.info.dto.request.OfficeMemberCreateUpdateRequestDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.controller;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.common.response.ListResponse;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.dto.Option;

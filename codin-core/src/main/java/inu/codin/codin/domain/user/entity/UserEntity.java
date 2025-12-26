@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.user.entity;
 
 import inu.codin.common.contract.PortalLoginResponseDto;
-import inu.codin.common.dto.BaseTimeEntity;
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.BaseTimeEntity;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.notification.entity.NotificationPreference;
 import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import jakarta.validation.constraints.NotBlank;
@@ -107,7 +107,7 @@ public class UserEntity extends BaseTimeEntity {
 
     /**
      * studentId(학번), name(실제 이름), department(소속) 정보 업데이트
-     * @param updateRequest 유저 티켓팅 참여 정보 업데이트 request dto
+     * @param updateRequest 유저 티켓팅 참여 정보 업데이트 request entity
      */
     public void updateParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
         this.studentId = updateRequest.getStudentId();

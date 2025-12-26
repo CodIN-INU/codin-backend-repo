@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.notice.service;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.board.notice.dto.request.NoticeCreateUpdateRequestDTO;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.notice.controller;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.board.notice.dto.request.NoticeCreateUpdateRequestDTO;
 import inu.codin.codin.domain.board.notice.dto.response.NoticeDetailResponseDto;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.entity;
 
-import inu.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.lecture.dto.Emotion;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.exception;
 
-import inu.codin.codin.global.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
