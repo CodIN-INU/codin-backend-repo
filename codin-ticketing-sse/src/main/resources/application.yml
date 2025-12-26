@@ -14,23 +14,23 @@ spring:
   # Redis Configuration
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6380}
-      password: ${REDIS_PASSWORD:1234}
-      database: ${REDIS_DATABASE:0}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE}
 
 # Redis Stream Configuration
 redis:
   stream:
     stock:
-      key: ${STOCK_REDIS_STREAM_KEY:event-stock-stream}
-      group: ${STOCK_REDIS_STREAM_GROUP:event-stock-group}
-      consumer: ${STOCK_REDIS_STREAM_CONSUMER:event-stock-consumer}
+      key: ${STOCK_REDIS_STREAM_KEY}
+      group: ${STOCK_REDIS_STREAM_GROUP}
+      consumer: ${STOCK_REDIS_STREAM_CONSUMER}
 
 server:
   domain: https://codin.inu.ac.kr
   forward-headers-strategy: framework
-  port: ${SSE_SERVER_PORT:8084}
+  port: ${TICKETING_SSE_SERVER_PORT}
 
 # Swagger SpringDoc Configuration
 springdoc:

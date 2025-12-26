@@ -5,7 +5,7 @@ spring:
   application:
     name: codin-auth
   config:
-    import: optional:file:./.env[.properties], optional:file:./.env.auth[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
   profiles:
     active:
       local
@@ -36,9 +36,9 @@ server:
       force-response: true
       charset: UTF-8
       enabled: true
-  domain: ${SERVER_DOMAIN}
+  domain: ${AUTH_SERVER_DOMAIN}
   forward-headers-strategy: framework
-  port: ${SERVER_PORT}
+  port: ${AUTH_SERVER_PORT}
 
 springdoc:
   api-docs:

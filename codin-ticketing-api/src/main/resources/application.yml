@@ -11,18 +11,18 @@ spring:
 
   # MySQL Database Configuration
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ticketing}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-    username: ${MYSQL_USER:codin}
-    password: ${MYSQL_PASSWORD:codinpassword}
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${TICKETING_MYSQL_DATABASE}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # JPA Configuration
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
+      ddl-auto: ${JPA_DDL_AUTO}
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: ${JPA_SHOW_SQL:true}
+    show-sql: ${JPA_SHOW_SQL}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -36,26 +36,26 @@ spring:
   # Redis Configuration
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6380}
-      password: ${REDIS_PASSWORD:1234}
-      database: ${REDIS_DATABASE:0}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE}
 
 # Redis Stream Configuration
 redis:
   stream:
     stock:
-      key: ${STOCK_REDIS_STREAM_KEY:"event-stock-stream"}
+      key: ${STOCK_REDIS_STREAM_KEY}
 
 server:
-  domain: ${SERVER_DOMAIN}
+  domain: ${TICKETING_SERVER_DOMAIN}
   forward-headers-strategy: framework
-  port: ${SERVER_PORT}
+  port: ${TICKETING_SERVER_PORT}
 
 # Feign Main API Server URL
 user:
   client:
-    url: ${USER_CLIENT_URL:http://localhost:8080}
+    url: ${USER_CLIENT_URL}
 
 # Swagger SpringDoc Configuration
 springdoc:
