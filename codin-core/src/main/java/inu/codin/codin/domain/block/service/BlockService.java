@@ -84,12 +84,14 @@ public class BlockService {
      * @return 차단한 유저 목록 (빈 리스트가 제공될 수 있음)
      */
     public List<ObjectId> getBlockedUsers() {
-        ObjectId currentUserId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
-        if (currentUserId == null) {
+        //null
+        String currentUserIdStr = SecurityUtil.getCurrentUserIdOrNull();
+        if (currentUserIdStr == null) {
             return List.of();
         }
 
-        return blockRepository.findByUserId(toObjectId(SecurityUtil.getCurrentUserId()))
+        ObjectId currentUserId = toObjectId(currentUserIdStr);
+        return blockRepository.findByUserId(currentUserId)
                 .map(BlockEntity::getBlockedUsers)
                 .orElse(List.of());
     }

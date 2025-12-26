@@ -81,11 +81,11 @@ public class UserInternalService {
      */
     public AdminLoginMaterialResponse getAdminLoginMaterial(String email) {
         UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다."));
+                .orElseThrow(() -> new UserCreateFailException("아이디를 잘못 입력하였습니다."));
 
         if (user.getPassword() == null) {
             log.info("[USER] password is null: email={}", user.getEmail());
-            throw new UserCreateFailException("아이디 혹은 비밀번호를 잘못 입력하였습니다.");
+            throw new UserCreateFailException("비밀번호가 비어있습니다.");
         }
 
         return new AdminLoginMaterialResponse(

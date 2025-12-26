@@ -72,7 +72,12 @@ public class PostDtoAssembler {
      * PostEntity 리스트를 PostPageItemResponseDTO 리스트로 변환
      */
     public List<PostPageItemResponseDTO> toPageItemList(List<PostEntity> posts) {
-        ObjectId currentUserId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
+        String currentUserIdStr = SecurityUtil.getCurrentUserIdOrNull();
+
+        ObjectId currentUserId = (currentUserIdStr == null)
+                ? null
+                : toObjectId(currentUserIdStr);
+
         return posts.stream()
                 .map(post -> toPageItem(post, currentUserId))
                 .toList();

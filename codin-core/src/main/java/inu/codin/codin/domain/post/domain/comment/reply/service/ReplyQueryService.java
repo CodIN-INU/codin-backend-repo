@@ -107,11 +107,11 @@ public class ReplyQueryService {
     }
 
     public UserInfo getUserInfoAboutReply(ObjectId replyId) {
-        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
-
+        String userIdStr = SecurityUtil.getCurrentUserIdOrNull();
         boolean isLiked = false;
 
-        if (userId != null) {
+        if (userIdStr != null) {
+            ObjectId userId = toObjectId(userIdStr);
             isLiked = likeService.isLiked(LikeType.REPLY, replyId.toString(), userId);
         }
 

@@ -115,10 +115,10 @@ public class CommentQueryService {
 
 
     public UserInfo getUserInfoAboutComment(ObjectId commentId) {
-        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserIdOrNull());
-
+        String userIdStr = SecurityUtil.getCurrentUserIdOrNull();
         boolean isLiked = false;
-        if (userId != null) {
+        if (userIdStr != null) {
+            ObjectId userId = toObjectId(userIdStr);
             isLiked = likeService.isLiked(LikeType.COMMENT, commentId.toString(), userId);
         }
 
