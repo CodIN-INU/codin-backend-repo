@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -35,6 +32,15 @@ public class LectureUploadController {
         lectureUploadService.uploadNewSemesterLectures(file);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new SingleResponse<>(201, file.getOriginalFilename()+"의 강의 내역 업로드", null));
+
+    }
+
+    @GetMapping(value = "/upload-elasticsearch")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    public ResponseEntity<SingleResponse<?>> uploadNewSemesterLecturesToElasticsearch() {
+        lectureUploadService.uploadLecturesToElasticsearch();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new SingleResponse<>(201, "강의 내역 업로드", null));
 
     }
 
@@ -71,6 +77,4 @@ public class LectureUploadController {
                         null));
 
     }
-
-
 }

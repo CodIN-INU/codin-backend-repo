@@ -19,7 +19,7 @@ public class LectureDocumentConverter {
     public LectureDocument convertToDocument(Lecture lecture) {
         return LectureDocument.builder()
                 .id(lecture.getId())
-                .lectureNm(lecture.getLectureNm())
+                .lectureName(lecture.getLectureNm())
                 .grade(lecture.getGrade())
                 .credit(lecture.getCredit())
                 .professor(lecture.getProfessor())

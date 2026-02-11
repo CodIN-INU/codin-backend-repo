@@ -64,8 +64,7 @@ public class LectureService {
                 ));
 
         List<String> likeIdList = getLikeIdList(likeMap);
-
-        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, likeIdList, PageRequest.of(page, 10), like);
+        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLectureList(keyword, department, sortingOption, likeIdList, PageRequest.of(page, 10), like);
 
         return getLecturePageResponse(lecturePage, likeMap);
     }
@@ -84,7 +83,7 @@ public class LectureService {
 
         Emotion emotion = emotionService.getOrMakeEmotion(lecture);
 
-        lectureElasticService.incrementHits(lectureId);
+        lectureElasticService.incrementHit(lectureId);
 
         return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }

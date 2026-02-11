@@ -6,9 +6,13 @@ import inu.codin.codin.domain.elasticsearch.event.LectureDeletedEvent;
 import inu.codin.codin.domain.elasticsearch.event.LectureSavedEvent;
 import inu.codin.codin.domain.elasticsearch.repository.LectureElasticRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.io.IOException;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LectureIndexService {
@@ -28,7 +32,11 @@ public class LectureIndexService {
     @TransactionalEventListener(classes = {LectureSavedEvent.class})
     public void handleLectureSaved(LectureSavedEvent event) {
         LectureDocument document = lectureDocumentConverter.convertToDocument(event.getLecture());
-        lectureElasticRepository.save(document);
+        try {
+            lectureElasticRepository.saveLecture(document);
+        } catch (IOException e) {
+            log.error("강의 저장 실패, {}" , e.getMessage());
+        }
     }
 
     /**
@@ -38,6 +46,10 @@ public class LectureIndexService {
      */
     @TransactionalEventListener(classes = {LectureDeletedEvent.class})
     public void handleLectureDeleted(LectureDeletedEvent event) {
-        lectureElasticRepository.deleteById(event.lectureId());
+        try {
+            lectureElasticRepository.deleteLecture(event.lectureId());
+        } catch (IOException e) {
+            log.error("강의 삭제 실패, {}" , e.getMessage());
+        }
     }
 }
