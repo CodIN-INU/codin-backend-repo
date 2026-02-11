@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <style>
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        .chat-message {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .chat-message.right { text-align: right; color: blue; }
+        .chat-message.left { text-align: left; color: green; }
+        .unread-count {
+            font-size: 0.9em;
+            color: red;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<input type="text" id="messageInput" placeholder="메시지를 입력하세요" />
+<button id="sendButton">전송</button>
+
+<div id="messages"></div>
+
+<script>
+    // URL의 쿼리 파라미터에서 chatRoomId를 가져오기
+    function getChatRoomId() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('chatRoomId');
+    }
+
+    let chatRoomId = null;
+    let stompClient = null; // stompClient를 글로벌로 선언
+    let messageSubscription = null;  // 메시지 구독을 저장
+    let unreadSubscription = null;   // unread 구독을 저장
+
+    // 페이지가 로드될 때 chatRoomId를 콘솔에 출력
+    window.onload = function() {
+        chatRoomId = getChatRoomId();
+        console.log('Chat Room ID:', chatRoomId); // 예시로 콘솔에 출력
+
+        const socket = new SockJS('/ws-stomp');
+        stompClient = Stomp.over(socket);
+
+        // STOMP 연결 후 구독 시작
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            const headers = { 'chatRoomId': chatRoomId };
+
+            // 채팅 메시지 구독
+            messageSubscription = stompClient.subscribe('/queue/' + chatRoomId, function (message) {
+                const receivedMessage = JSON.parse(message.body);
+                displayMessage(receivedMessage.body.data);
+            }, { 'chatRoomId': chatRoomId });
+
+            // unread 개수 업데이트 구독
+            unreadSubscription = stompClient.subscribe('/queue/unread/' + chatRoomId, function (message) {
+                const unreadData = JSON.parse(message.body);  // {"unread": 0, "id": "123"}
+                updateUnreadCount(unreadData);
+            }, { 'chatRoomId': chatRoomId });
+        });
+    };
+
+    // 메시지 전송 버튼 이벤트
+    document.getElementById('sendButton').addEventListener('click', function () {
+        const contents = document.getElementById('messageInput').value.trim();
+        if (!contents) return;
+        const message = { type: "SEND", content: contents, contentType: "TEXT" };
+        stompClient.send("/pub/chats/" + chatRoomId, {}, JSON.stringify(message));
+        document.getElementById('messageInput').value = '';
+    });
+
+    // 메시지 화면 표시 함수
+    function displayMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+
+        messageElement.id = `chat-${message.id}`;
+        messageElement.classList.add('chat-message');
+        messageElement.classList.add(message.senderId === '6735b830c8a74973b3dbad47' ? 'right' : 'left');
+
+        const contentSpan = document.createElement('span');
+        contentSpan.textContent = message.content;
+
+        const unreadSpan = document.createElement('span');
+        unreadSpan.classList.add('unread-count');
+        unreadSpan.textContent = message.unread > 0 ? `(${message.unread})` : '';
+
+        messageElement.appendChild(contentSpan);
+        messageElement.appendChild(unreadSpan);
+
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // unread 개수 업데이트 함수
+    function updateUnreadCount(dataArray) {
+        dataArray.forEach(data => {
+            console.log(data);
+            const chattingId = data.id;
+            const unreadCount = parseInt(data.unread);
+            console.log(`Unread update - Chat ID: ${chattingId}, Count: ${unreadCount}`);
+
+            const chatElement = document.querySelector(`#chat-${chattingId} .unread-count`);
+            if (chatElement) {
+                chatElement.textContent = unreadCount > 0 ? `(${unreadCount})` : '';
+            }
+        });
+    }
+
+    window.onbeforeunload = function() {
+        if (messageSubscription) {
+            messageSubscription.unsubscribe();  // 메시지 구독 취소
+        }
+        if (unreadSubscription) {
+            unreadSubscription.unsubscribe();   // unread 구독 취소
+        }
+        if (stompClient) {
+            stompClient.disconnect();  // STOMP 연결 종료
+        }
+    };
+</script>
+
+</body>
+</html>

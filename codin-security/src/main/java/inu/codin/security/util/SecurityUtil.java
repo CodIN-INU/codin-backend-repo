@@ -1,5 +1,6 @@
 package inu.codin.security.util;
 
+import inu.codin.security.entity.UserRole;
 import inu.codin.security.exception.SecurityException;
 import inu.codin.security.exception.JwtException;
 import inu.codin.security.exception.SecurityErrorCode;
@@ -55,15 +56,17 @@ public class SecurityUtil {
     /**
      * 현재 인증된 사용자의 역할을 반환
      */
-    public static String getCurrentUserRole() {
+    public static UserRole getCurrentUserRole() {
         UserDetails userDetails = getCurrentUserDetails();
-        
+
         if (userDetails instanceof TokenUserDetails tokenUserDetails) {
-            return tokenUserDetails.getRole();
+            return UserRole.valueOf(tokenUserDetails.getRole());
         }
-        
-        // 기본적으로 첫 번째 권한 반환
-        return userDetails.getAuthorities().iterator().next().getAuthority();
+
+        // 기본적으로 첫 번째 권한에서 ROLE_ 접두사 제거 후 변환
+        String authority = userDetails.getAuthorities().iterator().next().getAuthority();
+        String role = authority.startsWith("ROLE_") ? authority.substring(5) : authority;
+        return UserRole.valueOf(role);
     }
 
     /**
@@ -185,13 +188,10 @@ public class SecurityUtil {
     /**
      * 현재 사용자가 특정 권한을 가지고 있는지 확인
      */
-    public static boolean hasRole(String role) {
+    public static boolean hasRole(UserRole role) {
         try {
-            String currentRole = getCurrentUserRole();
-            String withPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-
-            return role.equals(currentRole) || withPrefix.equals(currentRole);
-        } catch (SecurityException e) {
+            return role == getCurrentUserRole();
+        } catch (Exception e) {
             return false;
         }
     }

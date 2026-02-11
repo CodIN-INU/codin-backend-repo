@@ -37,7 +37,7 @@ public class SseController {
     public ResponseEntity<?> disconnect(
             @Parameter(description = "구독 취소할 이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
-        sseService.closeConnection(eventId, SecurityUtil.getUserId());
+        sseService.closeConnection(eventId, SecurityUtil.getCurrentUserIdOrNull());
         return ResponseEntity.ok().build();
     }
 

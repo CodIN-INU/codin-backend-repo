@@ -82,10 +82,10 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createActivePollEntity();
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         given(pollVoteRepository.save(any())).willReturn(createPollVoteEntity());
         given(pollRepository.incOption(eq(poll.get_id()), eq(0))).willReturn(1L);
@@ -148,10 +148,10 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createActivePollEntity();
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(true);
         
         // When & Then
@@ -167,10 +167,10 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createSingleChoicePollEntity(); // 단일 선택만 허용
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         
         // When & Then
@@ -186,10 +186,10 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createPollEntityWithOptions(); // 2개 선택지만 있음
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.existsByPollIdAndUserId(poll.get_id(), userId)).willReturn(false);
         
         // When & Then
@@ -203,13 +203,13 @@ class PollCommandServiceTest {
         String postId = new ObjectId().toString();
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
-        
+
         PollEntity poll = createActivePollEntity();
         PollVoteEntity vote = createPollVoteEntity();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)).willReturn(Optional.of(vote));
         given(pollRepository.dcrOptionIfPositive(eq(poll.get_id()), eq(0))).willReturn(1L);
 
@@ -228,10 +228,10 @@ class PollCommandServiceTest {
         PostEntity post = createPostEntity();
         PollEntity poll = createPollEntityWithOptions();
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
         given(pollRepository.findByPostId(post.get_id())).willReturn(Optional.of(poll));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(pollVoteRepository.findByPollIdAndUserId(poll.get_id(), userId)).willReturn(Optional.empty());
         
         // When & Then

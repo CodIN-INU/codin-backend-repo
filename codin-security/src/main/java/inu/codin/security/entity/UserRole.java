@@ -1,4 +1,4 @@
-package inu.codin.codin.domain.user.entity;
+package inu.codin.security.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

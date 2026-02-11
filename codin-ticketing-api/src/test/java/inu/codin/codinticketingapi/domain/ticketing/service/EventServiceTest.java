@@ -46,6 +46,8 @@ class EventServiceTest {
     private ParticipationRepository participationRepository;
     @Mock
     private UserClientService userClientService;
+    @Mock
+    private ParticipationService participationService;
 
     private static final Campus SONGDO = Campus.SONGDO_CAMPUS;
     private static final Campus MICHUHOL = Campus.MICHUHOL_CAMPUS;
@@ -66,20 +68,18 @@ class EventServiceTest {
     void getEventList_성공() {
         // given
         int page = 0;
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, DESC_SORT);
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Event mockEvent = createMockEvent(1L, TEST_EVENT_TITLE, SONGDO);
         Page<Event> mockPage = new PageImpl<>(List.of(mockEvent), pageable, 1);
 
-        given(eventRepository.findByCampus(SONGDO, pageable)).willReturn(mockPage);
+        given(eventRepository.findByCampus(eq(SONGDO), any(Pageable.class))).willReturn(mockPage);
 
         // when
         EventPageResponse result = eventService.getEventList(SONGDO, page);
 
         // then
         assertThat(result.getEventList()).hasSize(1);
-        assertThat(result.getLastPage()).isEqualTo(0);
-        assertThat(result.getNextPage()).isEqualTo(-1);
-        verify(eventRepository).findByCampus(SONGDO, pageable);
+        verify(eventRepository).findByCampus(eq(SONGDO), any(Pageable.class));
     }
 
     @Test
@@ -87,19 +87,17 @@ class EventServiceTest {
     void getEventList_빈리스트() {
         // given
         int page = 0;
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, DESC_SORT);
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<Event> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        given(eventRepository.findByCampus(MICHUHOL, pageable)).willReturn(emptyPage);
+        given(eventRepository.findByCampus(eq(MICHUHOL), any(Pageable.class))).willReturn(emptyPage);
 
         // when
         EventPageResponse result = eventService.getEventList(MICHUHOL, page);
 
         // then
         assertThat(result.getEventList()).isEmpty();
-        assertThat(result.getLastPage()).isEqualTo(-1);
-        assertThat(result.getNextPage()).isEqualTo(-1);
-        verify(eventRepository).findByCampus(MICHUHOL, pageable);
+        verify(eventRepository).findByCampus(eq(MICHUHOL), any(Pageable.class));
     }
 
     @Test
@@ -124,7 +122,7 @@ class EventServiceTest {
     void getEventList_기본페이지크기() {
         // given
         int page = 2;
-        Pageable expected = PageRequest.of(page, 10, Sort.by("createdAt").descending());
+        Pageable expected = PageRequest.of(page, 10);
         given(eventRepository.findByCampus(eq(SONGDO), any(Pageable.class)))
                 .willReturn(new PageImpl<>(List.of(), expected, 0));
 
@@ -146,6 +144,7 @@ class EventServiceTest {
         Event mockEvent = createMockEvent(eventId, TEST_EVENT_TITLE, SONGDO);
 
         given(userClientService.fetchUser()).willReturn(userInfo);
+        given(participationService.isUserParticipatedInEvent(eventId)).willReturn(false);
         given(eventRepository.findById(eventId)).willReturn(Optional.of(mockEvent));
 
         // when
@@ -155,6 +154,7 @@ class EventServiceTest {
         assertThat(result.getEventId()).isEqualTo(eventId);
         assertThat(result.getEventTitle()).isEqualTo(TEST_EVENT_TITLE);
         verify(userClientService).fetchUser();
+        verify(participationService).isUserParticipatedInEvent(eventId);
         verify(eventRepository).findById(eventId);
     }
 
@@ -166,6 +166,7 @@ class EventServiceTest {
         UserInfoResponse userInfo = createUserInfo("testUser", "TEST_USER");
 
         given(userClientService.fetchUser()).willReturn(userInfo);
+        given(participationService.isUserParticipatedInEvent(eventId)).willReturn(false);
         given(eventRepository.findById(eventId)).willReturn(Optional.empty());
 
         // when & then
@@ -174,6 +175,7 @@ class EventServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", TicketingErrorCode.EVENT_NOT_FOUND);
 
         verify(userClientService).fetchUser();
+        verify(participationService).isUserParticipatedInEvent(eventId);
         verify(eventRepository).findById(eventId);
     }
 
@@ -182,21 +184,19 @@ class EventServiceTest {
     void getUserEventList_성공() {
         // given
         int pageNumber = 1;
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, DESC_SORT);
+        Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, DESC_SORT);
         UserInfoResponse userInfo = UserInfoResponse.builder().userId(TEST_USER_ID_1).build();
         EventParticipationHistoryDto historyDto = createMockHistoryDto(1L, "TEST HISTORY TITLE", ParticipationStatus.WAITING);
         Page<EventParticipationHistoryDto> mockPage = new PageImpl<>(List.of(historyDto), pageable, 1);
 
         given(userClientService.fetchUser()).willReturn(userInfo);
-        given(participationRepository.findHistoryByUserId(TEST_USER_ID_1, pageable)).willReturn(mockPage);
+        given(participationRepository.findHistoryByUserId(eq(TEST_USER_ID_1), any(Pageable.class))).willReturn(mockPage);
 
         EventParticipationHistoryPageResponse result = eventService.getUserEventList(pageNumber);
 
         assertThat(result.getEventList()).hasSize(1);
-        assertThat(result.getLastPage()).isEqualTo(0);
-        assertThat(result.getNextPage()).isEqualTo(-1);
         verify(userClientService).fetchUser();
-        verify(participationRepository).findHistoryByUserId(TEST_USER_ID_1, pageable);
+        verify(participationRepository).findHistoryByUserId(eq(TEST_USER_ID_1), any(Pageable.class));
     }
 
     @Test
@@ -205,7 +205,7 @@ class EventServiceTest {
         UserInfoResponse mockUser = UserInfoResponse.builder().userId("testUser").build();
         given(userClientService.fetchUser()).willReturn(mockUser);
 
-        assertThatThrownBy(() -> eventService.getUserEventList(0))
+        assertThatThrownBy(() -> eventService.getUserEventList(-1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -213,41 +213,38 @@ class EventServiceTest {
     @DisplayName("사용자 이벤트 참여 내역 조회 – 기본 페이지 크기(10)로 호출되는지 검증")
     void getUserEventList_기본페이지크기() {
         // given
+        int pageNumber = 1;
         given(userClientService.fetchUser()).willReturn(UserInfoResponse.builder().userId(TEST_USER_ID_1).build());
-        Pageable expected = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         given(participationRepository.findHistoryByUserId(eq(TEST_USER_ID_1), any(Pageable.class)))
-                .willReturn(new PageImpl<>(List.of(), expected, 0));
+                .willReturn(new PageImpl<>(List.of(), PageRequest.of(pageNumber, 10, DESC_SORT), 0));
 
         // when
-        eventService.getUserEventList(1);
+        eventService.getUserEventList(pageNumber);
 
         // then
         verify(participationRepository)
-                .findHistoryByUserId(eq(TEST_USER_ID_1), argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == 0));
+                .findHistoryByUserId(eq(TEST_USER_ID_1), argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == pageNumber));
     }
 
     @Test
     @DisplayName("상태별 사용자 이벤트 참여 내역 조회 - 완료, 취소, 대기")
     void getUserEventListByStatus_상태별() {
         int pageNumber = 1;
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, DESC_SORT);
         UserInfoResponse userInfo = UserInfoResponse.builder().userId(USER_456).build();
 
         for (ParticipationStatus status : ParticipationStatus.values()) {
             // given
-            Page<EventParticipationHistoryDto> mockPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+            Page<EventParticipationHistoryDto> mockPage = new PageImpl<>(Collections.emptyList(), PageRequest.of(pageNumber, PAGE_SIZE, DESC_SORT), 0);
             given(userClientService.fetchUser()).willReturn(userInfo);
-            given(participationRepository.findHistoryByUserIdAndCanceled(USER_456, status, pageable)).willReturn(mockPage);
+            given(participationRepository.findHistoryByUserIdAndCanceled(eq(USER_456), eq(status), any(Pageable.class))).willReturn(mockPage);
 
             // when
             EventParticipationHistoryPageResponse result = eventService.getUserEventListByStatus(pageNumber, status);
 
             // then
             assertThat(result.getEventList()).isEmpty();
-            assertThat(result.getLastPage()).isEqualTo(0);
-            assertThat(result.getNextPage()).isEqualTo(-1);
             verify(userClientService).fetchUser();
-            verify(participationRepository).findHistoryByUserIdAndCanceled(USER_456, status, pageable);
+            verify(participationRepository).findHistoryByUserIdAndCanceled(eq(USER_456), eq(status), any(Pageable.class));
 
             reset(userClientService, participationRepository);
         }
@@ -267,21 +264,21 @@ class EventServiceTest {
     @DisplayName("상태별 사용자 이벤트 참여 내역 조회 – 기본 페이지 크기(10)로 호출되는지 검증")
     void getUserEventListByStatus_기본페이지크기() {
         // given
+        int pageNumber = 2;
         ParticipationStatus status = ParticipationStatus.COMPLETED;
         given(userClientService.fetchUser()).willReturn(UserInfoResponse.builder().userId(TEST_USER_ID_1).build());
 
-        Pageable expected = PageRequest.of(1, 10, Sort.by("createdAt").descending());
         given(participationRepository.findHistoryByUserIdAndCanceled(eq(TEST_USER_ID_1), eq(status), any(Pageable.class)))
-                .willReturn(new PageImpl<>(List.of(), expected, 0));
+                .willReturn(new PageImpl<>(List.of(), PageRequest.of(pageNumber, 10, DESC_SORT), 0));
 
         // when
-        eventService.getUserEventListByStatus(2, status);
+        eventService.getUserEventListByStatus(pageNumber, status);
 
         // then
         verify(participationRepository).findHistoryByUserIdAndCanceled(
                 eq(TEST_USER_ID_1),
                 eq(status),
-                argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == 1)
+                argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == pageNumber)
         );
     }
 

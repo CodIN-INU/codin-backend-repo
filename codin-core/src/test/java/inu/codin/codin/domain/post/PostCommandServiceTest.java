@@ -11,7 +11,7 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.security.OwnershipPolicy;
 import inu.codin.codin.domain.post.service.PostCommandService;
 import inu.codin.codin.domain.post.service.PostInteractionService;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,8 +52,8 @@ class PostCommandServiceTest {
         // Given
         PostCreateRequestDTO dto = createPostCreateRequestDTO("제목", "내용", true, PostCategory.COMMUNICATION);
         List<MultipartFile> images = new ArrayList<>();
-        ObjectId userId = new ObjectId();
-        
+        String userId = new ObjectId().toHexString();
+
         given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postInteractionService.handleImageUpload(any())).willReturn(new ArrayList<>());
@@ -73,8 +73,8 @@ class PostCommandServiceTest {
         // Given
         PostCreateRequestDTO dto = createPostCreateRequestDTO("제목", "내용", true, PostCategory.EXTRACURRICULAR);
         List<MultipartFile> images = new ArrayList<>();
-        ObjectId userId = new ObjectId();
-        
+        String userId = new ObjectId().toHexString();
+
         given(SecurityUtil.getCurrentUserId()).willReturn(userId);
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.USER);
         
@@ -94,7 +94,7 @@ class PostCommandServiceTest {
         List<String> imageUrls = Arrays.asList("image1.jpg", "image2.jpg");
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postInteractionService.handleImageUpload(any())).willReturn(imageUrls);
         given(postRepository.save(any())).willReturn(post);
@@ -112,7 +112,7 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
@@ -129,7 +129,7 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
@@ -145,7 +145,7 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         given(postRepository.save(any())).willReturn(post);
         
@@ -162,7 +162,7 @@ class PostCommandServiceTest {
         PostEntity post = createPostEntity();
 
         given(ownershipPolicy.assertPostOwner(any(ObjectId.class))).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(SecurityUtil.getCurrentUserRole()).willReturn(UserRole.ADMIN);
         doNothing().when(postInteractionService).deletePostImageInternal(any(), any());
         

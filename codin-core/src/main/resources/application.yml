@@ -5,10 +5,10 @@ spring:
   application:
     name: codin-core
   config:
-    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.core[.properties]
   profiles:
     active:
-      local
+      local, prod
     include: jwt, aws, email, oauth
   servlet:
     multipart:
@@ -36,9 +36,9 @@ server:
       force-response: true
       charset: UTF-8
       enabled: true
-  domain: ${SERVER_DOMAIN}
+  domain: ${CORE_SERVER_DOMAIN}
   forward-headers-strategy: framework
-  port: ${SERVER_PORT}
+  port: ${CORE_SERVER_PORT}
 
 springdoc:
   api-docs:

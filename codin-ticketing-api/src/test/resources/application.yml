@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: codin-ticketing-api
+
+  profiles:
+    active: test
+
+  # Disable env file imports for test
+  config:
+    import: ""
+
+  jwt:
+    secret: test-jwt-secret-key-for-unit-tests-must-be-long-enough
+
+  # H2 in-memory database for tests (MySQL compatibility mode)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Redis dummy config (values for @Value resolution in RedisConfig)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      database: 0
+
+  # Quartz - use in-memory store for tests
+  quartz:
+    job-store-type: memory
+
+  # Exclude auto-configurations that require external services
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+# Redis Stream Configuration
+redis:
+  stream:
+    stock:
+      key: test-stock-stream-key
+
+server:
+  port: 0
+  domain: http://localhost:8080
+  forward-headers-strategy: framework
+
+# Feign client URL
+user:
+  client:
+    url: http://localhost:8081
+
+# S3 Configuration (dummy values for test)
+cloud:
+  aws:
+    s3:
+      bucket: test-bucket
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      access-key: test-access-key
+      secret-key: test-secret-key
+
+# Security permit-all for tests
+security:
+  permit-all:
+    urls:
+      - "/**"
+  public-api:
+    urls: []
+
+logging:
+  level:
+    root: warn

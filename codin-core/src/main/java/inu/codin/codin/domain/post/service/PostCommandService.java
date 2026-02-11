@@ -13,7 +13,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.security.OwnershipPolicy;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -189,7 +189,7 @@ public class PostCommandService {
     }
 
     private boolean isPrivileged() {
-        UserRole role = UserRole.valueOf(SecurityUtil.getCurrentUserRole());
+        UserRole role = SecurityUtil.getCurrentUserRole();
         return role == UserRole.ADMIN || role == UserRole.MANAGER;
     }
 

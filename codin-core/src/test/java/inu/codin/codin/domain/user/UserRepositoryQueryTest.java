@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.user;
 
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

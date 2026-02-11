@@ -73,7 +73,7 @@ class ReplyQueryServiceTest {
         given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(3);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(likeService.isLiked(eq(LikeType.REPLY), any(),(ObjectId) any())).willReturn(false);
         
         // When
@@ -121,7 +121,7 @@ class ReplyQueryServiceTest {
         given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
         given(postQueryService.getUserAnonymousNumber(postAnonymous, userId)).willReturn(3); // 익명 번호
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(2);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(likeService.isLiked(eq(LikeType.REPLY), any(),(ObjectId) any())).willReturn(true);
         
         // When
@@ -168,13 +168,13 @@ class ReplyQueryServiceTest {
         // Given
         ObjectId replyId = new ObjectId();
         ObjectId userId = new ObjectId();
-        
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(likeService.isLiked(LikeType.REPLY, replyId.toString(), userId)).willReturn(true);
-        
+
         // When
         UserInfo result = replyQueryService.getUserInfoAboutReply(replyId);
-        
+
         // Then
         assertThat(result).isNotNull();
         verify(likeService).isLiked(LikeType.REPLY, replyId.toString(), userId);
@@ -185,13 +185,13 @@ class ReplyQueryServiceTest {
         // Given
         ObjectId replyId = new ObjectId();
         ObjectId userId = new ObjectId();
-        
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(likeService.isLiked(LikeType.REPLY, replyId.toString(), userId)).willReturn(false);
-        
+
         // When
         UserInfo result = replyQueryService.getUserInfoAboutReply(replyId);
-        
+
         // Then
         assertThat(result).isNotNull();
         verify(likeService).isLiked(LikeType.REPLY, replyId.toString(), userId);
@@ -219,7 +219,7 @@ class ReplyQueryServiceTest {
         given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
         given(postQueryService.getUserAnonymousNumber(any(), any())).willReturn(1);
         given(likeService.getLikeCount(eq(LikeType.REPLY), any())).willReturn(0);
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(likeService.isLiked(eq(LikeType.REPLY), any(),(ObjectId) any())).willReturn(false);
         
         // When

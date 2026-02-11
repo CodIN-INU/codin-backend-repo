@@ -1,12 +1,13 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.common.util.MultipartJackson2HttpMessageConverter;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.*;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.service.EventService;
 import inu.codin.codinticketingapi.domain.ticketing.service.EventStockProducerService;
-import inu.codin.codinticketingapi.security.jwt.TokenUserDetails;
+import inu.codin.security.jwt.TokenUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class EventControllerTest {
 
     @MockitoBean
     private EventStockProducerService eventStockProducerService;
+
+    @MockitoBean
+    private MultipartJackson2HttpMessageConverter multipartJackson2HttpMessageConverter;
 
     @BeforeEach
     void setUp() {

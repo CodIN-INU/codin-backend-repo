@@ -21,6 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -30,6 +31,7 @@ import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
+@Profile("!test")
 public class ElasticsearchConfig {
     @Value("${SPRING_ELASTICSEARCH_USERNAME}")
     private String username;

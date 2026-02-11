@@ -160,7 +160,7 @@ class PostDtoAssemblerTest {
         List<PostEntity> posts = Arrays.asList(post1, post2);
         UserEntity user = createUserEntity();
 
-        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
         given(likeService.getLikeCount(any(), any())).willReturn(0);

@@ -3,7 +3,7 @@ package inu.codin.codin.domain.user.internal.inbound;
 import inu.codin.codin.domain.user.internal.inbound.dto.OauthDecisionRequest;
 import inu.codin.codin.domain.user.internal.inbound.dto.OauthDecisionResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;

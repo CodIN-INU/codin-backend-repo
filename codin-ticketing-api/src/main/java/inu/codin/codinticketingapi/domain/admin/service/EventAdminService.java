@@ -24,6 +24,7 @@ import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 
+import inu.codin.security.entity.UserRole;
 import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -229,8 +230,8 @@ public class EventAdminService {
     }
 
     private void validationEvent(Event event, String userId) {
-        boolean isAdmin = SecurityUtil.hasRole("ADMIN");
-        boolean isManager = SecurityUtil.hasRole("MANAGER");
+        boolean isAdmin = SecurityUtil.hasRole(UserRole.ADMIN);
+        boolean isManager = SecurityUtil.hasRole(UserRole.MANAGER);
         boolean isOwner = event.getUserId().equals(userId);
 
         // 관리자이거나 매니저이면서 이벤트 생성자일 경우에만 수정 가능

@@ -1,0 +1,6 @@
+# 이름 : application-prod.yml
+
+security:
+  #공개 API
+  public-api:
+    urls:

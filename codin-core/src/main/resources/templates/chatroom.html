@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <style>
+        .chat-room {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .unread-count {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h2>채팅방 목록</h2>
+<div id="chatRoomList"></div>
+
+<script>
+    const socket = new SockJS('/ws-stomp');
+    const stompClient = Stomp.over(socket);
+
+    function fetchChatRooms() {
+        fetch('http://localhost:8080/chatroom') // Spring Boot에서 채팅방 리스트를 반환하는 엔드포인트 호출
+            .then(response => response.json())
+            .then(chatRooms => {
+                const chatRoomList = document.getElementById('chatRoomList');
+                chatRoomList.innerHTML = '';
+                console.log(chatRooms);
+                chatRooms.dataList.forEach(room => {
+                    const roomDiv = document.createElement('div');
+                    roomDiv.classList.add('chat-room');
+                    roomDiv.dataset.chatRoomId = room.chatRoomId;
+                    roomDiv.innerHTML = `
+                            <div>
+                                <strong>${room.roomName}</strong><br>
+                                <small>${room.lastMessage || '메시지가 없습니다.'}</small>
+                            </div>
+                            <div>
+                                <span class="unread-count" id="unread-${room.chatRoomId}">${room.unread > 0 ? `(${room.unread})` : ''}</span>
+                                <br>
+                                <small>${room.currentMessageDate || ''}</small>
+                            </div>
+                        `;
+                    roomDiv.addEventListener('click', () => {
+                        window.location.href = `/chat?chatRoomId=${room.chatRoomId}`;
+                    });
+                    chatRoomList.appendChild(roomDiv);
+                });
+            })
+            .catch(error => console.error('채팅방 목록을 불러오는 중 오류 발생:', error));
+    }
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe(`/user/queue/chatroom/unread`, function (message) {
+            const data = JSON.parse(message.body);
+            const chatRoomId = data.chatRoomId;
+            const unreadElement = document.getElementById(`unread-${chatRoomId}`);
+            const lastMessageElement = document.getElementById(`lastMessage-${chatRoomId}`);
+
+            if (unreadElement) {
+                unreadElement.textContent = data.unread > 0 ? `(${data.unread})` : '';
+            }
+
+            if (lastMessageElement) {
+                lastMessageElement.textContent = data.lastMessage || '메시지가 없습니다.';
+            }
+
+            // 채팅방 목록에서 해당 채팅방을 맨 위로 올리기
+            const chatRoomDiv = document.querySelector(`[data-chat-room-id='${chatRoomId}']`);
+            if (chatRoomDiv) {
+                const chatRoomList = document.getElementById('chatRoomList');
+                chatRoomList.prepend(chatRoomDiv); // 채팅방을 맨 위로 이동
+            }
+        });
+    });
+
+    fetchChatRooms();
+</script>
+</body>
+</html>

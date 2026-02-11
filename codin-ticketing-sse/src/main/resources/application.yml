@@ -28,7 +28,7 @@ redis:
       consumer: ${STOCK_REDIS_STREAM_CONSUMER}
 
 server:
-  domain: https://codin.inu.ac.kr
+  domain: ${TICKETING_SSE_SERVER_DOMAIN}
   forward-headers-strategy: framework
   port: ${TICKETING_SSE_SERVER_PORT}
 

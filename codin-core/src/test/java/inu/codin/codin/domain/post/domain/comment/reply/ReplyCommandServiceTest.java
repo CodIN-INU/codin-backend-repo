@@ -59,10 +59,10 @@ class ReplyCommandServiceTest {
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
         ReplyCommentEntity reply = createReplyEntity();
-        
+
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -91,10 +91,10 @@ class ReplyCommandServiceTest {
                 .postCategory(PostCategory.COMMUNICATION)
                 .build();
         setIdField(post, new ObjectId());
-        
+
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -116,8 +116,8 @@ class ReplyCommandServiceTest {
         String commentId = new ObjectId().toString();
         ReplyCreateRequestDTO dto = createReplyCreateRequestDTO("대댓글 내용", false);
         ObjectId userId = new ObjectId();
-        ObjectId postOwner = new ObjectId(); // 다른 사용자
-        ObjectId commentOwner = new ObjectId(); // 댓글 작성자
+        ObjectId postOwner = new ObjectId();
+        ObjectId commentOwner = new ObjectId();
         CommentEntity comment = CommentEntity.builder()
                 .postId(new ObjectId())
                 .userId(commentOwner)
@@ -133,7 +133,7 @@ class ReplyCommandServiceTest {
         
         given(commentQueryService.findCommentById(any())).willReturn(comment);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(replyCommentRepository.save(any())).willAnswer(inv -> {
             ReplyCommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -142,7 +142,7 @@ class ReplyCommandServiceTest {
         doNothing().when(postCommandService).handleCommentCreation(any(), any());
         doNothing().when(bestService).applyBestScore(any());
         doNothing().when(notificationService).sendNotificationMessageByReply(any(), any(), any(), any());
-        
+
         // When
         replyCommandService.addReply(commentId, dto);
         
@@ -177,7 +177,7 @@ class ReplyCommandServiceTest {
         ReplyCommentEntity reply = createReplyEntity();
         CommentEntity comment = createCommentEntity();
         PostEntity post = createPostEntity();
-        ObjectId userId = reply.getUserId();
+        String userId = reply.getUserId().toHexString();
 
         given(ownershipPolicy.assertReplyOwner(any(ObjectId.class))).willReturn(reply);
         doNothing().when(SecurityUtil.class);

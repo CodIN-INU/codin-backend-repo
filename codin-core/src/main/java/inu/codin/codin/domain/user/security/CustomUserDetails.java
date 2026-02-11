@@ -2,7 +2,7 @@ package inu.codin.codin.domain.user.security;
 
 import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import inu.codin.codin.domain.user.entity.UserStatus;
 import lombok.Builder;
 import lombok.Getter;

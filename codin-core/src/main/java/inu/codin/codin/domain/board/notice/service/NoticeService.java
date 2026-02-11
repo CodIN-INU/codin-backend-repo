@@ -16,7 +16,7 @@ import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.entity.PostStatus;
 import inu.codin.codin.domain.scrap.service.ScrapService;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import lombok.RequiredArgsConstructor;

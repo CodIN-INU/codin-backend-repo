@@ -104,15 +104,15 @@ class PostQueryServiceTest {
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
         PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
-        
+
         given(postRepository.findByIdAndNotDeleted(any())).willReturn(Optional.of(post));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
-        
+
         // When
         PostPageItemResponseDTO response = postQueryService.getPostWithDetail(postId);
-        
+
         // Then
         assertThat(response).isNotNull();
         verify(postInteractionService).increaseHits(post, userId);
@@ -138,15 +138,15 @@ class PostQueryServiceTest {
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
         PostPageItemResponseDTO mockDto = createMockPostPageItemResponseDTO();
-        
+
         given(postRepository.findByIdAndNotDeleted(postId)).willReturn(Optional.of(post));
-        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(postDtoAssembler.toPageItem(post, userId)).willReturn(mockDto);
         doNothing().when(postInteractionService).increaseHits(any(), any());
-        
+
         // When
         Optional<PostPageItemResponseDTO> response = postQueryService.getPostDetailById(postId);
-        
+
         // Then
         assertThat(response).isPresent();
         verify(postInteractionService).increaseHits(post, userId);

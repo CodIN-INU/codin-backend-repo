@@ -5,7 +5,7 @@ spring:
   application:
     name: codin-auth
   config:
-    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.auth[.properties]
   profiles:
     active:
       local
