@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
+import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,8 @@ public class EventPageDetailResponse {
     @Schema(description = "티켓팅 이벤트 ID", example = "111111")
     @NotNull
     private Long eventId;
+    @Schema(description = "이벤트가 진행되는 캠퍼스", example = "송도 캠퍼스")
+    private Campus campus;
     @Schema(description = "이벤트 제목", example = "컴퓨터 공학부 중간고사 간식나눔")
     @NotBlank
     private String eventTitle;
@@ -37,28 +40,21 @@ public class EventPageDetailResponse {
     @Schema(description = "이벤트 상태 enum(UPCOMING, ACTIVE, ENDED)", example = "UPCOMING")
     private EventStatus eventStatus;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", locale = "ko", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", locale = "ko", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventEndTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
-    private LocalDateTime eventReceivedStartTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
-    private LocalDateTime eventReceivedEndTime;
 
     public static EventPageDetailResponse of(Event event) {
         return EventPageDetailResponse.builder()
                 .eventId(event.getId())
+                .campus(event.getCampus())
                 .eventTitle(event.getTitle())
                 .eventImageUrl(event.getEventImageUrl())
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
-                .eventReceivedStartTime(event.getEventReceivedStartTime())
-                .eventReceivedEndTime(event.getEventReceivedEndTime())
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getStock().getCurrentTotalStock())
                 .currentQuantity(event.getStock().getRemainingStock())
@@ -69,12 +65,11 @@ public class EventPageDetailResponse {
     public static EventPageDetailResponse of(Event event, int waitQuantity) {
         return EventPageDetailResponse.builder()
                 .eventId(event.getId())
+                .campus(event.getCampus())
                 .eventTitle(event.getTitle())
                 .eventImageUrl(event.getEventImageUrl())
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
-                .eventReceivedStartTime(event.getEventReceivedStartTime())
-                .eventReceivedEndTime(event.getEventReceivedEndTime())
                 .locationInfo(event.getLocationInfo())
                 .quantity(event.getStock().getCurrentTotalStock())
                 .currentQuantity(event.getStock().getRemainingStock())

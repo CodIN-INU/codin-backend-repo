@@ -51,7 +51,7 @@ public class TicketingController {
     @ApiResponse(responseCode = "200", description = "관리자 비밀번호로 수령 확인 성공")
     public ResponseEntity<SingleResponse<?>> updateParticipationStatusByPassword(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId,
-            @Parameter(description = "관리자 비밀번호 (4자리)", example = "1234") @RequestPart("password") String adminPassword,
+            @Parameter(description = "관리자 비밀번호 (4자리)", example = "1234") @RequestParam("password") String adminPassword,
             @Parameter(description = "서명 이미지 파일") @RequestPart("signatureImage") MultipartFile signatureImage
     ) {
         ticketingService.processParticipationSuccess(eventId, adminPassword, signatureImage);

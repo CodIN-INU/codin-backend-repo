@@ -93,7 +93,7 @@ public class ParticipationService {
             // 재고 줄임
             Integer ticketNumber = redisEventService.getTicket(event.getId());
             ticketingService.decrement(event.getId());
-            log.info("ticketNumber: {}", ticketNumber);
+            log.info("ticketNumber: {}, user info: {}", ticketNumber, userInfoResponse.getUserId());
 
             Participation participation = Participation.builder()
                     .event(event)

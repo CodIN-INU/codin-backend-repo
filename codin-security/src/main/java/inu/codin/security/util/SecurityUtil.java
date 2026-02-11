@@ -188,7 +188,9 @@ public class SecurityUtil {
     public static boolean hasRole(String role) {
         try {
             String currentRole = getCurrentUserRole();
-            return role.equals(currentRole);
+            String withPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
+            return role.equals(currentRole) || withPrefix.equals(currentRole);
         } catch (SecurityException e) {
             return false;
         }

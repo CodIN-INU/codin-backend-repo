@@ -47,14 +47,6 @@ public class Event extends BaseEntity {
     @Column(name = "event_end_time", nullable = false)
     private LocalDateTime eventEndTime;
 
-    /** 티켓팅 상품 수령 시작 시간 */
-    @Column(name = "event_received_start_time")
-    private LocalDateTime eventReceivedStartTime;
-
-    /** 티켓팅 상품 수령 종료 시간 */
-    @Column(name = "event_received_end_time")
-    private LocalDateTime eventReceivedEndTime;
-
     /** 이제 단일 이미지 URL */
     @Column(name = "event_image_url")
     private String eventImageUrl;
@@ -97,14 +89,12 @@ public class Event extends BaseEntity {
     private EventStatus eventStatus;
 
     @Builder
-    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, LocalDateTime eventReceivedStartTime, LocalDateTime eventReceivedEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
+    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
         this.id = id;
         this.userId = userId;
         this.campus = campus;
         this.eventTime = eventTime;
         this.eventEndTime = eventEndTime;
-        this.eventReceivedStartTime = eventReceivedStartTime;
-        this.eventReceivedEndTime = eventReceivedEndTime;
         this.eventImageUrl = eventImageUrl;
         this.title = title;
         this.locationInfo = locationInfo;
@@ -122,8 +112,6 @@ public class Event extends BaseEntity {
         this.campus = dto.getCampus();
         this.eventTime = dto.getEventTime();
         this.eventEndTime = dto.getEventEndTime();
-        this.eventReceivedStartTime = dto.getEventReceivedStartTime();
-        this.eventReceivedEndTime = dto.getEventReceivedEndTime();
         this.title = dto.getTitle();
         this.locationInfo = dto.getLocationInfo();
         this.target = dto.getTarget();

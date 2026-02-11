@@ -111,6 +111,10 @@ public class EventAdminService {
     @Transactional
     public void deleteEvent(Long eventId) {
         Event event = findEventById(eventId);
+
+        String currentUserId = findAdminUser();
+        validationEvent(event, currentUserId);
+
         event.delete();
         eventStatusScheduler.scheduleAllDelete(event);
         redisEventService.deleteTickets(eventId);
@@ -150,6 +154,11 @@ public class EventAdminService {
 
     @Transactional
     public boolean changeReceiveStatus(Long eventId, String userId, MultipartFile image) {
+        // 권한 검증
+        Event event = findEventById(eventId);
+        String currentUserId = findAdminUser();
+        validationEvent(event, currentUserId);
+
         Participation findParticipation = getParticipationByEventIdAndUserId(eventId, userId);
         String imageURL = imageService.handleImageUpload(image);
 
@@ -168,6 +177,11 @@ public class EventAdminService {
 
     @Transactional
     public void cancelTicket(Long eventId, String userId) {
+        // 권한 검증
+        Event event = findEventById(eventId);
+        String currentUserId = findAdminUser();
+        validationEvent(event, currentUserId);
+
         ticketingService.cancelParticipation(eventId, userId);
     }
 
@@ -215,11 +229,16 @@ public class EventAdminService {
     }
 
     private void validationEvent(Event event, String userId) {
-        if (!event.getUserId().equals(userId) && !SecurityUtil.hasRole("ADMIN")) {
+        boolean isAdmin = SecurityUtil.hasRole("ADMIN");
+        boolean isManager = SecurityUtil.hasRole("MANAGER");
+        boolean isOwner = event.getUserId().equals(userId);
+
+        // 관리자이거나 매니저이면서 이벤트 생성자일 경우에만 수정 가능
+        if (!(isAdmin || (isManager && isOwner))) {
             throw new TicketingException(TicketingErrorCode.UNAUTHORIZED_EVENT_UPDATE);
         }
 
-        if (event.getEventTime().isBefore(LocalDateTime.now())) {
+        if (!event.getEventStatus().equals(EventStatus.ENDED) && event.getEventTime().isBefore(LocalDateTime.now())) {
             throw new TicketingException(TicketingErrorCode.EVENT_ALREADY_STARTED);
         }
     }

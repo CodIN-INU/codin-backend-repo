@@ -26,8 +26,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
                 e.locationInfo,
                 e.eventTime,
                 e.eventEndTime,
-                e.eventReceivedStartTime,
-                e.eventReceivedEndTime,
                 p.status
             )
             FROM Participation p
@@ -46,8 +44,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
                 e.locationInfo,
                 e.eventTime,
                 e.eventEndTime,
-                e.eventReceivedStartTime,
-                e.eventReceivedEndTime,
                 p.status
             )
             FROM Participation p
@@ -69,14 +65,7 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     Page<Participation> findAllByEvent_Id(@Param("eventId") Long eventId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"event"})
-    List<Participation> findAllByEvent_Id(Long eventId);
-
-    @Query("""
-                SELECT p.signatureImgUrl
-                FROM Participation p
-                WHERE p.event.id = :eventId AND p.userId = :userId
-            """)
-    Optional<String> findSignatureImgUrlByEventIdAndUserId(@Param("eventId") Long eventId, @Param("userId") String userId);
+    List<Participation> findAllByEvent_IdAndStatus(Long eventId, ParticipationStatus status);
 
     Optional<Participation> findByEvent_IdAndUserId(Long eventId, String profileUserId);
 
