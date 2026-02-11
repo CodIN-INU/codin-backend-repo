@@ -1,16 +1,16 @@
-name: deploy codin-core on branch 'main'
+name: deploy codin-auth on branch 'main'
 on:
   push:
     branches: [ main ]
     paths:
-      - 'codin-core/**'
+      - 'codin-auth/**'
       - 'codin-common/**'
       - 'codin-security/**'
       - 'docker-compose.yml'
   workflow_dispatch:
 
 jobs:
-  build-codin-core:
+  build-codin-auth:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -26,7 +26,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :codin-core:build -x test
+        run: ./gradlew :codin-auth:build -x test
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -40,14 +40,14 @@ jobs:
       - name: Build Docker image And Push
         uses: docker/build-push-action@v6
         with:
-          context: codin-core
+          context: codin-auth
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:latest
-          cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:cache,image-manifest=true,oci-mediatypes=true
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-core-api:cache,image-manifest=true,oci-mediatypes=true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/codin-auth-api:latest
+          cache-from: type=registry,mode=max,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-auth-api:cache,image-manifest=true,oci-mediatypes=true
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/codin-auth-api:cache,image-manifest=true,oci-mediatypes=true
 
-  deploy-codin-core:
-    needs: [build-codin-core]
+  deploy-codin-auth:
+    needs: [build-codin-auth]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -75,8 +75,8 @@ jobs:
           script: |
             echo ${{ secrets.PASSWORD }} | sudo -S su -c "
               cd /opt/mono-repo
-              docker compose pull codin-core-api
-              docker compose up -d codin-core-api
+              docker compose pull codin-auth-api
+              docker compose up -d codin-auth-api
               docker images -f 'dangling=true' -q | xargs sudo docker rmi || true
               docker ps -a
             "

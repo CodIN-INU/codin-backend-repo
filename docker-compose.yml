@@ -1,0 +1,67 @@
+services:
+  codin-core-api:
+    image: ${DOCKERHUB_USERNAME:-inucodin}/codin-core-api:latest
+    container_name: codin-core-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/mono-repo/backend-data/:/opt/project/backend-data/
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    env_file:
+      - .env
+    networks:
+      - codin-docker_default
+    restart: unless-stopped
+
+  codin-auth-api:
+    image: ${DOCKERHUB_USERNAME:-inucodin}/codin-auth-api:latest
+    container_name: codin-auth-api
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    env_file:
+      - .env
+    networks:
+      - codin-docker_default
+    restart: unless-stopped
+
+  codin-ticketing-api:
+    image: ${DOCKERHUB_USERNAME:-inucodin}/codin-ticketing-api:latest
+    container_name: codin-ticketing-api
+    ports:
+      - "8083:8083"
+    env_file:
+      - .env
+    networks:
+      - codin-docker_default
+    restart: unless-stopped
+
+  codin-ticketing-sse:
+    image: ${DOCKERHUB_USERNAME:-inucodin}/codin-ticketing-sse:latest
+    container_name: codin-ticketing-sse
+    ports:
+      - "8084:8084"
+    env_file:
+      - .env
+    networks:
+      - codin-docker_default
+    restart: unless-stopped
+
+  codin-lecture-api:
+    image: ${DOCKERHUB_USERNAME:-inucodin}/codin-lecture-api:latest
+    container_name: codin-lecture-api
+    ports:
+      - "8085:8080"
+    volumes:
+      - /opt/mono-repo/certs/:/app/certs/
+    env_file:
+      - .env
+    networks:
+      - codin-docker_default
+    restart: unless-stopped
+
+networks:
+  codin-docker_default:
+    external: true

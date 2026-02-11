@@ -36,6 +36,15 @@ out/
 ### VS Code ###
 .vscode/
 
+.env
 .env.*
 !.env.example
+
+### Secrets ###
+**/key/*.p8
+**/data/fcm/*.json
+
 logs
+
+### Nginx ###
+nginx.conf
