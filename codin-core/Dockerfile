@@ -17,9 +17,7 @@ RUN wget -O /tmp/google-chrome.deb \
       https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
     apt-get update && \
     apt-get install -y /tmp/google-chrome.deb && \
-    rm -rf /var/lib/apt/lists/* /tmp/google-chrome.deb \
-
-ENV PATH="/usr/bin/google-chrome-stable:${PATH}"
+    rm -rf /var/lib/apt/lists/* /tmp/google-chrome.deb
 
 WORKDIR /app
 COPY build/libs/codin-core-0.0.1-SNAPSHOT.jar app.jar
