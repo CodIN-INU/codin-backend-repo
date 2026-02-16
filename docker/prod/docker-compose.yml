@@ -57,7 +57,7 @@ services:
     image: ${DOCKERHUB_USERNAME:-inucodin}/codin-lecture-api:latest
     container_name: codin-lecture-api
     ports:
-      - "8085:8080"
+      - "8085:8085"
     volumes:
       - /opt/mono-repo/certs/:/app/certs/
     environment:
