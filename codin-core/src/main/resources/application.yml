@@ -23,9 +23,6 @@ spring:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
       database: ${MONGODB_DATABASE}
-      username: ${MONGODB_USERNAME}
-      password: ${MONGODB_PASSWORD}
-      authentication-database: ${MONGODB_AUTH_DATABASE:admin}
 
 
 google:
