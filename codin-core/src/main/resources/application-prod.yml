@@ -1,5 +1,12 @@
 # 이름 : application-prod.yml
 
+spring:
+  data:
+    mongodb:
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
+      authentication-database: ${MONGODB_AUTH_DATABASE:admin}
+
 security:
   permit-all:
     urls:
