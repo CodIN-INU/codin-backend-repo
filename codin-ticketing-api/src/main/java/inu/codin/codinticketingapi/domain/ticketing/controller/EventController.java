@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
-import inu.codin.codinticketingapi.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventDetailResponse;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryPageResponse;

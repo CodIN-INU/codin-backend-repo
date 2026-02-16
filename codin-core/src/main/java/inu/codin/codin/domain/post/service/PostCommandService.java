@@ -1,9 +1,9 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;
@@ -13,7 +13,7 @@ import inu.codin.codin.domain.post.entity.PostCategory;
 import inu.codin.codin.domain.post.entity.PostEntity;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.security.OwnershipPolicy;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Slf4j
 @Service
@@ -36,7 +38,7 @@ public class PostCommandService {
      * @param postImages 이미지 파일 리스트
      */
     public void createPost(PostCreateRequestDTO postCreateRequestDTO, List<MultipartFile> postImages) {
-        log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtils.getCurrentUserId(), postCreateRequestDTO.getTitle());
+        log.info("게시물 생성 시작. UserId: {}, 제목: {}", SecurityUtil.getCurrentUserId(), postCreateRequestDTO.getTitle());
         List<String> imageUrls = postInteractionService.handleImageUpload(postImages);
 
         ObjectId userId = validateUserAndPost(postCreateRequestDTO.getPostCategory());
@@ -163,13 +165,13 @@ public class PostCommandService {
     private ObjectId validateUserAndPost(PostCategory postCategory) {
         if (isPrivileged()) {
             // ADMIN / MANAGER 는 카테고리/유저 상태 검증을 통과시킴
-            return SecurityUtils.getCurrentUserId();
+            return toObjectId(SecurityUtil.getCurrentUserId());
         }
         assertCategoryWriteAllowed(postCategory);
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
-        SecurityUtils.validateUser(userId);
-        return userId;
+        String userId = SecurityUtil.getCurrentUserId();
+        SecurityUtil.validateUser(userId);
+        return toObjectId(userId);
     }
 
     private PostEntity assertPostOwner(ObjectId postId){
@@ -180,14 +182,14 @@ public class PostCommandService {
 
 
     private void assertCategoryWriteAllowed(PostCategory postCategory) {
-        if (SecurityUtils.getCurrentUserRole().equals(UserRole.USER) &&
+        if (SecurityUtil.getCurrentUserRole().equals(UserRole.USER) &&
                 postCategory.toString().split("_")[0].equals("EXTRACURRICULAR")) {
             throw new JwtException(SecurityErrorCode.ACCESS_DENIED, "비교과 게시글에 대한 권한이 없습니다.");
         }
     }
 
     private boolean isPrivileged() {
-        UserRole role = SecurityUtils.getCurrentUserRole();
+        UserRole role = SecurityUtil.getCurrentUserRole();
         return role == UserRole.ADMIN || role == UserRole.MANAGER;
     }
 

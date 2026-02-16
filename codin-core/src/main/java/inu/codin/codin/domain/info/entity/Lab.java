@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.entity;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.info.dto.request.LabCreateUpdateRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;

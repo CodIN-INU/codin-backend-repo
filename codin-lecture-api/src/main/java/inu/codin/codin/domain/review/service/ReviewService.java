@@ -19,7 +19,7 @@ import inu.codin.codin.domain.review.entity.Review;
 import inu.codin.codin.domain.review.exception.ReviewErrorCode;
 import inu.codin.codin.domain.review.exception.ReviewException;
 import inu.codin.codin.domain.review.repository.ReviewRepository;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +60,7 @@ public class ReviewService {
         Lecture lecture = lectureRepository.findLectureWithSemesterAndReviewsById(lectureId)
                 .orElseThrow(() -> new LectureException(LectureErrorCode.LECTURE_NOT_FOUND));
 
-        String userId = SecurityUtils.getUserId();
+        String userId = SecurityUtil.getUserId();
         checkReviewExisted(lectureId, userId, lecture); //리뷰를 작성한 상태인지 확인
 
         Semester semester = getSemester(createReviewRequestDto, lecture);

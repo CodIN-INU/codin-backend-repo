@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.ticketing.exception;
 
-import inu.codin.codinticketingapi.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 

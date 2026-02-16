@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: codin-ticketing-sse
+
+  profiles:
+    active: test
+
+  # Disable env file imports for test
+  config:
+    import: ""
+
+  jwt:
+    secret: test-jwt-secret-key-for-unit-tests-must-be-long-enough
+
+  # Redis dummy config
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      database: 0
+
+  # Exclude auto-configurations that require external services
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+# Redis Stream Configuration
+redis:
+  stream:
+    stock:
+      key: test-stock-stream-key
+      group: test-stock-stream-group
+      consumer: test-stock-stream-consumer
+
+server:
+  port: 0
+  domain: http://localhost:8080
+  forward-headers-strategy: framework
+
+# Security permit-all for tests
+security:
+  permit-all:
+    urls:
+      - "/**"
+  public-api:
+    urls: []
+
+logging:
+  level:
+    root: warn

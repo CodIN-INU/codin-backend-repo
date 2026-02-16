@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.exception;
 
-import inu.codin.codin.global.common.exception.GlobalException;
+import inu.codin.common.exception.GlobalException;
 
 public class SemesterException extends GlobalException {
     private final SemesterErrorCode errorCode;

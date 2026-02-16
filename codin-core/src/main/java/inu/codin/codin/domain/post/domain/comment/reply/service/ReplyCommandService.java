@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.reply.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
@@ -19,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -41,9 +42,9 @@ public class ReplyCommandService {
     // 대댓글 추가
     public void addReply(String id, ReplyCreateRequestDTO requestDTO) {
 
-        CommentEntity comment = commentQueryService.findCommentById(ObjectIdUtil.toObjectId(id));
+        CommentEntity comment = commentQueryService.findCommentById(toObjectId(id));
         PostEntity post = postQueryService.findPostById(comment.getPostId());
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
 
         ReplyCommentEntity reply = ReplyCommentEntity.create(comment.get_id(), userId, requestDTO);
@@ -58,7 +59,7 @@ public class ReplyCommandService {
     }
 
     public void updateReply(String replyId, @Valid ReplyUpdateRequestDTO requestDTO) {
-        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(ObjectIdUtil.toObjectId(replyId));
+        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(toObjectId(replyId));
 
         reply.updateReply(requestDTO.getContent());
         replyCommentRepository.save(reply);
@@ -69,7 +70,7 @@ public class ReplyCommandService {
 
     // 대댓글 삭제 (Soft Delete)
     public void softDeleteReply(String replyId) {
-        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(ObjectIdUtil.toObjectId(replyId));
+        ReplyCommentEntity reply = ownershipPolicy.assertReplyOwner(toObjectId(replyId));
 
         CommentEntity comment = commentQueryService.findCommentById(reply.getCommentId());
 

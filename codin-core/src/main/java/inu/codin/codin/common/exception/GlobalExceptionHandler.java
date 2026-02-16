@@ -1,7 +1,10 @@
 package inu.codin.codin.common.exception;
 
-import inu.codin.codin.common.response.ExceptionResponse;
-import inu.codin.codin.common.security.exception.JwtException;
+import inu.codin.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalException;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.common.response.ExceptionResponse;
+import inu.codin.security.exception.JwtException;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.board.notice.exception.NoticeErrorCode;
@@ -14,6 +17,7 @@ import inu.codin.codin.domain.chat.exception.ChattingErrorCode;
 import inu.codin.codin.domain.chat.exception.ChattingException;
 import inu.codin.codin.domain.info.exception.InfoErrorCode;
 import inu.codin.codin.domain.info.exception.InfoException;
+import inu.codin.security.exception.SecurityErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.http.HttpStatus;
@@ -83,12 +87,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JwtException.class)
     protected ResponseEntity<ExceptionResponse> handleJwtException(JwtException e) {
-        if (e.getErrorCode().getErrorCode().equals("SEC_005")){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+        SecurityErrorCode code = e.getErrorCode();
+        HttpStatus status = code.httpStatus();
+
+        return ResponseEntity.status(status)
+                .body(new ExceptionResponse(code.message(), status.value()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

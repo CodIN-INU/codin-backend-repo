@@ -4,7 +4,7 @@ package inu.codin.codin.domain.like.controller;
 import inu.codin.codin.domain.like.dto.LikeRequestDto;
 import inu.codin.codin.domain.like.dto.LikeType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
-import inu.codin.codin.global.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

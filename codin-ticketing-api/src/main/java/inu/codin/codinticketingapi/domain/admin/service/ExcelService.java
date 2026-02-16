@@ -5,6 +5,7 @@ import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.exception.ExcelErrorCode;
 import inu.codin.codinticketingapi.domain.admin.exception.ExcelException;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -37,8 +39,12 @@ public class ExcelService {
     private final static String NO_PARTICIPANTS = "현재 이벤트에 참가자가 존재하지 않습니다.";
     private final static String SHEET_NAME_PREFIX = "CODIN_티켓팅_이벤트_";
     private final static String UNKNOWN = "UNKNOWN";
-    private final static String[] HEADERS = {"사용자 ID", "이름", "학과", "학번", "경품 수령 상태", "교환권 번호", "서명"};
-    private final static int SIGN_NUM = 6;
+    private final static String[] HEADERS = {"이름", "학과", "학번", "교환권 번호", "서명"};
+    private final static int NAME_COL = 0;
+    private final static int DEPARTMENT_COL = 1;
+    private final static int STUDENT_ID_COL = 2;
+    private final static int TICKET_NUM_COL = 3;
+    private final static int SIGN_COL = 4;
     private final static int PADDING = 5 * Units.EMU_PER_PIXEL;
 
     @Transactional(readOnly = true)
@@ -55,12 +61,12 @@ public class ExcelService {
 
     private String createSheet(Workbook workbook, Long eventId) {
         Event event = getEvent(eventId);
-        String fileName = SHEET_NAME_PREFIX + DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String fileName = SHEET_NAME_PREFIX + event.getTitle() + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         Sheet sheet = workbook.createSheet(fileName);
 
         createHeaderRow(sheet);
 
-        List<Participation> participationList = getParticipation(event.getId());
+        List<Participation> participationList = getCompletedParticipation(event.getId());
         populateDataRows(sheet, participationList);
 
         autoSizeAllColumns(sheet);
@@ -97,9 +103,9 @@ public class ExcelService {
         }
     }
 
-    private List<Participation> getParticipation(Long eventId) {
-
-        return participationRepository.findAllByEvent_Id(eventId);
+    // 완료된 참여자 목록 조회
+    private List<Participation> getCompletedParticipation(Long eventId) {
+        return participationRepository.findAllByEvent_IdAndStatus(eventId, ParticipationStatus.COMPLETED);
     }
 
     private void populateDataRows(Sheet sheet, List<Participation> participationList) {
@@ -118,12 +124,10 @@ public class ExcelService {
             Row row = sheet.createRow(rowNum++);
             row.setHeightInPoints(70);
 
-            row.createCell(0).setCellValue(participation.getUserId());
-            row.createCell(1).setCellValue(participation.getName());
-            row.createCell(2).setCellValue(participation.getDepartment() != null ? participation.getDepartment().name() : UNKNOWN);
-            row.createCell(3).setCellValue(participation.getStudentId());
-            row.createCell(4).setCellValue(participation.getStatus() != null ? participation.getStatus().name() : UNKNOWN);
-            row.createCell(5).setCellValue(participation.getTicketNumber());
+            row.createCell(NAME_COL).setCellValue(participation.getName());
+            row.createCell(DEPARTMENT_COL).setCellValue(participation.getDepartment() != null ? participation.getDepartment().getDescription() : UNKNOWN);
+            row.createCell(STUDENT_ID_COL).setCellValue(participation.getStudentId());
+            row.createCell(TICKET_NUM_COL).setCellValue(participation.getTicketNumber());
             setImage(workbook, drawing, row, participation);
         }
     }
@@ -139,9 +143,9 @@ public class ExcelService {
                 CreationHelper helper = workbook.getCreationHelper();
                 ClientAnchor anchor = helper.createClientAnchor();
 
-                anchor.setCol1(SIGN_NUM);
+                anchor.setCol1(SIGN_COL);
                 anchor.setRow1(row.getRowNum());
-                anchor.setCol2(SIGN_NUM + 1);
+                anchor.setCol2(SIGN_COL + 1);
                 anchor.setRow2(row.getRowNum() + 1);
 
                 anchor.setDx1(PADDING);
@@ -151,7 +155,7 @@ public class ExcelService {
 
                 drawing.createPicture(anchor, pictureIdx);
             } catch (Exception e) {
-                row.createCell(6).setCellValue("이미지 로드 실패");
+                row.createCell(SIGN_COL).setCellValue("이미지 로드 실패");
 
                 log.error("이미지 로드 실패 URL: {}", imageURL, e);
             }
@@ -160,12 +164,13 @@ public class ExcelService {
 
     private void autoSizeAllColumns(Sheet sheet) {
         for (int i = 0; i < HEADERS.length; i++) {
-            if (i == SIGN_NUM) {
+            if (i == SIGN_COL) {
                 sheet.setColumnWidth(i, 25 * 256);
 
                 continue;
             }
             sheet.autoSizeColumn(i);
+            sheet.setColumnWidth(i, sheet.getColumnWidth(i) + (3 * 256));
         }
     }
 }

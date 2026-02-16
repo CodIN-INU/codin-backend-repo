@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.voice.repository;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.board.voice.entity.VoiceEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;

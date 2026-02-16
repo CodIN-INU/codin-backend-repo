@@ -3,7 +3,7 @@ package inu.codin.codin.domain.lecture.entity;
 import inu.codin.codin.domain.lecture.converter.EvaluationConverter;
 import inu.codin.codin.domain.lecture.converter.StringListConverter;
 import inu.codin.codin.domain.review.entity.Review;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

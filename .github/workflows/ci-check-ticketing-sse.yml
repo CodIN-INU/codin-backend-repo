@@ -1,0 +1,31 @@
+name: CI Check - codin-ticketing-sse
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'codin-ticketing-sse/**'
+      - 'codin-common/**'
+      - 'codin-security/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew :codin-ticketing-sse:build -x test
+
+      - name: Run tests
+        run: ./gradlew :codin-ticketing-sse:test

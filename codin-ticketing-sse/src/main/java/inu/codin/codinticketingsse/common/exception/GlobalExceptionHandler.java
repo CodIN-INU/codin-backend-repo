@@ -1,8 +1,10 @@
 package inu.codin.codinticketingsse.common.exception;
 
-import inu.codin.codinticketingsse.common.response.ExceptionResponse;
-import inu.codin.codinticketingsse.security.exception.SecurityErrorCode;
-import inu.codin.codinticketingsse.security.exception.SecurityException;
+import inu.codin.common.exception.GlobalErrorCode;
+import inu.codin.common.exception.GlobalException;
+import inu.codin.common.response.ExceptionResponse;
+import inu.codin.security.exception.SecurityErrorCode;
+import inu.codin.security.exception.SecurityException;
 import inu.codin.codinticketingsse.sse.exception.SseErrorCode;
 import inu.codin.codinticketingsse.sse.exception.SseException;
 import jakarta.validation.ConstraintViolationException;
@@ -50,7 +52,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<ExceptionResponse> handleSecurityException(SecurityException e) {
         log.warn("[SecurityException] Class: {}, Error Message : {}",  e.getClass().getSimpleName(), e.getMessage());
-        SecurityErrorCode code = e.getSecurityErrorCode();
+        SecurityErrorCode code = e.getErrorCode();
         return ResponseEntity.status(code.httpStatus())
                 .body(new ExceptionResponse(e.getMessage(), code.httpStatus().value()));
     }

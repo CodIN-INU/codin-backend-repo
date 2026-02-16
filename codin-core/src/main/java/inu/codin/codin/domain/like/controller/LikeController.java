@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.like.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.like.dto.LikeResponseType;
 import inu.codin.codin.domain.like.dto.LikedResponseDto;
 import inu.codin.codin.domain.like.dto.request.LikeRequestDto;

@@ -36,6 +36,19 @@ out/
 ### VS Code ###
 .vscode/
 
+### macOS ###
+.DS_Store
+
+.env
 .env.*
 !.env.example
+
+### Secrets ###
+**/key/*.p8
+**/data/fcm/*.json
+**/src/main/resources/data/
+
 logs
+
+### Nginx ###
+nginx.conf

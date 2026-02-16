@@ -1,8 +1,8 @@
 package inu.codin.codin.common.stomp;
 
-import inu.codin.codin.common.security.exception.JwtException;
-import inu.codin.codin.common.security.exception.SecurityErrorCode;
-import inu.codin.codin.common.security.service.JwtService;
+import inu.codin.security.exception.JwtException;
+import inu.codin.security.exception.SecurityErrorCode;
+import inu.codin.security.service.JwtService;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
@@ -25,7 +25,10 @@ public class HttpHandShakeInterceptor implements HandshakeInterceptor {
             ServletServerHttpRequest serverHttpRequest = (ServletServerHttpRequest) request;
 
             try {
-                jwtService.setAuthentication(serverHttpRequest.getServletRequest());
+                boolean ok = jwtService.validateAndSetAuthentication(serverHttpRequest.getServletRequest());
+                if (!ok) {
+                    throw new JwtException(SecurityErrorCode.INVALID_TOKEN, "[Chatting] 인증되지 않은 jwt 토큰 입니다.");
+                }
             } catch (MessageDeliveryException e) {
                 throw new MessageDeliveryException("[Chatting] Jwt로 인한 메세지 전송 오류입니다.");
             } catch (MalformedJwtException e) {

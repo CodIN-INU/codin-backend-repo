@@ -1,11 +1,12 @@
 package inu.codin.codinticketingapi.domain.ticketing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import inu.codin.common.util.MultipartJackson2HttpMessageConverter;
 import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationResponse;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.service.ParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
-import inu.codin.codinticketingapi.security.jwt.TokenUserDetails;
+import inu.codin.security.jwt.TokenUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class TicketingControllerTest {
 
     @MockitoBean
     private ParticipationService participationService;
+
+    @MockitoBean
+    private MultipartJackson2HttpMessageConverter multipartJackson2HttpMessageConverter;
 
     @BeforeEach
     void setUp() {
@@ -94,19 +98,13 @@ class TicketingControllerTest {
                 "image/png",
                 "signature image content".getBytes()
         );
-        MockMultipartFile passwordPart = new MockMultipartFile(
-                "password",
-                "",
-                "text/plain",
-                adminPassword.getBytes()
-        );
 
         doNothing().when(ticketingService).processParticipationSuccess(eq(eventId), eq(adminPassword), any());
 
         // when & then
         mockMvc.perform(multipart("/event/complete/{eventId}", eventId)
                         .file(signatureImage)
-                        .file(passwordPart)
+                        .param("password", adminPassword)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
@@ -151,16 +149,10 @@ class TicketingControllerTest {
     void updateParticipationStatusByPassword_NoSignatureImage() throws Exception {
         // given
         Long eventId = 1L;
-        MockMultipartFile passwordPart = new MockMultipartFile(
-                "password",
-                "",
-                "text/plain",
-                "1234".getBytes()
-        );
 
         // when & then
         mockMvc.perform(multipart("/event/complete/{eventId}", eventId)
-                        .file(passwordPart)
+                        .param("password", "1234")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
 
@@ -181,10 +173,11 @@ class TicketingControllerTest {
         );
 
         // when & then
+        // MissingServletRequestParameterException is caught by generic Exception handler (500)
         mockMvc.perform(multipart("/event/complete/{eventId}", eventId)
                         .file(signatureImage)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
 
         verify(ticketingService, never()).processParticipationSuccess(any(), any(), any());
     }

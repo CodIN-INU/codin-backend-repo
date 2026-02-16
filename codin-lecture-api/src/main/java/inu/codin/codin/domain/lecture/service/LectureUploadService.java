@@ -35,7 +35,7 @@ public class LectureUploadService {
     private static final String META_PROGRAM = "load_metadata.py";
 
 
-    public void uploadNewSemesterLectures(MultipartFile file){
+    public void uploadNewSemesterLectures(MultipartFile file) {
         try {
             saveFile(file);
             int exitCode = executeGetExitCode(file, LECTURE_PROGRAM);
@@ -53,6 +53,10 @@ public class LectureUploadService {
 
             throw new LectureUploadException(LectureErrorCode.LECTURE_UPLOAD_FAIL, e.getMessage());
         }
+    }
+
+    public void uploadLecturesToElasticsearch() {
+        indexer.lectureIndex();
     }
 
     public void uploadNewSemesterRooms(MultipartFile file) {
@@ -80,7 +84,9 @@ public class LectureUploadService {
             executeMetaLoader(file, mode);
             log.info("[uploadLectureMeta] {} 메타 업데이트 완료", file.getOriginalFilename());
 
-            try { indexer.lectureIndex(); } catch (Exception e) {
+            try {
+                indexer.lectureIndex();
+            } catch (Exception e) {
                 log.warn("[uploadLectureMeta] 색인 갱신 경고: {}", e.getMessage());
             }
 
@@ -93,10 +99,12 @@ public class LectureUploadService {
     }
 
 
-    /** 메타 로더 실행 헬퍼: load_metadata.py <excel> [--keywords] [--tags] [--pre-courses] | --all */
-    private void executeMetaLoader(MultipartFile file,MetaMode mode) {
+    /**
+     * 메타 로더 실행 헬퍼: load_metadata.py <excel> [--keywords] [--tags] [--pre-courses] | --all
+     */
+    private void executeMetaLoader(MultipartFile file, MetaMode mode) {
         String scriptPath = Paths.get(UPLOAD_DIR, META_PROGRAM).toString();
-        String excelPath  = Paths.get(UPLOAD_DIR, file.getOriginalFilename()).toString();
+        String excelPath = Paths.get(UPLOAD_DIR, file.getOriginalFilename()).toString();
 
         List<String> cmd = new ArrayList<>();
         cmd.add(PYTHON_DIR);                                 // ex) /usr/bin/python3 or venv/bin/python
@@ -147,7 +155,7 @@ public class LectureUploadService {
 
     private int executeGetExitCode(MultipartFile file, String pythonNm) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder(
-                PYTHON_DIR, UPLOAD_DIR + pythonNm, UPLOAD_DIR+ file.getOriginalFilename()
+                PYTHON_DIR, UPLOAD_DIR + pythonNm, UPLOAD_DIR + file.getOriginalFilename()
         );
         processBuilder.redirectErrorStream(true);
         Process process = processBuilder.start();

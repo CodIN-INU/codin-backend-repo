@@ -1,6 +1,6 @@
 package inu.codin.codin.common.stomp;
 
-import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.repository.ChatRoomRepository;
 import inu.codin.codin.domain.chat.chatting.dto.event.UpdateUnreadCountEvent;

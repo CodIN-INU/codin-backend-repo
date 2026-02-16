@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.user.dto.response;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
-import inu.codin.codin.domain.user.entity.UserRole;
+import inu.codin.security.entity.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

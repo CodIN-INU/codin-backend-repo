@@ -29,18 +29,12 @@ public class EventParticipationProfilePageResponse {
     @Schema(description = "수령 대기", example = "100")
     private long waitNum;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", locale = "ko", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", locale = "ko", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 티켓팅 종료 시간", example = "2025.07.02 (수) 16:00")
     private LocalDateTime eventEndTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 시작 시간", example = "2025.07.02 (수) 16:00")
-    private LocalDateTime eventReceivedStartTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", timezone = "Asia/Seoul")
-    @Schema(description = "티켓팅 상품 수령 종료 시간", example = "2025.07.02 (수) 16:00")
-    private LocalDateTime eventReceivedEndTime;
 
     public static EventParticipationProfilePageResponse from(Event event, Stock stock, List<EventParticipationProfileResponse> list, int lastPage, int nextPage, long waitNum) {
         return EventParticipationProfilePageResponse.builder()
@@ -52,8 +46,6 @@ public class EventParticipationProfilePageResponse {
                 .waitNum(waitNum)
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
-                .eventReceivedStartTime(event.getEventReceivedStartTime())
-                .eventReceivedEndTime(event.getEventReceivedEndTime())
                 .build();
     }
 }

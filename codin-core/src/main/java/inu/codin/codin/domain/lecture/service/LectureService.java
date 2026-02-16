@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.lecture.service;
 
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.exception.NotFoundException;
+import inu.codin.common.entity.Department;
+import inu.codin.common.exception.NotFoundException;
 import inu.codin.codin.domain.lecture.dto.*;
 import inu.codin.codin.domain.lecture.dto.response.LectureDetailResponseDto;
 import inu.codin.codin.domain.lecture.dto.response.LectureListResponseDto;

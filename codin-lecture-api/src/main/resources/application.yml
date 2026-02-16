@@ -2,7 +2,10 @@ spring:
   application:
     name: codin-lecture-api
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:./.env[.properties], optional:file:./.env.local[.properties]
+  profiles:
+    active:
+      local
   jwt:
     secret: ${SPRING_JWT_SECRET}
   data:
@@ -10,10 +13,14 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+    elasticsearch:
+      repositories:
+        enabled: false
+  # MySQL Database Configuration
   datasource:
-    url: ${DATASOURCE_URL}
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${LECTURE_MYSQL_DATABASE}?useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -40,31 +47,11 @@ spring:
         queue-capacity: 100
 
   elasticsearch:
-    uris: ${ELASTICSEARCH_URL:http://localhost:9200}
-    indices:
-      lectures:
-        settings:
-          analysis:
-            tokenizer:
-              nori_tokenizer:
-                type: nori_tokenizer
-                decompound_mode: mixed
-            filter:
-              nori_readingform:
-                type: nori_readingform
-              autocomplete_filter:
-                type: edge_ngram
-                min_gram: 1
-                max_gram: 20
-            analyzer:
-              nori:
-                type: custom
-                tokenizer: nori_tokenizer
-                filter: [ nori_readingform, lowercase ]
-              nori_autocomplete:
-                type: custom
-                tokenizer: nori_tokenizer
-                filter: [ nori_readingform, autocomplete_filter, lowercase ]
+    username: ${SPRING_ELASTICSEARCH_USERNAME}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD}
+    uris: ${SPRING_ELASTICSEARCH_URIS}
+
+caPath: ${CA_PATH}
 
 lecture:
   python:
@@ -73,11 +60,11 @@ lecture:
     path: ${PYTHON_FILE_PATH:./example}
 
 server:
-  port: ${SERVER_PORT}
-  domain: ${SERVER_DOMAIN}
+  port: ${LECTURE_SERVER_PORT}
+  domain: ${LECTURE_SERVER_DOMAIN}
   forward-headers-strategy: framework
   feign:
-    url: ${SERVER_FEIGN_URL}
+    url: ${USER_CLIENT_URL}
 
 logging:
   level:

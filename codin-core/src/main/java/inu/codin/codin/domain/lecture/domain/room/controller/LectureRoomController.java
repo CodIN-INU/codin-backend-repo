@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.lecture.domain.room.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.lecture.domain.room.service.LectureRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

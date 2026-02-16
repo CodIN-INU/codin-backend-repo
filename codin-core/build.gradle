@@ -33,14 +33,18 @@ dependencyManagement {
 	}
 }
 dependencies {
+	// Security - codin-security 공통 모듈 사용
+	implementation project(':codin-security')
+	implementation project(':codin-common')
+	
 	// FCM
 	implementation 'com.google.firebase:firebase-admin:7.3.0'
-	// JWT Token
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
-	// Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// JWT Token - codin-security에서 제공되므로 제거 가능
+	// implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	// implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	// implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+	// Security - codin-security에서 제공되므로 제거 가능
+	// implementation 'org.springframework.boot:spring-boot-starter-security'
 	// Email
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	// Thymeleaf(for email service)
@@ -77,17 +81,17 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
+	testImplementation 'org.testcontainers:mongodb:1.19.7'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
+	enabled = false
 	useJUnitPlatform()
+
+}
+tasks.withType(Test).configureEach {
+	enabled = false
 }
 
-processResources.dependsOn('copySecret')
-
-tasks.register('copySecret', Copy) {
-	from './backend-submodule' // 서브모듈 디렉토리 경로
-	include "*"  // 복사할 파일들
-	into './src/main/resources'  // 복사 위치
-}

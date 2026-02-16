@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.service.BlockService;
 import inu.codin.codin.domain.post.domain.best.BestEntity;
 import inu.codin.codin.domain.post.domain.best.BestService;
@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Slf4j
 @Service
@@ -54,7 +56,12 @@ public class PostQueryService
      */
     public PostPageItemResponseDTO getPostWithDetail(String postId) {
         PostEntity post = findPostById(ObjectIdUtil.toObjectId(postId));
-        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
+
+        String userIdStr = SecurityUtil.getCurrentUserIdOrNull();
+        ObjectId userId = (userIdStr == null)
+                ? null
+                : toObjectId(userIdStr);
+
         postInteractionService.increaseHits(post, userId);
         return postDtoAssembler.toPageItem(post, userId);
     }
@@ -65,7 +72,7 @@ public class PostQueryService
     public Optional<PostPageItemResponseDTO> getPostDetailById(ObjectId postId) {
         return postRepository.findByIdAndNotDeleted(postId)
                 .map(post -> {
-                    ObjectId userId = SecurityUtils.getCurrentUserId();
+                    ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
                     postInteractionService.increaseHits(post, userId);
                     return postDtoAssembler.toPageItem(post, userId);
                 });

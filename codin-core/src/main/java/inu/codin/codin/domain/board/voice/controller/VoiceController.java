@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.board.voice.controller;
 
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.entity.Department;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.board.voice.service.VoiceService;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxAnswerRequest;
 import inu.codin.codin.domain.board.voice.dto.VoiceBoxCreateRequest;

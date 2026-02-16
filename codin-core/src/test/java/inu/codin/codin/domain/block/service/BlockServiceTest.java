@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.block.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.block.entity.BlockEntity;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
@@ -41,9 +41,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 성공")
     void blockUser_성공() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)){
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)){
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             BlockEntity existingBlock = BlockEntity.ofNew(testUserId);
             when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.of(existingBlock));
@@ -62,9 +62,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 성공 - 새로운 BlockEntity 생성")
     void blockUser_성공_새로운BlockEntity생성() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
             when(blockRepository.save(any(BlockEntity.class))).thenReturn(BlockEntity.ofNew(testUserId));
@@ -80,9 +80,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 실패 - 자기 자신 차단")
     void blockUser_실패_자기자신차단() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             //when & then
             assertThatThrownBy(() -> blockService.blockUser(testUserId.toString()))
@@ -95,9 +95,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 실패 - 차단유저 존재하지 않음")
     void blockUser_실패_차단유저X() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             doNothing().when(userValidator).validateUserExists(eq(testUserId), any());
             doThrow(new BlockException(BlockErrorCode.BLOCKED_USER_NOT_FOUND))
@@ -114,9 +114,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 실패 - 차단 실행 유저 존재하지 않음")
     void blockUser_실패_차단실행유저X() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             doThrow(new BlockException(BlockErrorCode.BLOCKING_USER_NOT_FOUND))
                     .when(userValidator).validateUserExists(eq(testUserId), any());
@@ -132,9 +132,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단해제 성공")
     void unblockUser_성공() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             BlockEntity existingBlock = BlockEntity.ofNew(testUserId);
             existingBlock.addBlockedUser(blockedUserId);
@@ -154,9 +154,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단해제 실패 - 자기 자신 차단해제")
     void unblockUser_실패_자기자신차단해제() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             //when & then
             assertThatThrownBy(() -> blockService.unblockUser(testUserId.toString()))
@@ -169,9 +169,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단해제 실패 - 차단 정보 없음")
     void unblockUser_실패_차단정보없음() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
 
@@ -186,9 +186,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단 실패 - 이미 차단된 사용자")
     void blockUser_실패_이미차단된사용자() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             BlockEntity existingBlock = BlockEntity.ofNew(testUserId);
             existingBlock.addBlockedUser(blockedUserId); // 이미 차단된 상태
@@ -211,9 +211,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("유저 차단해제 실패 - 차단되지 않은 사용자")
     void unblockUser_실패_차단되지않은사용자() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             // 다른 사용자는 차단되어 있지만, 요청한 사용자는 차단되지 않은 상태
             ObjectId otherBlockedUserId = ObjectIdUtil.toObjectId("507f1f77bcf86cd799439011");
@@ -238,9 +238,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("차단된 유저 목록 조회 성공")
     void getBlockedUsers_성공() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             BlockEntity blockEntity = spy(BlockEntity.ofNew(testUserId));
             when(blockEntity.getBlockedUsers()).thenReturn(List.of(blockedUserId));
@@ -261,9 +261,9 @@ class BlockServiceTest {
     @Test
     @DisplayName("차단된 유저 목록 조회 - 차단 정보 없음")
     void getBlockedUsers_차단정보없음() {
-        try (MockedStatic<SecurityUtils> mSecurityUtils = mockStatic(SecurityUtils.class)) {
+        try (MockedStatic<SecurityUtil> mSecurityUtils = mockStatic(SecurityUtil.class)) {
             //given
-            mSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
+            mSecurityUtils.when(SecurityUtil::getCurrentUserId).thenReturn(testUserId);
 
             when(blockRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
 

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.report.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.report.dto.request.ReportCreateRequestDto;
 import inu.codin.codin.domain.report.dto.request.ReportExecuteRequestDto;
 import inu.codin.codin.domain.report.dto.response.ReportPageResponse;

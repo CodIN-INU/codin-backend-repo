@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.email.entity;
 
-import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;

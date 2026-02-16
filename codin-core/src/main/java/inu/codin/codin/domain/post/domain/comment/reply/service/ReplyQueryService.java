@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.reply.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -105,11 +107,11 @@ public class ReplyQueryService {
     }
 
     public UserInfo getUserInfoAboutReply(ObjectId replyId) {
-        ObjectId userId = SecurityUtils.getCurrentUserIdOrNull();
-
+        String userIdStr = SecurityUtil.getCurrentUserIdOrNull();
         boolean isLiked = false;
 
-        if (userId != null) {
+        if (userIdStr != null) {
+            ObjectId userId = toObjectId(userIdStr);
             isLiked = likeService.isLiked(LikeType.REPLY, replyId.toString(), userId);
         }
 

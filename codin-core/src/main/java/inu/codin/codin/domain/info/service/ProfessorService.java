@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.info.service;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.info.dto.request.ProfessorCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.dto.response.ProfessorListResponseDto;
 import inu.codin.codin.domain.info.dto.response.ProfessorThumbnailResponseDto;

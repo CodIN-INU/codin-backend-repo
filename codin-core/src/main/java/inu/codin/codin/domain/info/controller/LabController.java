@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.info.controller;
 
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.info.dto.request.LabCreateUpdateRequestDto;
 import inu.codin.codin.domain.info.dto.response.LabListResponseDto;
 import inu.codin.codin.domain.info.dto.response.LabThumbnailResponseDto;

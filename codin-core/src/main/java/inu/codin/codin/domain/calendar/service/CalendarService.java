@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.calendar.service;
 
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.calendar.dto.*;
 import inu.codin.codin.domain.calendar.entity.CalendarEntity;
 import inu.codin.codin.domain.calendar.exception.CalendarErrorCode;

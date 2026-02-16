@@ -19,7 +19,7 @@ import inu.codin.codin.domain.lecture.repository.LectureSearchRepositoryCustom;
 import inu.codin.codin.domain.like.dto.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.review.service.UserReviewStatsService;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -64,8 +64,7 @@ public class LectureService {
                 ));
 
         List<String> likeIdList = getLikeIdList(likeMap);
-
-        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLecturesAtPreview(keyword, department, sortingOption, likeIdList, PageRequest.of(page, 10), like);
+        Page<LectureDocument> lecturePage = lectureSearchRepository.searchLectureList(keyword, department, sortingOption, likeIdList, PageRequest.of(page, 10), like);
 
         return getLecturePageResponse(lecturePage, likeMap);
     }
@@ -84,7 +83,7 @@ public class LectureService {
 
         Emotion emotion = emotionService.getOrMakeEmotion(lecture);
 
-        lectureElasticService.incrementHits(lectureId);
+        lectureElasticService.incrementHit(lectureId);
 
         return LectureDetailResponseDto.of(lecture, emotion, userReviewStatsService.isOpenKeyword());
     }

@@ -70,7 +70,7 @@ public class LecturePreviewResponseDto {
     public static LecturePreviewResponseDto of(LectureDocument lecture, int likes, boolean liked) {
         return LecturePreviewResponseDto.builder()
                 .id(lecture.getId())
-                .title(lecture.getLectureNm())
+                .title(lecture.getLectureName())
                 .professor(lecture.getProfessor())
                 .type(lecture.getType() != null ? Type.valueOf(lecture.getType()) : null)
                 .grade(lecture.getGrade())
