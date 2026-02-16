@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.calendar.controller.swagger;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateRequest;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateResponse;
 import inu.codin.codin.domain.calendar.dto.CalendarMonthResponse;

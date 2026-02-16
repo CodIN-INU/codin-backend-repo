@@ -1,6 +1,6 @@
 package inu.codin.codin.common.config;
 
-import inu.codin.codin.common.util.MultipartJackson2HttpMessageConverter;
+import inu.codin.common.util.MultipartJackson2HttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

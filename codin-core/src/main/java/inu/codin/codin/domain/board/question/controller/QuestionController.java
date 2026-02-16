@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.board.question.controller;
 
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.entity.Department;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.board.question.dto.request.QuestionCreateUpdateRequestDto;
 import inu.codin.codin.domain.board.question.dto.response.QuestionResponseDto;
 import inu.codin.codin.domain.board.question.service.QuestionService;

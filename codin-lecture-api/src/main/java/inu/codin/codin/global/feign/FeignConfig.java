@@ -1,7 +1,7 @@
 package inu.codin.codin.global.feign;
 
 import feign.RequestInterceptor;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +19,6 @@ public class FeignConfig {
     }
 
     private String getJwtToken() {
-        return SecurityUtils.getUserToken();
+        return SecurityUtil.getUserToken();
     }
 }

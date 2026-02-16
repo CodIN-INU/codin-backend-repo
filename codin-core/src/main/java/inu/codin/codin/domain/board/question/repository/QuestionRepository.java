@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.question.repository;
 
-import inu.codin.codin.common.dto.Department;
+import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.board.question.entity.QuestionEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;

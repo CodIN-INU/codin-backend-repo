@@ -11,7 +11,7 @@ import inu.codin.codin.domain.lecture.entity.Semester;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
 import inu.codin.codin.domain.lecture.exception.LectureErrorCode;
 import inu.codin.codin.domain.lecture.exception.LectureException;
-import inu.codin.codin.global.common.entity.Department;
+import inu.codin.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,14 +28,13 @@ import java.util.List;
 public class LectureSearchRepositoryImpl implements LectureSearchRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
-
     private final LectureElasticService lectureElasticService;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<LectureDocument> searchLecturesAtPreview(String keyword, Department department, SortingOption sortingOption, List<String> likeIdList, Pageable pageable, Boolean like) {
+    public Page<LectureDocument> searchLectureList(String keyword, Department department, SortingOption sortingOption, List<String> likeIdList, Pageable pageable, Boolean like) {
         log.debug("[searchLecturesAtPreview] 강의 조회, keyword={}, department={}, sortingOption={}, liked={}", keyword, department, sortingOption, like);
-        Page<LectureDocument> lectureDocumentPage = lectureElasticService.searchLectureDocument(keyword, department, sortingOption, likeIdList, pageable.getPageNumber(), pageable.getPageSize(), like);
+        Page<LectureDocument> lectureDocumentPage = lectureElasticService.searchLectureDocumentList(keyword, department, sortingOption, likeIdList, pageable.getPageNumber(), pageable.getPageSize(), like);
 
         long total = lectureDocumentPage.getTotalElements();
 

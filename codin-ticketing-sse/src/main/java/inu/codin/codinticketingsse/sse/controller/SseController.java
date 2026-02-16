@@ -1,6 +1,6 @@
 package inu.codin.codinticketingsse.sse.controller;
 
-import inu.codin.codinticketingsse.security.util.SecurityUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codinticketingsse.sse.dto.EventStockStream;
 import inu.codin.codinticketingsse.sse.service.SseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +37,7 @@ public class SseController {
     public ResponseEntity<?> disconnect(
             @Parameter(description = "구독 취소할 이벤트 ID", example = "1111") @PathVariable Long eventId
     ) {
-        sseService.closeConnection(eventId, SecurityUtil.getUserId());
+        sseService.closeConnection(eventId, SecurityUtil.getCurrentUserIdOrNull());
         return ResponseEntity.ok().build();
     }
 

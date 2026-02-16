@@ -1,0 +1,12 @@
+# 이름 : application-aws.yml
+# [취급주의] 실제 AWS 환경에서 사용할 설정 파일
+cloud:
+  aws:
+    s3:
+      defaultProfileImageUrl: ${AWS_S3_DEFAULT_PROFILE_IMAGE_URL}
+      bucket: ${AWS_S3_BUCKET}
+    stack.auto: ${AWS_STACK_AUTO}
+    region.static: ${AWS_REGION_STATIC}
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_KEY}

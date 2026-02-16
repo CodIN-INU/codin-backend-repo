@@ -1,6 +1,6 @@
 package inu.codin.codin.infra.fcm.controller.swagger;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.infra.fcm.dto.request.FcmTokenRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

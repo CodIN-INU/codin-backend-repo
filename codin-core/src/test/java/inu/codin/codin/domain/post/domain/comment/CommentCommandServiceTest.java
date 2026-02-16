@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.best.BestService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
@@ -43,7 +43,7 @@ class CommentCommandServiceTest {
     
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
     
     @AfterEach
@@ -58,9 +58,9 @@ class CommentCommandServiceTest {
         CommentCreateRequestDTO dto = createCommentCreateRequestDTO("댓글 내용", false);
         PostEntity post = createPostEntity();
         ObjectId userId = new ObjectId();
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -69,7 +69,7 @@ class CommentCommandServiceTest {
         doNothing().when(postCommandService).handleCommentCreation(any(), any());
         doNothing().when(bestService).applyBestScore(any());
         doNothing().when(notificationService).sendNotificationMessageByComment(any(), any(), any(), any());
-        
+
         // When & Then
         assertThatCode(() -> commentCommandService.addComment(postId, dto)).doesNotThrowAnyException();
         verify(commentRepository).save(any(CommentEntity.class));
@@ -88,9 +88,9 @@ class CommentCommandServiceTest {
                 .postCategory(PostCategory.COMMUNICATION)
                 .build();
         setIdField(post, new ObjectId());
-        
+
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -120,7 +120,7 @@ class CommentCommandServiceTest {
         setIdField(post, new ObjectId());
         
         given(postQueryService.findPostById(any())).willReturn(post);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId.toHexString());
         given(commentRepository.save(any())).willAnswer(inv -> {
             CommentEntity entity = inv.getArgument(0);
             setIdField(entity, new ObjectId());
@@ -129,10 +129,10 @@ class CommentCommandServiceTest {
         doNothing().when(postCommandService).handleCommentCreation(any(), any());
         doNothing().when(bestService).applyBestScore(any());
         doNothing().when(notificationService).sendNotificationMessageByComment(any(), any(), any(), any());
-        
+
         // When
         commentCommandService.addComment(postId, dto);
-        
+
         // Then
         verify(notificationService).sendNotificationMessageByComment(
                 eq(post.getPostCategory()),
@@ -148,12 +148,12 @@ class CommentCommandServiceTest {
         String commentId = new ObjectId().toString();
         CommentUpdateRequestDTO dto = createCommentUpdateRequestDTO("수정된 내용");
         CommentEntity comment = createCommentEntity();
-        ObjectId userId = new ObjectId();
+        String userId = new ObjectId().toHexString();
 
         given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
-        given(SecurityUtils.getCurrentUserId()).willReturn(userId);
-        doNothing().when(SecurityUtils.class);
-        SecurityUtils.validateUser(userId);
+        given(SecurityUtil.getCurrentUserId()).willReturn(userId);
+        doNothing().when(SecurityUtil.class);
+        SecurityUtil.validateUser(userId);
         given(commentRepository.save(any())).willReturn(comment);
         
         // When & Then
@@ -167,11 +167,11 @@ class CommentCommandServiceTest {
         String commentId = new ObjectId().toString();
         CommentEntity comment = createCommentEntity();
         PostEntity post = createPostEntity();
-        ObjectId userId = comment.getUserId();
+        String userId = comment.getUserId().toHexString();
 
         given(ownershipPolicy.assertCommentOwner(any(ObjectId.class))).willReturn(comment);
-        doNothing().when(SecurityUtils.class);
-        SecurityUtils.validateUser(userId);
+        doNothing().when(SecurityUtil.class);
+        SecurityUtil.validateUser(userId);
         given(postQueryService.findPostById(comment.getPostId())).willReturn(post);
         given(commentRepository.save(any())).willReturn(comment);
         doNothing().when(postCommandService).decreaseCommentCount(any());

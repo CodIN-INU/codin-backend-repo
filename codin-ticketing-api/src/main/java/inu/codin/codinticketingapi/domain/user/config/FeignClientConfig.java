@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.user.config;
 
 import feign.RequestInterceptor;
-import inu.codin.codinticketingapi.security.util.SecurityUtil;
+import inu.codin.security.util.SecurityUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

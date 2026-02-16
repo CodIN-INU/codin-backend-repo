@@ -1,6 +1,6 @@
 package inu.codin.codinticketingsse.sse.exception;
 
-import inu.codin.codinticketingsse.common.exception.GlobalException;
+import inu.codin.common.exception.GlobalException;
 import lombok.Getter;
 
 @Getter

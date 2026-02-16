@@ -1,0 +1,65 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'inu.codin'
+version = '1.0.0'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Codin Common 의존성 (공통 응답, 예외 클래스)
+    api project(':codin-common')
+
+    // Spring Boot Security
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-web'
+
+    // JWT
+    api 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Configuration Properties
+    api 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Jackson for JSON processing
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.assertj:assertj-core'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Disable Spring Boot plugin's jar task since this is a library
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+// Disable the bootJar task since this is a library
+bootJar {
+    enabled = false
+}

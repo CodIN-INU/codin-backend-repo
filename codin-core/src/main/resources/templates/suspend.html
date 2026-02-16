@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>계정 정지 안내</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffffff; /* 배경 흰색 */
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #000000;
+    }
+
+    .container {
+      text-align: center;
+      padding: 15px; /* 패딩 줄이기 */
+      background-color: #99ccff; /* 하늘색 배경 */
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      max-width: 250px; /* 크기 줄이기 */
+      width: 100%;
+    }
+
+    h2 {
+      font-size: 1.25em; /* 크기 줄이기 */
+      margin-bottom: 10px;
+      color: white;
+      text-shadow: 1px 1px 3px black; /* 검은색 테두리 */
+    }
+
+    p {
+      font-size: 0.9em; /* 크기 줄이기 */
+      margin-bottom: 15px;
+      color: white;
+      text-shadow: 1px 1px 3px black; /* 검은색 테두리 */
+    }
+
+    .date-info {
+      font-size: 1.1em; /* 크기 줄이기 */
+      font-weight: bold;
+      color: #ffcc00;
+      text-shadow: 1px 1px 3px black; /* 검은색 테두리 */
+    }
+
+    .email-link {
+      display: inline-block;
+      margin-top: 10px; /* 여백 줄이기 */
+      padding: 5px 10px; /* 크기 줄이기 */
+      font-size: 0.9em; /* 글자 크기 줄이기 */
+      background-color: #ffffff; /* 버튼 흰색 */
+      color: #000000;
+      text-decoration: none;
+      border-radius: 5px;
+      border: 1px solid black; /* 테두리 두께 줄이기 */
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .email-link:hover {
+      background-color: #000000; /* 버튼 배경 검은색 */
+      color: #ffffff; /* 글씨 흰색 */
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>계정이 정지되었습니다.</h2>
+  <div class="date-info">
+    <p>정지 해제 날짜: <span th:text="${endDate}"></span></p>
+  </div>
+  <p>문의는 이메일로 연락주세요.</p>
+  <a href="mailto:inu.codin@gmail.com" class="email-link">inu.codin@gmail.com</a>
+</div>
+</body>
+</html>

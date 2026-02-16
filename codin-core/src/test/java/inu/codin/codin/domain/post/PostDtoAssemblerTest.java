@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.service.LikeService;
 import inu.codin.codin.domain.post.domain.hits.service.HitsService;
@@ -50,7 +50,7 @@ class PostDtoAssemblerTest {
 
     @BeforeEach
     void setUp() {
-        securityUtilsMock = Mockito.mockStatic(SecurityUtils.class);
+        securityUtilsMock = Mockito.mockStatic(SecurityUtil.class);
     }
 
     @AfterEach
@@ -160,7 +160,7 @@ class PostDtoAssemblerTest {
         List<PostEntity> posts = Arrays.asList(post1, post2);
         UserEntity user = createUserEntity();
 
-        given(SecurityUtils.getCurrentUserId()).willReturn(new ObjectId());
+        given(SecurityUtil.getCurrentUserId()).willReturn(new ObjectId().toHexString());
         given(userRepository.findById(any())).willReturn(Optional.of(user));
         given(s3Service.getDefaultProfileImageUrl()).willReturn("default.jpg");
         given(likeService.getLikeCount(any(), any())).willReturn(0);

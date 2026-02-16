@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.entity;
 
-import inu.codin.codin.common.dto.BaseTimeEntity;
+import inu.codin.common.entity.BaseTimeEntity;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

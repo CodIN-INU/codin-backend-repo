@@ -7,6 +7,7 @@ import inu.codin.codinticketingapi.domain.ticketing.dto.response.ParticipationRe
 import inu.codin.codinticketingapi.domain.ticketing.entity.*;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.redis.RedisParticipationService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
@@ -14,7 +15,7 @@ import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
-import inu.codin.codinticketingapi.security.util.SecurityUtil;
+import inu.codin.security.util.SecurityUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,8 @@ class ParticipationServiceTest {
     private TicketingService ticketingService;
     @Mock
     private UserClientService userClientService;
+    @Mock
+    private RedisEventService redisEventService;
     @Mock
     private EventRepository eventRepository;
     @Mock
@@ -79,12 +82,6 @@ class ParticipationServiceTest {
 
         event.updateStatus(EventStatus.ACTIVE);
 
-        Stock stock = Stock.builder()
-                .event(event)
-                .initialStock(100)
-                .build();
-        stock.updateStock(99);
-
         Participation participation = Participation.builder()
                 .event(event)
                 .ticketNumber(TICKET_NUMBER)
@@ -94,7 +91,8 @@ class ParticipationServiceTest {
         given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(EVENT_ID)).willReturn(Optional.of(event));
         given(redisParticipationService.getCachedParticipation(USER_ID, EVENT_ID)).willReturn(Optional.empty());
-        given(participationRepository.findByUserIdAndEvent(USER_ID, event)).willReturn(Optional.empty());
+        given(participationRepository.findByUserIdAndEventIdAndNotCanceled(USER_ID, EVENT_ID)).willReturn(Optional.empty());
+        given(redisEventService.getTicket(EVENT_ID)).willReturn(TICKET_NUMBER);
         given(participationRepository.save(any(Participation.class))).willReturn(participation);
 
         // when
@@ -114,7 +112,17 @@ class ParticipationServiceTest {
                 .name(USER_NAME)
                 .build(); // department, studentId 없음
 
+        Event event = Event.builder()
+                .id(EVENT_ID)
+                .title("테스트 이벤트")
+                .campus(Campus.SONGDO_CAMPUS)
+                .eventTime(LocalDateTime.now().minusDays(1))
+                .eventEndTime(LocalDateTime.now().plusDays(1).plusHours(2))
+                .build();
+        event.updateStatus(EventStatus.ACTIVE);
+
         given(userClientService.fetchUser()).willReturn(userInfo);
+        given(eventRepository.findById(EVENT_ID)).willReturn(Optional.of(event));
 
         // when & then
         assertThatThrownBy(() -> participationService.saveParticipation(EVENT_ID))
@@ -160,9 +168,10 @@ class ParticipationServiceTest {
                 .id(EVENT_ID)
                 .title("테스트 이벤트")
                 .campus(Campus.SONGDO_CAMPUS)
-                .eventTime(LocalDateTime.now().plusDays(1))
+                .eventTime(LocalDateTime.now().minusDays(1))
                 .eventEndTime(LocalDateTime.now().plusDays(1).plusHours(2))
                 .build();
+        event.updateStatus(EventStatus.ACTIVE);
 
         given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(EVENT_ID)).willReturn(Optional.of(event));
@@ -176,7 +185,7 @@ class ParticipationServiceTest {
         verify(userClientService).fetchUser();
         verify(eventRepository).findById(EVENT_ID);
         verify(redisParticipationService).getCachedParticipation(USER_ID, EVENT_ID);
-        verify(participationRepository, never()).findByUserIdAndEvent(any(), any());
+        verify(participationRepository, never()).findByUserIdAndEventIdAndNotCanceled(any(), any());
         verify(ticketingService, never()).decrement(any());
     }
 
@@ -190,7 +199,14 @@ class ParticipationServiceTest {
                 .studentId(STUDENT_ID)
                 .build();
 
-        Event event = Event.builder().id(EVENT_ID).build();
+        Event event = Event.builder()
+                .id(EVENT_ID)
+                .title("테스트 이벤트")
+                .campus(Campus.SONGDO_CAMPUS)
+                .eventTime(LocalDateTime.now().minusDays(1))
+                .eventEndTime(LocalDateTime.now().plusDays(1).plusHours(2))
+                .build();
+        event.updateStatus(EventStatus.ACTIVE);
 
         Participation existingParticipation = Participation.builder()
                 .event(event)
@@ -201,7 +217,7 @@ class ParticipationServiceTest {
         given(userClientService.fetchUser()).willReturn(userInfo);
         given(eventRepository.findById(EVENT_ID)).willReturn(Optional.of(event));
         given(redisParticipationService.getCachedParticipation(USER_ID, EVENT_ID)).willReturn(Optional.empty());
-        given(participationRepository.findByUserIdAndEvent(USER_ID, event)).willReturn(Optional.of(existingParticipation));
+        given(participationRepository.findByUserIdAndEventIdAndNotCanceled(USER_ID, EVENT_ID)).willReturn(Optional.of(existingParticipation));
 
         // when
         ParticipationResponse result = participationService.saveParticipation(EVENT_ID);

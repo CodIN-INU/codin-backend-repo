@@ -1,7 +1,6 @@
 package inu.codin.codin.domain.post.domain.comment.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.notification.service.NotificationService;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.comment.dto.request.CommentUpdateRequestDTO;
@@ -17,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,10 +32,10 @@ public class CommentCommandService {
     // 댓글 추가
     public void addComment(String id, CommentCreateRequestDTO requestDTO) {
 
-        ObjectId postId = ObjectIdUtil.toObjectId(id);
+        ObjectId postId = toObjectId(id);
         PostEntity post = postQueryService.findPostById(postId);
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         CommentEntity comment = CommentEntity.create(postId, userId, requestDTO);
         commentRepository.save(comment);
@@ -50,7 +51,7 @@ public class CommentCommandService {
     public void updateComment(String commentId, CommentUpdateRequestDTO requestDTO) {
         log.info("댓글 업데이트 요청. commentId: {}, 새로운 내용: {}", commentId, requestDTO.getContent());
 
-        CommentEntity comment = ownershipPolicy.assertCommentOwner(ObjectIdUtil.toObjectId(commentId));
+        CommentEntity comment = ownershipPolicy.assertCommentOwner(toObjectId(commentId));
 
         comment.updateComment(requestDTO.getContent());
         commentRepository.save(comment);
@@ -61,7 +62,7 @@ public class CommentCommandService {
 
     // 댓글 삭제 (Soft Delete)
     public void softDeleteComment(String commentId) {
-        CommentEntity comment = ownershipPolicy.assertCommentOwner(ObjectIdUtil.toObjectId(commentId));
+        CommentEntity comment = ownershipPolicy.assertCommentOwner(toObjectId(commentId));
 
         ObjectId postId = comment.getPostId();
         PostEntity post = postQueryService.findPostById(postId);

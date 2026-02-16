@@ -1,0 +1,24 @@
+# 이름 : application-prod.yml
+
+spring:
+  data:
+    mongodb:
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
+      authentication-database: ${MONGODB_AUTH_DATABASE:admin}
+
+security:
+  permit-all:
+    urls:
+      - "/ws-stomp/**"
+      - "/suspends"
+      - "/"
+      - "/favicon.ico"
+      - "/.well-known/**"
+      - "/actuator/health"
+  #투표 이벤트 공개 API
+  public-api:
+    urls:
+      - "/posts/category"
+      - "/posts/{postId}"
+      - "/comments/post/{postId}"

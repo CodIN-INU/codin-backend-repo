@@ -1,24 +1,16 @@
 package inu.codin.codin.domain.elasticsearch.document.dto;
 
 import inu.codin.codin.domain.lecture.entity.LectureSchedule;
-import lombok.Builder;
-import lombok.Getter;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ScheduleInfo {
-    @Field(type = FieldType.Keyword)
     private String day;
-
-    @Field(type = FieldType.Keyword)
     private String startTime;
-
-    @Field(type = FieldType.Keyword)
     private String endTime;
-
-    @Field(type = FieldType.Keyword)
     private String roomInfo;
 
     public static ScheduleInfo from(LectureSchedule schedule) {

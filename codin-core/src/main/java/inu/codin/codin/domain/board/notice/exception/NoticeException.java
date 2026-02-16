@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.board.notice.exception;
 
-import inu.codin.codin.common.exception.GlobalException;
+import inu.codin.common.exception.GlobalException;
 import lombok.Getter;
 
 @Getter

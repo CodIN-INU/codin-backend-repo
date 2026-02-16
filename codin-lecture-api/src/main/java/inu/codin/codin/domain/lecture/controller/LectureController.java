@@ -5,9 +5,10 @@ import inu.codin.codin.domain.lecture.dto.LecturePageResponse;
 import inu.codin.codin.domain.lecture.dto.LectureSearchListResponseDto;
 import inu.codin.codin.domain.lecture.entity.SortingOption;
 import inu.codin.codin.domain.lecture.service.LectureService;
-import inu.codin.codin.global.common.entity.Department;
-import inu.codin.codin.global.common.response.ListResponse;
-import inu.codin.codin.global.common.response.SingleResponse;
+
+import inu.codin.common.entity.Department;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

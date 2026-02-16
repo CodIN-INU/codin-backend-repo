@@ -1,6 +1,6 @@
 package inu.codin.codinticketingapi.domain.admin.controller;
 
-import inu.codin.codinticketingapi.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codinticketingapi.domain.admin.controller.swagger.EventAdminController;
 import inu.codin.codinticketingapi.domain.admin.dto.request.EventCreateRequest;
 import inu.codin.codinticketingapi.domain.admin.dto.request.EventUpdateRequest;

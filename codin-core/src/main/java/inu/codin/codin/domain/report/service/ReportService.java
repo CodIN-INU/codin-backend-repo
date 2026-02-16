@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.report.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.post.domain.comment.dto.response.CommentResponseDTO;
 import inu.codin.codin.domain.post.domain.comment.entity.CommentEntity;
 import inu.codin.codin.domain.post.domain.comment.repository.CommentRepository;
@@ -42,6 +42,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import inu.codin.codin.domain.post.dto.response.PostPageItemResponseDTO;
 
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -69,7 +71,7 @@ public class ReportService {
         log.info("신고 생성 요청 시작: {} ", reportCreateRequestDto);
 
         // 신고한 유저 검증
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         ObjectId reportTargetId = new ObjectId(reportCreateRequestDto.getReportTargetId());
 
 
@@ -157,7 +159,7 @@ public class ReportService {
     public void handleReport(ReportExecuteRequestDto requestDto) {
         log.info("신고 처리 요청: {}", requestDto.getReportTargetId());
         //현재 관리자 ID
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         ObjectId targetObjectId = new ObjectId(requestDto.getReportTargetId());
 
         // 해당 신고 대상에 대한 모든 신고 가져오기
@@ -267,7 +269,7 @@ public class ReportService {
         log.info(" 신고대상 유지 요청: 신고 ID: {}", reportTargetId);
 
         ObjectId targetObjectId = new ObjectId(reportTargetId);
-        ObjectId userId = SecurityUtils.getCurrentUserId(); // 현재 유저 ID
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId()); // 현재 유저 ID
 
         //  신고 존재 확인
         List<ReportEntity> reports = reportRepository.findByReportTargetId(targetObjectId);

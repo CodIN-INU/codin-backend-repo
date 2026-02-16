@@ -2,18 +2,14 @@ package inu.codin.codin.domain.elasticsearch.document.dto;
 
 import inu.codin.codin.domain.lecture.entity.LectureSemester;
 import inu.codin.codin.domain.lecture.entity.Semester;
-import lombok.Builder;
-import lombok.Getter;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class SemesterInfo {
-    @Field(type = FieldType.Integer)
     private Integer year;
-
-    @Field(type = FieldType.Integer)
     private Integer quarter;
 
     public static SemesterInfo from(LectureSemester lectureSemester) {

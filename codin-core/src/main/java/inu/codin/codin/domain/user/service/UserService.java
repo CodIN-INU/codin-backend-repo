@@ -1,8 +1,9 @@
 package inu.codin.codin.domain.user.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.service.JwtService;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.common.util.CookieUtil;
+import inu.codin.security.service.JwtService;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
@@ -14,6 +15,7 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
+import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
 import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
@@ -22,6 +24,7 @@ import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -53,7 +59,7 @@ public class UserService {
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllUserPosts(int pageNumber) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[게시글 조회] 유저 ID: {}, 페이지 번호: {}", userId, pageNumber);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
@@ -68,7 +74,7 @@ public class UserService {
     }
 
     public PostPageResponse getPostUserInteraction(int pageNumber, InteractionType interactionType) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저 상호작용 조회] 유저 ID: {}, 타입: {}, 페이지 번호: {}", userId, interactionType, pageNumber);
 
         PageRequest pageRequest = PageRequest.of(pageNumber, 20, Sort.by("createdAt").descending());
@@ -117,8 +123,8 @@ public class UserService {
         }
     }
 
-    public void deleteUser(HttpServletResponse response) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+    public void deleteUser(HttpServletRequest request, HttpServletResponse response) {
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
@@ -130,12 +136,14 @@ public class UserService {
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
 
-        jwtService.deleteToken(response);
+        CookieUtil.deleteCookie(request, response, "ACCESS_TOKEN");
+        CookieUtil.deleteCookie(request, response, "REFRESH_TOKEN");
+
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
 
     public UserInfoResponseDto getUserInfo() {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저 정보 조회] 유저 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -154,7 +162,7 @@ public class UserService {
             throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
         }
 
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -169,7 +177,7 @@ public class UserService {
     }
 
     public void updateUserProfile(MultipartFile profileImage) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[프로필 이미지 업데이트] 현재 사용자 ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
@@ -184,13 +192,45 @@ public class UserService {
         log.info("[프로필 이미지 업데이트 성공] 사용자 ID: {}, 프로필 이미지 URL: {}", userId, profileImageUrl);
     }
 
+    public void updateUserName(@Valid UserNameUpdateRequestDto request){
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
+        log.info("[유저 실명 수정] 현재 사용자 ID: {}, 요청 이름: {}", userId, request.getName());
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.info("[유저 실명 수정 실패] 유저 정보를 찾을 수 없음. 사용자 ID: {}", userId);
+                    return new NotFoundException("유저 정보를 찾을 수 없습니다.");
+                });
+
+        String newName = request.getName().trim();
+
+            if (newName.isEmpty()) {
+            throw new IllegalArgumentException("이름은 비어 있을 수 없습니다.");
+        }
+            if (newName.length() > 10) {
+            throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
+        }
+            if (!newName.matches("^[가-힣a-zA-Z]+$")) {
+            throw new IllegalArgumentException("이름은 한글 또는 영어만 입력 가능합니다.");
+        }
+
+            if (newName.equals(user.getName())) {
+            log.info("[유저 실명 수정] 변경 사항 없음. 사용자 ID: {}", userId);
+            return;
+        }
+
+            user.updateName(newName);
+            userRepository.save(user);
+
+            log.info("[유저 실명 수정 성공] 사용자 ID: {}, 변경 이름: {}", userId, newName);
+    }
     /**
      * 유저 티켓팅 수령 정보 반환
      * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
      */
     public UserTicketingParticipationInfoResponse getUserTicketingParticipationInfo() {
         return UserTicketingParticipationInfoResponse.of(
-                userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+                userRepository.findByUserId(toObjectId(SecurityUtil.getCurrentUserId()))
                         .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다.")));
     }
 
@@ -199,11 +239,12 @@ public class UserService {
      * @return UserTicketingParticipationInfoResponse 유저의 학번, 이름, 소속 Dto 반환
      */
     public UserTicketingParticipationInfoResponse updateUserTicketingParticipationInfo(UserTicketingParticipationInfoUpdateRequest updateRequest) {
-        UserEntity userEntity = userRepository.findByUserId(SecurityUtils.getCurrentUserId())
+        UserEntity userEntity = userRepository.findByUserId(toObjectId(SecurityUtil.getCurrentUserId()))
                 .orElseThrow(() -> new NotFoundException("유저 정보를 찾을 수 없습니다."));
 
         userEntity.updateParticipationInfo(updateRequest);
         userEntity = userRepository.save(userEntity);
+        log.info("User Ticketing Participation Update: Email: {}, Name:{}", userEntity.getEmail(),userEntity.getName());
         return UserTicketingParticipationInfoResponse.of(userEntity);
     }
 

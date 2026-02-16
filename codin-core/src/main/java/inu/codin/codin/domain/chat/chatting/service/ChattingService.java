@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.service;
 
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.chat.chatroom.entity.ChatRoom;
 import inu.codin.codin.domain.chat.chatroom.entity.ParticipantInfo;
 import inu.codin.codin.domain.chat.chatroom.exception.ChatRoomNotFoundException;
@@ -29,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +74,7 @@ public class ChattingService {
     }
 
     public ChattingAndUserIdResponseDto getAllMessage(String id, int page) {
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         ChatRoom chatRoom = chatRoomRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> {
                     log.warn("[채팅방 조회 실패] 채팅방 ID: {}를 찾을 수 없습니다.", id);
@@ -97,7 +99,7 @@ public class ChattingService {
 
         log.info("[메시지 조회 성공] 채팅방 ID: {}, 메시지 개수: {}", id, chattingResponseDto.size());
 
-        return new ChattingAndUserIdResponseDto(chattingResponseDto, SecurityUtils.getCurrentUserId().toString());
+        return new ChattingAndUserIdResponseDto(chattingResponseDto, SecurityUtil.getCurrentUserId().toString());
     }
 
     public List<String> sendImageMessage(List<MultipartFile> chatImages) {

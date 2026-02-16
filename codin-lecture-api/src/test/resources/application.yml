@@ -1,0 +1,102 @@
+spring:
+  application:
+    name: codin-lecture-api
+
+  profiles:
+    active: test
+
+  # Disable env file imports for test
+  config:
+    import: ""
+
+  jwt:
+    secret: test-jwt-secret-key-for-unit-tests-must-be-long-enough
+
+  # H2 in-memory database for tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Redis dummy config (RedisConfig is excluded via @Profile)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+    elasticsearch:
+      repositories:
+        enabled: false
+
+  # Spring AI - dummy key to satisfy auto-configuration
+  ai:
+    model:
+      chat: openai
+    openai:
+      api-key: test-dummy-api-key
+      chat:
+        options:
+          model: gpt-4.1-mini
+          temperature: 0.7
+
+  task:
+    scheduling:
+      pool:
+        size: 1
+        thread-name-prefix: scheduled-task-
+    execution:
+      pool:
+        core-size: 1
+        max-size: 2
+        queue-capacity: 10
+
+  # Elasticsearch dummy values (ElasticsearchConfig is excluded via @Profile)
+  elasticsearch:
+    username: dummy
+    password: dummy
+    uris: http://localhost:9200
+
+  # Exclude auto-configurations that require external services
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+# Elasticsearch dummy values (needed for @Value resolution if any remain)
+SPRING_ELASTICSEARCH_USERNAME: dummy
+SPRING_ELASTICSEARCH_PASSWORD: dummy
+SPRING_ELASTICSEARCH_URIS: http://localhost:9200
+CA_PATH: /tmp/dummy-ca.pem
+caPath: /tmp/dummy-ca.pem
+
+lecture:
+  python:
+    path: ./example
+  file:
+    path: ./example
+
+server:
+  port: 0
+  domain: http://localhost:8080
+  forward-headers-strategy: framework
+  feign:
+    url: http://localhost:8081
+
+security:
+  permit-all:
+    urls:
+      - "/**"
+  public-api:
+    urls: []
+
+logging:
+  level:
+    root: warn

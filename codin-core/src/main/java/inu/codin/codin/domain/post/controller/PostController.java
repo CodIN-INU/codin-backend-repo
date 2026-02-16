@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.post.controller;
 
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.request.PostAnonymousUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostContentUpdateRequestDTO;
 import inu.codin.codin.domain.post.dto.request.PostCreateRequestDTO;

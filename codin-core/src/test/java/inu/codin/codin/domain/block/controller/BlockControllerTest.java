@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.block.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.block.exception.BlockErrorCode;
 import inu.codin.codin.domain.block.exception.BlockException;
 import inu.codin.codin.domain.block.service.BlockService;

@@ -30,4 +30,12 @@ public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
     //정지 종료일(suspensionEndDate)이 현재 날짜보다 이전($lt)
     @Query("{'status': 'SUSPENDED', 'totalSuspensionEndDate': { $lt: ?0 }}")
     List<UserEntity> findSuspendedUsers(LocalDateTime now);
+
+    // 이름이 정확히 1글자(한글/영문), role=USER, status=ACTIVE
+    @Query("{ 'role': 'USER', 'status': 'ACTIVE', 'name': { $regex: '^[A-Za-z가-힣]$' } }")
+    List<UserEntity> findActiveUsersWithOneCharName();
+
+    @Query("{ 'role': 'ADMIN', 'status': 'ACTIVE' }")
+    List<UserEntity> findActiveAdmins();
+
 }

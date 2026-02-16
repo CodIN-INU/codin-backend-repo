@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.chat.chatting.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.chat.chatting.dto.request.ChattingRequestDto;
 import inu.codin.codin.domain.chat.chatting.service.ChattingService;
 import io.swagger.v3.oas.annotations.Operation;

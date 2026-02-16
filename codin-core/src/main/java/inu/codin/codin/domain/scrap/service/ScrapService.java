@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.scrap.service;
 
-import inu.codin.codin.common.exception.NotFoundException;
-import inu.codin.codin.common.security.util.SecurityUtils;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
@@ -12,6 +12,8 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static inu.codin.common.util.ObjectIdUtil.toObjectId;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class ScrapService {
     public String toggleScrap(String id) {
         log.info("스크랩 토글 요청 - postId: {}", id);
         ObjectId postId = new ObjectId(id);
-        ObjectId userId = SecurityUtils.getCurrentUserId();
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
 
         postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> {

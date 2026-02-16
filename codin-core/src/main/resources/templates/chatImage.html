@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+  <style>
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      height: 200px;
+      overflow-y: scroll;
+    }
+  </style>
+</head>
+<body>
+<input type="file" id="fileInput" multiple />
+<button id="sendImageButton">이미지 전송</button>
+<input type="text" id="messageInput" placeholder="메시지를 입력하세요" />
+<button id="sendButton">전송</button>
+
+<div id="messages"></div>
+
+<script>
+  const token = localStorage.getItem('token');
+  const socket = new WebSocket('wss://codin.co.kr/ws-stomp');
+  const stompClient = Stomp.over(socket);
+
+  const chatRoomId = '67682ae249934c34a41d5381';
+
+  const headers = {
+    'Authorization': token
+  };
+
+  stompClient.connect(headers, function (frame) {
+    console.log('Connected: ' + frame);
+
+    // Subscribe to the chat room
+    stompClient.subscribe('/queue/' + chatRoomId, function (message) {
+      const receivedMessage = JSON.parse(message.body);
+      displayMessage(receivedMessage.body.data);
+    });
+
+    // Text message send button
+    document.getElementById('sendButton').addEventListener('click', function () {
+      const contents = document.getElementById('messageInput').value.trim();
+      if (!contents) return;
+      const message = {type: "SEND", content: contents, contentType : "TEXT"};
+      stompClient.send("/pub/chats/" + chatRoomId, headers, JSON.stringify(message));
+      document.getElementById('messageInput').value = '';
+    });
+
+    // Image message send button
+    document.getElementById('sendImageButton').addEventListener('click', async function () {
+      const files = document.getElementById('fileInput').files;
+      if (files.length === 0) {
+        alert("이미지를 선택해주세요.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('chatImages', files[i]);
+      }
+
+      try {
+        const response = await fetch(`/chats/image`, {
+          method: 'POST',
+          headers: {
+            'Authorization': token
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error("이미지 전송 중 오류 발생");
+        }
+
+        const result = await response.json();
+        console.log("Uploaded URLs:", result.data);
+
+        // Send the image URLs as a chat message
+        result.data.forEach(url => {
+          const message = {type: "SEND", content: url, contentType: 'IMAGE'};
+          stompClient.send(`/pub/chats/${chatRoomId}`, headers, JSON.stringify(message));
+        });
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+    });
+  })
+
+
+    // Display messages on the UI
+  function displayMessage(message) {
+    const messagesDiv = document.getElementById('messages');
+    const messageElement = document.createElement('div');
+
+    if (message.contentType === 'IMAGE') {
+      const imgElement = document.createElement('img');
+      imgElement.src = message.content; // Assume `content` contains the image URL
+      imgElement.style.maxWidth = '100%';
+      imgElement.style.maxHeight = '100px';
+      messageElement.appendChild(imgElement);
+    } else {
+      messageElement.textContent = message.content;
+    }
+
+    messagesDiv.appendChild(messageElement);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+</script>
+</body>
+</html>

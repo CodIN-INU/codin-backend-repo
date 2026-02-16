@@ -15,7 +15,7 @@ import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
-import inu.codin.codinticketingapi.security.util.SecurityUtil;
+import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -93,7 +93,7 @@ public class ParticipationService {
             // 재고 줄임
             Integer ticketNumber = redisEventService.getTicket(event.getId());
             ticketingService.decrement(event.getId());
-            log.info("ticketNumber: {}", ticketNumber);
+            log.info("ticketNumber: {}, user info: {}", ticketNumber, userInfoResponse.getUserId());
 
             Participation participation = Participation.builder()
                     .event(event)

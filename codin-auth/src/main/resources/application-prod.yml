@@ -1,0 +1,13 @@
+# 이름 : application-prod.yml
+
+security:
+  permit-all:
+    urls:
+      - "/auth/**"
+      - "/login/oauth2/code/**"
+      - "/"
+      - "/favicon.ico"
+      - "/.well-known/**"
+      - "/actuator/health"
+  public-api:
+    urls:

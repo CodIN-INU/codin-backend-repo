@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.config;
 
 import inu.codin.codinticketingapi.common.converter.CampusConverter;
-import inu.codin.codinticketingapi.common.util.MultipartJackson2HttpMessageConverter;
+import inu.codin.common.util.MultipartJackson2HttpMessageConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;

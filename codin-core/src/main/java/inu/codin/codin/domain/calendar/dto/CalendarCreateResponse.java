@@ -1,8 +1,8 @@
 package inu.codin.codin.domain.calendar.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inu.codin.codin.common.dto.Department;
-import inu.codin.codin.common.util.ObjectIdUtil;
+import inu.codin.common.entity.Department;
+import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.calendar.entity.CalendarEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

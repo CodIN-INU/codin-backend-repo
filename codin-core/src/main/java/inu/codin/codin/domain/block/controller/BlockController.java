@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.block.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.block.service.BlockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,7 +1,7 @@
 package inu.codin.codin.domain.chat.chatroom.controller;
 
-import inu.codin.codin.common.response.ListResponse;
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.ListResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.chat.chatroom.dto.request.ChatRoomCreateRequestDto;
 import inu.codin.codin.domain.chat.chatroom.dto.response.ChatRoomListResponseDto;
 import inu.codin.codin.domain.chat.chatroom.service.ChatRoomService;

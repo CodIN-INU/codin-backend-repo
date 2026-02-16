@@ -2,7 +2,7 @@ package inu.codin.codin.domain.review.service;
 
 import inu.codin.codin.domain.review.entity.UserReviewStats;
 import inu.codin.codin.domain.review.repository.UserReviewStatsRepository;
-import inu.codin.codin.global.auth.util.SecurityUtils;
+import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class UserReviewStatsService {
     }
 
     public boolean isOpenKeyword() {
-        String userId = SecurityUtils.getUserId();
+        String userId = SecurityUtil.getUserId();
         return userReviewStatsRepository.findByUserId(userId)
                         .map(UserReviewStats::isOpenKeyword)
                         .orElse(false);

@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.post.domain.poll.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollCreateRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.dto.request.PollVotingRequestDTO;
 import inu.codin.codin.domain.post.domain.poll.service.PollCommandService;

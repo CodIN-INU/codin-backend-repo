@@ -1,6 +1,6 @@
 package inu.codin.codin.domain.email.controller;
 
-import inu.codin.codin.common.response.SingleResponse;
+import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.email.dto.request.JoinEmailCheckRequestDto;
 import inu.codin.codin.domain.email.dto.request.JoinEmailSendRequestDto;
 import inu.codin.codin.domain.email.service.JoinEmailAuthService;
