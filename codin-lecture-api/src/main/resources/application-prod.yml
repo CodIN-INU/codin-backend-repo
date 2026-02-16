@@ -1,6 +1,11 @@
 # 이름 : application-prod.yml
 
 security:
-  #공개 API
+  permit-all:
+    urls:
+      - "/"
+      - "/favicon.ico"
+      - "/.well-known/**"
+      - "/actuator/health"
   public-api:
     urls:

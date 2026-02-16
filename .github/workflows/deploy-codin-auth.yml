@@ -6,7 +6,7 @@ on:
       - 'codin-auth/**'
       - 'codin-common/**'
       - 'codin-security/**'
-      - 'docker-compose.yml'
+      - 'docker/prod/docker-compose.yml'
   workflow_dispatch:
 
 jobs:
@@ -59,10 +59,11 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          password: ${{ secrets.PASSWORD }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           port: ${{ secrets.PORT }}
-          source: "docker-compose.yml"
+          source: "docker/prod/docker-compose.yml"
           target: "/opt/mono-repo"
+          strip_components: 2
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
@@ -70,7 +71,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          password: ${{ secrets.PASSWORD }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
             echo ${{ secrets.PASSWORD }} | sudo -S su -c "

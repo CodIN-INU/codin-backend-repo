@@ -7,7 +7,7 @@ services:
     volumes:
       - /opt/mono-repo/backend-data/:/opt/project/backend-data/
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
     networks:
@@ -20,7 +20,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
     networks:
@@ -32,6 +32,8 @@ services:
     container_name: codin-ticketing-api
     ports:
       - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
     networks:
@@ -43,6 +45,8 @@ services:
     container_name: codin-ticketing-sse
     ports:
       - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
     networks:
@@ -56,6 +60,8 @@ services:
       - "8085:8080"
     volumes:
       - /opt/mono-repo/certs/:/app/certs/
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     env_file:
       - .env
     networks:

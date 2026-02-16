@@ -1,8 +1,13 @@
 # 이름 : application-prod.yml
 
 security:
-  #공개 API
+  permit-all:
+    urls:
+      - "/"
+      - "/favicon.ico"
+      - "/.well-known/**"
+      - "/actuator/health"
+  #Sse 구독 엔드포인트 허용
   public-api:
     urls:
-      #Sse 구독 엔드포인트 허용
-      "/subscribe/**""
+      - "/subscribe/**"

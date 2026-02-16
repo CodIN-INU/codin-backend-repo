@@ -1,6 +1,14 @@
 # 이름 : application-prod.yml
 
 security:
+  permit-all:
+    urls:
+      - "/ws-stomp/**"
+      - "/suspends"
+      - "/"
+      - "/favicon.ico"
+      - "/.well-known/**"
+      - "/actuator/health"
   #투표 이벤트 공개 API
   public-api:
     urls:
