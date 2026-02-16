@@ -46,6 +46,7 @@ out/
 ### Secrets ###
 **/key/*.p8
 **/data/fcm/*.json
+**/src/main/resources/data/
 
 logs
 
