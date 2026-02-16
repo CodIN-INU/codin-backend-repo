@@ -16,9 +16,9 @@ import java.util.TimeZone;
 @EnableScheduling
 @EnableFeignClients
 @EnableAsync
-public class CodinApplication {
+public class CodinCoreApplication {
 	public static void main(String[] args) {
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-		SpringApplication.run(CodinApplication.class, args);
+		SpringApplication.run(CodinCoreApplication.class, args);
 	}
 }
