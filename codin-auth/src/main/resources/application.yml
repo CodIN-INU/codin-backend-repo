@@ -30,6 +30,10 @@ google:
     project-id: ${GOOGLE_FIREBASE_PROJECT_ID}
     key-path: ${GOOGLE_FIREBASE_KEY_PATH}
 
+feign:
+  user-service:
+    url: ${USER_CLIENT_URL:http://localhost:8080}
+
 server:
   servlet:
     encoding:
