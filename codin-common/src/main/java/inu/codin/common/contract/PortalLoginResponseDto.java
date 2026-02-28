@@ -1,5 +1,6 @@
 package inu.codin.common.contract;
 
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,6 @@ public class PortalLoginResponseDto {
     private String studentId;
     private String name;
     private Department department;
-    private String college;
+    private College college;
     private Boolean undergraduate;
 }

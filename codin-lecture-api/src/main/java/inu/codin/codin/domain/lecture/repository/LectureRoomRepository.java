@@ -10,6 +10,11 @@ import java.util.List;
 @Repository
 public interface LectureRoomRepository extends JpaRepository<LectureRoom, Long> {
 
-    @Query("SELECT lr FROM LectureRoom lr LEFT JOIN FETCH lr.schedules")
-    List<LectureRoom> findAllWithSchedules();
+    @Query("""
+    SELECT DISTINCT lr
+    FROM LectureRoom lr
+    LEFT JOIN FETCH lr.schedules s
+    LEFT JOIN FETCH s.lecture l
+""")
+    List<LectureRoom> findAllWithSchedulesAndLectures();
 }

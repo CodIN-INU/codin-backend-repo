@@ -3,6 +3,7 @@ package inu.codin.codin.domain.lecture.service;
 import inu.codin.codin.domain.lecture.dto.LectureRoomResponseDto;
 import inu.codin.codin.domain.lecture.entity.LectureRoom;
 import inu.codin.codin.domain.lecture.repository.LectureRoomRepository;
+import inu.codin.common.entity.College;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 public class LectureRoomService {
 
     private final LectureRoomRepository lectureRoomRepository;
+    private final UserCollegeService userCollegeService;
 
     /**
      * List 인덱스마다 층고를 뜻하며, 각각 강의실마다 진행되는 강의 스케줄을 Map 형식으로 관리
@@ -26,7 +28,8 @@ public class LectureRoomService {
     public List<Map<Integer, List<LectureRoomResponseDto>>> statusOfEmptyRoom() {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek today = now.getDayOfWeek();
-        List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedules();
+        List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
+        College userCollege = userCollegeService.getCurrentUserCollege();
 
         List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 
@@ -37,6 +40,7 @@ public class LectureRoomService {
                 if ((room / 100) == floor) {
                     List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
                                     .filter(schedule -> schedule.getDayOfWeek().equals(today))
+                                    .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
                                     .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
                                     .toList();
                     floorMap.put(room, emptyRooms);
