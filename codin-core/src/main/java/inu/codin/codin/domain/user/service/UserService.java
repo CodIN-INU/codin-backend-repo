@@ -167,24 +167,11 @@ public class UserService {
                 });
 
         user.setUserInfo(setUserInfoRequestDto);
+        userRepository.save(user);
     }
 
     @Transactional
     public void updateNicknameAndName(UpdateNicknameAndNameRequestDto updateNicknameAndNameRequestDto) {
-
-        Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateNicknameAndNameRequestDto.nickname());
-        if (nickNameDuplicate.isPresent()){
-            throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
-        }
-
-        String newName = updateNicknameAndNameRequestDto.name().trim();
-        if (newName.length() > 10) {
-            throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
-        }
-        if (!newName.matches("^[가-힣a-zA-Z]+$")) {
-            throw new IllegalArgumentException("이름은 한글 또는 영어만 입력 가능합니다.");
-        }
-
         ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
 
@@ -194,8 +181,28 @@ public class UserService {
                     return new NotFoundException("유저 정보를 찾을 수 없습니다.");
                 });
 
-        user.updateNickname(updateNicknameAndNameRequestDto.nickname());
-        user.updateName(newName);
+        if (updateNicknameAndNameRequestDto.nickname() != null) {
+            Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateNicknameAndNameRequestDto.nickname());
+            if (nickNameDuplicate.isPresent()){
+                throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
+            }
+
+            user.updateNickname(updateNicknameAndNameRequestDto.nickname());
+        }
+
+        if (updateNicknameAndNameRequestDto.name() != null) {
+            String newName = updateNicknameAndNameRequestDto.name().trim();
+            if (newName.length() > 10) {
+                throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
+            }
+            if (!newName.matches("^[가-힣a-zA-Z]+$")) {
+                throw new IllegalArgumentException("이름은 한글 또는 영어만 입력 가능합니다.");
+            }
+
+            user.updateName(newName);
+        }
+
+        userRepository.save(user);
         log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, updateNicknameAndNameRequestDto);
     }
 

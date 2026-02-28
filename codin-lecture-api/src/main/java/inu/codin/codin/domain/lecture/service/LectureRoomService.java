@@ -30,6 +30,9 @@ public class LectureRoomService {
         DayOfWeek today = now.getDayOfWeek();
         List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
         College userCollege = userCollegeService.getCurrentUserCollege();
+        if (userCollege == null) {
+            return List.of();
+        }
 
         List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 
@@ -40,6 +43,8 @@ public class LectureRoomService {
                 if ((room / 100) == floor) {
                     List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
                                     .filter(schedule -> schedule.getDayOfWeek().equals(today))
+                                    .filter(schedule -> schedule.getLecture() != null)
+                                    .filter(schedule -> schedule.getLecture().getCollege() != null)
                                     .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
                                     .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
                                     .toList();
