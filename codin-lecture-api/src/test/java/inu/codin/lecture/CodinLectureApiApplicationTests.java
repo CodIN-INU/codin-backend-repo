@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@SpringBootTest
+@SpringBootTest(classes = CodinLectureApiApplication.class)
 @ActiveProfiles("test")
 class CodinLectureApiApplicationTests {
 
