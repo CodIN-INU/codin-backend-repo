@@ -24,7 +24,6 @@ class CodinLectureApiApplicationTests {
             "inu.codin.codin.domain.lecture",
             "inu.codin.codin.domain.like",
             "inu.codin.codin.domain.review",
-            "inu.codin.codin.global",
             "inu.codin.codin.domain.user.service"
     })
     static class TestApp { }
