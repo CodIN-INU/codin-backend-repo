@@ -63,10 +63,10 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public void setUserInfo(SetUserInfoRequestDto setUserInfoRequestDto) {
-        this.nickname = setUserInfoRequestDto.getNickname();
-        this.name = setUserInfoRequestDto.getName();
-        this.college = setUserInfoRequestDto.getCollege();
-        this.department = setUserInfoRequestDto.getDepartment();
+        this.nickname = setUserInfoRequestDto.nickname();
+        this.name = setUserInfoRequestDto.name();
+        this.college = setUserInfoRequestDto.college();
+        this.department = setUserInfoRequestDto.department();
     }
 
     public void updateName(String name) {
