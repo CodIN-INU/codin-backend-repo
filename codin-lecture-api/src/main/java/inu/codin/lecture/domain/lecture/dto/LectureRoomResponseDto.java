@@ -1,7 +1,8 @@
-package inu.codin.lecture.domain.lecture.dto;
+package inu.codin.codin.domain.lecture.dto;
 
-import inu.codin.lecture.domain.lecture.entity.LectureSchedule;
-import inu.codin.lecture.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.lecture.entity.Lecture;
+import inu.codin.codin.domain.lecture.entity.LectureSchedule;
+import inu.codin.common.entity.College;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,13 +27,17 @@ public class LectureRoomResponseDto {
     @Schema(description = "종료 시간", example = "18:00")
     private String endTime;
 
+    @Schema(description = "단과대", example = "INFORMATION_TECHNOLOGY")
+    private College college;
+
     @Builder
-    public LectureRoomResponseDto(String lectureNm, String professor, int roomNum, String startTime, String endTime) {
+    public LectureRoomResponseDto(String lectureNm, String professor, int roomNum, String startTime, String endTime, College college) {
         this.lectureNm = lectureNm;
         this.professor = professor;
         this.roomNum = roomNum;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.college = college;
     }
 
     public static LectureRoomResponseDto of(Lecture lecture, int room, LectureSchedule schedule) {
@@ -42,6 +47,7 @@ public class LectureRoomResponseDto {
                 .roomNum(room)
                 .startTime(schedule.getStart())
                 .endTime(schedule.getEnd())
+                .college(lecture.getCollege())
                 .build();
     }
 
