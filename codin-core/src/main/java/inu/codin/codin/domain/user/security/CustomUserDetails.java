@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.user.security;
 
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.security.entity.UserRole;
@@ -24,6 +25,7 @@ public class CustomUserDetails implements UserDetails {
     private final String name;
     private final String nickname;
     private final String profileImageUrl;
+    private final College college;
     private final Department department;
     private final UserRole role;
     private final UserStatus status;
@@ -31,7 +33,7 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Builder
-    public CustomUserDetails(ObjectId id, String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, UserRole role, UserStatus status, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(ObjectId id, String email, String password, String studentId, String name, String nickname, String profileImageUrl, College college, Department department, UserRole role, UserStatus status, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -39,6 +41,7 @@ public class CustomUserDetails implements UserDetails {
         this.name = name;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
+        this.college = college;
         this.department = department;
         this.role = role;
         this.status = status;
@@ -54,6 +57,7 @@ public class CustomUserDetails implements UserDetails {
                 .name(userEntity.getName())
                 .nickname(userEntity.getNickname())
                 .profileImageUrl(userEntity.getProfileImageUrl())
+                .college(userEntity.getCollege())
                 .department(userEntity.getDepartment())
                 .role(userEntity.getRole())
                 .status(userEntity.getStatus())

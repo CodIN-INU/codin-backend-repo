@@ -1,11 +1,13 @@
 package inu.codin.codin.domain.user.entity;
 
+import inu.codin.codin.domain.notification.entity.NotificationPreference;
+import inu.codin.codin.domain.user.dto.request.SetUserInfoRequestDto;
+import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.common.contract.PortalLoginResponseDto;
 import inu.codin.common.entity.BaseTimeEntity;
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import inu.codin.security.entity.UserRole;
-import inu.codin.codin.domain.notification.entity.NotificationPreference;
-import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +38,7 @@ public class UserEntity extends BaseTimeEntity {
 
     private Department department;
 
-    private String college;
+    private College college;
 
     private UserRole role;
 
@@ -47,17 +49,24 @@ public class UserEntity extends BaseTimeEntity {
     private NotificationPreference notificationPreference = new NotificationPreference();
 
     @Builder
-    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, Department department, String college, UserRole role, UserStatus status) {
+    public UserEntity(String email, String password, String studentId, String name, String nickname, String profileImageUrl, College college, Department department, UserRole role, UserStatus status) {
         this.email = email;
         this.password = password;
         this.studentId = studentId;
         this.name = name;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.department = department;
         this.college = college;
+        this.department = department;
         this.role = role;
         this.status = status;
+    }
+
+    public void setUserInfo(SetUserInfoRequestDto setUserInfoRequestDto) {
+        this.nickname = setUserInfoRequestDto.getNickname();
+        this.name = setUserInfoRequestDto.getName();
+        this.college = setUserInfoRequestDto.getCollege();
+        this.department = setUserInfoRequestDto.getDepartment();
     }
 
     public void updateName(String name) {

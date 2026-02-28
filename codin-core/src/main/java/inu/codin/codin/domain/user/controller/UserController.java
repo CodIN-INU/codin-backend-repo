@@ -1,10 +1,8 @@
 package inu.codin.codin.domain.user.controller;
 
+import inu.codin.codin.domain.user.dto.request.*;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
-import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
-import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.service.UserService;
@@ -84,6 +82,26 @@ public class UserController {
     public ResponseEntity<SingleResponse<UserInfoResponseDto>> getUserInfo(){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 반환 완료", userService.getUserInfo()));
+    }
+
+    @Operation(
+            summary = "유저 초기 정보 설정"
+    )
+    @PostMapping
+    public ResponseEntity<SingleResponse<?>> setUserInfo(@RequestBody @Valid SetUserInfoRequestDto setUserInfoRequestDto){
+        userService.setUserInfo(setUserInfoRequestDto);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 초기 정보 설정 완료", null));
+    }
+
+    @Operation(
+            summary = "유저 닉네임, 이름 수정"
+    )
+    @PutMapping("/nickname-name")
+    public ResponseEntity<SingleResponse<?>> updateNicknameAndName(@RequestBody @Valid UpdateNicknameAndNameRequestDto updateNicknameAndNameRequestDto){
+        userService.updateNicknameAndName(updateNicknameAndNameRequestDto);
+        return ResponseEntity.ok()
+                .body(new SingleResponse<>(200, "유저 닉네임, 이름 수정 완료", null));
     }
 
     @Operation(

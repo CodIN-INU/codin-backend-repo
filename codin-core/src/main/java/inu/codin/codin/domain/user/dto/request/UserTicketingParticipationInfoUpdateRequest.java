@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.user.dto.request;
 
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,9 @@ import lombok.Getter;
 @Builder
 @Schema(description = "유저 티켓팅 수령자 정보 Update Dto")
 public class UserTicketingParticipationInfoUpdateRequest {
+
+    @Schema(description = "단과대", example = "공과대학")
+    private College college;
 
     @Schema(description = "학과", example = "컴퓨터공학부")
     private Department department;
