@@ -22,7 +22,7 @@ public class LectureRoomController {
             summary = "오늘의 강의 현황",
             description = "당일의 요일에 따라 층마다 호실에서의 수업 내용 반환"
     )
-    @GetMapping("/empty")
+    @GetMapping("/empty/mongo")
     public ResponseEntity<?> statusOfEmptyRoom(){
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "오늘의 강의실 현황 반환", lectureRoomService.statusOfEmptyRoom()));
