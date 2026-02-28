@@ -1,9 +1,9 @@
-package inu.codin.lecture.domain.lecture.service;
+package inu.codin.codin.domain.lecture.service;
 
+import inu.codin.codin.domain.lecture.dto.LectureRoomResponseDto;
+import inu.codin.codin.domain.lecture.entity.LectureRoom;
+import inu.codin.codin.domain.lecture.repository.LectureRoomRepository;
 import inu.codin.common.entity.College;
-import inu.codin.lecture.domain.lecture.dto.LectureRoomResponseDto;
-import inu.codin.lecture.domain.lecture.entity.LectureRoom;
-import inu.codin.lecture.domain.lecture.repository.LectureRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +30,9 @@ public class LectureRoomService {
         DayOfWeek today = now.getDayOfWeek();
         List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
         College userCollege = userCollegeService.getCurrentUserCollege();
+        if (userCollege == null) {
+            return List.of();
+        }
 
         List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 
@@ -39,10 +42,12 @@ public class LectureRoomService {
                 int room = lr.getRoomNum();
                 if ((room / 100) == floor) {
                     List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
-                            .filter(schedule -> schedule.getDayOfWeek().equals(today))
-                            .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
-                            .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
-                            .toList();
+                                    .filter(schedule -> schedule.getDayOfWeek().equals(today))
+                                    .filter(schedule -> schedule.getLecture() != null)
+                                    .filter(schedule -> schedule.getLecture().getCollege() != null)
+                                    .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
+                                    .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
+                                    .toList();
                     floorMap.put(room, emptyRooms);
                 }
             }

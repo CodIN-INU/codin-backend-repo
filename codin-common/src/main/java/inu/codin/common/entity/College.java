@@ -1,5 +1,7 @@
 package inu.codin.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -24,4 +26,15 @@ public enum College {
     OTHERS("타과대");
 
     private final String displayName;
+
+    @JsonCreator
+    public static College from(String value) {
+        for (College c : values()) {
+            if (c.name().equals(value) || c.getDisplayName().equals(value)) return c;
+        }
+        return OTHERS;
+    }
+
+    @JsonValue
+    public String toValue() { return this.name(); }
 }
