@@ -24,7 +24,7 @@ public class LectureRoomController {
 
     @Operation(
             summary = "오늘의 강의 현황",
-            description = "당일의 요일에 따라 층마다 호실에서의 수업 내용 반환" +
+            description = "당일의 요일에 따라 층마다 호실에서의 수업 내용 반환 <br><br>" +
                     "유저의 단과대에 해당하는 강의실의 수업 내용만 반환 [유저의 단과대가 없을 경우 빈 리스트 반환]"
     )
     @GetMapping("/empty")
