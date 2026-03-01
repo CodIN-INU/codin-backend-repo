@@ -8,6 +8,8 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,14 +20,21 @@ class CodinLectureApiApplicationTests {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @ComponentScan(basePackages = {
-            "inu.codin.codin.domain.admin",
-            "inu.codin.codin.domain.elasticsearch",
-            "inu.codin.codin.domain.lecture",
-            "inu.codin.codin.domain.like",
-            "inu.codin.codin.domain.review",
-            "inu.codin.codin.domain.user.service"
-    })
+    @EnableJpaAuditing
+    @ComponentScan(
+            basePackages = "inu.codin.codin",
+            excludeFilters = {
+                    @ComponentScan.Filter(
+                            type = FilterType.ASSIGNABLE_TYPE,
+                            classes = {
+                                    inu.codin.codin.common.config.SwaggerConfig.class,
+                                    inu.codin.codin.global.config.SwaggerConfig.class,
+                                    inu.codin.codin.TestController.class,
+                                    inu.codin.codin.global.LectureTestController.class
+                            }
+                    )
+            }
+    )
     static class TestApp { }
 
     @MockitoBean

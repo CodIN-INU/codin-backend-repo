@@ -1,8 +1,8 @@
-package inu.codin.codin.domain.lecture.service;
+package inu.codin.lecture.domain.lecture.service;
 
-import inu.codin.codin.domain.lecture.dto.LectureRoomResponseDto;
-import inu.codin.codin.domain.lecture.entity.LectureRoom;
-import inu.codin.codin.domain.lecture.repository.LectureRoomRepository;
+import inu.codin.lecture.domain.lecture.dto.LectureRoomResponseDto;
+import inu.codin.lecture.domain.lecture.entity.LectureRoom;
+import inu.codin.lecture.domain.lecture.repository.LectureRoomRepository;
 import inu.codin.common.entity.College;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

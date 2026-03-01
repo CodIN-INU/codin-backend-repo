@@ -1,7 +1,7 @@
-package inu.codin.codin.domain.lecture.dto;
+package inu.codin.lecture.domain.lecture.dto;
 
-import inu.codin.codin.domain.lecture.entity.Lecture;
-import inu.codin.codin.domain.lecture.entity.LectureSchedule;
+import inu.codin.lecture.domain.lecture.entity.Lecture;
+import inu.codin.lecture.domain.lecture.entity.LectureSchedule;
 import inu.codin.common.entity.College;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
