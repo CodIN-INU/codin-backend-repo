@@ -1,0 +1,24 @@
+package inu.codin.lecture.global.feign;
+
+import feign.RequestInterceptor;
+import inu.codin.security.util.SecurityUtil;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FeignConfig {
+
+    @Bean
+    public RequestInterceptor requestInterceptor() {
+        return requestTemplate -> {
+            String jwtToken = getJwtToken();
+            if (jwtToken != null && !jwtToken.isEmpty()) {
+                requestTemplate.header("Authorization", "Bearer " + jwtToken);
+            }
+        };
+    }
+
+    private String getJwtToken() {
+        return SecurityUtil.getUserToken();
+    }
+}

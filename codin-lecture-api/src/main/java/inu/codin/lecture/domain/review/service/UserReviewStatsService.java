@@ -1,0 +1,31 @@
+package inu.codin.lecture.domain.review.service;
+
+import inu.codin.lecture.domain.review.entity.UserReviewStats;
+import inu.codin.lecture.domain.review.repository.UserReviewStatsRepository;
+import inu.codin.security.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserReviewStatsService {
+
+    private static final int KEYWORD_UNLOCK_THRESHOLD = 3;
+    private final UserReviewStatsRepository userReviewStatsRepository;
+
+    public void updateStats(String userId) {
+        UserReviewStats userReviewStats = userReviewStatsRepository.findByUserId(userId)
+                        .orElseGet(() -> new UserReviewStats(userId));
+        userReviewStats.increaseCount();
+        if (!userReviewStats.isOpenKeyword() && userReviewStats.getCountOfReviews() >= KEYWORD_UNLOCK_THRESHOLD)
+            userReviewStats.canOpenKeyword();
+        userReviewStatsRepository.save(userReviewStats);
+    }
+
+    public boolean isOpenKeyword() {
+        String userId = SecurityUtil.getUserId();
+        return userReviewStatsRepository.findByUserId(userId)
+                        .map(UserReviewStats::isOpenKeyword)
+                        .orElse(false);
+    }
+}
