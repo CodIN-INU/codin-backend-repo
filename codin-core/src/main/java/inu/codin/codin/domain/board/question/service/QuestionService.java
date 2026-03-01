@@ -53,7 +53,7 @@ public class QuestionService {
     }
 
     private void validateDepartment(Department department) {
-        if (!(department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.EMBEDDED) || department.equals(Department.IT_COLLEGE))) {
+        if (!(department.equals(Department.COMPUTER_SCI) || department.equals(Department.INFO_COMM) || department.equals(Department.EMBEDDED))) {
             throw new QuestionException(QuestionErrorCode.INVALID_DEPARTMENT);
         }
     }
