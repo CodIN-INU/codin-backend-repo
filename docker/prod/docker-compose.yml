@@ -60,6 +60,7 @@ services:
       - "8085:8085"
     volumes:
       - /opt/mono-repo/certs/:/app/certs/
+      - /opt/mono-repo/backend-data/:/opt/project/backend-data/
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     env_file:
