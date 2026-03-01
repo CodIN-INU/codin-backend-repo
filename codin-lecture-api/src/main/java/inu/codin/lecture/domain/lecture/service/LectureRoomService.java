@@ -1,9 +1,11 @@
 package inu.codin.lecture.domain.lecture.service;
 
+import inu.codin.common.entity.College;
 import inu.codin.lecture.domain.lecture.dto.LectureRoomResponseDto;
 import inu.codin.lecture.domain.lecture.entity.LectureRoom;
 import inu.codin.lecture.domain.lecture.repository.LectureRoomRepository;
-import inu.codin.common.entity.College;
+import inu.codin.lecture.domain.user.dto.UserInfoResponse;
+import inu.codin.lecture.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ import java.util.Map;
 public class LectureRoomService {
 
     private final LectureRoomRepository lectureRoomRepository;
-    private final UserCollegeService userCollegeService;
+    private final UserClientService userClientService;
 
     /**
      * List 인덱스마다 층고를 뜻하며, 각각 강의실마다 진행되는 강의 스케줄을 Map 형식으로 관리
@@ -29,7 +31,9 @@ public class LectureRoomService {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek today = now.getDayOfWeek();
         List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
-        College userCollege = userCollegeService.getCurrentUserCollege();
+
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
+        College userCollege = userInfoResponse.getCollege();
         if (userCollege == null) {
             return List.of();
         }

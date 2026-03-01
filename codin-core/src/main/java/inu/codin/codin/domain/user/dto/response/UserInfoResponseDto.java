@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.user.dto.response;
 
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.security.entity.UserRole;
@@ -16,17 +17,19 @@ public class UserInfoResponseDto {
     private String name;
     private String profileImageUrl;
     private String nickname;
+    private College college;
     private Department department;
     private UserRole userRole;
 
     @Builder
-    public UserInfoResponseDto(String _id, String email, String studentId, String name, String profileImageUrl, String nickname, Department department, UserRole userRole) {
+    public UserInfoResponseDto(String _id, String email, String studentId, String name, String profileImageUrl, String nickname, College college, Department department, UserRole userRole) {
         this._id = _id;
         this.email = email;
         this.studentId = studentId;
         this.name = name;
         this.profileImageUrl = profileImageUrl;
         this.nickname = nickname;
+        this.college = college;
         this.department = department;
         this.userRole = userRole;
     }
@@ -39,6 +42,7 @@ public class UserInfoResponseDto {
                 .name(user.getName())
                 .profileImageUrl(user.getProfileImageUrl())
                 .nickname(user.getNickname())
+                .college(user.getCollege())
                 .department(user.getDepartment())
                 .userRole(user.getRole())
                 .build();

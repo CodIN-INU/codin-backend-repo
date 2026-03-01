@@ -1,0 +1,15 @@
+package inu.codin.lecture.global.exception;
+
+import inu.codin.common.exception.GlobalException;
+import lombok.Getter;
+
+@Getter
+public class UserException extends GlobalException {
+
+    private final UserErrorCode errorCode;
+
+    public UserException(UserErrorCode errorCode) {
+        super(errorCode);
+        this.errorCode = errorCode;
+    }
+}

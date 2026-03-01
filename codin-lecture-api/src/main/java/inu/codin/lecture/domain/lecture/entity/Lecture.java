@@ -1,8 +1,8 @@
-package inu.codin.codin.domain.lecture.entity;
+package inu.codin.lecture.domain.lecture.entity;
 
-import inu.codin.codin.domain.lecture.converter.EvaluationConverter;
-import inu.codin.codin.domain.lecture.converter.StringListConverter;
-import inu.codin.codin.domain.review.entity.Review;
+import inu.codin.lecture.domain.lecture.converter.EvaluationConverter;
+import inu.codin.lecture.domain.lecture.converter.StringListConverter;
+import inu.codin.lecture.domain.review.entity.Review;
 import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
