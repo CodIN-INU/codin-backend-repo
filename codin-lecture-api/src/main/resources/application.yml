@@ -66,11 +66,6 @@ server:
   feign:
     url: ${USER_CLIENT_URL}
 
-# Feign Main API Server URL
-user:
-  client:
-    url: ${USER_CLIENT_URL}
-
 logging:
   level:
     root: info
