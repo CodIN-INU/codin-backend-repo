@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "likeClient", url = "${server.feign.url}")
+@FeignClient(name = "likeClient", url = "${server.feign.url}", path = "/likes")
 public interface LikeFeignClient {
 
     @PostMapping
