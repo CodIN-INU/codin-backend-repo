@@ -3,6 +3,7 @@ package inu.codin.lecture.domain.lecture.entity;
 import inu.codin.lecture.domain.lecture.converter.EvaluationConverter;
 import inu.codin.lecture.domain.lecture.converter.StringListConverter;
 import inu.codin.lecture.domain.review.entity.Review;
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,6 +28,8 @@ public class Lecture {
     private int credit;                                         //학점
     private String professor;                                   //교수명
 
+    @Enumerated(EnumType.STRING)
+    private College college;                                     //단과대
     @Enumerated(EnumType.STRING)
     private Department department;                              //학과 (OTHERS : 교양)
     private Type type;                                          //수업 유형(전공핵심, 전공선택..)

@@ -1,9 +1,5 @@
 package inu.codin.codin.domain.user.service;
 
-import inu.codin.common.exception.NotFoundException;
-import inu.codin.common.util.CookieUtil;
-import inu.codin.security.service.JwtService;
-import inu.codin.security.util.SecurityUtil;
 import inu.codin.codin.domain.like.entity.LikeEntity;
 import inu.codin.codin.domain.like.entity.LikeType;
 import inu.codin.codin.domain.like.repository.LikeRepository;
@@ -15,15 +11,17 @@ import inu.codin.codin.domain.post.repository.PostRepository;
 import inu.codin.codin.domain.post.service.PostDtoAssembler;
 import inu.codin.codin.domain.scrap.entity.ScrapEntity;
 import inu.codin.codin.domain.scrap.repository.ScrapRepository;
-import inu.codin.codin.domain.user.dto.request.UserNameUpdateRequestDto;
-import inu.codin.codin.domain.user.dto.request.UserNicknameRequestDto;
-import inu.codin.codin.domain.user.dto.request.UserTicketingParticipationInfoUpdateRequest;
+import inu.codin.codin.domain.user.dto.request.*;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
+import inu.codin.common.exception.NotFoundException;
+import inu.codin.common.util.CookieUtil;
+import inu.codin.security.service.JwtService;
+import inu.codin.security.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -155,6 +154,58 @@ public class UserService {
         log.info("[유저 정보 조회 성공] 닉네임: {}", user.getNickname());
         return UserInfoResponseDto.of(user);
     }
+
+    @Transactional
+    public void setUserInfo(SetUserInfoRequestDto setUserInfoRequestDto) {
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
+        log.info("[유저 정보 조회] 유저 ID: {}", userId);
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("[유저 정보 조회 실패] 유저 정보 없음: {}", userId);
+                    return new NotFoundException("유저 정보를 찾을 수 없습니다.");
+                });
+
+        user.setUserInfo(setUserInfoRequestDto);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateNicknameAndName(UpdateNicknameAndNameRequestDto updateNicknameAndNameRequestDto) {
+        ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
+        log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("[유저 정보 찾기 실패] 유저 정보를 찾을 수 없음. 사용자 ID: {}", userId);
+                    return new NotFoundException("유저 정보를 찾을 수 없습니다.");
+                });
+
+        if (updateNicknameAndNameRequestDto.nickname() != null) {
+            Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateNicknameAndNameRequestDto.nickname());
+            if (nickNameDuplicate.isPresent()){
+                throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
+            }
+
+            user.updateNickname(updateNicknameAndNameRequestDto.nickname());
+        }
+
+        if (updateNicknameAndNameRequestDto.name() != null) {
+            String newName = updateNicknameAndNameRequestDto.name().trim();
+            if (newName.length() > 10) {
+                throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
+            }
+            if (!newName.matches("^[가-힣a-zA-Z]+$")) {
+                throw new IllegalArgumentException("이름은 한글 또는 영어만 입력 가능합니다.");
+            }
+
+            user.updateName(newName);
+        }
+
+        userRepository.save(user);
+        log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, updateNicknameAndNameRequestDto);
+    }
+
     public void updateUserInfo(@Valid UserNicknameRequestDto userNicknameRequestDto) {
 
         Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());

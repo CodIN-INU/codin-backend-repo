@@ -3,6 +3,7 @@ package inu.codin.lecture;
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
+import inu.codin.lecture.domain.user.feign.UserFeignClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,6 +25,9 @@ class CodinLectureApiApplicationTests {
 
     @MockitoBean
     private ElasticsearchAsyncClient elasticsearchAsyncClient;
+
+    @MockitoBean
+    private UserFeignClient userFeignClient;
 
     @SuppressWarnings("rawtypes")
     @MockitoBean

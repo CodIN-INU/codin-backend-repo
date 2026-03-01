@@ -1,5 +1,6 @@
 package inu.codin.lecture.domain.lecture.dto;
 
+import inu.codin.common.entity.College;
 import inu.codin.lecture.domain.lecture.entity.Emotion;
 import inu.codin.lecture.domain.lecture.entity.Lecture;
 import inu.codin.lecture.domain.lecture.entity.LectureSchedule;
@@ -36,9 +37,9 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
 
     private String aiSummary;
 
-    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, Department college, String evaluation, String lectureType, List<Schedule> schedule, List<String> preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes, double starRating, String aiSummary, int hits) {
+    public LectureDetailResponseDto(Long id, String title, String professor, Type type, int grade, int credit, List<String> tags, Department department, College college, String evaluation, String lectureType, List<Schedule> schedule, List<String> preCourse, EmotionResponseDto emotion, boolean openKeyword, int likes, double starRating, String aiSummary, int hits) {
         super(id, title, professor, type, grade, credit, tags, null, department.getDescription(), likes, starRating, hits);
-        this.college = college.getDescription();
+        this.college = college.getDisplayName();
         this.evaluation = evaluation;
         this.lectureType = lectureType;
         this.schedule = schedule;
@@ -60,7 +61,7 @@ public class LectureDetailResponseDto extends LecturePreviewResponseDto {
                 lecture.getCredit(), //참여 인원 수
                 tags,
                 lecture.getDepartment(),
-                Department.IT_COLLEGE,
+                lecture.getCollege(),
                 lecture.getEvaluation().getDescription(),
                 lecture.getLectureType(),
                 schedules,
