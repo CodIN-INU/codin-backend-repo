@@ -27,7 +27,7 @@ public class LectureUploadController {
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<SingleResponse<?>> uploadNewSemesterLectures(@RequestParam("excelFile") MultipartFile file) {
         lectureUploadService.uploadNewSemesterLectures(file);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -36,7 +36,7 @@ public class LectureUploadController {
     }
 
     @GetMapping(value = "/upload-elasticsearch")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<SingleResponse<?>> uploadNewSemesterLecturesToElasticsearch() {
         lectureUploadService.uploadLecturesToElasticsearch();
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -49,7 +49,7 @@ public class LectureUploadController {
             description = "강의 내역서(엑셀 파일) 이름을 '년도-학기'로 설정하여 업로드 ex) 24-1.xlsx, 24-2.xlsx"
     )
     @PostMapping(value = "/rooms", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<SingleResponse<?>> uploadNewSemesterRooms(@RequestParam("excelFile") MultipartFile file) {
         lectureUploadService.uploadNewSemesterRooms(file);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -62,7 +62,7 @@ public class LectureUploadController {
             description = "'단과대약어_연도_학기_meta'로 설정하여 업로드 ex) info_25_2_meta.xlxs. 기본값은 모두 true (즉 전체 처리)."
     )
     @PostMapping(value = "/meta", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<SingleResponse<?>> uploadLectureMeta(
             @Parameter(description = "업로드할 엑셀 파일 (.xlsx)")
             @RequestParam("excelFile") MultipartFile file,
