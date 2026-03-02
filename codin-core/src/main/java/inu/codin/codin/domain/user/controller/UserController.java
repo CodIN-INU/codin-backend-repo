@@ -85,7 +85,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "유저 초기 정보 설정"
+            summary = "유저 초기 정보 설정" +
+                    "<br><br> 존재하지 않는 학과 또는 단과대 입력 시, OTHERS로 저장"
     )
     @PostMapping
     public ResponseEntity<SingleResponse<?>> setUserInfo(@RequestBody @Valid SetUserInfoRequestDto setUserInfoRequestDto){

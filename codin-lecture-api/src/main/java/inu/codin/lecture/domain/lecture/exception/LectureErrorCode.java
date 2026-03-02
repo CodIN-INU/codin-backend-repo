@@ -16,6 +16,8 @@ public enum LectureErrorCode implements GlobalErrorCode {
     LECTURE_ROOM_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "강의실 내역(ROOM) 업로드에 실패했습니다.", Level.ERROR),
     LECTURE_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "강의실 내역을 찾을 수 없습니다.", Level.WARN),
 
+    FLOOR_NOT_VALID(HttpStatus.BAD_REQUEST, "유효하지 않은 층수입니다. 0 또는 1~5 사이의 값으로 입력해주세요.", Level.WARN),
+
     FILE_READ_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "파일을 읽을 수 없습니다.", Level.WARN),
     DEPARTMENT_WRONG_INPUT(HttpStatus.BAD_REQUEST, "학과명을 잘못 입력했습니다.", Level.INFO),
     AI_SUMMARY_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI 요약 생성 중 오류 발생했습니다.", Level.WARN),

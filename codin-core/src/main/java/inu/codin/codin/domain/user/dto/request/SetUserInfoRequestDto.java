@@ -16,11 +16,11 @@ public record SetUserInfoRequestDto(
         @NotBlank
         String name,
 
-        @Schema(description = "단과대", example = "정보기술대학")
+        @Schema(description = "단과대", example = "INFORMATION_TECHNOLOGY")
         @NotNull
         College college,
 
-        @Schema(description = "학과", example = "컴퓨터공학부")
+        @Schema(description = "학과", example = "COMPUTER_SCI")
         @NotNull
         Department department
 ) {

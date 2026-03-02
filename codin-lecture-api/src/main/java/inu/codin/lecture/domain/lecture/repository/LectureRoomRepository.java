@@ -17,4 +17,13 @@ public interface LectureRoomRepository extends JpaRepository<LectureRoom, Long> 
     LEFT JOIN FETCH s.lecture l
 """)
     List<LectureRoom> findAllWithSchedulesAndLectures();
+
+    @Query("""
+        SELECT lr
+        FROM LectureRoom lr
+        WHERE lr.buildingNum = :building
+          AND (:floor = 0 OR (lr.roomNum BETWEEN (:floor * 100) AND (:floor * 100 + 99)))
+        ORDER BY lr.roomNum
+    """)
+    List<LectureRoom> findRoomsByBuildingAndFloor(int building, int floor);
 }
