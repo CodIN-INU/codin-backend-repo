@@ -11,7 +11,7 @@ import java.util.List;
 public interface LectureScheduleRepository extends JpaRepository<LectureSchedule, Long> {
 
     @Query("""
-    SELECT s
+    SELECT DISTINCT s
     FROM LectureSchedule s
     join fetch s.room r
     join fetch s.lecture l

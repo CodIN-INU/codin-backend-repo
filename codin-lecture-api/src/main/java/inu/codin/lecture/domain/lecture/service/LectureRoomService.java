@@ -72,7 +72,7 @@ public class LectureRoomService {
     public List<Map<Integer, List<LectureRoomResponseDto>>> statusOfDetailEmptyRoom(
             int building, int floor) {
         if (floor != 0 && (floor < 1 || floor > 5)) {
-            throw new LectureException(LectureErrorCode.FLOOR_NOT_FOUND);
+            throw new LectureException(LectureErrorCode.FLOOR_NOT_VALID);
         }
 
         DayOfWeek today = LocalDateTime.now().getDayOfWeek();
@@ -80,9 +80,6 @@ public class LectureRoomService {
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         College userCollege = userInfoResponse.getCollege();
         if (userCollege == null) return List.of();
-
-        List<LectureSchedule> lectureSchedules = lectureScheduleRepository.findSchedulesForEmptyRoom(
-                building, floor, today, userCollege);
 
         // 0이면 전체 층, 1~5 사이면 해당 층, 그 외는 예외 처리
         int startFloor = (floor == 0) ? 1 : floor;
@@ -94,6 +91,20 @@ public class LectureRoomService {
             statusOfRooms.add(new HashMap<>());
         }
 
+        // 강의실 목록 먼저 가져와서 빈 리스트로 key 생성
+        List<LectureRoom> rooms = lectureRoomRepository.findRoomsByBuildingAndFloor(building, floor);
+        for (LectureRoom r : rooms) {
+            int roomNum = r.getRoomNum();
+            int roomFloor = roomNum / 100;
+
+            if (roomFloor < startFloor || roomFloor > endFloor) continue;
+
+            int idx = roomFloor - startFloor;
+            statusOfRooms.get(idx).put(roomNum, new ArrayList<>());
+        }
+
+        List<LectureSchedule> lectureSchedules = lectureScheduleRepository.findSchedulesForEmptyRoom(
+                building, floor, today, userCollege);
         for (LectureSchedule ls : lectureSchedules) {
             int roomNum = ls.getRoom().getRoomNum();
             int roomFloor = roomNum / 100;
