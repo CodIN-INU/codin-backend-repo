@@ -3,7 +3,11 @@ package inu.codin.lecture.domain.lecture.service;
 import inu.codin.common.entity.College;
 import inu.codin.lecture.domain.lecture.dto.LectureRoomResponseDto;
 import inu.codin.lecture.domain.lecture.entity.LectureRoom;
+import inu.codin.lecture.domain.lecture.entity.LectureSchedule;
+import inu.codin.lecture.domain.lecture.exception.LectureErrorCode;
+import inu.codin.lecture.domain.lecture.exception.LectureException;
 import inu.codin.lecture.domain.lecture.repository.LectureRoomRepository;
+import inu.codin.lecture.domain.lecture.repository.LectureScheduleRepository;
 import inu.codin.lecture.domain.user.dto.UserInfoResponse;
 import inu.codin.lecture.domain.user.service.UserClientService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import java.util.Map;
 public class LectureRoomService {
 
     private final LectureRoomRepository lectureRoomRepository;
+    private final LectureScheduleRepository lectureScheduleRepository;
     private final UserClientService userClientService;
 
     /**
@@ -66,50 +71,42 @@ public class LectureRoomService {
      */
     public List<Map<Integer, List<LectureRoomResponseDto>>> statusOfDetailEmptyRoom(
             int building, int floor) {
-        LocalDateTime now = LocalDateTime.now();
-        DayOfWeek today = now.getDayOfWeek();
-        List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
+        if (floor != 0 && (floor < 1 || floor > 5)) {
+            throw new LectureException(LectureErrorCode.FLOOR_NOT_FOUND);
+        }
+
+        DayOfWeek today = LocalDateTime.now().getDayOfWeek();
 
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         College userCollege = userInfoResponse.getCollege();
         if (userCollege == null) return List.of();
 
-        int startFloor = 0;
-        int endFloor = 0;
+        List<LectureSchedule> lectureSchedules = lectureScheduleRepository.findSchedulesForEmptyRoom(
+                building, floor, today, userCollege);
 
         // 0이면 전체 층, 1~5 사이면 해당 층, 그 외는 예외 처리
-        if (floor == 0) {
-            startFloor = 1;
-            endFloor = 5;
-        } else if (floor >= 1 && floor <= 5) {
-            startFloor = floor;
-            endFloor = floor;
-        } else {
-            throw new IllegalArgumentException("유효하지 않은 층수입니다. 0 또는 1~5 사이의 값으로 입력해주세요.");
+        int startFloor = (floor == 0) ? 1 : floor;
+        int endFloor = (floor == 0) ? 5 : floor;
+
+        // 결과 틀 생성
+        List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>();
+        for (int f = startFloor; f <= endFloor; f++) {
+            statusOfRooms.add(new HashMap<>());
         }
-        List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 
-        for (int floorIndex = startFloor; floorIndex <= endFloor; floorIndex++) { //1번 인덱스 = 1층 강의실
-            Map<Integer, List<LectureRoomResponseDto>> floorMap = new HashMap<>(); // 강의실 호수 : 해당 호수에서 진행되는 강의 스케줄
+        for (LectureSchedule ls : lectureSchedules) {
+            int roomNum = ls.getRoom().getRoomNum();
+            int roomFloor = roomNum / 100;
 
-            for (LectureRoom lr : lectureRooms){
-                int room = lr.getRoomNum();
-                if ((room / 100) != floorIndex) continue;
+            if (roomFloor < startFloor || roomFloor > endFloor) continue;
 
-                List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
-                        .filter(schedule -> schedule.getDayOfWeek().equals(today))
-                        .filter(schedule -> schedule.getLecture() != null)
-                        .filter(schedule -> schedule.getLecture().getCollege() != null)
-                        .filter(schedule -> schedule.getRoom() != null)
-                        .filter(schedule -> schedule.getRoom().getBuildingNum() != null)
-                        .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
-                        .filter(schedule -> schedule.getRoom().getBuildingNum() == building)
-                        .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
-                        .toList();
-                floorMap.put(room, emptyRooms);
-            }
-            statusOfRooms.add(floorMap);
+            int idx = roomFloor - startFloor;
+            Map<Integer, List<LectureRoomResponseDto>> floorMap = statusOfRooms.get(idx);
+
+            floorMap.computeIfAbsent(roomNum, k -> new ArrayList<>())
+                    .add(LectureRoomResponseDto.of(ls.getLecture(), roomNum, ls));
         }
+
         return statusOfRooms;
     }
 }
