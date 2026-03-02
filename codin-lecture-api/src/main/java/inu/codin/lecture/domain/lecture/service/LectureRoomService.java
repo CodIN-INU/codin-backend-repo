@@ -33,32 +33,38 @@ public class LectureRoomService {
      * @return List<Map<강의실 호수, 해당 강의실에서 진행되는 강의 스케줄>>
      */
     public List<Map<Integer, List<LectureRoomResponseDto>>> statusOfEmptyRoom() {
-        LocalDateTime now = LocalDateTime.now();
-        DayOfWeek today = now.getDayOfWeek();
+        DayOfWeek today = LocalDateTime.now().getDayOfWeek();
         List<LectureRoom> lectureRooms = lectureRoomRepository.findAllWithSchedulesAndLectures();
 
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
         College userCollege = userInfoResponse.getCollege();
-        if (userCollege == null) {
-            return List.of();
-        }
+        if (userCollege == null) return List.of();
 
         List<Map<Integer, List<LectureRoomResponseDto>>> statusOfRooms = new ArrayList<>(); //배열 인덱스마다 층고를 뜻함
 
         for (int floor = 1; floor <= 5; floor++) { //1번 인덱스 = 1층 강의실
             Map<Integer, List<LectureRoomResponseDto>> floorMap = new HashMap<>(); // 강의실 호수 : 해당 호수에서 진행되는 강의 스케줄
+
             for (LectureRoom lr : lectureRooms){
                 int room = lr.getRoomNum();
-                if ((room / 100) == floor) {
-                    List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
-                                    .filter(schedule -> schedule.getDayOfWeek().equals(today))
-                                    .filter(schedule -> schedule.getLecture() != null)
-                                    .filter(schedule -> schedule.getLecture().getCollege() != null)
-                                    .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
-                                    .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
-                                    .toList();
-                    floorMap.put(room, emptyRooms);
-                }
+                if (room / 100 != floor) continue;
+
+                // 강의실이 userCollege 소속 강의실인지 먼저 판별
+                boolean belongsToCollege = lr.getSchedules().stream()
+                        .anyMatch(s -> s.getLecture() != null
+                                && s.getLecture().getCollege() != null
+                                && userCollege.equals(s.getLecture().getCollege()));
+                // userCollege 소속 강의실이 아니라면 해당 강의실은 건너뛰기
+                if (!belongsToCollege) continue;
+
+                List<LectureRoomResponseDto> emptyRooms = lr.getSchedules().stream()
+                        .filter(schedule -> schedule.getDayOfWeek().equals(today))
+                        .filter(schedule -> schedule.getLecture() != null)
+                        .filter(schedule -> schedule.getLecture().getCollege() != null)
+                        .filter(schedule -> userCollege.equals(schedule.getLecture().getCollege()))
+                        .map(schedule -> LectureRoomResponseDto.of(schedule.getLecture(), room, schedule))
+                        .toList();
+                floorMap.put(room, emptyRooms);
             }
             statusOfRooms.add(floorMap);
         }
