@@ -15,6 +15,7 @@ public class LectureRoom {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int roomNum;
+    private Integer buildingNum;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<LectureSchedule> schedules;
