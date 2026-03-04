@@ -54,8 +54,6 @@ springdoc:
     operationsSorter: method
     disable-swagger-default-url: true
     display-request-duration: true
-    config-url: ${AUTH_SWAGGER_CONFIG}
-    url: ${AUTH_API_DOC}
 
 schedule:
   path: ${SCHEDULE_PATH}
