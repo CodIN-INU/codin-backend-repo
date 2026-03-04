@@ -1,15 +1,16 @@
 package inu.codin.codin.domain.user.internal.inbound;
 
-import inu.codin.codin.domain.user.exception.UserNotFoundException;
-import inu.codin.codin.domain.user.internal.inbound.dto.UserTokenInfoResponse;
-import inu.codin.codin.domain.user.repository.UserRepository;
-import inu.codin.codin.infra.s3.S3Service;
-
-import inu.codin.codin.domain.user.internal.inbound.dto.AdminLoginMaterialResponse;
-import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
 import inu.codin.codin.domain.user.exception.UserCreateFailException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
+import inu.codin.codin.domain.user.exception.UserNotFoundException;
+import inu.codin.codin.domain.user.internal.inbound.dto.AdminLoginMaterialResponse;
+import inu.codin.codin.domain.user.internal.inbound.dto.CompleteProfileResponse;
+import inu.codin.codin.domain.user.internal.inbound.dto.UserTokenInfoResponse;
+import inu.codin.codin.domain.user.repository.UserRepository;
+import inu.codin.codin.infra.s3.S3Service;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import inu.codin.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,12 @@ public class UserInternalService {
     /**
      * USER 책임: 프로필 완성 (닉네임 중복 체크 + 이미지 업로드 + 활성화)
      */
-    public CompleteProfileResponse completeProfile(String email, String nickname, MultipartFile userImage) {
+    public CompleteProfileResponse completeProfile(String email,
+                                                   String nickname,
+                                                   String name,
+                                                   College college,
+                                                   Department department,
+                                                   MultipartFile userImage) {
         // 닉네임 중복 체크
         boolean duplicated = userRepository.findByNicknameAndDeletedAtIsNull(nickname).isPresent();
         if (duplicated) {
@@ -54,6 +60,9 @@ public class UserInternalService {
 
         // 업데이트 + 활성화 + 저장
         user.updateNickname(nickname);
+        user.updateName(name);
+        user.updateCollege(college);
+        user.updateDepartment(department);
         user.updateProfileImageUrl(imageUrl);
         user.activation();
         userRepository.save(user);

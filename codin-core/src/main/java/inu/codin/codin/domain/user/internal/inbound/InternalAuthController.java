@@ -1,6 +1,8 @@
 package inu.codin.codin.domain.user.internal.inbound;
 
 import inu.codin.codin.domain.user.internal.inbound.dto.*;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +27,12 @@ public class InternalAuthController {
     public CompleteProfileResponse completeProfile(
             @RequestParam String email,
             @RequestParam String nickname,
+            @RequestParam String name,
+            @RequestParam College college,
+            @RequestParam Department department,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage
     ) {
-        return userInternalService.completeProfile(email, nickname, userImage);
+        return userInternalService.completeProfile(email, nickname, name, college, department, userImage);
     }
 
     @GetMapping("/suspension-end-date")
