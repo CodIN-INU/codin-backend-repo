@@ -2,6 +2,8 @@ package inu.codin.auth.feign;
 
 import inu.codin.auth.config.FeignMultipartConfig;
 import inu.codin.auth.dto.user.*;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +23,9 @@ public interface UserInternalAuthClient {
     CompleteProfileResponse completeProfile(
             @RequestParam String email,
             @RequestParam String nickname,
+            @RequestParam String name,
+            @RequestParam College college,
+            @RequestParam Department department,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage
     );
 

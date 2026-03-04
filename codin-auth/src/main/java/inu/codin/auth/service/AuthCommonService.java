@@ -50,7 +50,13 @@ public class AuthCommonService extends AbstractAuthService {
     }
 
     private CompleteProfileResponse callUserCompleteProfile(UserProfileRequestDto userProfileRequestDto, MultipartFile userImage) {
-        return userInternalAuthClient.completeProfile(userProfileRequestDto.getEmail(),userProfileRequestDto.getNickname(), userImage);
+        return userInternalAuthClient.completeProfile(
+                userProfileRequestDto.getEmail(),
+                userProfileRequestDto.getNickname(),
+                userProfileRequestDto.getName(),
+                userProfileRequestDto.getCollege(),
+                userProfileRequestDto.getDepartment(),
+                userImage);
     }
 
 }
