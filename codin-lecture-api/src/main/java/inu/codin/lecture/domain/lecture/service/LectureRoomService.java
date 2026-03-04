@@ -83,10 +83,6 @@ public class LectureRoomService {
 
         DayOfWeek today = LocalDateTime.now().getDayOfWeek();
 
-        UserInfoResponse userInfoResponse = userClientService.fetchUser();
-        College userCollege = userInfoResponse.getCollege();
-        if (userCollege == null) return List.of();
-
         // 0이면 전체 층, 1~5 사이면 해당 층, 그 외는 예외 처리
         int startFloor = (floor == 0) ? 1 : floor;
         int endFloor = (floor == 0) ? 5 : floor;
@@ -110,7 +106,7 @@ public class LectureRoomService {
         }
 
         List<LectureSchedule> lectureSchedules = lectureScheduleRepository.findSchedulesForEmptyRoom(
-                building, floor, today, userCollege);
+                building, floor, today);
         for (LectureSchedule ls : lectureSchedules) {
             int roomNum = ls.getRoom().getRoomNum();
             int roomFloor = roomNum / 100;
