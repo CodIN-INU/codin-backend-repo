@@ -98,7 +98,7 @@ public class UserController {
     @Operation(
             summary = "유저 전체적인 정보 수정"
     )
-    @PutMapping("/update/user-info")
+    @PutMapping("/update/info")
     public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UpdateUserInfoRequestDto updateUserInfoRequestDto){
         userService.updateUserInfo(updateUserInfoRequestDto);
         return ResponseEntity.ok()
