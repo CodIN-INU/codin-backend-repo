@@ -96,21 +96,21 @@ public class UserController {
     }
 
     @Operation(
-            summary = "유저 닉네임, 이름 수정"
+            summary = "유저 전체적인 정보 수정"
     )
     @PutMapping("/nickname-name")
-    public ResponseEntity<SingleResponse<?>> updateNicknameAndName(@RequestBody @Valid UpdateNicknameAndNameRequestDto updateNicknameAndNameRequestDto){
-        userService.updateNicknameAndName(updateNicknameAndNameRequestDto);
+    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UpdateUserInfoRequestDto updateUserInfoRequestDto){
+        userService.updateUserInfo(updateUserInfoRequestDto);
         return ResponseEntity.ok()
-                .body(new SingleResponse<>(200, "유저 닉네임, 이름 수정 완료", null));
+                .body(new SingleResponse<>(200, "유저 전체적인 정보 수정", null));
     }
 
     @Operation(
             summary = "유저 닉네임 수정"
     )
     @PutMapping
-    public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UserNicknameRequestDto userUpdateRequestDto){
-        userService.updateUserInfo(userUpdateRequestDto);
+    public ResponseEntity<SingleResponse<?>> updateUserNickname(@RequestBody @Valid UserNicknameRequestDto userUpdateRequestDto){
+        userService.updateUserNickname(userUpdateRequestDto);
         return ResponseEntity.ok()
                 .body(new SingleResponse<>(200, "유저 정보 수정 완료", null));
     }

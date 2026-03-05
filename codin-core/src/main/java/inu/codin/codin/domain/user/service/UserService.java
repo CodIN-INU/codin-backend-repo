@@ -171,7 +171,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateNicknameAndName(UpdateNicknameAndNameRequestDto updateNicknameAndNameRequestDto) {
+    public void updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto) {
         ObjectId userId = toObjectId(SecurityUtil.getCurrentUserId());
         log.info("[유저 정보 업데이트] 현재 사용자 ID: {}", userId);
 
@@ -181,17 +181,17 @@ public class UserService {
                     return new NotFoundException("유저 정보를 찾을 수 없습니다.");
                 });
 
-        if (updateNicknameAndNameRequestDto.nickname() != null) {
-            Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateNicknameAndNameRequestDto.nickname());
+        if (updateUserInfoRequestDto.nickname() != null && !updateUserInfoRequestDto.nickname().equals(user.getNickname())) {
+            Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateUserInfoRequestDto.nickname());
             if (nickNameDuplicate.isPresent()){
                 throw new UserNicknameDuplicateException("이미 사용중인 닉네임입니다.");
             }
 
-            user.updateNickname(updateNicknameAndNameRequestDto.nickname());
+            user.updateNickname(updateUserInfoRequestDto.nickname());
         }
 
-        if (updateNicknameAndNameRequestDto.name() != null) {
-            String newName = updateNicknameAndNameRequestDto.name().trim();
+        if (updateUserInfoRequestDto.name() != null) {
+            String newName = updateUserInfoRequestDto.name().trim();
             if (newName.length() > 10) {
                 throw new IllegalArgumentException("이름은 10자 이하여야 합니다.");
             }
@@ -202,11 +202,18 @@ public class UserService {
             user.updateName(newName);
         }
 
+        if (updateUserInfoRequestDto.college() != null) {
+            user.updateCollege(updateUserInfoRequestDto.college());
+        }
+        if (updateUserInfoRequestDto.department() != null) {
+            user.updateDepartment(updateUserInfoRequestDto.department());
+        }
+
         userRepository.save(user);
-        log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, updateNicknameAndNameRequestDto);
+        log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, updateUserInfoRequestDto);
     }
 
-    public void updateUserInfo(@Valid UserNicknameRequestDto userNicknameRequestDto) {
+    public void updateUserNickname(@Valid UserNicknameRequestDto userNicknameRequestDto) {
 
         Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(userNicknameRequestDto.getNickname());
         if (nickNameDuplicate.isPresent()){
