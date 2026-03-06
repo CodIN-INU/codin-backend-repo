@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.calendar.service;
 
+import inu.codin.common.entity.Department;
 import inu.codin.common.util.ObjectIdUtil;
 import inu.codin.codin.domain.calendar.dto.*;
 import inu.codin.codin.domain.calendar.entity.CalendarEntity;
@@ -19,7 +20,7 @@ public class CalendarService {
 
     private final CalendarRepository calendarRepository;
 
-    public CalendarMonthResponse getMonth(int year, int month) {
+    public CalendarMonthResponse getMonth(int year, int month, Department department) {
         if (month < 1 || month > 12) {
             throw new CalendarException(CalendarErrorCode.DATE_FORMAT_ERROR);
         }
@@ -27,8 +28,16 @@ public class CalendarService {
         LocalDate monthStart = LocalDate.of(year, month, 1);
         LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
-        List<CalendarEntity> calendarEventList = calendarRepository
-                .findByEndDateGreaterThanEqualAndStartDateLessThanEqual(monthStart, monthEnd).stream()
+        // 조회: department 없으면 전체일정, 있으면 해당 학과만
+        List<CalendarEntity> calendarEventList =
+                (department == null)
+                        ? calendarRepository.findByDepartmentIsNullAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+                        monthStart, monthEnd)
+                        : calendarRepository.findByDepartmentAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+                        department, monthStart, monthEnd);
+
+
+        calendarEventList = calendarEventList.stream()
                 .filter(e -> e.getStartDate() != null && e.getEndDate() != null)
                 .toList();
 
