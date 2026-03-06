@@ -1,11 +1,13 @@
 package inu.codin.codin.domain.calendar.controller;
 
+import inu.codin.common.entity.Department;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.calendar.controller.swagger.CalendarController;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateRequest;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateResponse;
 import inu.codin.codin.domain.calendar.dto.CalendarMonthResponse;
 import inu.codin.codin.domain.calendar.service.CalendarService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,10 +23,17 @@ public class CalendarControllerImpl implements CalendarController {
     @GetMapping("/month")
     public ResponseEntity<SingleResponse<CalendarMonthResponse>> getMonth(
             @RequestParam int year,
-            @RequestParam int month
+            @RequestParam int month,
+            @RequestParam(required = false) String department
     ) {
-        return ResponseEntity.ok().body(new SingleResponse<>(200, "캘린더 반환 완료",
-                calendarService.getMonth(year, month)));
+        Department dept = (department == null || department.isBlank())
+                ? null
+                : Department.fromDescription(department);
+
+        return ResponseEntity.ok().body(
+                new SingleResponse<>(200, "캘린더 반환 완료",
+                        calendarService.getMonth(year, month, dept))
+        );
     }
 
     @PostMapping("/events")
