@@ -38,7 +38,7 @@ public class CalendarControllerImpl implements CalendarController {
 
     @PostMapping("/events")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<SingleResponse<CalendarCreateResponse>> create(@RequestBody CalendarCreateRequest request) {
+    public ResponseEntity<SingleResponse<CalendarCreateResponse>> create(@Valid @RequestBody CalendarCreateRequest request) {
         return ResponseEntity.status(201).body(new SingleResponse<>(201, "켈린더 이벤트 생성 완료",
                 calendarService.create(request)));
     }
