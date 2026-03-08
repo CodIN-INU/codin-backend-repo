@@ -24,20 +24,18 @@ public class CalendarControllerImpl implements CalendarController {
     public ResponseEntity<SingleResponse<CalendarMonthResponse>> getMonth(
             @RequestParam int year,
             @RequestParam int month,
-            @RequestParam(required = false) String department
+            @RequestParam(required = false) Department department
     ) {
-        Department dept = (department == null || department.isBlank())
-                ? null
-                : Department.fromDescription(department);
+
 
         return ResponseEntity.ok().body(
                 new SingleResponse<>(200, "캘린더 반환 완료",
-                        calendarService.getMonth(year, month, dept))
+                        calendarService.getMonth(year, month, department))
         );
     }
 
     @PostMapping("/events")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    //@PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<SingleResponse<CalendarCreateResponse>> create(@Valid @RequestBody CalendarCreateRequest request) {
         return ResponseEntity.status(201).body(new SingleResponse<>(201, "켈린더 이벤트 생성 완료",
                 calendarService.create(request)));
