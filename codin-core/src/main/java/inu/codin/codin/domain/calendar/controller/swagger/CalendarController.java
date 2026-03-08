@@ -1,5 +1,6 @@
 package inu.codin.codin.domain.calendar.controller.swagger;
 
+import inu.codin.common.entity.Department;
 import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateRequest;
 import inu.codin.codin.domain.calendar.dto.CalendarCreateResponse;
@@ -20,13 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "Calendar API", description = "[리디자인] 캘린더 API")
 public interface CalendarController {
 
-    @Operation(summary = "월별 캘린더 조회", description = "특정 년도와 월의 캘린더 이벤트를 조회합니다.")
+    @Operation(summary = "월별 캘린더 조회", description = "특정 과,특정 년도와 월의 캘린더 이벤트를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "캘린더 조회 성공"),
     })
     ResponseEntity<SingleResponse<CalendarMonthResponse>> getMonth(
             @Parameter(description = "년도", example = "2025") @RequestParam int year,
-            @Parameter(description = "월", example = "8") @RequestParam @Min(1) @Max(12) int month
+            @Parameter(description = "월", example = "8") @RequestParam @Min(1) @Max(12) int month,
+            @Parameter(description = "학과 (없으면 전체 일정)", example = "컴퓨터공학부") @RequestParam(required = false) Department department
     );
 
     @Operation(summary = "캘린더 이벤트 생성", description = "새로운 캘린더 이벤트를 생성합니다.")

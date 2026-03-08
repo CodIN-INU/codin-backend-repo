@@ -27,8 +27,7 @@ public class CalendarCreateRequest {
     @NotBlank
     private final String content;
 
-    @Schema(description = "학과 또는 대학 전체 행사(IT_COLLEAGE로 지정)", example = "COMPUTER_SCI")
-    @NotNull
+    @Schema(description = "학과 (없으면 전체 행사로 처리)", example = "컴퓨터공학부", nullable = true)
     private final Department department;
 
     @Builder
