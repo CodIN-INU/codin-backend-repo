@@ -22,12 +22,12 @@ public interface CalendarRepository extends MongoRepository<CalendarEntity, Obje
 
 
     @Query("{ 'department': ?0, 'endDate': { $gte: ?1 }, 'startDate': { $lte: ?2 }, 'deleted_at': null }")
-    List<CalendarEntity> findByDepartmentAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+    List<CalendarEntity> findDepartmentEventsBetween(
             Department department, LocalDate start, LocalDate end
     );
 
     @Query("{ 'department': null, 'endDate': { $gte: ?0 }, 'startDate': { $lte: ?1 }, 'deleted_at': null }")
-    List<CalendarEntity> findByDepartmentIsNullAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+    List<CalendarEntity> findGlobalEventsBetween(
             LocalDate start, LocalDate end
     );
 }

@@ -31,9 +31,9 @@ public class CalendarService {
         // 조회: department 없으면 전체일정, 있으면 해당 학과만
         List<CalendarEntity> calendarEventList =
                 (department == null)
-                        ? calendarRepository.findByDepartmentIsNullAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+                        ? calendarRepository.findGlobalEventsBetween(
                         monthStart, monthEnd)
-                        : calendarRepository.findByDepartmentAndEndDateGreaterThanEqualAndStartDateLessThanEqual(
+                        : calendarRepository.findDepartmentEventsBetween(
                         department, monthStart, monthEnd);
 
 
