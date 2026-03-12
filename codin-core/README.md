@@ -1,17 +1,6 @@
-# CodIN Main API
+# codin-core
 
-CodIN 백엔드 Main API 서버 Repository 입니다.
-
-**인천대학교 정보기술대학 구성원 커뮤니티 서비스** - 인천대 정보대학교 **SNS 공모전 대상**
-
-페이지 : https://codin.inu.ac.kr
-
-### 서브 API 모듈
-
-- [티켓팅 API 서버](https://github.com/CodIN-INU/codin-ticketing-api)
-- [교과목 API 서버](https://github.com/CodIN-INU/codin-lecture-api)
-
----
+> CodIN 커뮤니티 핵심 서비스 — 게시판, 채팅, 알림, 사용자 관리
 
 ## 주요 화면
 
@@ -23,28 +12,36 @@ CodIN 백엔드 Main API 서버 Repository 입니다.
   <img src="https://github.com/user-attachments/assets/dc44e692-ada0-4b5b-b69a-79e279544010" width="18%" />
 </p>
 
-## 프로젝트 사용 기술
+## 주요 기능
 
-- **Language/Framework**
-    - Java 17, Spring Boot 3.*
-    - Spring JPA, Data MongoDB, QueryDSL
-    - STOMP, SSE, Quartz, Elastic Search, Swagger
-    - Rate Limiting, Web Scraping
-    - JWT, OAuth 2.0
-    - S3, FCM, Spring Mail
-- **DB**
-    - Redis
-    - MongoDB
-    - MySQL
-- **Infra**
-    - AWS -> On-Premise
-    - Grafana/Prometheus
-    - Docker, Github Actions
+- 게시판 CRUD, 댓글/대댓글, 익명 투표, 베스트 게시글 선정
+- WebSocket(STOMP) 기반 1:1 실시간 채팅
+- FCM 기반 푸시 알림 (댓글, 좋아요, 채팅 등)
 
-## 개발 기간
+## 도메인 구조
 
-- `24.11.06 ~ 진행중`
+| 도메인 | 설명 |
+|--------|------|
+| `post` | 게시글 CRUD, 댓글/대댓글, 투표, 조회수, 베스트 |
+| `board` | 공지사항(notice), 질문(question), 익명(voice) |
+| `chat` | 채팅방 관리 + 메시지 처리 |
+| `user` | 사용자 프로필, 내부 API |
+| `like` | 좋아요 |
+| `notification` | 알림 관리 |
+| `email` | 웹메일 인증 |
+| `report` | 신고 처리 + 자동 스케줄링 |
+| `calendar` | 학사 일정 |
+| `scrap` | 게시글 스크랩 |
+| `block` | 사용자 차단 |
 
-## Swagger
+## 인프라 계층
 
-https://codin.inu.ac.kr/api/swagger-ui/index.html
+| 패키지 | 설명 |
+|--------|------|
+| `infra/fcm` | Firebase Cloud Messaging 푸시 알림 |
+| `infra/redis` | 캐시, 세션 관리, 스케줄러 |
+| `infra/s3` | AWS S3 파일 업로드 |
+
+## 기술 스택
+
+Spring Boot 3.3, MongoDB, Redis, WebSocket(STOMP), FCM, AWS S3, OpenFeign
