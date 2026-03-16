@@ -40,8 +40,13 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10);
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
 
-        return EventPageResponse.from(eventRepository.findByCampus(campus, pageable));
+        return EventPageResponse.from(eventRepository.findByCampus(
+                campus,
+                userInfoResponse.getCollege(),
+                userInfoResponse.getDepartment(),
+                pageable));
     }
 
     @Transactional(readOnly = true)
