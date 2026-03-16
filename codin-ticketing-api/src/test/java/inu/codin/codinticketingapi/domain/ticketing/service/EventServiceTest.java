@@ -1,12 +1,8 @@
 package inu.codin.codinticketingapi.domain.ticketing.service;
 
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventDetailResponse;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventPageResponse;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryDto;
-import inu.codin.codinticketingapi.domain.ticketing.dto.response.EventParticipationHistoryPageResponse;
+import inu.codin.codinticketingapi.domain.ticketing.dto.response.*;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
-import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
 import inu.codin.codinticketingapi.domain.ticketing.entity.ParticipationStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
@@ -15,6 +11,8 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,17 +67,36 @@ class EventServiceTest {
         // given
         int page = 0;
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Event mockEvent = createMockEvent(1L, TEST_EVENT_TITLE, SONGDO);
-        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent), pageable, 1);
 
-        given(eventRepository.findByCampus(eq(SONGDO), any(Pageable.class))).willReturn(mockPage);
+        UserInfoResponse userInfo = UserInfoResponse.builder()
+                .userId(TEST_USER_ID_1)
+                .college(College.INFORMATION_TECHNOLOGY)
+                .department(Department.COMPUTER_SCI)
+                .build();
+        given(userClientService.fetchUser()).willReturn(userInfo);
+
+        Event mockDepartmentEvent = createMockEvent(1L, TEST_EVENT_TITLE, SONGDO, null, Department.COMPUTER_SCI);
+        Event mockCollegeEvent = createMockEvent(2L, TEST_EVENT_TITLE + "_COLLEGE", SONGDO, College.INFORMATION_TECHNOLOGY, null);
+        Page<Event> mockPage = new PageImpl<>(List.of(mockCollegeEvent, mockDepartmentEvent), pageable, 1);
+
+        given(eventRepository.findByCampus(
+                eq(SONGDO),
+                eq(userInfo.getCollege()),
+                eq(userInfo.getDepartment()),
+                any(Pageable.class))).willReturn(mockPage);
 
         // when
         EventPageResponse result = eventService.getEventList(SONGDO, page);
 
         // then
-        assertThat(result.getEventList()).hasSize(1);
-        verify(eventRepository).findByCampus(eq(SONGDO), any(Pageable.class));
+        assertThat(result.getEventList())
+                .extracting(EventPageDetailResponse::getEventId)
+                        .containsExactlyInAnyOrder(2L, 1L);
+        verify(eventRepository).findByCampus(
+                eq(SONGDO),
+                eq(userInfo.getCollege()),
+                eq(userInfo.getDepartment()),
+                any(Pageable.class));
     }
 
     @Test
@@ -88,16 +105,32 @@ class EventServiceTest {
         // given
         int page = 0;
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+
+        UserInfoResponse userInfo = UserInfoResponse.builder()
+                .userId(TEST_USER_ID_1)
+                .college(College.INFORMATION_TECHNOLOGY)
+                .department(Department.COMPUTER_SCI)
+                .build();
+        given(userClientService.fetchUser()).willReturn(userInfo);
+
         Page<Event> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        given(eventRepository.findByCampus(eq(MICHUHOL), any(Pageable.class))).willReturn(emptyPage);
+        given(eventRepository.findByCampus(
+                eq(MICHUHOL),
+                eq(userInfo.getCollege()),
+                eq(userInfo.getDepartment()),
+                any(Pageable.class))).willReturn(emptyPage);
 
         // when
         EventPageResponse result = eventService.getEventList(MICHUHOL, page);
 
         // then
         assertThat(result.getEventList()).isEmpty();
-        verify(eventRepository).findByCampus(eq(MICHUHOL), any(Pageable.class));
+        verify(eventRepository).findByCampus(
+                eq(MICHUHOL),
+                eq(userInfo.getCollege()),
+                eq(userInfo.getDepartment()),
+                any(Pageable.class));
     }
 
     @Test
@@ -123,15 +156,30 @@ class EventServiceTest {
         // given
         int page = 2;
         Pageable expected = PageRequest.of(page, 10);
-        given(eventRepository.findByCampus(eq(SONGDO), any(Pageable.class)))
-                .willReturn(new PageImpl<>(List.of(), expected, 0));
+
+        UserInfoResponse userInfo = UserInfoResponse.builder()
+                .userId(TEST_USER_ID_1)
+                .college(College.INFORMATION_TECHNOLOGY)
+                .department(Department.COMPUTER_SCI)
+                .build();
+        given(userClientService.fetchUser()).willReturn(userInfo);
+
+        given(eventRepository.findByCampus(
+                eq(SONGDO),
+                eq(userInfo.getCollege()),
+                eq(userInfo.getDepartment()),
+                any(Pageable.class))).willReturn(new PageImpl<>(List.of(), expected, 0));
 
         // when
         eventService.getEventList(SONGDO, page);
 
         // then
         verify(eventRepository, times(1))
-                .findByCampus(eq(SONGDO), argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == page));
+                .findByCampus(
+                        eq(SONGDO),
+                        eq(userInfo.getCollege()),
+                        eq(userInfo.getDepartment()),
+                        argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == page));
     }
 
 
@@ -141,7 +189,7 @@ class EventServiceTest {
         // given
         Long eventId = 999L;
         UserInfoResponse userInfo = createUserInfo("testUser", "TEST_USER");
-        Event mockEvent = createMockEvent(eventId, TEST_EVENT_TITLE, SONGDO);
+        Event mockEvent = createMockEvent(eventId, TEST_EVENT_TITLE, SONGDO, College.INFORMATION_TECHNOLOGY, Department.COMPUTER_SCI);
 
         given(userClientService.fetchUser()).willReturn(userInfo);
         given(participationService.isUserParticipatedInEvent(eventId)).willReturn(false);
@@ -282,7 +330,7 @@ class EventServiceTest {
         );
     }
 
-    private Event createMockEvent(Long id, String title, Campus campus) {
+    private Event createMockEvent(Long id, String title, Campus campus, College college, Department department) {
         Stock stock = Stock.builder().initialStock(INITIAL_STOCK).build();
         return Event.builder()
                 .id(id)
@@ -295,6 +343,8 @@ class EventServiceTest {
                 .target("테스트 대상")
                 .eventImageUrl(TEST_IMAGE_URL)
                 .stock(stock)
+                .college(college)
+                .department(department)
                 .build();
     }
 
@@ -309,6 +359,7 @@ class EventServiceTest {
                 .userId(userId)
                 .name(name)
                 .studentId("2020123456")
+                .college(College.INFORMATION_TECHNOLOGY)
                 .department(Department.COMPUTER_SCI)
                 .build();
     }
