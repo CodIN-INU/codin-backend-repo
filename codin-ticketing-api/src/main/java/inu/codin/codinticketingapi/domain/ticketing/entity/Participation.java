@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.entity;
 import inu.codin.codinticketingapi.common.entity.BaseEntity;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
+import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,7 +1,7 @@
 package inu.codin.codinticketingapi.domain.admin.dto.response;
 
-import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Participation;
+import inu.codin.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
