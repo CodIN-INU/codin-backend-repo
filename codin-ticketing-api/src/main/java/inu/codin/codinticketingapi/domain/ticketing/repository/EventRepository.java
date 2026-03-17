@@ -66,24 +66,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     FROM Event e
     WHERE e.deletedAt IS NULL
       AND e.eventStatus = :eventStatus
-      AND e.eventTime > :eventTimeAfter
-      AND (
-        :isAdmin = TRUE
-        OR (:isManager = TRUE AND e.userId = :userId)
-      )
-""")
-    List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(
-            @Param("eventStatus") EventStatus eventStatus,
-            @Param("userId") String userId,
-            @Param("isAdmin") boolean isAdmin,
-            @Param("isManager") boolean isManager,
-            @Param("eventTimeAfter") LocalDateTime eventTimeAfter);
-
-    @Query("""
-    SELECT e
-    FROM Event e
-    WHERE e.deletedAt IS NULL
-      AND e.eventStatus = :eventStatus
       AND (
         :isAdmin = TRUE
         OR (:isManager = TRUE AND e.userId = :userId)
@@ -96,22 +78,27 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("isManager") boolean isManager,
             Pageable pageable);
 
+
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.deletedAt IS NULL
+      AND e.eventStatus = :status
+      AND e.eventTime > :after
+""")
+    List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(
+            @Param("status") EventStatus status,
+            @Param("after") LocalDateTime after);
+
     @Query("""
     SELECT e
     FROM Event e
     WHERE e.deletedAt IS NULL
       AND e.eventStatus = :eventStatus
       AND e.eventEndTime > :now
-      AND (
-        :isAdmin = TRUE
-        OR (:isManager = TRUE AND e.userId = :userId)
-      )
 """)
     List<Event> findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(
             @Param("eventStatus") EventStatus eventStatus,
-            @Param("userId") String userId,
-            @Param("isAdmin") boolean isAdmin,
-            @Param("isManager") boolean isManager,
             @Param("now") LocalDateTime now);
 
     List<Event> findByEventStatus(EventStatus eventStatus);
