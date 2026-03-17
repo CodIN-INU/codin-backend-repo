@@ -50,8 +50,10 @@ public class UserInfoResponse {
                 ", email='" + email + '\'' +
                 ", studentId='" + studentId + '\'' +
                 ", name='" + name + '\'' +
-                ", department=" + department +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", nickname='" + nickname + '\'' +
                 ", college=" + college +
+                ", department=" + department +
                 '}';
     }
 }

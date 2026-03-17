@@ -27,7 +27,7 @@ public interface EventAdminController {
 
     @Operation(summary = "티켓팅 이벤트 생성", description = "새로운 티켓팅 이벤트를 생성합니다. 관리자/매니저 권한이 필요합니다." +
             "<br><br> 단과대의 이벤트일 경우, College 필드가 반드시 포함되어야 하며, Department 필드는 null이어야 합니다. <br><br>" +
-             "학과의 이벤트일 경우, Department 필드가 반드시 포함되어야 하며, College 필드는 null로 보내주세요. (학과 이벤트의 College 필드는 로직에 차이가 없어, 편한대로 보내주셔도 됩니다.)")
+             "학과의 이벤트일 경우, Department 필드가 반드시 포함되어야 하며, College 필드는 로직에 차이가 없어, 편한대로 보내주셔도 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "티켓팅 이벤트 생성 성공")
     })

@@ -90,9 +90,11 @@ public class Event extends BaseEntity {
     @Column(name = "status", nullable = false)
     private EventStatus eventStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "college")
     private College college;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "department")
     private Department department;
 

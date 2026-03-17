@@ -42,6 +42,10 @@ public class EventService {
         Pageable pageable = PageRequest.of(pageNumber, 10);
         UserInfoResponse userInfoResponse = userClientService.fetchUser();
 
+        if (userInfoResponse.getDepartment() == null || userInfoResponse.getCollege() == null) {
+            throw new TicketingException(TicketingErrorCode.USER_INFO_INCOMPLETE);
+        }
+
         return EventPageResponse.from(eventRepository.findByCampus(
                 campus,
                 userInfoResponse.getCollege(),
