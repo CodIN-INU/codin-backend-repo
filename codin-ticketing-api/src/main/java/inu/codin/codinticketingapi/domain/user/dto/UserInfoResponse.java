@@ -1,6 +1,7 @@
 package inu.codin.codinticketingapi.domain.user.dto;
 
-import inu.codin.codinticketingapi.domain.ticketing.entity.Department;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,15 +16,23 @@ public class UserInfoResponse {
     private String name;
     private String nickname;
     private String profileImageUrl;
+    private College college;
     private Department department;
 
     @Builder
-    public UserInfoResponse(String userId, String email, String name, Department department, String studentId) {
+    public UserInfoResponse(
+            String userId,
+            String email,
+            String name,
+            Department department,
+            String studentId,
+            College college) {
         this._id = userId;
         this.email = email;
+        this.studentId = studentId;
         this.name = name;
         this.department = department;
-        this.studentId = studentId;
+        this.college = college;
     }
 
     public String getUserId() {
@@ -39,9 +48,12 @@ public class UserInfoResponse {
         return "UserInfoResponse{" +
                 "_id='" + _id + '\'' +
                 ", email='" + email + '\'' +
-                ", name='" + name + '\'' +
-                ", department=" + department +
                 ", studentId='" + studentId + '\'' +
+                ", name='" + name + '\'' +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", college=" + college +
+                ", department=" + department +
                 '}';
     }
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +40,10 @@ public class EventResponse {
     private String promotionLink;
     @Schema(description = "이벤트 상태", example = "UPCOMING")
     private EventStatus status;
+    @Schema(description = "단과대", example = "INFORMATION_TECHNOLOGY")
+    private College college;
+    @Schema(description = "학과", example = "COMPUTER_SCI")
+    private Department department;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd (E) HH:mm", locale = "ko", timezone = "Asia/Seoul")
     @Schema(description = "이벤트 티켓팅 시작 시간", example = "2025.07.02 (수) 16:00")
@@ -61,6 +67,8 @@ public class EventResponse {
                 .status(event.getEventStatus())
                 .eventTime(event.getEventTime())
                 .eventEndTime(event.getEventEndTime())
+                .college(event.getCollege())
+                .department(event.getDepartment())
                 .build();
     }
 }

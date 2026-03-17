@@ -40,8 +40,17 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventPageResponse getEventList(@NotNull Campus campus, @PositiveOrZero int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10);
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
 
-        return EventPageResponse.from(eventRepository.findByCampus(campus, pageable));
+        if (userInfoResponse.getDepartment() == null || userInfoResponse.getCollege() == null) {
+            throw new TicketingException(TicketingErrorCode.USER_INFO_INCOMPLETE);
+        }
+
+        return EventPageResponse.from(eventRepository.findByCampus(
+                campus,
+                userInfoResponse.getCollege(),
+                userInfoResponse.getDepartment(),
+                pageable));
     }
 
     @Transactional(readOnly = true)

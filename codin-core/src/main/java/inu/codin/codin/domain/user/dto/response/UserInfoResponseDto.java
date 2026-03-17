@@ -15,8 +15,8 @@ public class UserInfoResponseDto {
     private String email;
     private String studentId;
     private String name;
-    private String profileImageUrl;
     private String nickname;
+    private String profileImageUrl;
     private College college;
     private Department department;
     private UserRole userRole;

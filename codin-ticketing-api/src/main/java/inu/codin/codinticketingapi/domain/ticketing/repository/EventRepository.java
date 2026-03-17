@@ -3,6 +3,8 @@ package inu.codin.codinticketingapi.domain.ticketing.repository;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.admin.entity.EventStatus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -22,28 +24,82 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             SELECT e
                  FROM Event e
-                 WHERE e.deletedAt IS NULL AND e.campus = :campus
+                 WHERE e.deletedAt IS NULL
+                    AND e.campus = :campus
+                    AND (
+                            (e.department IS NOT NULL AND e.department = :department)
+                            OR (e.department IS NULL AND e.college = :college)
+                    )
                  ORDER BY
                      CASE WHEN e.eventStatus = 'ENDED' THEN 1 ELSE 0 END ASC,
                      CASE WHEN e.eventStatus <> 'ENDED' THEN e.eventEndTime END ASC NULLS LAST,
                      CASE WHEN e.eventStatus = 'ENDED' THEN e.eventEndTime END DESC NULLS LAST
             """)
-    Page<Event> findByCampus(@Param("campus") Campus campus, Pageable pageable);
+    Page<Event> findByCampus(@Param("campus") Campus campus,
+                             @Param("college") College college,
+                             @Param("department") Department department,
+                             Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.deletedAt IS NULL")
     Optional<Event> findById(@Param("eventId") Long eventId);
 
-    @Query("SELECT e FROM Event e WHERE e.deletedAt IS NULL")
-    Page<Event> findAll(Pageable pageable);
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.deletedAt IS NULL
+    AND (
+        :isAdmin = TRUE
+        OR (:isManager = TRUE AND e.userId = :userId)
+    )
+""")
+    Page<Event> findAll(
+            @Param("userId") String userId,
+            @Param("isAdmin") Boolean isAdmin,
+            @Param("isManager") Boolean isManager,
+            Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.deletedAt IS NULL AND e.userId = :userId")
     Page<Event> findByCreatedUserId(@Param("userId") String userId, Pageable pageable);
 
-    List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime eventTimeAfter);
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.deletedAt IS NULL
+      AND e.eventStatus = :eventStatus
+      AND (
+        :isAdmin = TRUE
+        OR (:isManager = TRUE AND e.userId = :userId)
+      )
+""")
+    Page<Event> findAllByEventStatusAndDeletedAtIsNull(
+            @Param("eventStatus") EventStatus eventStatus,
+            @Param("userId") String userId,
+            @Param("isAdmin") boolean isAdmin,
+            @Param("isManager") boolean isManager,
+            Pageable pageable);
 
-    Page<Event> findAllByEventStatusAndDeletedAtIsNull(EventStatus eventStatus, Pageable pageable);
 
-    List<Event> findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(EventStatus eventStatus, LocalDateTime now);
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.deletedAt IS NULL
+      AND e.eventStatus = :status
+      AND e.eventTime > :after
+""")
+    List<Event> findByEventStatusAndEventTimeAfterAndDeletedAtIsNull(
+            @Param("status") EventStatus status,
+            @Param("after") LocalDateTime after);
+
+    @Query("""
+    SELECT e
+    FROM Event e
+    WHERE e.deletedAt IS NULL
+      AND e.eventStatus = :eventStatus
+      AND e.eventEndTime > :now
+""")
+    List<Event> findByEventStatusAndEventEndTimeAfterAndDeletedAtIsNull(
+            @Param("eventStatus") EventStatus eventStatus,
+            @Param("now") LocalDateTime now);
 
     List<Event> findByEventStatus(EventStatus eventStatus);
 

@@ -5,6 +5,8 @@ import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingErrorCode;
 import inu.codin.codinticketingapi.domain.ticketing.exception.TicketingException;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -66,6 +68,12 @@ public class EventCreateRequest {
     @Schema(description = "홍보 링크", example = "https://example.com/promotion")
     private String promotionLink;
 
+    @Schema(description = "이벤트와 연관된 단과대학", example = "INFORMATION_TECHNOLOGY")
+    private College college;
+
+    @Schema(description = "이벤트와 연관된 학과", example = "COMPUTER_SCI")
+    private Department department;
+
     public Event toEntity(String userId, String eventImageUrl) {
         return Event.builder()
                 .userId(userId)
@@ -79,6 +87,8 @@ public class EventCreateRequest {
                 .description(this.description)
                 .inquiryNumber(this.inquiryNumber)
                 .promotionLink(this.promotionLink)
+                .college(this.college)
+                .department(this.department)
                 .build();
     }
 

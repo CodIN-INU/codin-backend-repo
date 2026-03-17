@@ -4,6 +4,8 @@ import inu.codin.codinticketingapi.common.entity.BaseEntity;
 import inu.codin.codinticketingapi.domain.admin.dto.request.EventUpdateRequest;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Campus;
 import inu.codin.codinticketingapi.domain.ticketing.entity.Stock;
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -88,8 +90,31 @@ public class Event extends BaseEntity {
     @Column(name = "status", nullable = false)
     private EventStatus eventStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "college")
+    private College college;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "department")
+    private Department department;
+
     @Builder
-    public Event(Long id, String userId, Campus campus, LocalDateTime eventTime, LocalDateTime eventEndTime, String eventImageUrl, String title, String locationInfo, String target, String description, String inquiryNumber, String promotionLink, Stock stock) {
+    public Event(
+            Long id,
+            String userId,
+            Campus campus,
+            LocalDateTime eventTime,
+            LocalDateTime eventEndTime,
+            String eventImageUrl,
+            String title,
+            String locationInfo,
+            String target,
+            String description,
+            String inquiryNumber,
+            String promotionLink,
+            Stock stock,
+            College college,
+            Department department){
         this.id = id;
         this.userId = userId;
         this.campus = campus;
@@ -105,6 +130,8 @@ public class Event extends BaseEntity {
         this.eventPassword = generateEventPassword();
         this.eventStatus = EventStatus.UPCOMING;
         this.stock = stock;
+        this.college = college;
+        this.department = department;
     }
 
     // todo: eventTime을 바꾸면 EventStatusScheduler 부분이 꼬일 수 있음 수정 필요

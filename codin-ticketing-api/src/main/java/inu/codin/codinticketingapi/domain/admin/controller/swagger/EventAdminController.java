@@ -25,7 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Admin API", description = "관리자 권한을 가진 사용자들을 위한 이벤트 관리 API")
 public interface EventAdminController {
 
-    @Operation(summary = "티켓팅 이벤트 생성", description = "새로운 티켓팅 이벤트를 생성합니다. 관리자/매니저 권한이 필요합니다.")
+    @Operation(summary = "티켓팅 이벤트 생성", description = "새로운 티켓팅 이벤트를 생성합니다. 관리자/매니저 권한이 필요합니다." +
+            "<br><br> 단과대의 이벤트일 경우, College 필드가 반드시 포함되어야 하며, Department 필드는 null이어야 합니다. <br><br>" +
+             "학과의 이벤트일 경우, Department 필드가 반드시 포함되어야 하며, College 필드는 로직에 차이가 없어, 편한대로 보내주셔도 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "티켓팅 이벤트 생성 성공")
     })
@@ -34,7 +36,8 @@ public interface EventAdminController {
             @RequestPart(value = "eventImage", required = false) @Parameter(description = "이벤트 이미지 파일", content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)) MultipartFile eventImage);
 
 
-    @Operation(summary = "티켓팅 리스트 조회 (관리자)", description = "관리자 페이지에서 티켓팅 이벤트 리스트를 조회합니다. 관리자/매니저 권한이 필요합니다.")
+    @Operation(summary = "티켓팅 리스트 조회 (관리자)", description = "관리자 페이지에서 티켓팅 이벤트 리스트를 조회합니다. 관리자/매니저 권한이 필요합니다." +
+            "<br><br> ADMIN일 경우 모든 이벤트가 조회되며, MANAGER일 경우 본인이 생성한 이벤트만 조회됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "[티켓팅 관리자] 이벤트 게시물 리스트 반환 성공")
     })

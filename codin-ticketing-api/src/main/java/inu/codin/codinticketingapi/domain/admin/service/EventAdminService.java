@@ -77,7 +77,12 @@ public class EventAdminService {
 
     public EventPageResponse eventPageResponseWithStatus(String status, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber - 1, PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<Event> eventPage = findEventsByStatus(status, pageable);
+
+        String userId = findAdminUser();
+        boolean isAdmin = SecurityUtil.hasRole(UserRole.ADMIN);
+        boolean isManager = SecurityUtil.hasRole(UserRole.MANAGER);
+
+        Page<Event> eventPage = findEventsByStatus(status, userId, isAdmin, isManager, pageable);
         Map<Long, Long> waitingCountMap = getWaitingCountMap(eventPage);
 
         return EventPageResponse.from(eventPage, waitingCountMap);
@@ -201,12 +206,12 @@ public class EventAdminService {
         return true;
     }
 
-    private Page<Event> findEventsByStatus(String status, Pageable pageable) {
+    private Page<Event> findEventsByStatus(String status, String userId, Boolean isAdmin, Boolean isManager, Pageable pageable) {
         return switch (status) {
-            case "all" -> eventRepository.findAll(pageable);
-            case "upcoming" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.UPCOMING, pageable);
-            case "open" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ACTIVE, pageable);
-            case "ended" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ENDED, pageable);
+            case "all" -> eventRepository.findAll(userId, isAdmin, isManager, pageable);
+            case "upcoming" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.UPCOMING, userId, isAdmin, isManager, pageable);
+            case "open" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ACTIVE, userId, isAdmin, isManager, pageable);
+            case "ended" -> eventRepository.findAllByEventStatusAndDeletedAtIsNull(EventStatus.ENDED, userId, isAdmin, isManager, pageable);
             default -> throw new TicketingException(TicketingErrorCode.EVENT_NOT_FOUND);
         };
     }
