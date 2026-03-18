@@ -135,8 +135,8 @@ public class UserService {
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
 
-        CookieUtil.deleteCookie(request, response, "ACCESS_TOKEN");
-        CookieUtil.deleteCookie(request, response, "REFRESH_TOKEN");
+        CookieUtil.deleteCookie(request, response, "x-access-token");
+        CookieUtil.deleteCookie(request, response, "x-refresh-token");
 
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
