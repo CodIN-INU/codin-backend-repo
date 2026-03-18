@@ -84,13 +84,9 @@ public class UserOauthLoginDecisionService {
                 .orElseGet(() -> {
                     log.info("[USER] 신규 Google 회원 생성: identifier={}", identifier);
 
-                    String deptDesc = (department != null) ? department.replace("/", "").trim() : "";
-                    Department dept = Department.fromDescription(deptDesc);
-
                     UserEntity newUser = UserEntity.builder()
                             .email(identifier)
                             .name(name != null ? name : identifier)
-                            .department(dept)
                             .profileImageUrl(s3Service.getDefaultProfileImageUrl())
                             .status(UserStatus.DISABLED)
                             .role(UserRole.USER)
