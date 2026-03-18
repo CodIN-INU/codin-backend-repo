@@ -38,6 +38,17 @@ public class CookieUtil {
         }
     }
 
+    public static void expireCookie(HttpServletResponse response, String name, String domain) {
+        Cookie c = new Cookie(name, "");
+        c.setPath("/");
+        c.setMaxAge(0);
+        c.setHttpOnly(true);
+        c.setSecure(true);
+        c.setDomain(domain);
+        c.setAttribute("SameSite", "None");
+        response.addCookie(c);
+    }
+
     // 객체를 직렬화해 쿠키의 값으로 변환
     public static String serialize(Object obj) {
         return Base64.getUrlEncoder()

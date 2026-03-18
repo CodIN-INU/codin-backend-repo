@@ -28,6 +28,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -55,6 +56,8 @@ public class UserService {
     private final S3Service s3Service;
     private final JwtService jwtService;
 
+    @Value("${server.domain}")
+    private String BASEURL;
 
     //해당 유저가 작성한 모든 글 반환 :: 게시글 내용 + 댓글+대댓글의 수 + 좋아요,스크랩 count 수 반환
     public PostPageResponse getAllUserPosts(int pageNumber) {
@@ -135,8 +138,9 @@ public class UserService {
         user.updateProfileImageUrl(s3Service.getDefaultProfileImageUrl());
         userRepository.save(user);
 
-        CookieUtil.deleteCookie(request, response, "x-access-token");
-        CookieUtil.deleteCookie(request, response, "x-refresh-token");
+        String domain = BASEURL.replaceFirst("https?://", "").split(":")[0];
+        CookieUtil.expireCookie(response, "x-access-token", domain);
+        CookieUtil.expireCookie(response, "x-refresh-token", domain);
 
         log.info("[회원 탈퇴 성공] _id: {}", userId);
     }
