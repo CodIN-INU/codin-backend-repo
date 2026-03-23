@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface EventAdminController {
 
     @Operation(summary = "티켓팅 이벤트 생성", description = "새로운 티켓팅 이벤트를 생성합니다. 관리자/매니저 권한이 필요합니다." +
-            "<br><br> 단과대 계정의 경우, College 필드만 입력되고, 학과 계정의 경우 Department 필드만 입력됩니다.")
+            "<br><br> 단과대 계정, 총학생회 계정일 경우, College만 입력되며, 학과 계정일 경우, Department만 입력됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "티켓팅 이벤트 생성 성공")
     })

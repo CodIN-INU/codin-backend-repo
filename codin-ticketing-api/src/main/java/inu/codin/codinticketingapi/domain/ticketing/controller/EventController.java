@@ -31,7 +31,10 @@ public class EventController {
 
     /** 티켓팅 이벤트 목록 조회 (송도캠, 미추홀캠) */
     @GetMapping
-    @Operation(summary = "티켓팅 이벤트 목록 조회 (송도 캠퍼스, 미추홀 캠퍼스)")
+    @Operation(
+            summary = "티켓팅 이벤트 목록 조회 (송도 캠퍼스, 미추홀 캠퍼스)",
+            description = "유저 본인의 학과 or 단과대 or 총학생회 이벤트만 조회합니다."
+    )
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 게시물 리스트 조회 성공")
     public ResponseEntity<SingleResponse<EventPageResponse>> getEventList(
             @Parameter(description = "캠퍼스", example = "SONGDO_CAMPUS") @RequestParam Campus campus,
