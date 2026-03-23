@@ -1,11 +1,11 @@
 package inu.codin.codin.domain.user.controller;
 
-import inu.codin.codin.domain.user.dto.request.*;
-import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.user.dto.request.*;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.service.UserService;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -99,9 +98,8 @@ public class UserController {
     @Operation(
             summary = "유저 전체적인 정보 수정",
             description = "닉네임, 이름, 학과, 단과대 정보 수정" +
-                    "<br><br> MANGER 권한은 사용 불가 (계정을 지급하기 위함)"
+                    "<br><br> MANAGER 권한은 사용 불가 (계정을 지급하기 위함)"
     )
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/update/info")
     public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UpdateUserInfoRequestDto updateUserInfoRequestDto){
         userService.updateUserInfo(updateUserInfoRequestDto);
