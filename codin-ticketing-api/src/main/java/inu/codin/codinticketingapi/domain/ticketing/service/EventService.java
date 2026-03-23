@@ -13,6 +13,7 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import inu.codin.common.entity.College;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class EventService {
                 campus,
                 userInfoResponse.getCollege(),
                 userInfoResponse.getDepartment(),
+                College.STUDENT_COUNCIL,
                 pageable));
     }
 

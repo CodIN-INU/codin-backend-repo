@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -98,6 +99,7 @@ public class UserController {
     @Operation(
             summary = "유저 전체적인 정보 수정"
     )
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/update/info")
     public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UpdateUserInfoRequestDto updateUserInfoRequestDto){
         userService.updateUserInfo(updateUserInfoRequestDto);

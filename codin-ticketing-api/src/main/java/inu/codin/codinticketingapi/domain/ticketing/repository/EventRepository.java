@@ -29,6 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                     AND (
                             (e.department IS NOT NULL AND e.department = :department)
                             OR (e.department IS NULL AND e.college = :college)
+                            OR (e.college = :studentCouncil)
                     )
                  ORDER BY
                      CASE WHEN e.eventStatus = 'ENDED' THEN 1 ELSE 0 END ASC,
@@ -38,6 +39,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findByCampus(@Param("campus") Campus campus,
                              @Param("college") College college,
                              @Param("department") Department department,
+                             @Param("studentCouncil") College studentCouncil,
                              Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.deletedAt IS NULL")

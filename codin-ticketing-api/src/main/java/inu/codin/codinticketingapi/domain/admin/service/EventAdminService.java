@@ -20,10 +20,13 @@ import inu.codin.codinticketingapi.domain.ticketing.redis.RedisEventService;
 import inu.codin.codinticketingapi.domain.ticketing.repository.EventRepository;
 import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepository;
 import inu.codin.codinticketingapi.domain.ticketing.service.TicketingService;
+import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
 
+import inu.codin.common.entity.College;
+import inu.codin.common.entity.Department;
 import inu.codin.security.entity.UserRole;
 import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -58,11 +61,30 @@ public class EventAdminService {
 
     @Transactional
     public EventResponse createEvent(EventCreateRequest request, MultipartFile eventImage) {
-        String userId = findAdminUser();
+        UserInfoResponse userInfoResponse = userClientService.fetchUser();
         request.validateEventTimes();
 
+        // 단과대 계정 또는 학과 계정인지 검증 후, 해당하는 데이터만 save
+        Department department = null;
+        College college = null;
+        if (userInfoResponse.getDepartment() != null) {
+            department = userInfoResponse.getDepartment();
+        } else {
+            college = userInfoResponse.getCollege();
+        }
+
+        // 정상적인 계정 (단과대 계정 또는 학과 계정)인지 검증
+        if (userInfoResponse.getDepartment() == null && userInfoResponse.getCollege() == null) {
+            throw new TicketingException(TicketingErrorCode.USER_INFO_INCOMPLETE);
+        }
+
         String eventImageUrl = imageService.handleImageUpload(eventImage);
-        Event event = request.toEntity(userId, eventImageUrl);
+        Event event = request.toEntity(
+                userInfoResponse.getUserId(),
+                eventImageUrl,
+                college,
+                department
+                );
         Stock stock = Stock.builder()
                 .event(event)
                 .initialStock(request.getQuantity())
