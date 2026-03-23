@@ -15,6 +15,7 @@ import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
 import inu.codin.codinticketingapi.domain.user.exception.UserErrorCode;
 import inu.codin.codinticketingapi.domain.user.exception.UserException;
 import inu.codin.codinticketingapi.domain.user.service.UserClientService;
+import inu.codin.common.entity.College;
 import inu.codin.security.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,13 @@ public class ParticipationService {
         if (findEvent.getEventStatus() != EventStatus.ACTIVE) {
 
             throw new TicketingException(TicketingErrorCode.EVENT_NOT_ACTIVE);
+        }
+
+        // 이벤트 참여 대상(단과대/학과/총학생회) 일치 여부 검증
+        if (findEvent.getCollege() != userInfoResponse.getCollege()
+            && findEvent.getCollege() != College.STUDENT_COUNCIL
+            && findEvent.getDepartment() != userInfoResponse.getDepartment()) {
+            throw new TicketingException(TicketingErrorCode.EVENT_TARGET_MISMATCH);
         }
 
        return findParticipationResponse(userInfoResponse.getUserId(), findEvent.getId())

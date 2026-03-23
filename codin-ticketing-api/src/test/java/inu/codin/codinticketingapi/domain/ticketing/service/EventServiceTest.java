@@ -83,6 +83,7 @@ class EventServiceTest {
                 eq(SONGDO),
                 eq(userInfo.getCollege()),
                 eq(userInfo.getDepartment()),
+                eq(College.STUDENT_COUNCIL),
                 any(Pageable.class))).willReturn(mockPage);
 
         // when
@@ -96,6 +97,7 @@ class EventServiceTest {
                 eq(SONGDO),
                 eq(userInfo.getCollege()),
                 eq(userInfo.getDepartment()),
+                eq(College.STUDENT_COUNCIL),
                 any(Pageable.class));
     }
 
@@ -119,6 +121,7 @@ class EventServiceTest {
                 eq(MICHUHOL),
                 eq(userInfo.getCollege()),
                 eq(userInfo.getDepartment()),
+                eq(College.STUDENT_COUNCIL),
                 any(Pageable.class))).willReturn(emptyPage);
 
         // when
@@ -130,6 +133,7 @@ class EventServiceTest {
                 eq(MICHUHOL),
                 eq(userInfo.getCollege()),
                 eq(userInfo.getDepartment()),
+                eq(College.STUDENT_COUNCIL),
                 any(Pageable.class));
     }
 
@@ -168,6 +172,7 @@ class EventServiceTest {
                 eq(SONGDO),
                 eq(userInfo.getCollege()),
                 eq(userInfo.getDepartment()),
+                eq(College.STUDENT_COUNCIL),
                 any(Pageable.class))).willReturn(new PageImpl<>(List.of(), expected, 0));
 
         // when
@@ -179,6 +184,7 @@ class EventServiceTest {
                         eq(SONGDO),
                         eq(userInfo.getCollege()),
                         eq(userInfo.getDepartment()),
+                        eq(College.STUDENT_COUNCIL),
                         argThat(p -> p.getPageSize() == 10 && p.getPageNumber() == page));
     }
 

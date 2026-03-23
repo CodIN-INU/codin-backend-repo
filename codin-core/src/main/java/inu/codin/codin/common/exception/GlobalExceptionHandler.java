@@ -1,5 +1,6 @@
 package inu.codin.codin.common.exception;
 
+import inu.codin.codin.domain.user.exception.AdminInfoUpdateNotAllowedException;
 import inu.codin.common.exception.GlobalErrorCode;
 import inu.codin.common.exception.GlobalException;
 import inu.codin.common.exception.NotFoundException;
@@ -134,4 +135,9 @@ public class GlobalExceptionHandler {
                 .body(new ExceptionResponse(code.message(), code.httpStatus().value()));
     }
 
+    @ExceptionHandler(AdminInfoUpdateNotAllowedException.class)
+    public ResponseEntity<ExceptionResponse> handleAdminInfoUpdateNotAllowed(AdminInfoUpdateNotAllowedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value()));
+    }
 }

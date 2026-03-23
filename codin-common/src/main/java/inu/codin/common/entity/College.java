@@ -23,6 +23,7 @@ public enum College {
     NATURAL_SCIENCES("자연과학대학"),
     HUMANITIES("인문대학"),
     NORTHEAST_ASIA_TRADE_LOGISTICS("동북아국제통상물류학부"),
+    STUDENT_COUNCIL("총학생회"),
     OTHERS("타과대");
 
     private final String displayName;

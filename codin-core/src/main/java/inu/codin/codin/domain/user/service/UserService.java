@@ -15,11 +15,13 @@ import inu.codin.codin.domain.user.dto.request.*;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.entity.UserEntity;
+import inu.codin.codin.domain.user.exception.AdminInfoUpdateNotAllowedException;
 import inu.codin.codin.domain.user.exception.UserNicknameDuplicateException;
 import inu.codin.codin.domain.user.repository.UserRepository;
 import inu.codin.codin.infra.s3.S3Service;
 import inu.codin.common.exception.NotFoundException;
 import inu.codin.common.util.CookieUtil;
+import inu.codin.security.entity.UserRole;
 import inu.codin.security.service.JwtService;
 import inu.codin.security.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -184,6 +186,11 @@ public class UserService {
                     log.warn("[유저 정보 찾기 실패] 유저 정보를 찾을 수 없음. 사용자 ID: {}", userId);
                     return new NotFoundException("유저 정보를 찾을 수 없습니다.");
                 });
+
+        if (user.getRole() == UserRole.ADMIN) {
+            log.warn("[유저 정보 업데이트 실패] 관리자 계정은 정보 수정이 불가능합니다. 사용자 ID: {}", userId);
+            throw new AdminInfoUpdateNotAllowedException("관리자 계정은 정보 수정이 불가능합니다.");
+        }
 
         if (updateUserInfoRequestDto.nickname() != null && !updateUserInfoRequestDto.nickname().equals(user.getNickname())) {
             Optional<UserEntity> nickNameDuplicate = userRepository.findByNicknameAndDeletedAtIsNull(updateUserInfoRequestDto.nickname());

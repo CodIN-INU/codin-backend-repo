@@ -36,7 +36,13 @@ public class TicketingController {
 
     /** 특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여) */
     @PostMapping("/join/{eventId}")
-    @Operation(summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)")
+    @Operation(
+            summary = "특정 티켓팅 이벤트에 티켓팅 참여 (교환권 부여)",
+            description = "아래의 조건을 만족하는 이벤트들에만 참여가 가능합니다." +
+                    "<br><br> 이벤트 단과대 == 유저 단과대" +
+                    "<br> 이벤트 단과대 == College.총학생회" +
+                    "<br> 이벤트 학과 == 유저 학과"
+    )
     @ApiResponse(responseCode = "200", description = "티켓팅 이벤트 참여 및 교환권 부여 성공")
     public ResponseEntity<SingleResponse<ParticipationResponse>> createUserParticipation(
             @Parameter(description = "이벤트 ID", example = "1111") @PathVariable Long eventId

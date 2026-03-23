@@ -68,13 +68,7 @@ public class EventCreateRequest {
     @Schema(description = "홍보 링크", example = "https://example.com/promotion")
     private String promotionLink;
 
-    @Schema(description = "이벤트와 연관된 단과대학", example = "INFORMATION_TECHNOLOGY")
-    private College college;
-
-    @Schema(description = "이벤트와 연관된 학과", example = "COMPUTER_SCI")
-    private Department department;
-
-    public Event toEntity(String userId, String eventImageUrl) {
+    public Event toEntity(String userId, String eventImageUrl, College college, Department department) {
         return Event.builder()
                 .userId(userId)
                 .campus(this.campus)
@@ -87,8 +81,8 @@ public class EventCreateRequest {
                 .description(this.description)
                 .inquiryNumber(this.inquiryNumber)
                 .promotionLink(this.promotionLink)
-                .college(this.college)
-                .department(this.department)
+                .college(college)
+                .department(department)
                 .build();
     }
 

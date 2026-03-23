@@ -1,11 +1,11 @@
 package inu.codin.codin.domain.user.controller;
 
-import inu.codin.codin.domain.user.dto.request.*;
-import inu.codin.common.response.SingleResponse;
 import inu.codin.codin.domain.post.dto.response.PostPageResponse;
+import inu.codin.codin.domain.user.dto.request.*;
 import inu.codin.codin.domain.user.dto.response.UserInfoResponseDto;
 import inu.codin.codin.domain.user.dto.response.UserTicketingParticipationInfoResponse;
 import inu.codin.codin.domain.user.service.UserService;
+import inu.codin.common.response.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -96,7 +96,9 @@ public class UserController {
     }
 
     @Operation(
-            summary = "유저 전체적인 정보 수정"
+            summary = "유저 전체적인 정보 수정",
+            description = "닉네임, 이름, 학과, 단과대 정보 수정" +
+                    "<br><br> MANAGER 권한은 사용 불가 (계정을 지급하기 위함)"
     )
     @PutMapping("/update/info")
     public ResponseEntity<SingleResponse<?>> updateUserInfo(@RequestBody @Valid UpdateUserInfoRequestDto updateUserInfoRequestDto){
