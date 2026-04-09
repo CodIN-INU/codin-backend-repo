@@ -38,4 +38,5 @@ public interface UserRepository extends MongoRepository<UserEntity, ObjectId> {
     @Query("{ 'role': 'ADMIN', 'status': 'ACTIVE' }")
     List<UserEntity> findActiveAdmins();
 
+    Optional<UserEntity> findByEmailAndDeletedAtIsNull(String email);
 }
