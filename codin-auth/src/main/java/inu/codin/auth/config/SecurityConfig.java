@@ -10,15 +10,14 @@ package inu.codin.auth.config;
  * 2. Resource Server -> codin-security 모듈
  */
 
+import inu.codin.auth.handler.OAuth2LoginFailureHandler;
+import inu.codin.auth.handler.OAuth2LoginSuccessHandler;
 import inu.codin.auth.service.oauth2.AppleOAuth2UserService;
 import inu.codin.auth.service.oauth2.CustomOAuth2UserService;
 import inu.codin.auth.util.CustomAuthorizationRequestResolver;
 import inu.codin.auth.util.CustomOAuth2AccessTokenResponseClient;
 import inu.codin.auth.util.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import inu.codin.auth.handler.OAuth2LoginFailureHandler;
-import inu.codin.auth.handler.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,8 +25,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -75,11 +72,6 @@ public class SecurityConfig {
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
