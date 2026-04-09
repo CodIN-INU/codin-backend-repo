@@ -4,7 +4,6 @@ import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record SetManagerUserInfo(
 
@@ -24,10 +23,8 @@ public record SetManagerUserInfo(
 
         String profileImageUrl,
 
-        @NotNull
         Department department,
 
-        @NotNull
         College college
 
 ) {
