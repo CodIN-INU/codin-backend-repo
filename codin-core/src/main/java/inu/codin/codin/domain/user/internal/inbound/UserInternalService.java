@@ -34,6 +34,7 @@ public class UserInternalService {
                                                    String name,
                                                    College college,
                                                    Department department,
+                                                   String studentId,
                                                    MultipartFile userImage) {
         // 닉네임 중복 체크
         boolean duplicated = userRepository.findByNicknameAndDeletedAtIsNull(nickname).isPresent();
@@ -63,6 +64,7 @@ public class UserInternalService {
         user.updateName(name);
         user.updateCollege(college);
         user.updateDepartment(department);
+        user.updateStudentId(studentId);
         user.updateProfileImageUrl(imageUrl);
         user.activation();
         userRepository.save(user);

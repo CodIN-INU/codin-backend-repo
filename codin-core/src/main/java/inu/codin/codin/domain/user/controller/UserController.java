@@ -97,7 +97,7 @@ public class UserController {
 
     @Operation(
             summary = "유저 전체적인 정보 수정",
-            description = "닉네임, 이름, 학과, 단과대 정보 수정" +
+            description = "닉네임, 이름, 학과, 단과대, 학번 정보 수정" +
                     "<br><br> MANAGER 권한은 사용 불가 (계정을 지급하기 위함)"
     )
     @PutMapping("/update/info")
