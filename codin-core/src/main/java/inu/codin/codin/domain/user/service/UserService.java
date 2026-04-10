@@ -219,6 +219,9 @@ public class UserService {
         if (updateUserInfoRequestDto.department() != null) {
             user.updateDepartment(updateUserInfoRequestDto.department());
         }
+        if (updateUserInfoRequestDto.studentId() != null) {
+            user.updateStudentId(updateUserInfoRequestDto.studentId());
+        }
 
         userRepository.save(user);
         log.info("[유저 정보 업데이트 성공] 사용자 ID: {}, 업데이트된 정보: {}", userId, updateUserInfoRequestDto);

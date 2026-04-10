@@ -56,6 +56,7 @@ public class AuthCommonService extends AbstractAuthService {
                 userProfileRequestDto.getName(),
                 userProfileRequestDto.getCollege(),
                 userProfileRequestDto.getDepartment(),
+                userProfileRequestDto.getStudentId(),
                 userImage);
     }
 

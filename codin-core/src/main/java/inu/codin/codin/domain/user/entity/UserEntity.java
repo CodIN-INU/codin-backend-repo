@@ -85,6 +85,10 @@ public class UserEntity extends BaseTimeEntity {
         this.department = department;
     }
 
+    public void updateStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+
     public void updateProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }

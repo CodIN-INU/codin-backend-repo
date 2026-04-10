@@ -26,6 +26,7 @@ public interface UserInternalAuthClient {
             @RequestParam String name,
             @RequestParam College college,
             @RequestParam Department department,
+            @RequestParam String studentId,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage
     );
 

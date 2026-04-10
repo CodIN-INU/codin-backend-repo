@@ -16,6 +16,9 @@ public record UpdateUserInfoRequestDto(
         College college,
 
         @Schema(description = "학과", example = "COMPUTER_SCI")
-        Department department
+        Department department,
+
+        @Schema(description = "학번", example = "202012345")
+        String studentId
 ) {
 }

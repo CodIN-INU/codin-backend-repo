@@ -3,6 +3,7 @@ package inu.codin.codinticketingapi.domain.ticketing.entity;
 import inu.codin.codinticketingapi.common.entity.BaseEntity;
 import inu.codin.codinticketingapi.domain.admin.entity.Event;
 import inu.codin.codinticketingapi.domain.user.dto.UserInfoResponse;
+import inu.codin.common.entity.College;
 import inu.codin.common.entity.Department;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +36,10 @@ public class Participation extends BaseEntity {
     @Column(name = "department", nullable = false)
     private Department department;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "college", nullable = false)
+    private College college;
+
     @Column(name = "student_id", nullable = false)
     private String studentId;
 
@@ -58,6 +63,7 @@ public class Participation extends BaseEntity {
         this.name = userInfoResponse.getName();
         this.studentId = userInfoResponse.getStudentId();
         this.department = userInfoResponse.getDepartment();
+        this.college = userInfoResponse.getCollege();
     }
 
     /** 경품 수령 처리 */

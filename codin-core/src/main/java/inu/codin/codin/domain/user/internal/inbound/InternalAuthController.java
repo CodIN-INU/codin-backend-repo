@@ -30,9 +30,10 @@ public class InternalAuthController {
             @RequestParam String name,
             @RequestParam College college,
             @RequestParam Department department,
+            @RequestParam String studentId,
             @RequestPart(value = "userImage", required = false) MultipartFile userImage
     ) {
-        return userInternalService.completeProfile(email, nickname, name, college, department, userImage);
+        return userInternalService.completeProfile(email, nickname, name, college, department, studentId, userImage);
     }
 
     @GetMapping("/suspension-end-date")

@@ -31,4 +31,8 @@ public class UserProfileRequestDto {
     @Schema(description = "학과", example = "COMPUTER_SCI")
     @NotNull
     private Department department;
+
+    @Schema(description = "학번", example = "20201234")
+    @NotBlank
+    private String studentId;
 }
