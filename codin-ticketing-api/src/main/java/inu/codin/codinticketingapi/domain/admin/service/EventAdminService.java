@@ -218,11 +218,11 @@ public class EventAdminService {
         Event findEvent = findEventById(eventId);
 
         if (findEvent.getEventStatus() == EventStatus.ACTIVE) {
-
             return true;
         }
 
         findEvent.updateStatus(EventStatus.ACTIVE);
+        findEvent.updateEventTime(LocalDateTime.now());
         eventStatusScheduler.deleteOpenEventScheduler(eventId);
 
         return true;

@@ -164,6 +164,10 @@ public class Event extends BaseEntity {
         this.eventStatus = eventStatus;
     }
 
+    public void updateEventTime(LocalDateTime eventTime) {
+        this.eventTime = eventTime;
+    }
+
     public void closeEvent() {
         this.eventStatus = EventStatus.ENDED;
         this.eventEndTime = LocalDateTime.now();
