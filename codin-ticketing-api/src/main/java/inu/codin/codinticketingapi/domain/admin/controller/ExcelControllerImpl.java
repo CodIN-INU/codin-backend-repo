@@ -36,7 +36,7 @@ public class ExcelControllerImpl implements ExcelController {
                 .replaceAll("\\+", "%20");
 
         String contentDisposition = "attachment; " +
-                "filename=\"download.xlsx\"; " +
+                "filename=\"codin\"; " +
                 "filename*=UTF-8''" + encodedFileName;
 
         return ResponseEntity.ok()
