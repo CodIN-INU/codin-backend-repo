@@ -21,7 +21,8 @@ public enum TicketingErrorCode implements GlobalErrorCode {
     EVENT_ALREADY_STARTED(HttpStatus.BAD_REQUEST, "이미 이벤트가 시작했습니다."),
     INSUFFICIENT_TOTAL_STOCK(HttpStatus.BAD_REQUEST, "변경하려는 재고는 남은 재고보다 적을 수 없습니다."),
     USER_INFO_INCOMPLETE(HttpStatus.BAD_REQUEST, "사용자 정보가 완전하지 않습니다."),
-    EVENT_TARGET_MISMATCH(HttpStatus.BAD_REQUEST, "사용자의 단과대/학과에서 접근 할 수 없는 이벤트입니다.");
+    EVENT_TARGET_MISMATCH(HttpStatus.BAD_REQUEST, "사용자의 단과대/학과에서 접근 할 수 없는 이벤트입니다."),
+    EVENT_ALREADY_ENDED(HttpStatus.BAD_REQUEST, "이미 이벤트가 종료되었습니다.");
     ;
 
     private final HttpStatus httpStatus;

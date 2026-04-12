@@ -13,6 +13,7 @@ import inu.codin.codinticketingapi.domain.ticketing.repository.ParticipationRepo
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -61,8 +62,14 @@ public class ExcelService {
 
     private String createSheet(Workbook workbook, Long eventId) {
         Event event = getEvent(eventId);
-        String fileName = SHEET_NAME_PREFIX + event.getTitle() + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        Sheet sheet = workbook.createSheet(fileName);
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String baseName = SHEET_NAME_PREFIX + event.getTitle() + "_" + timestamp;
+
+        String sheetName = WorkbookUtil.createSafeSheetName(baseName); // 시트명용
+        String fileName = encodeFileName(baseName) + ".xlsx"; // 다운로드 파일명용
+
+        Sheet sheet = workbook.createSheet(sheetName);
 
         createHeaderRow(sheet);
 
