@@ -6,7 +6,6 @@ import inu.codin.codinticketingapi.domain.admin.service.ExcelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @RestController
@@ -31,13 +31,17 @@ public class ExcelControllerImpl implements ExcelController {
     public ResponseEntity<ByteArrayResource> downloadEventExcel(@PathVariable Long eventId) {
         ExcelResponse response = excelService.getExcel(eventId);
 
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename(response.getFileName(), StandardCharsets.UTF_8)
-                .build();
+        String fileName = response.getFileName();
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
+
+        String contentDisposition = "attachment; " +
+                "filename=\"download.xlsx\"; " +
+                "filename*=UTF-8''" + encodedFileName;
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                 .body(new ByteArrayResource(response.getExcel()));
     }
 }
