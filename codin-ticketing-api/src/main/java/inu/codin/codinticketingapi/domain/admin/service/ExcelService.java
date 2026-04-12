@@ -67,7 +67,7 @@ public class ExcelService {
         String baseName = SHEET_NAME_PREFIX + event.getTitle() + "_" + timestamp;
 
         String sheetName = WorkbookUtil.createSafeSheetName(baseName); // 시트명용
-        String fileName = encodeFileName(baseName) + ".xlsx"; // 다운로드 파일명용
+        String fileName = baseName + ".xlsx"; // 다운로드 파일명용
 
         Sheet sheet = workbook.createSheet(sheetName);
 
@@ -78,7 +78,7 @@ public class ExcelService {
 
         autoSizeAllColumns(sheet);
 
-        return encodeFileName(fileName);
+        return fileName;
     }
 
     private Event getEvent(Long eventId) {
