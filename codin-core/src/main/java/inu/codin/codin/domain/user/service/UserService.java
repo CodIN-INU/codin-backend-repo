@@ -187,7 +187,7 @@ public class UserService {
                     return new NotFoundException("유저 정보를 찾을 수 없습니다.");
                 });
 
-        if (user.getRole() == UserRole.ADMIN) {
+        if (user.getRole() == UserRole.MANAGER) {
             log.warn("[유저 정보 업데이트 실패] 관리자 계정은 정보 수정이 불가능합니다. 사용자 ID: {}", userId);
             throw new AdminInfoUpdateNotAllowedException("관리자 계정은 정보 수정이 불가능합니다.");
         }
